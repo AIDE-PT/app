@@ -2,9 +2,11 @@ import { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import clsx from "clsx";
+import { LineChart } from "react-native-gifted-charts";
 
 export default function TestScreen() {
   const [color, setColor] = useState("blue");
+  const data = [{ value: 50 }, { value: 80 }, { value: 90 }, { value: 70 }];
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -54,6 +56,8 @@ export default function TestScreen() {
             This is a test card with Tailwind styling
           </Text>
         </View>
+
+        <LineChart data={data} areachart />
       </ScrollView>
     </SafeAreaView>
   );
