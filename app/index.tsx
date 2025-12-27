@@ -3,8 +3,9 @@ import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import clsx from "clsx";
 import { LineChart } from "react-native-gifted-charts";
+import '../global.css';
 
-export default function TestScreen() {
+export default function App() {
   const [color, setColor] = useState("blue");
   const data = [{ value: 50 }, { value: 80 }, { value: 90 }, { value: 70 }];
 
@@ -12,7 +13,7 @@ export default function TestScreen() {
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView className="flex-1 px-4 py-6">
         {/* Header */}
-        <Text className="text-3xl font-bold text-gray-900 mb-6">
+        <Text className="safiro text-3xl font-bold text-gray-900 mb-6">
           Native Wind Test
         </Text>
 
@@ -57,7 +58,7 @@ export default function TestScreen() {
           </Text>
         </View>
 
-        <LineChart data={data} areachart />
+        <LineChart data={data} areaChart />
       </ScrollView>
     </SafeAreaView>
   );
