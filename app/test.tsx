@@ -1,14 +1,64 @@
-import { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { useRef, useState } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Pressable } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import clsx from "clsx";
+import { Button } from "@/components/buttons/button";
+import Navbar from "@/components/navBar/NavBar";
+import BackButton from "@/components/buttons/backButton";
+import { Input } from "@/components/imput/Imput";
+import BottomModal from "@/components/modals/BottomModal";
+import SimpleLineChart from "@/components/charts/LineChartSlim";
+import WidgetGrid from "@/components/widgets/WidgetGrid";
+import { WidgetWrapper } from "@/components/widgets/WidgetWrapper";
+import WidgetIcon from "@/components/svg/WidgetIcon";
 
 export default function TestScreen() {
   const [color, setColor] = useState("blue");
+  const [value, setValue] = useState("");
+  const [pass, setPass] = useState("");
+  const [date, setDatetPass] = useState("");
+  const [email, setEmail] = useState("");
+
+  const [isAddDeviceOpen, setIsAddDeviceOpen] = useState(false);
+
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
-      <ScrollView className="flex-1 px-4 py-6">
+    <SafeAreaView className=" bg-[#ECF5FF]">
+      <ScrollView className=" px-4 pb-5">
+        <Input value={value} onChangeText={(str: string) => setValue(str)} placeholder="exemplo" />
+        <Input value={pass} type="password" onChangeText={(str: string) => setPass(str)} placeholder="Password" />
+        <Input value={date} type="date" onChangeText={(str: string) => setDatetPass(str)} placeholder="data" />
+        <Input value={email} type="email" onChangeText={(str: string) => setEmail(str)} placeholder="email" />
+
+        <SimpleLineChart />
+
+        <WidgetGrid>
+          <WidgetWrapper feedback="exercicio" unit="bpm" value="73" feedbackColor="#FFCC00" icon={<WidgetIcon variant="heartRate" />} title="BPM" variant="1-1" />
+          <WidgetWrapper feedback="exercicio" unit="bpm" value="73" feedbackColor="#FFCC00" icon={<WidgetIcon variant="steps" />} title="Passos" variant="1-2" />
+          <WidgetWrapper feedback="exercicio" unit="bpm" value="73" feedbackColor="#FFCC00" icon={<WidgetIcon variant="heartRate" />} title="BPM" variant="1-3" />
+          <WidgetWrapper feedback="exercicio" unit="bpm" value="73" feedbackColor="#FFCC00" icon={<WidgetIcon variant="temp" />} title="Temperatura" variant="2-3" />
+        </WidgetGrid>
+
+
+
+        <Button label="list" variant="list" onPress={() => setIsAddDeviceOpen(true)} />
+
+        <BottomModal
+          visible={isAddDeviceOpen}
+          onClose={() => setIsAddDeviceOpen(false)}
+        >
+          {/* CONTEÚDO REAL */}
+          <Text style={{ fontSize: 18, fontWeight: '600' }}>
+            Adicionar Dispositivos
+          </Text>
+
+          <Text style={{ marginTop: 4, color: '#6B7280' }}>
+            Selecione uma das fontes de dados disponíveis
+          </Text>
+
+        </BottomModal>
+
+
         {/* Header */}
         <Text className="text-3xl font-bold text-gray-900 mb-6">
           Native Wind Test
@@ -54,7 +104,16 @@ export default function TestScreen() {
             This is a test card with Tailwind styling
           </Text>
         </View>
+        <View className="bg-slate-400">
+          <BackButton />
+          <BackButton dark />
+        </View>
+        <Button label="primario" variant="primary" onPress={() => console.log(('primario'))} />
+        <Button label="primario dark" variant="primaryDark" onPress={() => console.log(('primario dark'))} />
+        <Button label="list" variant="list" onPress={() => console.log(('primario'))} />
+        <Button label="list dark" variant="listDark" onPress={() => console.log(('primario dark'))} />
       </ScrollView>
+      <Navbar />
     </SafeAreaView>
   );
 }
