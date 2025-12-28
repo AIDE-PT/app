@@ -4,7 +4,13 @@ module.exports = {
   content: ["./app/**/*.{js,jsx,ts,tsx}", "./components/**/*.{js,jsx,ts,tsx}"],
   presets: [require("nativewind/preset")],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        safiro: ['Safiro-Medium'],
+        'open-sans': ['OpenSans-Regular'],
+        'open-sans-semibold': ['OpenSans-SemiBold'],
+      }
+    },
   },
   plugins: [],
 };
