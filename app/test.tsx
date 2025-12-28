@@ -11,6 +11,7 @@ import SimpleLineChart from "@/components/charts/LineChartSlim";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import { WidgetWrapper } from "@/components/widgets/WidgetWrapper";
 import WidgetIcon from "@/components/svg/WidgetIcon";
+import { LineChart } from "react-native-gifted-charts";
 
 export default function TestScreen() {
   const [color, setColor] = useState("blue");
@@ -21,10 +22,6 @@ export default function TestScreen() {
 
   const [isAddDeviceOpen, setIsAddDeviceOpen] = useState(false);
 
-import { LineChart } from "react-native-gifted-charts";
-
-export default function TestScreen() {
-  const [color, setColor] = useState("blue");
   const data = [{ value: 50 }, { value: 80 }, { value: 90 }, { value: 70 }];
 
   return (
@@ -118,7 +115,7 @@ export default function TestScreen() {
         <Button label="list" variant="list" onPress={() => console.log(('primario'))} />
         <Button label="list dark" variant="listDark" onPress={() => console.log(('primario dark'))} />
 
-        <LineChart data={data} areachart />
+        <LineChart data={data} areaChart />
       </ScrollView>
       <Navbar />
     </SafeAreaView>
