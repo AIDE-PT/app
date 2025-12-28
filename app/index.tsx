@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler';
 import { Text, TouchableOpacity, View } from "react-native";
 import "../global.css";
 import { Link } from "expo-router";
