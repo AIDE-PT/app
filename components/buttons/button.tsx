@@ -1,8 +1,7 @@
-import React from 'react';
-import { TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 interface buttonDTO {
-    variant: 'primary' | 'primaryDark' | 'list'| 'listDark'
+    variant: 'primary' | 'primaryDark' | 'list' | 'listDark'
     label: string,
     onPress: () => void
 }
@@ -26,7 +25,7 @@ export const Button = ({ variant = 'primary', label, onPress }: buttonDTO) => {
     return (
         <TouchableOpacity
             onPress={onPress}
-            style={ [styles.buttonShadow, ]}
+            style={[styles.buttonShadow,]}
             className={`p-3 rounded-[16px] border border-[#5061FF]/20
                  ${containerVariants[variant]}`}
         >
