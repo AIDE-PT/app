@@ -1,7 +1,7 @@
-import 'react-native-gesture-handler';
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
+import { Dimensions, Text, View } from "react-native";
+import 'react-native-gesture-handler';
 import Animated, {
   Easing,
   interpolate,
@@ -13,6 +13,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
+import { Button } from "../components/buttons/button";
 import { LightBackground } from "../components/LightBackground";
 import '../global.css';
 
@@ -128,23 +129,15 @@ const ConcentricRings = () => {
   const centerY = SCREEN_HEIGHT * 0.35;
 
   const rings = [
-    { radius: 45, color: '#5C7CFA', strokeWidth: 2, isDashed: false, delay: 0 },
-    { radius: 70, color: '#748FFC', strokeWidth: 1.5, isDashed: false, delay: 300 },
-    { radius: 100, color: '#BAC8FF', strokeWidth: 1, isDashed: false, delay: 600 },
-    { radius: 140, color: '#3B5BDB', strokeWidth: 1, isDashed: true, delay: 900 },
-    { radius: 190, color: '#3B5BDB', strokeWidth: 1, isDashed: true, delay: 1200 },
+    { radius: 45, color: '#5C7CFA', strokeWidth: 2, isDashed: false, delay: 0 },     // primary-600
+    { radius: 70, color: '#748FFC', strokeWidth: 1.5, isDashed: false, delay: 300 }, // accent-light
+    { radius: 100, color: '#BAC8FF', strokeWidth: 1, isDashed: false, delay: 600 },  // success-light
+    { radius: 140, color: '#3B5BDB', strokeWidth: 1, isDashed: true, delay: 900 },   // primary-800
+    { radius: 190, color: '#3B5BDB', strokeWidth: 1, isDashed: true, delay: 1200 },  // primary-800
   ];
 
   return (
-    <View
-      style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: SCREEN_HEIGHT * 0.6,
-      }}
-    >
+    <View className="absolute top-0 left-0 right-0" style={{ height: SCREEN_HEIGHT * 0.6 }}>
       <Svg width={SCREEN_WIDTH} height={SCREEN_HEIGHT * 0.6}>
         {rings.map((ring, index) => (
           <AnimatedRing
@@ -182,113 +175,42 @@ export default function App() {
 
         {/* Center Logo Container */}
         <View
+          className="absolute w-[110px] h-[110px] justify-center items-center"
           style={{
-            position: 'absolute',
             top: SCREEN_HEIGHT * 0.35 - 55,
             left: SCREEN_WIDTH / 2 - 55,
-            width: 110,
-            height: 110,
-            justifyContent: 'center',
-            alignItems: 'center',
           }}
         >
-          
           {/* Middle glow */}
-          <View
-            style={{
-              position: 'absolute',
-              width: 150,
-              height: 150,
-              borderRadius: 75,
-              backgroundColor: '#A9BDFF',
-              opacity: 0.8,
-            }}
-          />
+          <View className="absolute w-[150px] h-[150px] rounded-full bg-[#A9BDFF] opacity-80" />
+
           {/* Inner circle with logo */}
-          <View
-            style={{
-              width: 100,
-              height: 100,
-              borderRadius: 50,
-              backgroundColor: '#9AADE8',
-              justifyContent: 'center',
-              alignItems: 'center',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 20,
-              elevation: 8,
-            }}
-          >
+          <View className="w-[100px] h-[100px] rounded-full bg-[#9AADE8] justify-center items-center shadow-lg">
             <AideLogo size={55} />
           </View>
         </View>
 
         {/* Content Container */}
-        <View
-          style={{
-            flex: 1,
-            justifyContent: 'flex-end',
-            paddingHorizontal: 32,
-            paddingBottom: 60,
-          }}
-        >
+        <View className="flex-1 justify-end px-8 pb-[60px]">
           {/* Title - Using Safiro font */}
-          <Text
-            style={{
-              fontFamily: 'Safiro-Medium',
-              fontSize: 32,
-              color: '#1A1A2E',
-              textAlign: 'center',
-              lineHeight: 42,
-              marginBottom: 16,
-            }}
-          >
+          <Text className="font-safiro text-[32px] leading-[42px] text-[#1A1A2E] text-center mb-4">
             O futuro do cuidado{'\n'}é conectado.
           </Text>
 
           {/* Subtitle - Using Open Sans */}
-          <Text
-            style={{
-              fontFamily: 'OpenSans-Regular',
-              fontSize: 16,
-              color: '#4B5563',
-              textAlign: 'center',
-              lineHeight: 24,
-              marginBottom: 40,
-              paddingHorizontal: 16,
-            }}
-          >
+          <Text className="font-open-sans text-base text-[#4B5563] text-center leading-6 mb-10 px-4">
             Simples. Inteligente. Humano.{'\n'}
             Gerir a saúde e bem-estar na palma da tua mão.
           </Text>
 
           {/* CTA Button */}
-          <TouchableOpacity
-            style={{
-              backgroundColor: '#FFFFFF',
-              paddingVertical: 16,
-              paddingHorizontal: 48,
-              borderRadius: 30,
-              alignSelf: 'center',
-              shadowColor: '#3B5BDB',
-              shadowOffset: { width: 0, height: 4 },
-              shadowOpacity: 0.15,
-              shadowRadius: 12,
-              elevation: 4,
-            }}
-            activeOpacity={0.8}
-          >
-            <Text
-              style={{
-                fontFamily: 'OpenSans-SemiBold',
-                fontSize: 18,
-                color: '#1A1A2E',
-                textAlign: 'center',
-              }}
-            >
-              Começa Já!
-            </Text>
-          </TouchableOpacity>
+          <View className="items-center">
+            <Button
+              variant="primary"
+              label="Começa Já!"
+              onPress={() => { }}
+            />
+          </View>
         </View>
       </LightBackground>
     </SafeAreaView>

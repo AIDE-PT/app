@@ -28,15 +28,7 @@ const DotPattern = () => {
     }
 
     return (
-        <View
-            style={{
-                position: 'absolute',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-            }}
-        >
+        <View className="absolute inset-0">
             <Svg width={SCREEN_WIDTH} height={SCREEN_HEIGHT}>
                 {dots}
             </Svg>
@@ -50,18 +42,12 @@ interface LightBackgroundProps {
 
 export const LightBackground = ({ children }: LightBackgroundProps) => {
     return (
-        <View style={{ flex: 1 }}>
+        <View className="flex-1">
             {/* Background Gradient - Light at top, lavender-blue at bottom */}
             <LinearGradient
                 colors={['#FFFFFF', '#919cfeff']}
-                locations={[0,1]}
-                style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                }}
+                locations={[0, 1]}
+                className="absolute inset-0"
             />
 
             {/* Dot Pattern Overlay */}
@@ -74,3 +60,4 @@ export const LightBackground = ({ children }: LightBackgroundProps) => {
 };
 
 export default LightBackground;
+
