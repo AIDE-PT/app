@@ -1,17 +1,18 @@
-import { useRef, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import clsx from "clsx";
-import { Button } from "@/components/buttons/button";
-import Navbar from "@/components/navBar/NavBar";
 import BackButton from "@/components/buttons/backButton";
+import { Button } from "@/components/buttons/button";
+import SimpleLineChart from "@/components/charts/LineChartSlim";
 import { Input } from "@/components/imput/Imput";
 import BottomModal from "@/components/modals/BottomModal";
-import SimpleLineChart from "@/components/charts/LineChartSlim";
+import Navbar from "@/components/navBar/NavBar";
+import WidgetIcon from "@/components/svg/WidgetIcon";
+import TopBar from "@/components/topBar/TopBar";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import { WidgetWrapper } from "@/components/widgets/WidgetWrapper";
-import WidgetIcon from "@/components/svg/WidgetIcon";
+import clsx from "clsx";
+import { useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TestScreen() {
   const [color, setColor] = useState("blue");
@@ -20,12 +21,25 @@ export default function TestScreen() {
   const [date, setDatetPass] = useState("");
   const [email, setEmail] = useState("");
 
+  const cuidados = [
+    { id: '1', name: 'João Silva' },
+    { id: '2', name: 'Maria Santos' },
+  ];
+  const [selectedCuidado, setSelectedCuidado] = useState(cuidados[0]);
+
   const [isAddDeviceOpen, setIsAddDeviceOpen] = useState(false);
 
   const data = [{ value: 50 }, { value: 80 }, { value: 90 }, { value: 70 }];
 
   return (
     <SafeAreaView className=" bg-[#ECF5FF]">
+      <TopBar 
+        cuidados={cuidados}
+        selectedCuidado={selectedCuidado}
+        onSelectCuidado={setSelectedCuidado}
+        onNotificationPress={() => console.log('Notification')}
+        onSettingsPress={() => console.log('Settings')}
+      />
       <ScrollView className=" px-4 pb-5">
         <Input value={value} onChangeText={(str: string) => setValue(str)} placeholder="exemplo" />
         <Input value={pass} type="password" onChangeText={(str: string) => setPass(str)} placeholder="Password" />
