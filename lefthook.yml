@@ -21,7 +21,7 @@ pre-push:
       tags:
         - frontend
         - format
-      run: npx run prettier:check
+      run: npm run prettier:check
 
     - name: typecheck
       tags:
@@ -36,14 +36,14 @@ pre-commit:
       tags:
         - frontend
         - lint
-      run: npm run lint 
+      run: npm run lint
 
     - name: prettier
       tags:
         - frontend
         - format
-      run: npx run prettier
-    
+      run: npm run prettier
+
     - name: packages audit fix
       tags:
         - frontend
@@ -60,4 +60,4 @@ pre-commit:
     #   tags:
     #     - frontend
     #     - test
-    #   run: 
+    #   run:
