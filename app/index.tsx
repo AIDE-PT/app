@@ -13,11 +13,17 @@ export default function Index() {
       }}
     >
       <Text>Edit app/index.tsx to edit this screen.</Text>
-      <TouchableOpacity className="bg-blue-600 rounded-lg m-2 p-2">
+      <TouchableOpacity className="p-2 m-2 bg-blue-600 rounded-lg">
         <Link href="/test" className="text-lg text-white">
-          Go to Test Screen
+        Go to Test Screen
         </Link>
       </TouchableOpacity>
+      <TouchableOpacity className="p-2 m-2 bg-blue-600 rounded-lg">
+        <Link href="/ComponentsTestHP" className="text-lg text-white">
+          Go to HP Test Screen
+        </Link>
+      </TouchableOpacity>
+      
     </View>
   );
 }
