@@ -1,17 +1,17 @@
-import { useRef, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, Pressable } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import clsx from "clsx";
-import { Button } from "@/components/buttons/button";
-import Navbar from "@/components/navBar/NavBar";
 import BackButton from "@/components/buttons/backButton";
-import { Input } from "@/components/imput/Imput";
-import BottomModal from "@/components/modals/BottomModal";
+import { Button } from "@/components/buttons/button";
 import SimpleLineChart from "@/components/charts/LineChartSlim";
+import { Input } from "@/components/input/Input";
+import BottomModal from "@/components/modals/BottomModal";
+import Navbar from "@/components/navBar/NavBar";
+import WidgetIcon from "@/components/svg/WidgetIcon";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import { WidgetWrapper } from "@/components/widgets/WidgetWrapper";
-import WidgetIcon from "@/components/svg/WidgetIcon";
+import clsx from "clsx";
+import { useState } from "react";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { LineChart } from "react-native-gifted-charts";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function TestScreen() {
   const [color, setColor] = useState("blue");
