@@ -1,8 +1,8 @@
-import React from 'react';
-import { Dimensions, ViewStyle, StyleSheet } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import React from "react";
+import { Dimensions, ViewStyle, StyleSheet } from "react-native";
+import { LineChart } from "react-native-chart-kit";
 
-const defaultWidth = Dimensions.get('window').width - 32;
+const defaultWidth = Dimensions.get("window").width - 32;
 
 interface SimpleLineChartProps {
   // Dados e Dimensões
@@ -34,18 +34,21 @@ interface SimpleLineChartProps {
 }
 
 export default function SimpleLineChart({
-  data = [5, 10, 6, 12, 8, 14, 9, 9, 10, 6, 10, 6, 12, 6, 10, 6, 12, 8, 14, 9, 10, 6, 1],
+  data = [
+    5, 10, 6, 12, 8, 14, 9, 9, 10, 6, 10, 6, 12, 6, 10, 6, 12, 8, 14, 9, 10, 6,
+    1,
+  ],
   height = 70,
   width = defaultWidth,
 
-  lineColor = '#5C6CFF',
-  gradientFrom = '#7BA1FF',
-  gradientTo = '#243AFF',
+  lineColor = "#5C6CFF",
+  gradientFrom = "#7BA1FF",
+  gradientTo = "#243AFF",
   gradientFromOpacity = 0.6,
   gradientToOpacity = 0,
 
-  backgroundGradient = '#ffffff',
-  labelColor = 'rgba(124, 137, 255, 1)',
+  backgroundGradient = "#ffffff",
+  labelColor = "rgba(124, 137, 255, 1)",
   labelFontSize = 10,
   yAxisSuffix = "",
   showYLabels = true,
@@ -57,7 +60,6 @@ export default function SimpleLineChart({
 
   style,
 }: SimpleLineChartProps) {
-
   const combinedStyle = StyleSheet.flatten([
     {
       marginVertical: 8,
@@ -105,7 +107,7 @@ export default function SimpleLineChart({
           stroke: gridColor,
         },
         propsForDots: {
-          r: '0',
+          r: "0",
         },
       }}
       style={combinedStyle}
