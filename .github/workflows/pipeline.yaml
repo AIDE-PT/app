@@ -25,7 +25,7 @@ jobs:
 q
       - name: Set up Node.js
         uses: actions/setup-node@v4
-        with:
+        with:n au
           node-version: "22"
           cache: "npm"
 
