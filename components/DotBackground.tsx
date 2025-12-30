@@ -36,11 +36,11 @@ const DotPattern = () => {
     );
 };
 
-interface LightBackgroundProps {
+interface DotBackgroundProps {
     children?: React.ReactNode;
 }
 
-export const LightBackground = ({ children }: LightBackgroundProps) => {
+export const DotBackground = ({ children }: DotBackgroundProps) => {
     return (
         <View className="flex-1">
             {/* Background Gradient - Light at top, lavender-blue at bottom */}
@@ -59,5 +59,5 @@ export const LightBackground = ({ children }: LightBackgroundProps) => {
     );
 };
 
-export default LightBackground;
+export default DotBackground;
 
