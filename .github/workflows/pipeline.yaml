@@ -86,12 +86,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "22"
-
-      - name: Restore node_modules
-        uses: actions/cache/restore@v4
-        with:
-          path: node_modules
           cache: "npm"
+
+      - name: Run TypeScript type check
+        run: npx tsc --noEmit
 
   test:
     name: Jest Tests
@@ -108,11 +106,6 @@ jobs:
         with:
           node-version: "22"
           cache: "npm"
-      - name: Restore node_modules
-        uses: actions/cache/restore@v4
-        with:
-          path: node_modules
-          key: node-modules-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
 
       - name: Run tests
         run: npm run test:coverage
