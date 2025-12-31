@@ -1,7 +1,7 @@
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { Dimensions, Text, View } from "react-native";
-import 'react-native-gesture-handler';
+import "react-native-gesture-handler";
 import Animated, {
   Easing,
   interpolate,
@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { Button } from "../components/buttons/button";
 import { LightBackground } from "../components/LightBackground";
-import '../global.css';
+import "../global.css";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -83,26 +83,18 @@ const AnimatedRing = ({
           easing: Easing.bezier(0.215, 0.61, 0.355, 1),
         }),
         -1, // Infinite
-        false // No reverse - continuous loop
-      )
+        false, // No reverse - continuous loop
+      ),
     );
-  }, []);
+  }, [delay, progress]);
 
   const animatedProps = useAnimatedProps(() => {
     // pulse-ring keyframes:
     // 0%: scale(0.8), opacity: 0
     // 50%: scale(1.5), opacity: 0.5
     // 100%: scale(2.2), opacity: 0
-    const scale = interpolate(
-      progress.value,
-      [0, 0.5, 1],
-      [0.8, 1.5, 2.2]
-    );
-    const opacity = interpolate(
-      progress.value,
-      [0, 0.5, 1],
-      [0, 0.5, 0]
-    );
+    const scale = interpolate(progress.value, [0, 0.5, 1], [0.8, 1.5, 2.2]);
+    const opacity = interpolate(progress.value, [0, 0.5, 1], [0, 0.5, 0]);
 
     return {
       r: baseRadius * scale,
@@ -117,7 +109,7 @@ const AnimatedRing = ({
       stroke={color}
       strokeWidth={strokeWidth}
       fill="none"
-      strokeDasharray={isDashed ? '8 8' : undefined}
+      strokeDasharray={isDashed ? "8 8" : undefined}
       animatedProps={animatedProps}
     />
   );
@@ -129,15 +121,42 @@ const ConcentricRings = () => {
   const centerY = SCREEN_HEIGHT * 0.35;
 
   const rings = [
-    { radius: 45, color: '#5C7CFA', strokeWidth: 2, isDashed: false, delay: 0 },     // primary-600
-    { radius: 70, color: '#748FFC', strokeWidth: 1.5, isDashed: false, delay: 300 }, // accent-light
-    { radius: 100, color: '#BAC8FF', strokeWidth: 1, isDashed: false, delay: 600 },  // success-light
-    { radius: 140, color: '#3B5BDB', strokeWidth: 1, isDashed: true, delay: 900 },   // primary-800
-    { radius: 190, color: '#3B5BDB', strokeWidth: 1, isDashed: true, delay: 1200 },  // primary-800
+    { radius: 45, color: "#5C7CFA", strokeWidth: 2, isDashed: false, delay: 0 }, // primary-600
+    {
+      radius: 70,
+      color: "#748FFC",
+      strokeWidth: 1.5,
+      isDashed: false,
+      delay: 300,
+    }, // accent-light
+    {
+      radius: 100,
+      color: "#BAC8FF",
+      strokeWidth: 1,
+      isDashed: false,
+      delay: 600,
+    }, // success-light
+    {
+      radius: 140,
+      color: "#3B5BDB",
+      strokeWidth: 1,
+      isDashed: true,
+      delay: 900,
+    }, // primary-800
+    {
+      radius: 190,
+      color: "#3B5BDB",
+      strokeWidth: 1,
+      isDashed: true,
+      delay: 1200,
+    }, // primary-800
   ];
 
   return (
-    <View className="absolute top-0 left-0 right-0" style={{ height: SCREEN_HEIGHT * 0.6 }}>
+    <View
+      className="absolute top-0 left-0 right-0"
+      style={{ height: SCREEN_HEIGHT * 0.6 }}
+    >
       <Svg width={SCREEN_WIDTH} height={SCREEN_HEIGHT * 0.6}>
         {rings.map((ring, index) => (
           <AnimatedRing
@@ -158,9 +177,9 @@ const ConcentricRings = () => {
 
 export default function App() {
   const [fontsLoaded] = useFonts({
-    'Safiro-Medium': require('../assets/fonts/safiro/safiro-medium-webfont.ttf'),
-    'OpenSans-Regular': require('../assets/fonts/open-sans/OpenSans-Regular.ttf'),
-    'OpenSans-SemiBold': require('../assets/fonts/open-sans/OpenSans-SemiBold.ttf'),
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
   });
 
   if (!fontsLoaded) {
@@ -194,22 +213,18 @@ export default function App() {
         <View className="flex-1 justify-end px-8 pb-[60px]">
           {/* Title - Using Safiro font */}
           <Text className="font-safiro text-[32px] leading-[42px] text-[#1A1A2E] text-center mb-4">
-            O futuro do cuidado{'\n'}é conectado.
+            O futuro do cuidado{"\n"}é conectado.
           </Text>
 
           {/* Subtitle - Using Open Sans */}
           <Text className="font-open-sans text-base text-[#4B5563] text-center leading-6 mb-10 px-4">
-            Simples. Inteligente. Humano.{'\n'}
+            Simples. Inteligente. Humano.{"\n"}
             Gerir a saúde e bem-estar na palma da tua mão.
           </Text>
 
           {/* CTA Button */}
           <View className="items-center">
-            <Button
-              variant="primary"
-              label="Começa Já!"
-              onPress={() => { }}
-            />
+            <Button variant="primary" label="Começa Já!" onPress={() => {}} />
           </View>
         </View>
       </LightBackground>
