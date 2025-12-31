@@ -161,6 +161,37 @@ jobs:
   #           -Dsonar.pullrequest.branch=${{ github.head_ref }}
   #           -Dsonar.pullrequest.base=${{ github.base_ref }}
 
+  preview:
+    name: Expo Preview
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: dependency-validation
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Setup Expo and EAS
+        uses: expo/expo-github-action@v8
+        with:
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create preview
+        uses: expo/expo-github-action/preview@v8
+        with:
+          command: eas update --auto --branch ${{ github.event.pull_request.head.ref }}
+
   build-dev:
     name: Expo Dev Build
     runs-on: ubuntu-latest
@@ -204,22 +235,3 @@ jobs:
 
       - name: Build Expo Production
         run: eas build --platform all --profile production --non-interactive
-
-  build:
-    name: Install and build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: npm
-      - name: Setup Expo and EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
-      - name: Install dependencies
-        run: npm ci
-      - name: Build on EAS
-        run: eas build --platform all --non-interactive --no-wait
