@@ -6,9 +6,9 @@ module.exports = {
     extend: {
       // Font Families - Safiro and Open Sans
       fontFamily: {
-        safiro: ['Safiro-Medium'],
-        'open-sans': ['OpenSans-Regular'],
-        'open-sans-semibold': ['OpenSans-SemiBold'],
+        safiro: ["Safiro-Medium"],
+        "open-sans": ["OpenSans-Regular"],
+        "open-sans-semibold": ["OpenSans-SemiBold"],
       },
     },
   },
