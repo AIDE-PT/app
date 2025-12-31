@@ -137,34 +137,34 @@ jobs:
       - name: Run tests
         run: npm run test:coverage
 
-      # - name: Jest Coverage Comment
-      #   id: coverage
-      #   if: github.event_name == 'pull_request' || github.ref == 'refs/heads/main'
-      #   uses: MishaKav/jest-coverage-comment@main
-      #   with:
-      #     github-token: ${{ secrets.GITHUB_TOKEN }}
-      #     coverage-summary-path: ./coverage/coverage-summary.json
-      #     title: Jest Coverage Comment
-      #     summary-title: Summary
-      #     badge-title: Coverage
-      #     text-instead-badge: false
-      #     hide-comment: false
-      #     create-new-comment: false
-      #     hide-summary: false
-      #     remove-links-to-files: false
-      #     remove-links-to-lines: false
-      #     report-only-changed-files: false
+      - name: Jest Coverage Comment
+        id: coverage
+        if: github.event_name == 'pull_request' 
+        uses: MishaKav/jest-coverage-comment@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          coverage-summary-path: ./coverage/coverage-summary.json
+          title: Jest Coverage Comment
+          summary-title: Summary
+          badge-title: Coverage
+          text-instead-badge: false
+          hide-comment: false
+          create-new-comment: false
+          hide-summary: false
+          remove-links-to-files: false
+          remove-links-to-lines: false
+          report-only-changed-files: false
 
-      # - name: Dynamic Badges
-      #   if: github.ref == 'refs/heads/main'
-      #   uses: Schneegans/dynamic-badges-action@v1.7.0
-      #   with:
-      #     auth: ${{ secrets.GIST_SECRET }}
-      #     gistID: 89ec456cc3b23d9e0f07de9431936f3f
-      #     filename: coverage.json
-      #     label: Jest Coverage
-      #     message: ${{ steps.coverage.outputs.coverage }}%
-      #     color: ${{ steps.coverage.outputs.color }}
+      - name: Dynamic Badges
+        if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+        uses: Schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: 0d7da4825fe900c051580e2a6079d99d
+          filename: aide-coverage.json
+          label: Jest Coverage
+          message: ${{ steps.coverage.outputs.coverage }}%
+          color: ${{ steps.coverage.outputs.color }}
 
   # sonarcloud:
   #   name: SonarCloud Analysis
