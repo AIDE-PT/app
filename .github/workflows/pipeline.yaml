@@ -139,7 +139,7 @@ jobs:
 
       - name: Jest Coverage Comment
         id: coverage
-        if: github.event_name == 'pull_request' 
+        if: github.event_name == 'pull_request'
         uses: MishaKav/jest-coverage-comment@main
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
