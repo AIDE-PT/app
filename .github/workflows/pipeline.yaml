@@ -89,7 +89,7 @@ jobs:
           cache: "npm"
 
       - name: Run TypeScript type check
-        run: npx tsc --noEmit
+        run: npm run typecheck
 
   test:
     name: Jest Tests
