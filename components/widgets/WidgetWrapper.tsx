@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react';
-import { View, Text, Dimensions, ViewStyle } from 'react-native';
+import { Dimensions, Text, View, ViewStyle } from 'react-native';
 import SimpleLineChart from '../charts/LineChartSlim';
 import MiniSparkline from '../charts/MiniSparkline';
 
@@ -27,7 +27,7 @@ interface WidgetWrapperProps {
 
 }
 
-export function WidgetWrapper({ title, icon, variant,feedback, feedbackColor, unit, value, bg = "bg-white", style }: WidgetWrapperProps) {
+export function WidgetWrapper({ title, icon, variant, feedback, feedbackColor, unit, value, bg = "bg-white", style }: WidgetWrapperProps) {
 
   const u1 = COLUMN_WIDTH - GRID_GAP;
   const u2 = (u1 * 2) + GRID_GAP;
@@ -53,19 +53,19 @@ export function WidgetWrapper({ title, icon, variant,feedback, feedbackColor, un
       {/* Header */}
       <View className='flex flex-row gap-2 '>
         {icon}
-        <Text className="text-[#7C89FF] text-sm font-semibold gap-2 uppercase tracking-widest ">
+        <Text className="text-aide-light-blue text-sm font-open-sans-semibold gap-2 uppercase tracking-widest ">
           {title}
         </Text>
       </View>
 
       {(variant === "1-1") &&
         <>
-          <Text className="text-3xl font-bold text-red-500">
+          <Text className="text-3xl font-open-sans-semibold text-aide-red">
             {value}
           </Text>
 
           <Text
-            className="text-xs text-gray-400 font-semibold"
+            className="text-xs text-gray-400 font-open-sans-semibold"
           >
             {unit}
 
@@ -76,22 +76,22 @@ export function WidgetWrapper({ title, icon, variant,feedback, feedbackColor, un
 
         {/* ESQUERDA */}
         <View className='flex flex-row items-end'>
-          <Text className="text-3xl font-bold text-red-500">
+          <Text className="text-3xl font-open-sans-semibold text-aide-red">
             {value}
           </Text>
 
           <Text
-            className="text-xs text-gray-400 font-semibold"
+            className="text-xs text-gray-400 font-open-sans-semibold"
           >
             {unit}
           </Text>
         </View>
         {/* DIREITA */}
         <View
-          className="text-xs text-gray-400 mr-2 font-semibold"
+          className="text-xs text-gray-400 mr-2 font-open-sans-semibold"
         >
           <Text
-            className={`text-sm bg-[${feedbackColor}] p-2 rounded-[20px] font-normal text-black`}
+            className={`text-sm bg-[${feedbackColor}] p-2 rounded-[20px] font-open-sans text-aide-text`}
           >
             {feedback}
           </Text>
@@ -109,7 +109,7 @@ export function WidgetWrapper({ title, icon, variant,feedback, feedbackColor, un
           data={[100, 102, 101, 103, 103, 102, 104, 105, 103, 106, 108]}
           width={variant === "1-3" ? u3 - (2 * GRID_GAP) : u2 - (2 * GRID_GAP)}
           height={20}
-          color="#5C6CFF"
+          color="#5061FF" // aide-normal-blue
         />
       }
 

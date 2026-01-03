@@ -66,7 +66,7 @@ export const SocialButton = ({ provider, onPress, label }: SocialButtonDTO) => {
             <View className="mr-3">
                 {config.icon}
             </View>
-            <Text className="font-bold text-[16px] text-black/90">
+            <Text className="font-open-sans-semibold text-[16px] text-aide-text/90">
                 {displayLabel}
             </Text>
         </TouchableOpacity>

@@ -43,9 +43,9 @@ interface DotBackgroundProps {
 export const DotBackground = ({ children }: DotBackgroundProps) => {
     return (
         <View className="flex-1">
-            {/* Background Gradient - Light at top, lavender-blue at bottom */}
+            {/* Background Gradient - aide-white at top, aide-light-blue at bottom */}
             <LinearGradient
-                colors={['#FFFFFF', '#919cfeff']}
+                colors={['#FFFFFF', '#7C89FF']} // aide-white to aide-light-blue
                 locations={[0, 1]}
                 className="absolute inset-0"
             />

@@ -37,9 +37,9 @@ export const GradientBackground = ({ children }: GradientBackgroundProps) => {
     return (
         <GradientContext.Provider value={contextValue}>
             <View style={styles.container}>
-                {/* Static gradient from white to light blue - covers whole page */}
+                {/* Static gradient from aide-white to aide-navbar */}
                 <LinearGradient
-                    colors={['#FFFFFF', '#DBEDF8']}
+                    colors={['#FFFFFF', '#ECF5FF']} // aide-white to aide-background
                     locations={[0, 1]}
                     style={StyleSheet.absoluteFillObject}
                 />

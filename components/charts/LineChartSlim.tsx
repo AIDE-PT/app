@@ -1,5 +1,5 @@
 import React from 'react';
-import { Dimensions, ViewStyle, StyleSheet } from 'react-native';
+import { Dimensions, StyleSheet, ViewStyle } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 
 const defaultWidth = Dimensions.get('window').width - 32;
@@ -38,14 +38,14 @@ export default function SimpleLineChart({
   height = 70,
   width = defaultWidth,
 
-  lineColor = '#5C6CFF',
-  gradientFrom = '#7BA1FF',
-  gradientTo = '#243AFF',
+  lineColor = '#5061FF', // aide-normal-blue
+  gradientFrom = '#7C89FF', // aide-light-blue
+  gradientTo = '#5061FF', // aide-normal-blue
   gradientFromOpacity = 0.6,
   gradientToOpacity = 0,
 
-  backgroundGradient = '#ffffff',
-  labelColor = 'rgba(124, 137, 255, 1)',
+  backgroundGradient = '#FFFFFF', // aide-white
+  labelColor = 'rgba(124, 137, 255, 1)', // aide-light-blue
   labelFontSize = 10,
   yAxisSuffix = "",
   showYLabels = true,
