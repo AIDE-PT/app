@@ -1,7 +1,7 @@
-import React from 'react';
-import { TouchableOpacity, Text, View } from 'react-native';
-import ArrowIcon from '../svg/ArrowIcon';
 import { useRouter } from 'expo-router';
+import React from 'react';
+import { Text, TouchableOpacity } from 'react-native';
+import ArrowIcon from '../svg/ArrowIcon';
 
 interface BackButtonProps {
     label?: string;
@@ -20,7 +20,7 @@ const BackButton = ({ label = "Voltar", className, dark }: BackButtonProps) => {
         >
             <ArrowIcon variant='LEFT' dark={dark} />
             {label && (
-                <Text className={`${dark ? 'text-black/60' : 'text-white'} ml-2 text-2xl font-medium`}>
+                <Text className={`${dark ? 'text-aide-text/60' : 'text-aide-white'} ml-2 text-2xl font-open-sans`}>
                     {label}
                 </Text>
             )}

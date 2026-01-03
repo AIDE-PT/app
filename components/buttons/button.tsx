@@ -15,10 +15,10 @@ export const Button = ({ variant = 'primary', label, onPress }: buttonDTO) => {
     };
 
     const textVariants = {
-        primary: ' font-bold text-black/90',
-        list: 'mx-2 text-black/90',
-        primaryDark: 'font-bold text-white',
-        listDark: 'mx-2 text-white',
+        primary: ' font-open-sans-semibold text-aide-text/90',
+        list: 'mx-2 font-open-sans text-aide-text/90',
+        primaryDark: 'font-open-sans-semibold text-aide-white',
+        listDark: 'mx-2 font-open-sans text-aide-white',
 
     };
 
@@ -26,7 +26,7 @@ export const Button = ({ variant = 'primary', label, onPress }: buttonDTO) => {
         <TouchableOpacity
             onPress={onPress}
             style={[styles.buttonShadow,]}
-            className={`p-3 rounded-[16px] border border-[#5061FF]/20
+            className={`p-3 rounded-[16px] border border-aide-normal-blue/20
                  ${containerVariants[variant]}`}
         >
             <Text className={` ${textVariants[variant]}`}>
@@ -38,6 +38,7 @@ export const Button = ({ variant = 'primary', label, onPress }: buttonDTO) => {
 
 const styles = StyleSheet.create({
     buttonShadow: {
-        boxShadow: ' 0 0 50px -20px #5061FF inset',
+        // Using aide-normal-blue (#5061FF) for shadow
+        boxShadow: '0 0 50px -20px #5061FF inset',
     },
 });

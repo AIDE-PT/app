@@ -17,7 +17,7 @@ const Navbar = ({ dark }: navBarProps) => {
       <View className="absolute bottom-6 left-6 right-6">
         <View
           style={{ boxShadow: '0 4px 24.1px 0 rgba(0, 0, 0, 0.25)' }}
-          className={`flex-row justify-between items-center p-2 rounded-[100px] border border-white/10 ${dark ? 'bg-black/25' : 'bg-[#DBEDF8]/90'}`}
+          className={`flex-row justify-between items-center p-2 rounded-[100px] border border-white/10 ${dark ? 'bg-black/25' : 'bg-aide-navbar'}`}
         >
           <TouchableOpacity className={styleBall}>
 

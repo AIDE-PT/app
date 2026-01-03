@@ -1,6 +1,6 @@
 import React from 'react';
-import Svg, { Path } from 'react-native-svg';
 import { View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 
 interface MiniSparklineProps {
   data: number[];
@@ -9,13 +9,13 @@ interface MiniSparklineProps {
   color?: string;
 }
 
-export default function MiniSparkline({ 
-  data, 
-  width, 
-  height, 
-  color = '#5C6CFF' 
+export default function MiniSparkline({
+  data,
+  width,
+  height,
+  color = '#5061FF' // aide-normal-blue from Tailwind config
 }: MiniSparklineProps) {
-  
+
   if (!data || data.length < 2) return null;
 
   const min = Math.min(...data);

@@ -47,8 +47,8 @@ export const Input = ({ variant = 'light', type = 'text', dateValue, onDateChang
                 onPress={() => isDate && setShowDatePicker(true)}
                 style={styles.inputShadow}
                 className={`w-full flex-row items-center px-4 py-1 rounded-[16px] border 
-                    ${!isEmailValid ? 'border-red-500/50' : 'border-[#5061FF]/20'} 
-                    ${isDarkVariant ? 'bg-black/60' : 'bg-white/90'}`}
+                    ${!isEmailValid ? 'border-aide-red/50' : 'border-aide-normal-blue/20'} 
+                    ${isDarkVariant ? 'bg-black/60' : 'bg-aide-white/90'}`}
             >
                 <TextInput
                     className={`flex-1 h-12 text-base ${isDarkVariant ? 'text-white' : 'text-black/90'}`}
@@ -82,7 +82,7 @@ export const Input = ({ variant = 'light', type = 'text', dateValue, onDateChang
 
             {/* Feedback visual de erro */}
             {isEmail && !isEmailValid && (
-                <Text className="text-red-500 text-[10px] ml-4 mt-1 font-bold">
+                <Text className="text-aide-red text-[10px] ml-4 mt-1 font-open-sans-semibold">
                     E-mail inválido
                 </Text>
             )}
@@ -101,6 +101,7 @@ export const Input = ({ variant = 'light', type = 'text', dateValue, onDateChang
 
 const styles = StyleSheet.create({
     inputShadow: {
+        // Using aide-normal-blue (#5061FF) for shadow
         boxShadow: '0 0 50px -20px #5061FF inset',
     },
 });
