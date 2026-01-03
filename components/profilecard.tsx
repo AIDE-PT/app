@@ -51,7 +51,7 @@ export const Profilecard = ({
       {isSelected ? (
         <LinearGradient 
           colors={['#E1EFFF', '#9DBFFF']} 
-          className="p-6 h-[380px] justify-between"
+          className="p-6 h-[450px] justify-between rounded-[40px]"
         >
           <CardInner 
             title={title} 
@@ -62,7 +62,7 @@ export const Profilecard = ({
           />
         </LinearGradient>
       ) : (
-        <View className="bg-white p-6 h-[380px] justify-between shadow-sm">
+        <View className="bg-white p-6 h-[450px] justify-between shadow-sm rounded-[40px]">
           <CardInner 
             title={title} 
             description={description} 
