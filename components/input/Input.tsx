@@ -19,6 +19,7 @@ interface InputDTO extends TextInputProps {
   type?: "text" | "password" | "date" | "email"; // Adicionado 'email'
   dateValue?: Date;
   onDateChange?: (date: Date) => void;
+  suffix?: string;
 }
 
 export const Input = ({
@@ -26,6 +27,7 @@ export const Input = ({
   type = "text",
   dateValue,
   onDateChange,
+  suffix,
   ...props
 }: InputDTO) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -87,6 +89,12 @@ export const Input = ({
           pointerEvents={isDate ? "none" : "auto"}
           {...props}
         />
+
+        {suffix && (
+          <Text className={`ml-2 text-base ${isDarkVariant ? "text-white/60" : "text-black/60"}`}>
+            {suffix}
+          </Text>
+        )}
 
         {isPassword && (
           <TouchableOpacity
