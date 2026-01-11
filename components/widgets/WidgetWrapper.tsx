@@ -68,7 +68,7 @@ export function WidgetWrapper({
       {/* Header */}
       <View className="flex flex-row gap-2 ">
         {icon}
-        <Text className="text-[#7C89FF] text-sm font-semibold gap-2 uppercase tracking-widest ">
+        <Text className="text-aide-light-blue text-sm font-open-sans-semibold gap-2 uppercase tracking-widest ">
           {title}
         </Text>
       </View>
@@ -111,7 +111,7 @@ export function WidgetWrapper({
           data={[100, 102, 101, 103, 103, 102, 104, 105, 103, 106, 108]}
           width={variant === "1-3" ? u3 - 2 * GRID_GAP : u2 - 2 * GRID_GAP}
           height={20}
-          color="#5C6CFF"
+          color="#5061FF" // aide-normal-blue
         />
       )}
     </View>
