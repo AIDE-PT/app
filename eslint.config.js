@@ -11,7 +11,7 @@ module.exports = defineConfig([
   {
     rules: {
       // Se precisar de regras específicas do Prettier, elas entram aqui:
-      "prettier/prettier": ["error", { "endOfLine": "auto" }],
-    }
-  }
+      "prettier/prettier": ["error", { endOfLine: "auto" }],
+    },
+  },
 ]);
