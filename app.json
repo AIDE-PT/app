@@ -19,7 +19,8 @@
         "monochromeImage": "./assets/icon/monochromeBackground.png"
       },
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.cbl2025.aide"
     },
     "web": {
       "output": "static",
@@ -45,6 +46,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "77f0c9a8-1dd1-40c0-955c-01fac692579b"
+      }
     }
   }
 }

@@ -37,14 +37,17 @@ We use the following tools and libraries:
 ## Contribution Rules
 
 ### Keep Changes Small
+
 - One Jira issue = one branch = one PR
 - Don’t mix features and refactors
 
 ### Use Pull Requests
+
 - No direct commits to `main` or `dev`
 - All changes must go through PR review
 
 ### Write Readable Code
+
 - Prefer clarity over clever solutions
 - Add comments if something is not obvious
 
@@ -53,11 +56,13 @@ We use the following tools and libraries:
 ## Project Structure
 
 ### Components
+
 - Small and focused components
 - Reusable components go in `components/`
 - Screens live in `app/` (expo-router)
 
 ### Hooks
+
 - Custom hooks go in `hooks/`
 - Always prefix with `use`
 
@@ -66,10 +71,12 @@ We use the following tools and libraries:
 ## State Management
 
 ### Global State
+
 - Use Redux Toolkit only when necessary
 - Keep UI state local when possible
 
 ### Server State
+
 - All API data must use **TanStack Query**
 - Never store server data in Redux
 
@@ -88,6 +95,7 @@ className={clsx(
   isAlert && 'bg-red-500'
 )}
 ```
+
 ---
 
 ## Forms & Validation
@@ -112,29 +120,35 @@ className={clsx(
 We use **Jira** and an **adapted GitFlow** strategy.
 
 ### Main Branches
+
 - `main` → production-ready code
 - `dev` → integration branch
 
 Never commit directly to these branches.
 
 ### Feature Branches
+
 - Created directly from Jira issues
 - Branch from `dev`
 
 Examples:
+
 - `feature/AIDE-123-alert-system`
 - `feature/AIDE-456-heart-rate-chart`
 
 Rules:
+
 - One Jira issue per branch
 - Keep the branch focused on that issue only
 
 ### Hotfix Branches
+
 - Used only for urgent production fixes
 - Branch from `main`
 - Merge back into both `main` and `dev`
 
 Example:
+
 - `hotfix/AIDE-999-critical-crash`
 
 ---
