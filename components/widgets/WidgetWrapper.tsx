@@ -74,7 +74,7 @@ export function WidgetWrapper({
       {/* Header */}
       <View className='flex flex-row gap-2'>
         {icon}
-        <Text className="text-[#7C89FF] text-sm font-semibold uppercase tracking-widest ">
+        <Text className="text-aide-light-blue text-sm font-open-sans-semibold gap-2 uppercase tracking-widest ">
           {title}
         </Text>
       </View>
