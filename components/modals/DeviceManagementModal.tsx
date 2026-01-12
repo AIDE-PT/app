@@ -29,7 +29,9 @@ export default function DeviceManagementModal({
   onToggleDataSharing,
   device,
 }: DeviceManagementModalProps) {
-  const [shareData, setShareData] = useState(device?.isDataSharingEnabled ?? true);
+  const [shareData, setShareData] = useState(
+    device?.isDataSharingEnabled ?? true,
+  );
 
   const handleToggle = (value: boolean) => {
     setShareData(value);
@@ -117,10 +119,7 @@ export default function DeviceManagementModal({
             </View>
 
             {/* Remove Button */}
-            <TouchableOpacity
-              onPress={onRemove}
-              className="w-full px-8"
-            >
+            <TouchableOpacity onPress={onRemove} className="w-full px-8">
               <View className="bg-[#FF6B6B] py-3 rounded-[25px] items-center justify-center">
                 <Text className="font-open-sans font-semibold text-base text-white">
                   Remover dispositivo
