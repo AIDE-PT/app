@@ -31,17 +31,26 @@ export default function DispositivosPage() {
   const [managementModalVisible, setManagementModalVisible] = useState(false);
 
   const [pendingDevice, setPendingDevice] = useState<Device | null>(null);
-  const [selectedDevice, setSelectedDevice] =
-    useState<DeviceWithStatus | null>(null);
+  const [selectedDevice, setSelectedDevice] = useState<DeviceWithStatus | null>(
+    null,
+  );
 
   const [addedDevices, setAddedDevices] = useState<DeviceWithStatus[]>([
-    { id: "apple-healthkit", name: "Apple Healthkit", isDataSharingEnabled: true },
-    { id: "health-connect", name: "Health Connect", isDataSharingEnabled: true },
+    {
+      id: "apple-healthkit",
+      name: "Apple Healthkit",
+      isDataSharingEnabled: true,
+    },
+    {
+      id: "health-connect",
+      name: "Health Connect",
+      isDataSharingEnabled: true,
+    },
     { id: "fitbit", name: "Fitbit", isDataSharingEnabled: true },
   ]);
 
   const availableDevices = ALL_DEVICES.filter(
-    (device) => !addedDevices.find((added) => added.id === device.id)
+    (device) => !addedDevices.find((added) => added.id === device.id),
   );
 
   // Handle device selection from AddDeviceModal
@@ -72,9 +81,7 @@ export default function DispositivosPage() {
   // Handle removing a device
   const handleRemoveDevice = () => {
     if (selectedDevice) {
-      setAddedDevices(
-        addedDevices.filter((d) => d.id !== selectedDevice.id)
-      );
+      setAddedDevices(addedDevices.filter((d) => d.id !== selectedDevice.id));
     }
     setManagementModalVisible(false);
     setSelectedDevice(null);
@@ -84,7 +91,9 @@ export default function DispositivosPage() {
   const handleToggleDataSharing = (enabled: boolean) => {
     if (selectedDevice) {
       const updatedDevices = addedDevices.map((d) =>
-        d.id === selectedDevice.id ? { ...d, isDataSharingEnabled: enabled } : d
+        d.id === selectedDevice.id
+          ? { ...d, isDataSharingEnabled: enabled }
+          : d,
       );
       setAddedDevices(updatedDevices);
       setSelectedDevice({ ...selectedDevice, isDataSharingEnabled: enabled });
