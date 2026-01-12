@@ -1,6 +1,7 @@
 import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { Dimensions, Text, View } from "react-native";
+import { router } from "expo-router";
 import "react-native-gesture-handler";
 import Animated, {
   Easing,
@@ -224,7 +225,11 @@ export default function App() {
 
           {/* CTA Button */}
           <View className="items-center">
-            <Button variant="primary" label="Começa Já!" onPress={() => {}} />
+            <Button
+              variant="primary"
+              label="Começa Já!"
+              onPress={() => router.push("/associar")}
+            />
           </View>
         </View>
       </LightBackground>

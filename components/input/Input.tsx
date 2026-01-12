@@ -65,7 +65,7 @@ export const Input = ({
         activeOpacity={1}
         onPress={() => isDate && setShowDatePicker(true)}
         style={styles.inputShadow}
-        className={`w-full flex-row items-center px-4 py-1 rounded-[16px] border 
+        className={`w-full flex-row items-center px-4 rounded-[25px] border shadow
                     ${!isEmailValid ? "border-red-500/50" : "border-[#5061FF]/20"} 
                     ${isDarkVariant ? "bg-black/60" : "bg-white/90"}`}
       >
