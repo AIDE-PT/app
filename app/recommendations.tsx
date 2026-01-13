@@ -1,4 +1,4 @@
-import { useLocalSearchParams } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -54,6 +54,7 @@ const conditionToMetrics: Record<string, HealthMetric[]> = {
 };
 
 export default function Recommendations() {
+  const router = useRouter();
   const { conditions } = useLocalSearchParams<{ conditions: string }>();
   const [selectedMetrics, setSelectedMetrics] = useState<HealthMetric[]>([]);
 
@@ -89,6 +90,7 @@ export default function Recommendations() {
 
   const handleConcluir = () => {
     console.log("Selected metrics:", selectedMetrics);
+    router.push("/");
   };
 
   return (
