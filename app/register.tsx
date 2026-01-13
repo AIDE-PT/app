@@ -9,15 +9,15 @@ import { Input } from "../components/input/Input";
 import "../global.css";
 
 // Divider with text
-const DividerWithText = ({ text }: { text: string }) => (
-  <View className="flex-row items-center my-6">
-    <View className="flex-1 h-[1px] bg-[#D1D5DB]" />
-    <Text className="font-open-sans text-[16px] text-[#6B7280] mx-4">
-      {text}
-    </Text>
-    <View className="flex-1 h-[1px] bg-[#D1D5DB]" />
-  </View>
-);
+// const DividerWithText = ({ text }: { text: string }) => (
+//   <View className="flex-row items-center my-6">
+//     <View className="flex-1 h-[1px] bg-[#D1D5DB]" />
+//     <Text className="font-open-sans text-[16px] text-[#6B7280] mx-4">
+//       {text}
+//     </Text>
+//     <View className="flex-1 h-[1px] bg-[#D1D5DB]" />
+//   </View>
+// );
 
 export default function Register() {
   const router = useRouter();
