@@ -8,10 +8,18 @@ import Animated, {
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
+import { z, ZodError } from "zod";
 import { Button } from "../components/buttons/button";
 import { Input } from "../components/input/Input";
 import { LightBackground } from "../components/LightBackground";
 import "../global.css";
+
+const extraDataSchema = z.object({
+  idade: z.coerce.number().min(1, "Idade deve ser maior que 0").max(120, "Idade inválida"),
+  peso: z.coerce.number().min(1, "Peso deve ser maior que 0"),
+  altura: z.coerce.number().min(0.5, "Altura deve ser maior que 0.5").max(3, "Altura inválida"),
+  genero: z.string().min(1, "Selecione um género"),
+});
 
 const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
   <Svg 
@@ -106,12 +114,32 @@ export default function ExtraData() {
   const [peso, setPeso] = useState("");
   const [altura, setAltura] = useState("");
   const [genero, setGenero] = useState("");
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [selectedConditions, setSelectConditions] = useState<string[]>([]);
 
   const handleAdvance = () => {
-    router.push({
-      pathname: "/selectConditions",
-    });
+    try {
+      extraDataSchema.parse({
+        idade,
+        peso,
+        altura,
+        genero,
+      });
+      setErrors({});
+      router.push({
+        pathname: "/selectConditions",
+      });
+    } catch (err) {
+      if (err instanceof ZodError) {
+        const newErrors: Record<string, string> = {};
+        err.issues.forEach((issue) => {
+          if (issue.path[0]) {
+            newErrors[issue.path[0] as string] = issue.message;
+          }
+        });
+        setErrors(newErrors);
+      }
+    }
   };
 
   return (
@@ -126,33 +154,45 @@ export default function ExtraData() {
 
         {/* Form Inputs */}
         <View className="gap-4">
-          <Input
-            placeholder="Idade"
-            value={idade}
-            onChangeText={setIdade}
-            keyboardType="numeric"
-          />
+          <View>
+            <Input
+              placeholder="Idade"
+              value={idade}
+              onChangeText={setIdade}
+              keyboardType="numeric"
+            />
+            {errors.idade && <Text className="text-red-500 text-sm ml-2 mt-1">{errors.idade}</Text>}
+          </View>
 
-          <Input
-            placeholder="Peso"
-            value={peso}
-            onChangeText={setPeso}
-            keyboardType="numeric"
-            suffix="kg"
-          />
+          <View>
+            <Input
+              placeholder="Peso"
+              value={peso}
+              onChangeText={setPeso}
+              keyboardType="numeric"
+              suffix="kg"
+            />
+            {errors.peso && <Text className="text-red-500 text-sm ml-2 mt-1">{errors.peso}</Text>}
+          </View>
 
-          <Input
-            placeholder="Altura"
-            value={altura}
-            onChangeText={setAltura}
-            keyboardType="numeric"
-            suffix="m"
-          />
+          <View>
+            <Input
+              placeholder="Altura"
+              value={altura}
+              onChangeText={setAltura}
+              keyboardType="numeric"
+              suffix="m"
+            />
+            {errors.altura && <Text className="text-red-500 text-sm ml-2 mt-1">{errors.altura}</Text>}
+          </View>
 
-          <GenderSelector 
-            selected={genero}
-            onSelect={setGenero}
-          />
+          <View>
+            <GenderSelector 
+              selected={genero}
+              onSelect={setGenero}
+            />
+            {errors.genero && <Text className="text-red-500 text-sm ml-2 mt-1">{errors.genero}</Text>}
+          </View>
         </View>
 
         {/* Spacer to push button to bottom */}
