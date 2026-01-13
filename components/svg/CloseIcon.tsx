@@ -8,7 +8,11 @@ interface CloseIconProps {
   dark?: boolean;
 }
 
-export const CloseIcon = ({ size = 16, className = "", dark = false }: CloseIconProps) => {
+export const CloseIcon = ({
+  size = 16,
+  className = "",
+  dark = false,
+}: CloseIconProps) => {
   return (
     <View className={className}>
       <Svg width={size} height={size} viewBox="0 0 16 16" fill="none">

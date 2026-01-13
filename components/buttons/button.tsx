@@ -28,7 +28,9 @@ export const Button = ({ variant = "primary", label, onPress }: buttonDTO) => {
       className={`p-3 rounded-[16px] border border-[#5061FF]/20
                  ${containerVariants[variant]}`}
     >
-      <Text className={`text-center mx-auto ${textVariants[variant]}`}>{label}</Text>
+      <Text className={`text-center mx-auto ${textVariants[variant]}`}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 };
