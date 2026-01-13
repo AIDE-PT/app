@@ -4,7 +4,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
-  withTiming
+  withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Path } from "react-native-svg";
@@ -15,19 +15,25 @@ import { LightBackground } from "../components/LightBackground";
 import "../global.css";
 
 const extraDataSchema = z.object({
-  idade: z.coerce.number().min(1, "Idade deve ser maior que 0").max(120, "Idade inválida"),
+  idade: z.coerce
+    .number()
+    .min(1, "Idade deve ser maior que 0")
+    .max(120, "Idade inválida"),
   peso: z.coerce.number().min(1, "Peso deve ser maior que 0"),
-  altura: z.coerce.number().min(0.5, "Altura deve ser maior que 0.5").max(3, "Altura inválida"),
+  altura: z.coerce
+    .number()
+    .min(0.5, "Altura deve ser maior que 0.5")
+    .max(3, "Altura inválida"),
   genero: z.string().min(1, "Selecione um género"),
 });
 
 const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
-  <Svg 
-    width={20} 
-    height={20} 
-    viewBox="0 0 24 24" 
+  <Svg
+    width={20}
+    height={20}
+    viewBox="0 0 24 24"
     fill="none"
-    style={{ transform: [{ rotate: isOpen ? '180deg' : '0deg' }] }}
+    style={{ transform: [{ rotate: isOpen ? "180deg" : "0deg" }] }}
   >
     <Path
       d="M6 9l6 6 6-6"
@@ -39,14 +45,22 @@ const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
   </Svg>
 );
 
-const GenderSelector = ({ selected, onSelect }: { selected: string; onSelect: (gender: string) => void }) => {
+const GenderSelector = ({
+  selected,
+  onSelect,
+}: {
+  selected: string;
+  onSelect: (gender: string) => void;
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const options = ["Feminino", "Masculino", "Outro"];
   const dropdownHeight = useSharedValue(0);
 
   const toggleDropdown = () => {
     setIsOpen(!isOpen);
-    dropdownHeight.value = withTiming(isOpen ? 0 : options.length * 48, { duration: 200 });
+    dropdownHeight.value = withTiming(isOpen ? 0 : options.length * 48, {
+      duration: 200,
+    });
   };
 
   const selectOption = (option: string) => {
@@ -57,7 +71,7 @@ const GenderSelector = ({ selected, onSelect }: { selected: string; onSelect: (g
 
   const animatedStyle = useAnimatedStyle(() => ({
     height: dropdownHeight.value,
-    overflow: 'hidden',
+    overflow: "hidden",
   }));
 
   return (
@@ -66,16 +80,18 @@ const GenderSelector = ({ selected, onSelect }: { selected: string; onSelect: (g
         onPress={toggleDropdown}
         style={styles.inputShadow}
         className={`w-full flex-row items-center justify-between px-4 py-1 rounded-[16px] border border-[#5061FF]/20 bg-white/90 ${
-          isOpen ? 'rounded-b-none border-b-0' : ''
+          isOpen ? "rounded-b-none border-b-0" : ""
         }`}
       >
-        <Text className={`h-12 leading-[48px] text-base ${selected ? 'text-black/90' : 'text-black/40'}`}>
+        <Text
+          className={`h-12 leading-[48px] text-base ${selected ? "text-black/90" : "text-black/40"}`}
+        >
           {selected || "Género"}
         </Text>
         <ChevronIcon isOpen={isOpen} />
       </TouchableOpacity>
 
-      <Animated.View 
+      <Animated.View
         style={[animatedStyle, styles.dropdownShadow]}
         className="bg-white/90 rounded-b-[16px] border border-t-0 border-[#5061FF]/20 overflow-hidden"
       >
@@ -84,12 +100,16 @@ const GenderSelector = ({ selected, onSelect }: { selected: string; onSelect: (g
             key={option}
             onPress={() => selectOption(option)}
             className={`px-4 py-3 ${
-              index < options.length - 1 ? 'border-b border-[#5061FF]/10' : ''
-            } ${selected === option ? 'bg-[#5061FF]/10' : ''}`}
+              index < options.length - 1 ? "border-b border-[#5061FF]/10" : ""
+            } ${selected === option ? "bg-[#5061FF]/10" : ""}`}
           >
-            <Text className={`text-base ${
-              selected === option ? 'text-[#5061FF] font-semibold' : 'text-black/90'
-            }`}>
+            <Text
+              className={`text-base ${
+                selected === option
+                  ? "text-[#5061FF] font-semibold"
+                  : "text-black/90"
+              }`}
+            >
               {option}
             </Text>
           </TouchableOpacity>
@@ -161,7 +181,11 @@ export default function ExtraData() {
               onChangeText={setIdade}
               keyboardType="numeric"
             />
-            {errors.idade && <Text className="text-red-500 text-sm ml-2 mt-1">{errors.idade}</Text>}
+            {errors.idade && (
+              <Text className="text-red-500 text-sm ml-2 mt-1">
+                {errors.idade}
+              </Text>
+            )}
           </View>
 
           <View>
@@ -172,7 +196,11 @@ export default function ExtraData() {
               keyboardType="numeric"
               suffix="kg"
             />
-            {errors.peso && <Text className="text-red-500 text-sm ml-2 mt-1">{errors.peso}</Text>}
+            {errors.peso && (
+              <Text className="text-red-500 text-sm ml-2 mt-1">
+                {errors.peso}
+              </Text>
+            )}
           </View>
 
           <View>
@@ -183,15 +211,20 @@ export default function ExtraData() {
               keyboardType="numeric"
               suffix="m"
             />
-            {errors.altura && <Text className="text-red-500 text-sm ml-2 mt-1">{errors.altura}</Text>}
+            {errors.altura && (
+              <Text className="text-red-500 text-sm ml-2 mt-1">
+                {errors.altura}
+              </Text>
+            )}
           </View>
 
           <View>
-            <GenderSelector 
-              selected={genero}
-              onSelect={setGenero}
-            />
-            {errors.genero && <Text className="text-red-500 text-sm ml-2 mt-1">{errors.genero}</Text>}
+            <GenderSelector selected={genero} onSelect={setGenero} />
+            {errors.genero && (
+              <Text className="text-red-500 text-sm ml-2 mt-1">
+                {errors.genero}
+              </Text>
+            )}
           </View>
         </View>
 
@@ -200,11 +233,7 @@ export default function ExtraData() {
 
         {/* Bottom Button */}
         <View className="items-center mb-8">
-          <Button
-            variant="primary"
-            label="Avançar"
-            onPress={handleAdvance}
-          />
+          <Button variant="primary" label="Avançar" onPress={handleAdvance} />
         </View>
       </SafeAreaView>
     </LightBackground>

@@ -91,7 +91,9 @@ export const Input = ({
         />
 
         {suffix && (
-          <Text className={`ml-2 text-base ${isDarkVariant ? "text-white/60" : "text-black/60"}`}>
+          <Text
+            className={`ml-2 text-base ${isDarkVariant ? "text-white/60" : "text-black/60"}`}
+          >
             {suffix}
           </Text>
         )}

@@ -29,12 +29,12 @@ export default function SelectConditions() {
     setSelectedConditions((prev) =>
       prev.includes(condition)
         ? prev.filter((c) => c !== condition)
-        : [...prev, condition]
+        : [...prev, condition],
     );
   };
 
   const filteredConditions = ALL_CONDITIONS.filter((condition) =>
-    condition.toLowerCase().includes(searchText.toLowerCase())
+    condition.toLowerCase().includes(searchText.toLowerCase()),
   );
 
   const handleAdvance = () => {

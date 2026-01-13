@@ -1,10 +1,10 @@
 import React from "react";
 import {
-    StyleSheet,
-    TextInput,
-    TextInputProps,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  TextInput,
+  TextInputProps,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import SearchIcon from "../svg/SearchIcon";
 

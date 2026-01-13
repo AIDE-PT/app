@@ -19,7 +19,7 @@ import {
 
 import "../global.css";
 
-type HealthMetric = 
+type HealthMetric =
   | "pressao"
   | "glicose"
   | "bpm"
@@ -30,7 +30,11 @@ type HealthMetric =
   | "o2"
   | "temp";
 
-const healthMetrics: { id: HealthMetric; label: string; icon: React.ReactNode }[] = [
+const healthMetrics: {
+  id: HealthMetric;
+  label: string;
+  icon: React.ReactNode;
+}[] = [
   { id: "pressao", label: "PRESSÃO", icon: <PressaoIcon /> },
   { id: "glicose", label: "GLICOSE", icon: <GlicoseIcon /> },
   { id: "bpm", label: "BPM", icon: <BpmIcon /> },
@@ -84,7 +88,7 @@ export default function Recommendations() {
     setSelectedMetrics((prev) =>
       prev.includes(metric)
         ? prev.filter((m) => m !== metric)
-        : [...prev, metric]
+        : [...prev, metric],
     );
   };
 
@@ -121,11 +125,7 @@ export default function Recommendations() {
         <View className="flex-1" />
 
         <View className="items-center mb-8">
-          <Button
-            variant="primary"
-            label="Concluir"
-            onPress={handleConcluir}
-          />
+          <Button variant="primary" label="Concluir" onPress={handleConcluir} />
         </View>
       </SafeAreaView>
     </LightBackground>
