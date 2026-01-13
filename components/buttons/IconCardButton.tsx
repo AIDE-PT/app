@@ -18,19 +18,10 @@ export const IconCardButton = ({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.8}
-      style={[
-        styles.card,
-        selected ? styles.selectedCard : styles.defaultCard,
-      ]}
+      style={[styles.card, selected ? styles.selectedCard : styles.defaultCard]}
     >
-      {icon && (
-        <View style={styles.iconContainer}>
-          {icon}
-        </View>
-      )}
-      <Text style={styles.label}>
-        {label}
-      </Text>
+      {icon && <View style={styles.iconContainer}>{icon}</View>}
+      <Text style={styles.label}>{label}</Text>
     </TouchableOpacity>
   );
 };

@@ -25,11 +25,12 @@ export const ChipButton = ({
     >
       <View
         className={`w-4 h-4 rounded-full border-2 mr-2 items-center justify-center
-                    ${selected
-                      ? "border-black/90"
-                      : isDarkVariant
-                        ? "border-white/40"
-                        : "border-black/40"
+                    ${
+                      selected
+                        ? "border-black/90"
+                        : isDarkVariant
+                          ? "border-white/40"
+                          : "border-black/40"
                     }`}
       >
         {selected && (
@@ -42,9 +43,7 @@ export const ChipButton = ({
       </View>
 
       <Text
-        className={`text-sm ${
-          isDarkVariant ? "text-white" : "text-black/90"
-        }`}
+        className={`text-sm ${isDarkVariant ? "text-white" : "text-black/90"}`}
       >
         {label}
       </Text>
