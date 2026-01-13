@@ -6,10 +6,11 @@ interface ProfileImageProps {
 }
 
 export const ProfileImage = ({ source }: ProfileImageProps) => (
-  <View className="items-center justify-center">
+  // h-full permite que o pai (ProfileCard) controle o tamanho da imagem proporcionalmente
+  <View className="w-full h-full items-center justify-center p-2">
     <Image 
       source={source} 
-      className="w-40 h-52" 
+      className="w-full h-full" 
       resizeMode="contain" 
     />
   </View>
