@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, Text, TouchableOpacity, Image, Animated } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Animated, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ProfileImage } from './profileimage';
 
@@ -15,23 +15,11 @@ interface ProfileCardProps {
   onPress: () => void;
 }
 
-export const Profilecard = ({ 
-  title, 
-  description, 
-  imageSource, 
-  iconSource, 
-  isSelected, 
-  isOtherSelected, 
-  onPress 
-}: ProfileCardProps) => {
+export const Profilecard = ({ title, description, imageSource, iconSource, isSelected, isOtherSelected, onPress }: ProfileCardProps) => {
   const scale = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
-    Animated.spring(scale, {
-      toValue: isSelected ? 1.03 : 1,
-      useNativeDriver: true,
-      friction: 7,
-    }).start();
+    Animated.spring(scale, { toValue: isSelected ? 1.02 : 1, useNativeDriver: true, friction: 8 }).start();
   }, [isSelected]);
 
   const isFaded = isOtherSelected && !isSelected;
@@ -40,55 +28,68 @@ export const Profilecard = ({
     <AnimatedCard 
       onPress={onPress}
       activeOpacity={0.9}
-      style={{ 
-        transform: [{ scale }],
-        opacity: isFaded ? 0.35 : 1 
-      }}
-      className={`w-[48%] rounded-[40px] overflow-hidden border-2 ${
-        isSelected ? 'border-blue-600 shadow-xl' : 'border-transparent'
-      }`}
+      style={[
+        styles.cardContainer,
+        { 
+          transform: [{ scale }], 
+          opacity: isFaded ? 0.35 : 1,
+        },
+        isSelected ? styles.selectedBorder : styles.unselectedBorder
+      ]}
     >
-      {isSelected ? (
+      {/* O Gradiente agora preenche o fundo respeitando o border radius */}
+      {isSelected && (
         <LinearGradient 
-          colors={['#E1EFFF', '#9DBFFF']} 
-          className="p-6 h-[450px] justify-between rounded-[40px]"
-        >
-          <CardInner 
-            title={title} 
-            description={description} 
-            imageSource={imageSource} 
-            iconSource={iconSource} 
-            isSelected={isSelected} 
-          />
-        </LinearGradient>
-      ) : (
-        <View className="bg-white p-6 h-[450px] justify-between shadow-sm rounded-[40px]">
-          <CardInner 
-            title={title} 
-            description={description} 
-            imageSource={imageSource} 
-            iconSource={iconSource} 
-            isSelected={isSelected} 
-          />
-        </View>
+          colors={['#F1F7FF', '#9DBFFF']} 
+          style={StyleSheet.absoluteFill}
+        />
       )}
+
+      <View className="flex-1 p-5">
+        {/* 1. Imagem no topo: Ocupa 65% do card para não bater no texto */}
+        <View style={{ height: '65%' }}>
+          <ProfileImage source={imageSource} />
+        </View>
+        
+        {/* 2. Conteúdo de Texto: Ocupa os 35% inferiores */}
+        <View style={{ height: '35%' }} className="justify-end pb-2">
+          <View className="flex-row items-center mb-1">
+            <Image source={iconSource} className="w-6 h-6" resizeMode="contain" />
+            <Text className={`font-bold text-xl ml-2 ${isSelected ? 'text-black' : 'text-[#BCBCBC]'}`}>
+              {title}
+            </Text>
+          </View>
+          
+          {isSelected && (
+            <Text className="text-gray-800 text-[11px] leading-4 font-medium">
+              {description}
+            </Text>
+          )}
+        </View>
+      </View>
     </AnimatedCard>
   );
 };
 
-const CardInner = ({ title, description, imageSource, iconSource, isSelected }: any) => (
-  <>
-    <ProfileImage source={imageSource} />
-    <View>
-      <View className="flex-row items-center mb-1">
-        <Image source={iconSource} className="w-5 h-5" resizeMode="contain" />
-        <Text className="font-bold text-xl ml-2 text-gray-900">{title}</Text>
-      </View>
-      {isSelected && (
-        <Text className="text-gray-700 text-[13px] font-medium leading-4 mt-1">
-          {description}
-        </Text>
-      )}
-    </View>
-  </>
-);
+const styles = StyleSheet.create({
+  cardContainer: {
+    flex: 1,
+    minHeight: 380, // Mantém a altura do design
+    borderRadius: 40,
+    overflow: 'hidden', // Crucial para o gradiente e imagem não saírem fora
+    backgroundColor: 'white',
+  },
+  selectedBorder: {
+    borderWidth: 2,
+    borderColor: '#4B6BFF',
+  },
+  unselectedBorder: {
+    borderWidth: 2,
+    borderColor: 'transparent',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+  }
+});
