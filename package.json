@@ -64,7 +64,6 @@
     "react-redux": "^9.2.0",
     "zod": "^4.3.5",
     "zustand": "^5.0.9"
-
   },
   "devDependencies": {
     "@types/react": "~19.1.0",

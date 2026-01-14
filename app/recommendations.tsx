@@ -4,7 +4,7 @@ import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
 import { IconCardButton } from "../components/buttons/IconCardButton";
-import { LightBackground } from "../components/LightBackground";
+import LightBackground from "@/components/DotBackground";
 import {
   BpmIcon,
   CalIcon,
