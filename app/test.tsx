@@ -1,4 +1,3 @@
-import BackButton from "@/components/buttons/backButton";
 import { Button } from "@/components/buttons/button";
 import SimpleLineChart from "@/components/charts/LineChartSlim";
 import { Input } from "@/components/input/Input";
@@ -170,10 +169,6 @@ export default function TestScreen() {
           <Text className="text-gray-600">
             This is a test card with Tailwind styling
           </Text>
-        </View>
-        <View className="bg-slate-400">
-          <BackButton />
-          <BackButton dark />
         </View>
         <Button
           label="primario"
