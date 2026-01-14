@@ -1,7 +1,7 @@
 import BackButton from "@/components/buttons/backButton";
 import { Button } from "@/components/buttons/button";
 import SimpleLineChart from "@/components/charts/LineChartSlim";
-import { Input } from "@/components/imput/Imput";
+import { Input } from "@/components/input/Input";
 import BottomModal from "@/components/modals/BottomModal";
 import Navbar from "@/components/navBar/NavBar";
 import WidgetIcon from "@/components/svg/WidgetIcon";
