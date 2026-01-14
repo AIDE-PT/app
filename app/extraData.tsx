@@ -135,7 +135,6 @@ export default function ExtraData() {
   const [altura, setAltura] = useState("");
   const [genero, setGenero] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [selectedConditions, setSelectConditions] = useState<string[]>([]);
 
   const handleAdvance = () => {
     try {
