@@ -1,13 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useState } from "react";
 import {
-  Animated,
   SafeAreaView,
   Text,
   TouchableOpacity,
   View,
   ScrollView,
 } from "react-native";
-import { useRouter } from "expo-router";
 import aider from "../assets/images/aider.png";
 import cuidado from "../assets/images/cuidado.png";
 import icon_aider from "../assets/images/icon_aider.png";
@@ -15,12 +13,12 @@ import icon_cuidado from "../assets/images/icon_cuidado.png";
 import { Profilecard } from "../components/profilecard";
 
 export default function PerfilScreen() {
-  const router = useRouter();
+  // const router = useRouter();
   const [selected, setSelected] = useState<"aider" | "cuidado" | null>(null);
 
   const handleAvançar = () => {
-    if (selected === "aider") router.push("/home_aider");
-    else if (selected === "cuidado") router.push("/home_cuidado");
+    // if (selected === "aider") router.push("/home_aider");
+    // else if (selected === "cuidado") router.push("/home_cuidado");
   };
 
   return (
