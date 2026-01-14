@@ -9,11 +9,11 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { LightBackground } from "../components/LightBackground";
 import LineChartSlim from "../components/charts/LineChartSlim";
 import MainDetails from "../components/details/main";
 import ArrowIcon from "../components/svg/ArrowIcon";
 import "../global.css";
+import LightBackground from "@/components/DotBackground";
 
 const screenWidth = Dimensions.get("window").width;
 
