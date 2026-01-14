@@ -5,7 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
 import { ChipButton } from "../components/buttons/ChipButton";
 import { SearchBar } from "../components/input/SearchBar";
-import { LightBackground } from "../components/LightBackground";
+import LightBackground from "@/components/DotBackground";
 
 import "../global.css";
 

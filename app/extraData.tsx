@@ -11,8 +11,8 @@ import Svg, { Path } from "react-native-svg";
 import { z, ZodError } from "zod";
 import { Button } from "../components/buttons/button";
 import { Input } from "../components/input/Input";
-import { LightBackground } from "../components/LightBackground";
 import "../global.css";
+import LightBackground from "@/components/DotBackground";
 
 const extraDataSchema = z.object({
   idade: z.coerce
