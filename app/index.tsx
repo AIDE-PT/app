@@ -1,4 +1,5 @@
 import { useFonts } from "expo-font";
+import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { Dimensions, Text, View } from "react-native";
 import "react-native-gesture-handler";
@@ -14,8 +15,9 @@ import Animated, {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { Button } from "../components/buttons/button";
-import { LightBackground } from "../components/LightBackground";
 import "../global.css";
+
+import LightBackground from "@/components/DotBackground";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -176,6 +178,7 @@ const ConcentricRings = () => {
 };
 
 export default function App() {
+  const router = useRouter();
   const [fontsLoaded] = useFonts({
     "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
     "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
@@ -224,7 +227,13 @@ export default function App() {
 
           {/* CTA Button */}
           <View className="items-center">
-            <Button variant="primary" label="Começa Já!" onPress={() => {}} />
+            <Button
+              variant="primary"
+              label="Começa Já!"
+              onPress={() => {
+                router.push("/terms-of-service");
+              }}
+            />
           </View>
         </View>
       </LightBackground>
