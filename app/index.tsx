@@ -16,7 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
 import { Button } from "../components/buttons/button";
 import "../global.css";
-// eslint-disable-next-line import/no-named-as-default
+
 import LightBackground from "@/components/DotBackground";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
