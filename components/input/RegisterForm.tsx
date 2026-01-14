@@ -1,81 +1,86 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect } from 'react';
-import { Controller, useForm } from 'react-hook-form';
-import { Alert, Text, TouchableOpacity, View } from 'react-native';
-import { z } from 'zod';
-import { Input } from './Input';
+import { zodResolver } from "@hookform/resolvers/zod";
+import React, { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { z } from "zod";
+import { Input } from "./Input";
 
 // 1. O SCHEMA ZOD (A Lógica de Validação)
-const registerSchema = z.object({
-  name: z.string().min(2, 'Nome deve ter pelo menos 2 caracteres'),
-  
-  email: z.string().refine((val) => {
-    // Lógica original do teu regex para email OU telemóvel
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const phoneRegex = /^\+?\d{9,15}$/;
-    const cleanPhone = val.replace(/\s/g, ''); // Limpa espaços para validar phone
-    return emailRegex.test(val) || phoneRegex.test(cleanPhone);
-  }, 'Email ou telemóvel inválido'),
+const registerSchema = z
+  .object({
+    name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
 
-  password: z.string()
-    .min(6, 'Password deve ter pelo menos 6 caracteres')
-    .regex(/\d/, 'Password deve conter pelo menos um número')
-    .regex(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/, 'Password deve conter pelo menos um caractere especial'),
+    email: z.string().refine((val) => {
+      // Lógica original do teu regex para email OU telemóvel
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const phoneRegex = /^\+?\d{9,15}$/;
+      const cleanPhone = val.replace(/\s/g, ""); // Limpa espaços para validar phone
+      return emailRegex.test(val) || phoneRegex.test(cleanPhone);
+    }, "Email ou telemóvel inválido"),
 
-  repeatPassword: z.string()
-}).refine((data) => data.password === data.repeatPassword, {
-  message: "As passwords não coincidem",
-  path: ["repeatPassword"], // Isto associa o erro tecnicamente a este campo
-});
+    password: z
+      .string()
+      .min(6, "Password deve ter pelo menos 6 caracteres")
+      .regex(/\d/, "Password deve conter pelo menos um número")
+      .regex(
+        /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/,
+        "Password deve conter pelo menos um caractere especial",
+      ),
+
+    repeatPassword: z.string(),
+  })
+  .refine((data) => data.password === data.repeatPassword, {
+    message: "As passwords não coincidem",
+    path: ["repeatPassword"], // Isto associa o erro tecnicamente a este campo
+  });
 
 // Tipo automático do formulário
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterForm() {
-  
   // 2. SETUP DO REACT HOOK FORM
-  const { 
-    control, 
-    handleSubmit, 
+  const {
+    control,
+    handleSubmit,
     formState: { errors, touchedFields, dirtyFields, isSubmitted }, // O objeto que contém todos os erros atuais
     trigger,
     watch,
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      name: '',
-      email: '',
-      password: '',
-      repeatPassword: ''
+      name: "",
+      email: "",
+      password: "",
+      repeatPassword: "",
     },
-    mode: 'onChange',
-    reValidateMode: 'onChange'
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
-  const nameValue = watch('name');
-  const emailValue = watch('email');
-  const passwordValue = watch('password');
-  const repeatPasswordValue = watch('repeatPassword');
+  const nameValue = watch("name");
+  const emailValue = watch("email");
+  const passwordValue = watch("password");
+  const repeatPasswordValue = watch("repeatPassword");
 
   useEffect(() => {
-    trigger('name');
+    trigger("name");
   }, [nameValue, trigger]);
 
   useEffect(() => {
-    trigger('email');
+    trigger("email");
   }, [emailValue, trigger]);
 
   useEffect(() => {
-    trigger('password');
+    trigger("password");
   }, [passwordValue, trigger]);
 
   useEffect(() => {
-    trigger('repeatPassword');
+    trigger("repeatPassword");
   }, [repeatPasswordValue, trigger]);
 
   const onSubmit = (data: RegisterFormData) => {
     console.log("Dados Válidos:", data);
-    Alert.alert('Sucesso', 'Registo efetuado com sucesso');
+    Alert.alert("Sucesso", "Registo efetuado com sucesso");
     // Aqui farias o reset() se quisesses limpar o form
   };
 
@@ -86,13 +91,15 @@ export default function RegisterForm() {
   };
 
   const errorList = Object.entries(errors)
-    .filter(([field]) => isSubmitted || isFieldInteracted(field as keyof RegisterFormData))
+    .filter(
+      ([field]) =>
+        isSubmitted || isFieldInteracted(field as keyof RegisterFormData),
+    )
     .map(([, err]) => err);
 
   return (
     <View className="p-4">
       <View className="relative">
-        
         {/* INPUT NOME */}
         <Controller
           control={control}
@@ -107,9 +114,9 @@ export default function RegisterForm() {
             />
           )}
         />
-        
+
         <View className="mt-[16px]" />
-        
+
         {/* INPUT EMAIL */}
         <Controller
           control={control}
@@ -170,12 +177,11 @@ export default function RegisterForm() {
             ))}
           </View>
         )}
-
       </View>
 
       <View className="mt-[250px]" />
-      
-      <TouchableOpacity 
+
+      <TouchableOpacity
         onPress={handleSubmit(onSubmit)}
         className="bg-white/75 h-[57px] rounded-[20px] shadow items-center justify-center mx-12"
       >
