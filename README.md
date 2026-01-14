@@ -1,3 +1,5 @@
+![Jest Coverage](https://img.shields.io/endpoint?url=https%3A%2F%2Fgist.githubusercontent.com%2FDan1m4D%2F0d7da4825fe900c051580e2a6079d99d%2Fraw%2F30994fcfb1b7dea0ac004093262173bfb83f4734%2Faide-coverage.json)
+
 # Welcome to your Expo app 👋
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
