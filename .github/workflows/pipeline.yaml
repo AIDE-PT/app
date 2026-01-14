@@ -204,46 +204,46 @@ jobs:
   #       with:
   #         command: eas update --auto --branch ${{ github.event.pull_request.head.ref }}
 
-  build-dev:
-    name: Expo Dev Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: [lint, prettier, typecheck, test]
-    if: github.ref == 'refs/heads/dev'
+  # build-dev:
+  #   name: Expo Dev Build
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 30
+  #   needs: [lint, prettier, typecheck, test]
+  #   if: github.ref == 'refs/heads/dev'
 
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: npm
-      - name: Setup Expo and EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/setup-node@v6
+  #       with:
+  #         node-version: 22
+  #         cache: npm
+  #     - name: Setup Expo and EAS
+  #       uses: expo/expo-github-action@v8
+  #       with:
+  #         eas-version: latest
+  #         token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Build Expo Dev
-        run: eas build --platform all --profile development --non-interactive
+  #     - name: Build Expo Dev
+  #       run: eas build --platform all --profile development --non-interactive
 
-  build-prod:
-    name: Expo Production Build
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    needs: [lint, prettier, typecheck, test]
-    if: github.ref == 'refs/heads/main'
+  # build-prod:
+  #   name: Expo Production Build
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 30
+  #   needs: [lint, prettier, typecheck, test]
+  #   if: github.ref == 'refs/heads/main'
 
-    steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-node@v6
-        with:
-          node-version: 22
-          cache: npm
-      - name: Setup Expo and EAS
-        uses: expo/expo-github-action@v8
-        with:
-          eas-version: latest
-          token: ${{ secrets.EXPO_TOKEN }}
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/setup-node@v6
+  #       with:
+  #         node-version: 22
+  #         cache: npm
+  #     - name: Setup Expo and EAS
+  #       uses: expo/expo-github-action@v8
+  #       with:
+  #         eas-version: latest
+  #         token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Build Expo Production
-        run: eas build --platform all --profile production --non-interactive
+  #     - name: Build Expo Production
+  #       run: eas build --platform all --profile production --non-interactive
