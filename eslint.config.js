@@ -3,7 +3,7 @@ const expoConfig = require("eslint-config-expo/flat");
 const eslintPluginPrettierRecommended = require("eslint-plugin-prettier/recommended");
 
 module.exports = defineConfig([
-  ...expoConfig, // O expoConfig geralmente é um array, usamos o spread (...)
+  expoConfig,
   eslintPluginPrettierRecommended,
   {
     ignores: ["dist/*", ".expo/*", "node_modules/*"],
@@ -16,7 +16,6 @@ module.exports = defineConfig([
   },
   {
     rules: {
-      // Se precisar de regras específicas do Prettier, elas entram aqui:
       "prettier/prettier": ["error", { endOfLine: "auto" }],
     },
   },
