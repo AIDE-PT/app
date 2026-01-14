@@ -1,5 +1,5 @@
-import React from 'react';
-import { Text, TouchableOpacity, TouchableOpacityProps } from 'react-native';
+import React from "react";
+import { Text, TouchableOpacity, TouchableOpacityProps } from "react-native";
 
 interface SosButtonProps extends TouchableOpacityProps {
   className?: string;
@@ -12,7 +12,9 @@ const SosButton = ({ className, ...props }: SosButtonProps) => {
       activeOpacity={0.8}
       {...props}
     >
-      <Text className="text-[#FFECEC] font-bold text-3xl tracking-widest">SOS</Text>
+      <Text className="text-[#FFECEC] font-bold text-3xl tracking-widest">
+        SOS
+      </Text>
     </TouchableOpacity>
   );
 };
