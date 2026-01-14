@@ -7,6 +7,11 @@ module.exports = defineConfig([
   eslintPluginPrettierRecommended,
   {
     ignores: ["dist/*"],
-    // endOfLine: "auto",
+    rules: {
+      // TypeScript handles module resolution, so we disable this rule
+      "import/no-unresolved": "off",
+      // Allow using named export as default import identifier
+      "import/no-named-as-default": "off",
+    },
   },
 ]);
