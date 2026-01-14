@@ -146,7 +146,7 @@ export default function ExtraData() {
       });
       setErrors({});
       router.push({
-        pathname: "/selectConditions",
+        pathname: "/selectConditions" as any,
       });
     } catch (err) {
       if (err instanceof ZodError) {
