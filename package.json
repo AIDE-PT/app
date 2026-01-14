@@ -44,11 +44,11 @@
     "expo-web-browser": "~15.0.10",
     "jest": "^30.2.0",
     "json-server": "^1.0.0-beta.3",
-<<<<<<< HEAD
+
     "lefthook": "^2.0.13",
-=======
+
     "lucide-react-native": "^0.562.0",
->>>>>>> 9291d1e (Correção para aprovação+ ficheiro totalmente responsivo)
+
     "nativewind": "^4.2.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
