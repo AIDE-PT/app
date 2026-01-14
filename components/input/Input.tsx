@@ -213,7 +213,6 @@ export const Input = ({
           </View>
         )}
       </TouchableOpacity>
-
       {/* Feedback visual de erro */}
       {isEmail && !isEmailValid && (
         <Text className="text-red-500 text-[10px] ml-4 mt-1 font-bold">
