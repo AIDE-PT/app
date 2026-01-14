@@ -31,7 +31,7 @@ const MainDetails = ({
       {/* Left Section */}
       <View className="flex-col justify-center gap-4">
         <View className="flex-row items-baseline">
-          <Text className="text-[96px] leading-[96px] font-bold text-black font-safiro tracking-tighter">
+          <Text className="text-[96px] leading-[96px] font-bold text-black font-open-sans tracking-tighter">
             {value}
           </Text>
           <Text className="text-2xl text-black font-medium font-open-sans ml-1">

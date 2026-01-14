@@ -1,3 +1,4 @@
+import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -35,6 +36,16 @@ const heartRateData = [
 export default function MasterDetail() {
   const router = useRouter();
   const [selectedDay, setSelectedDay] = useState(10);
+
+  const [fontsLoaded] = useFonts({
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   return (
     <>
