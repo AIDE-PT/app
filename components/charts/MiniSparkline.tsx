@@ -1,6 +1,6 @@
-import React from 'react';
-import Svg, { Path } from 'react-native-svg';
-import { View } from 'react-native';
+import React from "react";
+import Svg, { Path } from "react-native-svg";
+import { View } from "react-native";
 
 interface MiniSparklineProps {
   data: number[];
@@ -9,13 +9,12 @@ interface MiniSparklineProps {
   color?: string;
 }
 
-export default function MiniSparkline({ 
-  data, 
-  width, 
-  height, 
-  color = '#5C6CFF' 
+export default function MiniSparkline({
+  data,
+  width,
+  height,
+  color = "#5C6CFF",
 }: MiniSparklineProps) {
-  
   if (!data || data.length < 2) return null;
 
   const min = Math.min(...data);
@@ -28,7 +27,7 @@ export default function MiniSparkline({
     return `${x},${y}`;
   });
 
-  const pathData = `M ${points.join(' L ')}`;
+  const pathData = `M ${points.join(" L ")}`;
 
   return (
     <View style={{ width, height }}>

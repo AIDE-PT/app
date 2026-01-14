@@ -11,7 +11,6 @@ import {
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import ArrowIcon from "../svg/ArrowIcon";
 import EyeIcon from "../svg/EyeIcon";
 import CalendarIcon from "../svg/CalendarIcon";
 
@@ -51,7 +50,7 @@ export const Input = ({
 
   const handleDateChange = (
     event: DateTimePickerEvent,
-    selectedDate?: Date
+    selectedDate?: Date,
   ) => {
     setShowDatePicker(Platform.OS === "ios");
     if (selectedDate) {
