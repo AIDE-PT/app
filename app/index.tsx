@@ -1,3 +1,4 @@
+import { useFonts } from "expo-font";
 import { useEffect } from "react";
 import { Dimensions, Text, View } from "react-native";
 import "react-native-gesture-handler";
@@ -175,6 +176,16 @@ const ConcentricRings = () => {
 };
 
 export default function App() {
+  const [fontsLoaded] = useFonts({
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   return (
     <SafeAreaView className="flex-1">
       <LightBackground>
