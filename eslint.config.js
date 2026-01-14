@@ -7,6 +7,8 @@ module.exports = defineConfig([
   eslintPluginPrettierRecommended,
   {
     ignores: ["dist/*"],
-    // endOfLine: "auto",
+    rules: {
+      "prettier/prettier": ["error", { endOfLine: "auto" }],
+    },
   },
 ]);
