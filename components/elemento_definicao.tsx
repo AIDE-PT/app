@@ -1,6 +1,7 @@
 import React from 'react';
 import { View } from 'react-native';
-import { Button } from './buttons/button'; // Teu componente BUTTON - LIST
+// Caminho correto a partir da pasta components
+import { Button } from './buttons/button'; 
 
 interface Props {
   title: string;
@@ -10,11 +11,15 @@ interface Props {
 const ElementoDefinicao = ({ title, onPress }: Props) => {
   return (
     <View className="mb-4 w-full px-6">
-      <Button 
-        title={title} 
-        onPress={onPress} 
-        variant="list" 
-      />
+      {/* Container branco puro com sombra leve */}
+      <View className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <Button 
+          label={title} 
+          onPress={onPress} 
+          variant="list"
+          style={{ backgroundColor: 'white' }} 
+        />
+      </View>
     </View>
   );
 };

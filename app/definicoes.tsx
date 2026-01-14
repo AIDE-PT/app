@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
-import { ChevronLeft } from 'lucide-react-native';
+import { View, ScrollView, SafeAreaView, Text } from 'react-native';
 import { useRouter } from 'expo-router';
+import BackButton from '../components/buttons/backButton'; 
 import DefinicoesLista from '../components/definicoes_lista';
 
 const Definicoes = () => {
@@ -10,20 +10,17 @@ const Definicoes = () => {
   return (
     <SafeAreaView className="flex-1 bg-[#F5F9FF]">
       <ScrollView 
+        showsVerticalScrollIndicator={false} 
         contentContainerStyle={{ paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
       >
-        {/* Cabeçalho Responsivo */}
-        <View className="flex-row items-center px-6 py-8">
-          <TouchableOpacity onPress={() => router.back()}>
-            <ChevronLeft size={32} color="black" />
-          </TouchableOpacity>
-          <Text className="text-4xl font-bold ml-4 text-[#111]">Definições</Text>
+        <View className="px-6 py-8">
+          <BackButton 
+            title="Definições" 
+            onPress={() => router.push('/login')} 
+          />
         </View>
 
-        {/* Lista de botões utilizando o componente reaproveitado */}
         <DefinicoesLista />
-
       </ScrollView>
     </SafeAreaView>
   );
