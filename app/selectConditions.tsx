@@ -39,7 +39,7 @@ export default function SelectConditions() {
 
   const handleAdvance = () => {
     router.push({
-      pathname: "/recommendations",
+      pathname: "/recommendations" as any,
       params: { conditions: selectedConditions.join(",") },
     });
   };
