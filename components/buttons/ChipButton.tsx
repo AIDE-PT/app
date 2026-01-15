@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface ChipButtonProps {
   label: string;
@@ -19,8 +19,7 @@ export const ChipButton = ({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={1}
-      style={styles.chipShadow}
-      className={`flex-row items-center px-4 py-2 rounded-full border border-[#5061FF]/20
+      className={`flex-row items-center px-4 py-2 rounded-full border border-[#5061FF]/20 shadow
                   ${isDarkVariant ? "bg-black/60" : "bg-white/90"}`}
     >
       <View
@@ -50,9 +49,3 @@ export const ChipButton = ({
     </TouchableOpacity>
   );
 };
-
-const styles = StyleSheet.create({
-  chipShadow: {
-    boxShadow: "0 0 50px -20px #5061FF inset",
-  },
-});

@@ -1,13 +1,15 @@
+import BackButton from "@/components/buttons/backButton";
+import { useFonts } from "expo-font";
+import { useRouter } from "expo-router";
+import { Camera, Pencil } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-  View,
-  Text,
-  ScrollView,
-  TouchableOpacity,
   SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
-import { ChevronLeft, Camera, Pencil } from "lucide-react-native";
-import { useRouter } from "expo-router";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
 
 const GerirPerfil = () => {
@@ -22,27 +24,28 @@ const GerirPerfil = () => {
     password: "password123",
   });
 
+  const [fontsLoaded] = useFonts({
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  });
+
   const handleSave = () => {
     setIsEditing(false);
     console.log("Alterações salvas localmente:", userData);
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#F5F9FF]">
+   <View className="flex-1 px-4 pt-10 bg-aide-background">
+       <SafeAreaView className="flex-1">
+        {/* Header */}
+         <View className="mb-4">
+          <BackButton label="Gerir Perfil" dark/>
+        </View>
       <ScrollView
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Header */}
-        <View className="flex-row items-center px-6 py-4">
-          <TouchableOpacity onPress={() => router.push("./definicoes")}>
-            <ChevronLeft size={28} color="black" />
-          </TouchableOpacity>
-          <Text className="text-3xl font-bold ml-2 text-[#111]">
-            Gerir Perfil
-          </Text>
-        </View>
-
         {/* Foto de Perfil */}
         <View className="items-center my-6">
           <View className="w-32 h-32 bg-[#E0E0E0] rounded-full items-center justify-center relative border-4 border-white shadow-sm">
@@ -54,13 +57,13 @@ const GerirPerfil = () => {
         </View>
 
         {/* Título e Lápis */}
-        <View className="px-6 mb-2">
-          <Text className="text-[10px] font-black uppercase text-gray-900 tracking-tighter">
+        <View className="px-4 mb-2">
+          <Text className="text-[11px] font-open-sans font-bold uppercase tracking-tighter">
             Aqui pode fazer alterações às suas informações de{"\n"}identificação
             e de contacto.
           </Text>
           <View className="flex-row justify-between items-center mt-6 mb-2">
-            <Text className="text-lg font-bold text-[#111]">
+            <Text className="text-lg font-safiro text-[#111]">
               A SUA IDENTIFICAÇÃO
             </Text>
             {!isEditing && (
@@ -78,7 +81,7 @@ const GerirPerfil = () => {
         />
 
         {/* Botão Alterar */}
-        <View className="px-6 mt-4">
+        <View className="mt-4 px-4">
           <TouchableOpacity
             onPress={handleSave}
             disabled={!isEditing}
@@ -91,7 +94,7 @@ const GerirPerfil = () => {
         </View>
 
         {/* Cards Extras */}
-        <View className="px-6 mt-10">
+        <View className="px-4 mt-10">
           <View className="bg-[#E2E8F0] p-6 rounded-[32px] mb-4">
             <Text className="text-xl font-bold">Apagar Conta</Text>
             <Text className="text-xs font-bold text-gray-800 mt-1">
@@ -116,6 +119,7 @@ const GerirPerfil = () => {
         </View>
       </ScrollView>
     </SafeAreaView>
+    </View>
   );
 };
 

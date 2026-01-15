@@ -108,17 +108,17 @@ import React, { useState } from "react";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import EyeIcon from "../svg/EyeIcon";
 import CalendarIcon from "../svg/CalendarIcon";
+import EyeIcon from "../svg/EyeIcon";
 
 import {
-  TextInput,
-  View,
+  Platform,
   StyleSheet,
+  Text,
+  TextInput,
   TextInputProps,
   TouchableOpacity,
-  Platform,
-  Text,
+  View,
 } from "react-native";
 
 interface InputDTO extends TextInputProps {
@@ -173,7 +173,7 @@ export const Input = ({
       <TouchableOpacity
         activeOpacity={1}
         onPress={() => isDate && setShowDatePicker(true)}
-        className={`w-full flex-row items-center px-5 py-0.5 rounded-[25px] shadow
+        className={`w-full flex-row items-center px-5 py-0.5 rounded-[20px] shadow
                     ${!isEmailValid ? "border border-red-500/50" : ""} 
                     ${isDarkVariant ? "bg-black/60" : "bg-white/75"}`}
       >

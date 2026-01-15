@@ -1,16 +1,13 @@
-import React, { useEffect, useRef } from "react";
+import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
 import {
-  View,
+  Image,
+  StyleSheet,
   Text,
   TouchableOpacity,
-  Image,
-  Animated,
-  StyleSheet,
+  View
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { ProfileImage } from "./profileimage";
-
-const AnimatedCard = Animated.createAnimatedComponent(TouchableOpacity);
 
 interface ProfileCardProps {
   title: string;
@@ -31,39 +28,20 @@ export const Profilecard = ({
   isOtherSelected,
   onPress,
 }: ProfileCardProps) => {
-  const scale = useRef(new Animated.Value(1)).current;
-
-  useEffect(() => {
-    Animated.spring(scale, {
-      toValue: isSelected ? 1.02 : 1,
-      useNativeDriver: true,
-      friction: 8,
-    }).start();
-  }, [isSelected]);
-
   const isFaded = isOtherSelected && !isSelected;
 
   return (
-    <AnimatedCard
+    <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.9}
       style={[
         styles.cardContainer,
         {
-          transform: [{ scale }],
-          opacity: isFaded ? 0.35 : 1,
+          opacity: isFaded ? 0.6 : 1,
         },
         isSelected ? styles.selectedBorder : styles.unselectedBorder,
       ]}
     >
-      {/* O Gradiente agora preenche o fundo respeitando o border radius */}
-      {isSelected && (
-        <LinearGradient
-          colors={["#F1F7FF", "#9DBFFF"]}
-          style={StyleSheet.absoluteFill}
-        />
-      )}
-
       <View className="flex-1 p-5">
         {/* 1. Imagem no topo: Ocupa 65% do card para não bater no texto */}
         <View style={{ height: "65%" }}>
@@ -71,7 +49,17 @@ export const Profilecard = ({
         </View>
 
         {/* 2. Conteúdo de Texto: Ocupa os 35% inferiores */}
-        <View style={{ height: "35%" }} className="justify-end pb-2">
+        <View style={{ height: "35%", position: "relative" }} className="justify-end pb-2">
+          {/* Gradient overlay behind title and description */}
+          {isSelected && (
+            <LinearGradient
+              colors={["transparent", "rgba(124, 137, 255, 0.25)", "rgba(124, 137, 255, 0.5)"]}
+              locations={[0, 0.3, 1]}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+              style={[StyleSheet.absoluteFill, { marginHorizontal: -20, marginBottom: -20 }]}
+            />
+          )}
           <View className="flex-row items-center mb-1">
             <Image
               source={iconSource}
@@ -79,20 +67,21 @@ export const Profilecard = ({
               resizeMode="contain"
             />
             <Text
-              className={`font-bold text-xl ml-2 ${isSelected ? "text-black" : "text-[#BCBCBC]"}`}
+              className={`font-bold text-xl ml-2 ${isSelected ? "text-black" : "text-[#6B7280]"}`}
             >
               {title}
             </Text>
           </View>
 
-          {isSelected && (
-            <Text className="text-gray-800 text-[11px] leading-4 font-medium">
-              {description}
-            </Text>
-          )}
+          <Text 
+            className="text-gray-800 text-[16px]"
+            style={{ opacity: isSelected ? 1 : 0 }}
+          >
+            {description}
+          </Text>
         </View>
       </View>
-    </AnimatedCard>
+      </TouchableOpacity>
   );
 };
 
@@ -106,7 +95,7 @@ const styles = StyleSheet.create({
   },
   selectedBorder: {
     borderWidth: 2,
-    borderColor: "#4B6BFF",
+    borderColor: "#0400FF",
   },
   unselectedBorder: {
     borderWidth: 2,

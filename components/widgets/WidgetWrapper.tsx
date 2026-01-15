@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { View, Text, Dimensions, ViewStyle } from "react-native";
+import { Dimensions, Text, View, ViewStyle } from "react-native";
 import SimpleLineChart from "../charts/LineChartSlim";
 import MiniSparkline from "../charts/MiniSparkline";
 import { IconType } from "../svg/WidgetIcon";
@@ -93,7 +93,7 @@ export function WidgetWrapper({
   style,
 }: WidgetWrapperProps) {
   // TUA MATEMÁTICA ORIGINAL (Não mexer aqui)
-  const u1 = COLUMN_WIDTH - GRID_GAP;
+  const u1 = COLUMN_WIDTH;
   const u2 = u1 * 2 + GRID_GAP;
   const u3 = u1 * 3 + GRID_GAP * 2;
 
@@ -120,12 +120,12 @@ export function WidgetWrapper({
         { width, height, boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" },
         style,
       ]}
-      className={`${bg} rounded-[16px] p-2 justify-between border border-gray-100 overflow-hidden relative`}
+      className={`${bg} rounded-[20px] p-2 justify-between border border-gray-100 overflow-hidden relative`}
     >
       {/* Header */}
       <View className="flex flex-row gap-2">
         {icon}
-        <Text className="text-aide-light-blue text-sm font-open-sans-semibold gap-2 uppercase tracking-widest ">
+        <Text className="text-aide-light-blue text-sm font-open-sans gap-2 uppercase tracking-widest ">
           {title}
         </Text>
       </View>
@@ -135,7 +135,10 @@ export function WidgetWrapper({
         className={`${variant === "1-1" ? "flex-col" : "flex-row mb-auto justify-between items-end"} ml-2 mb-2`}
       >
         <View className="flex flex-row items-end">
-          <Text className="text-3xl font-bold text-red-500 leading-none">
+          <Text 
+            style={{ color: "#000746" }}
+            className="text-3xl font-bold leading-none"
+          >
             {value}
           </Text>
           <Text className="text-xs text-gray-400 font-semibold ml-1 mb-1">
