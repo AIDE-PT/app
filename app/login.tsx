@@ -35,8 +35,7 @@ export default function Login() {
   }
 
   const handleLogin = () => {
-    // Handle login logic
-    console.log("Login with:", email, password);
+    router.push("/testDashboard" as any);
   };
 
   const handleGoogleLogin = () => {
