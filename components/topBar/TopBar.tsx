@@ -19,7 +19,7 @@ interface TopBarProps {
 }
 
 const styleBall =
-  "items-center bg-white  w-[50px] h-[50px] rounded-[100px] justify-center";
+  "items-center bg-white  w-[50px] h-[50px] rounded-[100px] justify-center shadow";
 
 const TopBar = ({
   cuidados,
