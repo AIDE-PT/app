@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, Platform, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  Platform,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import {
   BarcodeScanningResult,
   CameraView,
@@ -131,7 +137,11 @@ export function QRcode({
           <View className="flex-1 items-center justify-center">
             <View
               pointerEvents="none"
-              style={{ opacity: 0.1, alignItems: "center", justifyContent: "center" }}
+              style={{
+                opacity: 0.1,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
             >
               <QrcodeIcon size={placeholderSize} />
             </View>
