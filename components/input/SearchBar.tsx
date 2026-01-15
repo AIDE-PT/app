@@ -3,7 +3,7 @@ import {
   TextInput,
   TextInputProps,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import SearchIcon from "../svg/SearchIcon";
 

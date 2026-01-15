@@ -168,8 +168,8 @@ export default function ExtraData() {
   };
 
   return (
- <View className="flex-1 px-4 pt-10 bg-aide-background">
-       <SafeAreaView className="flex-1">
+    <View className="flex-1 px-4 pt-10 bg-aide-background">
+      <SafeAreaView className="flex-1">
         <View className="mt-12 mb-8">
           <Text className="font-safiro text-3xl text-black/90">
             Só mais uma coisa...

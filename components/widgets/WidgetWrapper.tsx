@@ -135,7 +135,7 @@ export function WidgetWrapper({
         className={`${variant === "1-1" ? "flex-col" : "flex-row mb-auto justify-between items-end"} ml-2 mb-2`}
       >
         <View className="flex flex-row items-end">
-          <Text 
+          <Text
             style={{ color: "#000746" }}
             className="text-3xl font-bold leading-none"
           >

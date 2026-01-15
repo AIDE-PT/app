@@ -48,12 +48,12 @@ export default function MasterDetail() {
 
   return (
     <>
-  <Stack.Screen options={{ headerShown: false }} />
-   <View className="flex-1 px-4 pt-10 bg-aide-background">
-         <SafeAreaView className="flex-1">
-        <View className="mb-4">
-          <BackButton label="Batimentos Cardíacos" dark/>
-        </View>
+      <Stack.Screen options={{ headerShown: false }} />
+      <View className="flex-1 px-4 pt-10 bg-aide-background">
+        <SafeAreaView className="flex-1">
+          <View className="mb-4">
+            <BackButton label="Batimentos Cardíacos" dark />
+          </View>
 
           <ScrollView
             className="flex-1"
@@ -76,7 +76,9 @@ export default function MasterDetail() {
                     key={item.day}
                     onPress={() => setSelectedDay(item.day)}
                     className={`w-14 h-20 rounded-2xl items-center justify-center bg-white ${
-                      selectedDay === item.day ? "border-2 border-[#93B1FF]" : ""
+                      selectedDay === item.day
+                        ? "border-2 border-[#93B1FF]"
+                        : ""
                     }`}
                     style={{
                       elevation: 3,

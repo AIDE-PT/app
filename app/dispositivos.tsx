@@ -104,10 +104,10 @@ export default function DispositivosPage() {
   }
 
   return (
-  <View className="flex-1 px-4 pt-10 bg-aide-background">
+    <View className="flex-1 px-4 pt-10 bg-aide-background">
       <SafeAreaView className="flex-1">
         <View className="mb-4">
-          <BackButton label="Gerir Dispositivos" dark/>
+          <BackButton label="Gerir Dispositivos" dark />
         </View>
 
         <View className="mb-8">
@@ -173,38 +173,37 @@ export default function DispositivosPage() {
           </View>
         </View>
 
-      {/* Add Device Modal */}
-      <AddDeviceModal
-        visible={addModalVisible}
-        onClose={() => setAddModalVisible(false)}
-        availableDevices={availableDevices}
-        onSelectDevice={handleSelectDevice}
-      />
+        {/* Add Device Modal */}
+        <AddDeviceModal
+          visible={addModalVisible}
+          onClose={() => setAddModalVisible(false)}
+          availableDevices={availableDevices}
+          onSelectDevice={handleSelectDevice}
+        />
 
-      {/* Connection Confirmation Modal */}
-      <DeviceConnectionModal
-        visible={connectionModalVisible}
-        onClose={() => {
-          setConnectionModalVisible(false);
-          setPendingDevice(null);
-        }}
-        onConfirm={handleConnectionConfirm}
-        device={pendingDevice}
-      />
+        {/* Connection Confirmation Modal */}
+        <DeviceConnectionModal
+          visible={connectionModalVisible}
+          onClose={() => {
+            setConnectionModalVisible(false);
+            setPendingDevice(null);
+          }}
+          onConfirm={handleConnectionConfirm}
+          device={pendingDevice}
+        />
 
-      {/* Device Management Modal */}
-      <DeviceManagementModal
-        visible={managementModalVisible}
-        onClose={() => {
-          setManagementModalVisible(false);
-          setSelectedDevice(null);
-        }}
-        onRemove={handleRemoveDevice}
-        onToggleDataSharing={handleToggleDataSharing}
-        device={selectedDevice}
-      />
-    </SafeAreaView>
-          </View>
-    
+        {/* Device Management Modal */}
+        <DeviceManagementModal
+          visible={managementModalVisible}
+          onClose={() => {
+            setManagementModalVisible(false);
+            setSelectedDevice(null);
+          }}
+          onRemove={handleRemoveDevice}
+          onToggleDataSharing={handleToggleDataSharing}
+          device={selectedDevice}
+        />
+      </SafeAreaView>
+    </View>
   );
 }

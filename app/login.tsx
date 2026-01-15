@@ -48,14 +48,14 @@ export default function Login() {
   };
 
   return (
- <View className="flex-1 px-4 pt-10 bg-aide-background">
+    <View className="flex-1 px-4 pt-10 bg-aide-background">
       <SafeAreaView className="flex-1">
         <View className="flex-1">
           {/* Título e Subtítulo */}
-        <View className="mt-12 mb-8">
-          <Text className="font-safiro text-[32px] text-[#1A1A2E]">
-            Login
-          </Text>
+          <View className="mt-12 mb-8">
+            <Text className="font-safiro text-[32px] text-[#1A1A2E]">
+              Login
+            </Text>
           </View>
 
           {/* Input Fields */}

@@ -11,7 +11,7 @@ const ElementoDefinicao = ({ title, onPress }: Props) => {
     <View className="mb-4 w-full">
       {/* Container branco puro com sombra leve */}
       <View className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <TouchableOpacity 
+        <TouchableOpacity
           onPress={onPress}
           className="p-3 bg-white/90 items-start"
         >
