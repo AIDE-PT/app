@@ -47,7 +47,6 @@ export default function SelectConditions() {
     return null;
   }
 
-
   const handleAdvance = () => {
     router.push({
       pathname: "/recommendations" as any,
@@ -56,8 +55,8 @@ export default function SelectConditions() {
   };
 
   return (
- <View className="flex-1 px-4 pt-10 bg-aide-background">
-       <SafeAreaView className="flex-1">
+    <View className="flex-1 px-4 pt-10 bg-aide-background">
+      <SafeAreaView className="flex-1">
         <View className="mt-12 mb-6">
           <Text className="font-safiro text-3xl text-black/90">
             Só mais uma coisa...

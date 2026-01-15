@@ -9,8 +9,7 @@ interface WidgetAddProps {
 }
 
 export const WidgetAdd = ({ label, Icon, onPress }: WidgetAddProps) => {
-
-const [fontsLoaded] = useFonts({
+  const [fontsLoaded] = useFonts({
     "Safiro-Medium": require("@/assets/fonts/safiro/safiro-medium-webfont.ttf"),
     "OpenSans-Regular": require("@/assets/fonts/open-sans/OpenSans-Regular.ttf"),
     "OpenSans-SemiBold": require("@/assets/fonts/open-sans/OpenSans-SemiBold.ttf"),

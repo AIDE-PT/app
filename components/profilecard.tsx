@@ -1,12 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
 import React from "react";
-import {
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View
-} from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ProfileImage } from "./profileimage";
 
 interface ProfileCardProps {
@@ -49,15 +43,25 @@ export const Profilecard = ({
         </View>
 
         {/* 2. Conteúdo de Texto: Ocupa os 35% inferiores */}
-        <View style={{ height: "35%", position: "relative" }} className="justify-end pb-2">
+        <View
+          style={{ height: "35%", position: "relative" }}
+          className="justify-end pb-2"
+        >
           {/* Gradient overlay behind title and description */}
           {isSelected && (
             <LinearGradient
-              colors={["transparent", "rgba(124, 137, 255, 0.25)", "rgba(124, 137, 255, 0.5)"]}
+              colors={[
+                "transparent",
+                "rgba(124, 137, 255, 0.25)",
+                "rgba(124, 137, 255, 0.5)",
+              ]}
               locations={[0, 0.3, 1]}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
-              style={[StyleSheet.absoluteFill, { marginHorizontal: -20, marginBottom: -20 }]}
+              style={[
+                StyleSheet.absoluteFill,
+                { marginHorizontal: -20, marginBottom: -20 },
+              ]}
             />
           )}
           <View className="flex-row items-center mb-1">
@@ -73,7 +77,7 @@ export const Profilecard = ({
             </Text>
           </View>
 
-          <Text 
+          <Text
             className="text-gray-800 text-[16px]"
             style={{ opacity: isSelected ? 1 : 0 }}
           >
@@ -81,7 +85,7 @@ export const Profilecard = ({
           </Text>
         </View>
       </View>
-      </TouchableOpacity>
+    </TouchableOpacity>
   );
 };
 

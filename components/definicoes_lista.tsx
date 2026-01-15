@@ -19,20 +19,17 @@ const DefinicoesLista = () => {
     "Sobre",
   ];
 
-
   const Definicoes = () => {
-  
-        const [fontsLoaded] = useFonts({
-          "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-          "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-          "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
-        });
-      
-        if (!fontsLoaded) {
-          return null;
-        }
+    const [fontsLoaded] = useFonts({
+      "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+      "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+      "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+    });
 
-      }
+    if (!fontsLoaded) {
+      return null;
+    }
+  };
 
   return (
     <View className="w-full mt-2">

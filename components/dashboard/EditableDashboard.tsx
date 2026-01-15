@@ -121,9 +121,8 @@ export default function EditableDashboard() {
   };
 
   return (
- <View className="flex-1 pt-10 bg-aide-background">
+    <View className="flex-1 pt-10 bg-aide-background">
       <SafeAreaView className="flex-1">
-
         <TopBar
           cuidados={cuidados}
           selectedCuidado={selectedCuidado}
@@ -133,106 +132,105 @@ export default function EditableDashboard() {
           className="z-50"
         />
 
-      <ScrollView className="flex-1 px-4">
-        <WidgetGrid>
-          {activeWidgets.map((item, index) => {
-            const style =
-              METRIC_STYLES[item.type as keyof typeof METRIC_STYLES];
+        <ScrollView className="flex-1 px-4">
+          <WidgetGrid>
+            {activeWidgets.map((item, index) => {
+              const style =
+                METRIC_STYLES[item.type as keyof typeof METRIC_STYLES];
 
-            return (
-              <TouchableOpacity
-                key={item.id}
-                onLongPress={() => setIsEditing(true)}
-                activeOpacity={0.9}
-                className="relative"
-              >
-                <WidgetWrapper
-                  {...style}
-                  value={item.value}
-                  variant={item.variant as any}
-                  feedback={item.feedback}
-                  icon={<WidgetIcon variant={item.type} />}
-                />
-
-                {isEditing && (
-                  <View className="absolute inset-0 bg-white/70 rounded-2xl items-center justify-center">
-                    <TouchableOpacity
-                      onPress={() => toggleVisibility(item.id, true)}
-                      className="absolute top-2 right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center"
-                    >
-                      <CloseIcon />
-                    </TouchableOpacity>
-
-                    <View className="flex-row gap-3 mt-4">
-                      <TouchableOpacity
-                        className="bg-white px-2 py-1 rounded-full shadow-md"
-                        onPress={() => move(index, "left")}
-                      >
-                        <ArrowIcon variant="LEFT" dark />
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        className="bg-white px-2 py-1 rounded-full shadow-md"
-                        onPress={() => move(index, "right")}
-                      >
-                        <ArrowIcon variant="RIGHT" dark />
-                      </TouchableOpacity>
-                    </View>
-
-                    <TouchableOpacity
-                      onPress={() => toggleSize(item.id)}
-                      className="bg-white px-2 py-1 rounded-full shadow-md"
-                    >
-                      <ResizeIcon dark size={25} />
-                    </TouchableOpacity>
-                  </View>
-                )}
-              </TouchableOpacity>
-            );
-          })}
-        </WidgetGrid>
-
-        {isEditing && hiddenWidgets.length > 0 && (
-          <View className="mt-4">
-            <Text className="text-xs text-slate-400 text-center mb-2">
-              Disponíveis para adicionar
-            </Text>
-            <View className="flex-row flex-wrap justify-center gap-2">
-              {hiddenWidgets.map((item) => (
+              return (
                 <TouchableOpacity
                   key={item.id}
-                  onPress={() => toggleVisibility(item.id, false)}
-                  className="bg-white px-4 py-2 rounded-xl flex-row items-center gap-2"
+                  onLongPress={() => setIsEditing(true)}
+                  activeOpacity={0.9}
+                  className="relative"
                 >
-                  <WidgetIcon variant={item.type} />
-                  <Text className="text-xs font-bold">
-                    {
-                      METRIC_STYLES[item.type as keyof typeof METRIC_STYLES]
-                        .title
-                    }
-                  </Text>
-                  <Text className="text-green-500 font-bold">＋</Text>
+                  <WidgetWrapper
+                    {...style}
+                    value={item.value}
+                    variant={item.variant as any}
+                    feedback={item.feedback}
+                    icon={<WidgetIcon variant={item.type} />}
+                  />
+
+                  {isEditing && (
+                    <View className="absolute inset-0 bg-white/70 rounded-2xl items-center justify-center">
+                      <TouchableOpacity
+                        onPress={() => toggleVisibility(item.id, true)}
+                        className="absolute top-2 right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center"
+                      >
+                        <CloseIcon />
+                      </TouchableOpacity>
+
+                      <View className="flex-row gap-3 mt-4">
+                        <TouchableOpacity
+                          className="bg-white px-2 py-1 rounded-full shadow-md"
+                          onPress={() => move(index, "left")}
+                        >
+                          <ArrowIcon variant="LEFT" dark />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          className="bg-white px-2 py-1 rounded-full shadow-md"
+                          onPress={() => move(index, "right")}
+                        >
+                          <ArrowIcon variant="RIGHT" dark />
+                        </TouchableOpacity>
+                      </View>
+
+                      <TouchableOpacity
+                        onPress={() => toggleSize(item.id)}
+                        className="bg-white px-2 py-1 rounded-full shadow-md"
+                      >
+                        <ResizeIcon dark size={25} />
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </TouchableOpacity>
-              ))}
+              );
+            })}
+          </WidgetGrid>
+
+          {isEditing && hiddenWidgets.length > 0 && (
+            <View className="mt-4">
+              <Text className="text-xs text-slate-400 text-center mb-2">
+                Disponíveis para adicionar
+              </Text>
+              <View className="flex-row flex-wrap justify-center gap-2">
+                {hiddenWidgets.map((item) => (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => toggleVisibility(item.id, false)}
+                    className="bg-white px-4 py-2 rounded-xl flex-row items-center gap-2"
+                  >
+                    <WidgetIcon variant={item.type} />
+                    <Text className="text-xs font-bold">
+                      {
+                        METRIC_STYLES[item.type as keyof typeof METRIC_STYLES]
+                          .title
+                      }
+                    </Text>
+                    <Text className="text-green-500 font-bold">＋</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
             </View>
-          </View>
-        )}
+          )}
 
-        {isEditing && (
-          <View className="w-1/3 mx-auto mt-4">
-            <Button
-              label="Guardar"
-              variant="list"
-              onPress={async () => {
-                await save();
-                setIsEditing(false);
-              }}
-            />
-          </View>
-        )}
-      </ScrollView>
-      <Navbar />
-    </SafeAreaView>
-  </View>
-
+          {isEditing && (
+            <View className="w-1/3 mx-auto mt-4">
+              <Button
+                label="Guardar"
+                variant="list"
+                onPress={async () => {
+                  await save();
+                  setIsEditing(false);
+                }}
+              />
+            </View>
+          )}
+        </ScrollView>
+        <Navbar />
+      </SafeAreaView>
+    </View>
   );
 }
