@@ -108,7 +108,9 @@ import React, { useState } from "react";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
-import { useState } from "react";
+import EyeIcon from "../svg/EyeIcon";
+import CalendarIcon from "../svg/CalendarIcon";
+
 import {
   TextInput,
   View,
@@ -118,11 +120,6 @@ import {
   Platform,
   Text,
 } from "react-native";
-import DateTimePicker, {
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
-import EyeIcon from "../svg/EyeIcon";
-import CalendarIcon from "../svg/CalendarIcon";
 
 interface InputDTO extends TextInputProps {
   variant?: "light" | "dark";
