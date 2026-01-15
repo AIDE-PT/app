@@ -1,0 +1,70 @@
+/* eslint-disable prettier/prettier */
+import React from "react";
+import { WidgetWrapper, METRIC_STYLES } from "./WidgetWrapper";
+import WidgetIcon, { IconType } from "../svg/WidgetIcon";
+import { useHealthMetric } from "@/hooks/useLatestMetric";
+
+interface Props {
+  type: IconType;
+  endpoint: string;
+  variant: "1-1" | "1-2" | "1-3" | "2-3";
+}
+
+export default function DashboardMetricWidget({
+  type,
+  endpoint,
+  variant,
+}: Props) {
+  const isBP = type === "bloodPressure";
+  const { data, isLoading } = useHealthMetric(endpoint, isBP);
+
+  const styles = METRIC_STYLES[type];
+
+  // 1. Enquanto carrega
+  if (isLoading) {
+    return (
+      <WidgetWrapper
+        title={styles.title}
+        icon={<WidgetIcon variant={type} />}
+        variant={variant}
+        value="--"
+        unit={styles.unit}
+        feedback="loading"
+        feedbackColor="#E5E7EB"
+        history={[]}
+      />
+    );
+  }
+
+  // 2. Se a API falhar ou não houver dados (evita o erro do undefined)
+  if (!data) {
+    return (
+      <WidgetWrapper
+        title={styles.title}
+        icon={<WidgetIcon variant={type} />}
+        variant={variant}
+        value="--"
+        unit={styles.unit}
+        feedback="offline"
+        feedbackColor="#FCA5A5"
+        history={[]}
+      />
+    );
+  }
+
+  // 3. RENDERIZAÇÃO FINAL (Ligado às variáveis reais)
+  return (
+    <WidgetWrapper
+      title={styles.title}
+      icon={<WidgetIcon variant={type} />}
+      variant={variant}
+      // USAR displayValue (que já trata BP e valores normais)
+      value={data.displayValue} 
+      unit={styles.unit}
+      feedback="live"
+      feedbackColor={styles.feedbackColor}
+      // USAR o history processado (array de números)
+      history={data.history}
+    />
+  );
+}

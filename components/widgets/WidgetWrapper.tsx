@@ -25,6 +25,7 @@ interface WidgetWrapperProps {
   feedback: string;
   feedbackColor: string;
   value: string;
+  history?: number[];
 }
 
 interface DASHBOARD_CONFIGProps {
@@ -33,6 +34,7 @@ interface DASHBOARD_CONFIGProps {
   variant: WidgetVariant;
   value: string;
   feedback: string;
+  endpoint: string;
 }
 
 export const DASHBOARD_CONFIG: DASHBOARD_CONFIGProps[] = [
@@ -42,6 +44,7 @@ export const DASHBOARD_CONFIG: DASHBOARD_CONFIGProps[] = [
     variant: "1-1",
     value: "73",
     feedback: "normal",
+    endpoint: "bpm",
   },
   {
     id: "steps",
@@ -49,6 +52,15 @@ export const DASHBOARD_CONFIG: DASHBOARD_CONFIGProps[] = [
     variant: "1-2",
     value: "10.432",
     feedback: "meta",
+    endpoint: "steps",
+  },
+  {
+    id: "blood Pressure",
+    type: "bloodPressure",
+    variant: "1-3",
+    value: "10.432",
+    feedback: "meta",
+    endpoint: "bloodPressure",
   },
   {
     id: "temp",
@@ -56,30 +68,114 @@ export const DASHBOARD_CONFIG: DASHBOARD_CONFIGProps[] = [
     variant: "2-3",
     value: "36.6",
     feedback: "estável",
+    endpoint: "temperature",
+  },
+  {
+    id: "sleep",
+    type: "sleep",
+    variant: "1-3",
+    value: "7",
+    feedback: "bom",
+    endpoint: "sleep",
+  },
+  {
+    id: "o2",
+    type: "o2",
+    variant: "1-1",
+    value: "98",
+    feedback: "normal",
+    endpoint: "o2",
+  },
+
+  {
+    id: "glycemia",
+    type: "cal",
+    variant: "1-1",
+    value: "450",
+    feedback: "meta",
+    endpoint: "glycemia",
+  },
+  {
+    id: "stress",
+    type: "stress",
+    variant: "1-1",
+    value: "3",
+    feedback: "baixo",
+    endpoint: "stress",
   },
 ];
 
-// Mapeamento de estilos para manter o WidgetWrapper limpo
-export const METRIC_STYLES = {
+export const METRIC_STYLES: Record<
+  IconType,
+  {
+    title: string;
+    unit: string;
+    color: string;
+    feedbackColor: string;
+  }
+> = {
   heartRate: {
     title: "BPM",
     unit: "bpm",
     color: "#EF4444",
-    feedbackColor: "#FFCC00",
+    feedbackColor: "#FACC15",
   },
+
   steps: {
     title: "PASSOS",
     unit: "steps",
     color: "#3B82F6",
     feedbackColor: "#10B981",
   },
+
   temp: {
     title: "TEMP",
     unit: "ºC",
     color: "#F59E0B",
-    feedbackColor: "#DBEAFE",
+    feedbackColor: "#FDE68A",
+  },
+
+  sleep: {
+    title: "SONO",
+    unit: "h",
+    color: "#6366F1",
+    feedbackColor: "#C7D2FE",
+  },
+
+  o2: {
+    title: "O₂",
+    unit: "%",
+    color: "#06B6D4",
+    feedbackColor: "#A5F3FC",
+  },
+
+  bloodPressure: {
+    title: "BP",
+    unit: "mmHg",
+    color: "#EC4899",
+    feedbackColor: "#FBCFE8",
+  },
+
+  cal: {
+    title: "CAL",
+    unit: "kcal",
+    color: "#F97316",
+    feedbackColor: "#FED7AA",
+  },
+
+  stress: {
+    title: "STRESS",
+    unit: "lvl",
+    color: "#64748B",
+    feedbackColor: "#CBD5E1",
   },
 };
+
+export interface DashboardItem {
+  id: string;
+  type: IconType;
+  variant: WidgetVariant;
+}
 
 export function WidgetWrapper({
   title,
@@ -91,6 +187,7 @@ export function WidgetWrapper({
   value,
   bg = "bg-white",
   style,
+  history,
 }: WidgetWrapperProps) {
   // TUA MATEMÁTICA ORIGINAL (Não mexer aqui)
   const u1 = COLUMN_WIDTH - GRID_GAP;
@@ -155,25 +252,28 @@ export function WidgetWrapper({
         )}
       </View>
 
-      {/* Lógica do Gráfico */}
-      {variant === "2-3" && (
+      {/* Só renderiza o gráfico se houver história e dados válidos */}
+      {variant === "2-3" && history && history.length > 0 && (
         <SimpleLineChart
+          data={[...history].reverse()}
           style={{ padding: 4 }}
           height={u2 - 60}
           width={u3 - 20}
         />
       )}
 
-      {(variant === "1-3" || variant === "1-2") && (
-        <View style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
-          <MiniSparkline
-            data={[100, 102, 101, 103, 103, 102, 104, 105, 103, 106, 108]}
-            width={width} // Ocupa a largura total da variante escolhida
-            height={20}
-            color="#5C6CFF"
-          />
-        </View>
-      )}
+      {(variant === "1-3" || variant === "1-2") &&
+        history &&
+        history.length > 0 && (
+          <View style={{ position: "absolute", bottom: 0, left: 0, right: 0 }}>
+            <MiniSparkline
+              data={[...history].reverse()}
+              width={width}
+              height={24}
+              color="#5C6CFF"
+            />
+          </View>
+        )}
     </View>
   );
 }
