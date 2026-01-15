@@ -3,73 +3,191 @@ const path = require("node:path");
 const { spawn } = require("node:child_process");
 const uuid = require("uuid");
 
-const __dirname = path.dirname(new URL(import.meta.url).pathname);
+// eslint-disable-next-line no-undef
 const dbPath = path.join(__dirname, "db.json");
 
-// 1. Start JSON Server
-// We use npx to ensure we find the installed binary.
-// CWD is set to __dirname so it finds db.json easily.
-console.log("Starting JSON Server...");
-const serverProcess = spawn(
-  "npx",
-  ["json-server", "--watch", "db.json", "--port", "3000"],
-  {
-    cwd: __dirname,
-    stdio: "inherit",
-    shell: true, // Helpful for npx resolution on some systems
-  },
-);
+// --- Helper Functions ---
 
-serverProcess.on("error", (err) => {
-  console.error("Failed to start json-server:", err);
-});
+function generateId() {
+  return typeof uuid !== "undefined" && uuid.v4
+    ? uuid.v4()
+    : Date.now() + Math.random().toString();
+}
 
-// 2. Simulate Data Stream
-console.log("Starting Data Simulation (10s interval)...");
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
 
-function simulateData() {
+// --- Database Operations ---
+
+function readDatabase() {
+  if (!fs.existsSync(dbPath)) {
+    console.error("db.json not found!");
+    return null;
+  }
   try {
-    // Read current DB
-    if (!fs.existsSync(dbPath)) {
-      console.error("db.json not found!");
-      return;
-    }
     const data = JSON.parse(fs.readFileSync(dbPath, "utf8"));
+    // Initialize arrays if missing
+    if (!data.bpm) data.bpm = [];
+    if (!data.bloodPressure) data.bloodPressure = [];
+    if (!data.glycemia) data.glycemia = [];
 
-    // Initialize if missing
-    if (!Array.isArray(data.healthData)) {
-      data.healthData = [];
-    }
+    // Ensure stats objects exist but don't overwrite if they have valid data
+    // If they look like defaults {min:0, max:0}, we might want to reset them or just let logic handle it.
+    // However, creating them here with 0 causes issues for Min calculation.
+    // We will let the generators create them if they are missing.
 
-    // Generate new reading
-    const newReading = {
-      id: uuid.v4(),
-      bpm: Math.floor(Math.random() * (100 - 80 + 1) + 80), // 80-100 BPM
-      timestamp: new Date().toISOString(),
-    };
-
-    // Add and trim
-    data.healthData.push(newReading);
-    if (data.healthData.length > 50) {
-      // Keep last 50exists
-      data.healthData.shift();
-    }
-
-    // Write back
-    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
-    console.log(
-      `[${newReading.timestamp}] added reading: ${newReading.bpm} BPM`,
-    );
-  } catch (err) {
-    console.error("Simulation error:", err);
+    return data;
+  } catch (e) {
+    console.error("Error reading db.json:", e);
+    return null;
   }
 }
 
-// Run immediately and then interval
-simulateData();
-setInterval(simulateData, 10000); // 10s
+function writeDatabase(data) {
+  try {
+    fs.writeFileSync(dbPath, JSON.stringify(data, null, 2));
+  } catch (e) {
+    console.error("Error writing to db.json:", e);
+  }
+}
 
-// Clean up on exit
+// --- Stats Helpers ---
+
+function updateSimpleStats(data, key, value) {
+  const statsKey = `${key}Stats`;
+  if (!data[statsKey]) {
+    data[statsKey] = { min: value, max: value };
+  } else {
+    data[statsKey].min = Math.min(data[statsKey].min, value);
+    data[statsKey].max = Math.max(data[statsKey].max, value);
+  }
+}
+
+function updateBPStats(data, systolic, diastolic) {
+  const statsKey = "bloodPressureStats";
+  if (!data[statsKey]) {
+    data[statsKey] = {
+      minSystolic: systolic,
+      maxSystolic: systolic,
+      minDiastolic: diastolic,
+      maxDiastolic: diastolic,
+    };
+  } else {
+    data[statsKey].minSystolic = Math.min(data[statsKey].minSystolic, systolic);
+    data[statsKey].maxSystolic = Math.max(data[statsKey].maxSystolic, systolic);
+    data[statsKey].minDiastolic = Math.min(
+      data[statsKey].minDiastolic,
+      diastolic
+    );
+    data[statsKey].maxDiastolic = Math.max(
+      data[statsKey].maxDiastolic,
+      diastolic
+    );
+  }
+}
+
+// --- Data Generators ---
+
+function generateBPM(data, timestamp) {
+  const bpmVal = getRandomInt(60, 100);
+  data.bpm.push({
+    id: generateId(),
+    value: bpmVal,
+    timestamp: timestamp,
+  });
+  updateSimpleStats(data, "bpm", bpmVal);
+  return bpmVal;
+}
+
+function generateBloodPressure(data, timestamp) {
+  const systolic = getRandomInt(110, 130);
+  const diastolic = getRandomInt(70, 85);
+  data.bloodPressure.push({
+    id: generateId(),
+    systolic: systolic,
+    diastolic: diastolic,
+    timestamp: timestamp,
+  });
+  updateBPStats(data, systolic, diastolic);
+  return { systolic, diastolic };
+}
+
+function generateGlycemia(data, timestamp) {
+  const glycemiaVal = getRandomInt(80, 120);
+  data.glycemia.push({
+    id: generateId(),
+    value: glycemiaVal,
+    timestamp: timestamp,
+  });
+  updateSimpleStats(data, "glycemia", glycemiaVal);
+  return glycemiaVal;
+}
+
+function maintainDataLimits(data, limit = 50) {
+  if (data.bpm.length > limit) data.bpm.shift();
+  if (data.bloodPressure.length > limit) data.bloodPressure.shift();
+  if (data.glycemia.length > limit) data.glycemia.shift();
+}
+
+// --- Server Management ---
+
+function startJsonServer() {
+  console.log("Starting JSON Server...");
+  const serverProcess = spawn(
+    "npx",
+    ["json-server", "--watch", "db.json", "--port", "3000"],
+    {
+      // eslint-disable-next-line no-undef
+      cwd: __dirname,
+      stdio: "inherit",
+      shell: true,
+    },
+  );
+
+  serverProcess.on("error", (err) => {
+    console.error("Failed to start json-server:", err);
+  });
+
+  return serverProcess;
+}
+
+// --- Main Simulation Loop ---
+
+function runSimulationStep() {
+  const data = readDatabase();
+  if (!data) return;
+
+  const timestamp = new Date().toISOString();
+
+  const bpm = generateBPM(data, timestamp);
+  const bp = generateBloodPressure(data, timestamp);
+  const glycemia = generateGlycemia(data, timestamp);
+
+  maintainDataLimits(data);
+  writeDatabase(data);
+
+  console.log(
+    `[${timestamp}] New readings - BPM: ${bpm}, BP: ${bp.systolic}/${bp.diastolic}, Gly: ${glycemia}`
+  );
+}
+
+function startSimulation(intervalMs = 10000) {
+  console.log(`Starting Data Simulation (${intervalMs / 1000}s interval)...`);
+
+  // Run immediately
+  runSimulationStep();
+
+  // Set interval
+  setInterval(runSimulationStep, intervalMs);
+}
+
+// --- Entry Point ---
+
+const serverProcess = startJsonServer();
+startSimulation(10000);
+
+// Cleanup on exit
 process.on("SIGINT", () => {
   serverProcess.kill();
   process.exit();
