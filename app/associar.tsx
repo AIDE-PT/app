@@ -21,7 +21,8 @@ export default function AssociarPage() {
       const result = emailSchema.safeParse(email);
       if (!result.success) {
         // Zod validation failed
-        const errorMessage = result.error.issues?.[0]?.message || "E-mail inválido";
+        const errorMessage =
+          result.error.issues?.[0]?.message || "E-mail inválido";
         setError(errorMessage);
         // For testing purposes, we can keep error or force show if user specifically asked to "always work"
         // but let's stick to valid email requirement for now, or just show it if data exists.

@@ -81,7 +81,7 @@ export default function AssociarConfirmationModal({
               <TouchableOpacity
                 onPress={onClose}
                 className="flex-1 bg-red-500/43 py-3 rounded-[25px] items-center justify-center"
-                style={{ backgroundColor: 'rgba(255, 0, 0, 0.43)' }}
+                style={{ backgroundColor: "rgba(255, 0, 0, 0.43)" }}
               >
                 <Text className="font-open-sans font-semibold text-base text-black">
                   Não, voltar
