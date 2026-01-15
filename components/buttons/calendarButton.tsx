@@ -1,25 +1,59 @@
+/* eslint-disable prettier/prettier */
 import CalendarIcon from "@/components/svg/CalendarIcon";
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, Platform } from "react-native";
+import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from "@react-native-community/datetimepicker";
 
 interface CalendarButtonProps {
   label?: string;
-  onPress?: () => void;
+  onDateChange?: (date: Date) => void;
 }
 
 export const CalendarButton = ({
   label = "Dia",
-  onPress,
+  onDateChange,
 }: CalendarButtonProps) => {
+  const [date, setDate] = useState(new Date());
+  const [show, setShow] = useState(false);
+
+  const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
+    // No Android o picker fecha-se sozinho após seleção (dismissed ou set)
+    setShow(Platform.OS === 'ios');
+
+    if (selectedDate) {
+      setDate(selectedDate);
+      if (onDateChange) onDateChange(selectedDate);
+    }
+  };
+
+  const showMode = () => {
+    DateTimePickerAndroid.open({
+      value: date,
+      onChange,
+      mode: 'date',
+      display: 'default',
+    });
+  };
+
   return (
-    <TouchableOpacity
-      onPress={onPress}
-      style={styles.buttonShadow}
-      className="flex-row items-center bg-white px-4 py-2 rounded-full border border-gray-100 self-start ml-4"
-    >
-      <CalendarIcon />
-      <Text className="ml-2 text-xl font-semibold text-black">{label}</Text>
-    </TouchableOpacity>
+    <>
+      <TouchableOpacity
+        onPress={Platform.OS === 'android' ? showMode : () => setShow(true)} style={styles.buttonShadow}
+        className="flex-row items-center bg-white px-4 py-2 rounded-full border border-gray-100 self-start ml-4"
+      >
+        <CalendarIcon />
+        <Text className="ml-2 text-xl font-semibold text-black">{label}</Text>
+      </TouchableOpacity>
+
+      {show && (
+        <DateTimePicker
+          value={date}
+          mode="date"
+          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+          onChange={onChange}
+        />
+      )}
+    </>
   );
 };
 
