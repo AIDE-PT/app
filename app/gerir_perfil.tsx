@@ -35,7 +35,7 @@ const GerirPerfil = () => {
       >
         {/* Header */}
         <View className="flex-row items-center px-6 py-4">
-          <TouchableOpacity onPress={() => router.push("/definicoes")}>
+          <TouchableOpacity onPress={() => router.push("./definicoes")}>
             <ChevronLeft size={28} color="black" />
           </TouchableOpacity>
           <Text className="text-3xl font-bold ml-2 text-[#111]">
