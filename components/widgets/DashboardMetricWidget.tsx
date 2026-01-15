@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import React from "react";
 import { WidgetWrapper, METRIC_STYLES } from "./WidgetWrapper";
 import WidgetIcon, { IconType } from "../svg/WidgetIcon";
@@ -59,7 +58,7 @@ export default function DashboardMetricWidget({
       icon={<WidgetIcon variant={type} />}
       variant={variant}
       // USAR displayValue (que já trata BP e valores normais)
-      value={data.displayValue} 
+      value={data.displayValue}
       unit={styles.unit}
       feedback="live"
       feedbackColor={styles.feedbackColor}
