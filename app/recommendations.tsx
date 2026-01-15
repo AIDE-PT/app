@@ -105,7 +105,10 @@ export default function Recommendations() {
 
   const handleConcluir = () => {
     console.log("Selected metrics:", selectedMetrics);
-    router.push("/");
+    router.push({
+      pathname: "/testDashboard",
+      params: { selectedMetrics: JSON.stringify(selectedMetrics) },
+    } as any);
   };
 
   return (

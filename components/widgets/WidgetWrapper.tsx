@@ -14,6 +14,25 @@ const COLUMN_WIDTH = (availableWidth - GRID_GAP * 2) / 3;
 
 export type WidgetVariant = "1-1" | "1-2" | "1-3" | "2-3";
 
+const FEEDBACK_COLORS: Record<string, string> = {
+  // Positive / Good -> Green
+  normal: "#dcfce7", // green-100
+  good: "#dcfce7",
+  ok: "#dcfce7",
+  estável: "#dcfce7",
+  calm: "#dcfce7",
+  meta: "#dcfce7",
+
+  // Warning / Attention -> Yellow/Orange
+  low: "#fef9c3", // yellow-100
+  high: "#fef9c3",
+  warning: "#fef9c3",
+
+  // Bad / Critical -> Red
+  bad: "#fee2e2", // red-100
+  critical: "#fee2e2",
+};
+
 interface WidgetWrapperProps {
   title: string;
   variant: WidgetVariant;
@@ -78,6 +97,42 @@ export const METRIC_STYLES = {
     unit: "ºC",
     color: "#F59E0B",
     feedbackColor: "#DBEAFE",
+  },
+  sleep: {
+    title: "SONO",
+    unit: "h",
+    color: "#6366F1",
+    feedbackColor: "#E0E7FF",
+  },
+  o2: {
+    title: "O2",
+    unit: "%",
+    color: "#0EA5E9",
+    feedbackColor: "#E0F2FE",
+  },
+  bloodPressure: {
+    title: "PRESSÃO",
+    unit: "mmHg",
+    color: "#EF4444",
+    feedbackColor: "#FEE2E2",
+  },
+  cal: {
+    title: "CAL",
+    unit: "kcal",
+    color: "#F97316",
+    feedbackColor: "#FFEDD5",
+  },
+  stress: {
+    title: "STRESS",
+    unit: "%",
+    color: "#8B5CF6",
+    feedbackColor: "#EDE9FE",
+  },
+  glucose: {
+    title: "GLICOSE",
+    unit: "mg/dL",
+    color: "#EC4899",
+    feedbackColor: "#FCE7F3",
   },
 };
 
@@ -148,7 +203,12 @@ export function WidgetWrapper({
 
         {feedback && variant !== "1-1" && (
           <View
-            style={{ backgroundColor: feedbackColor }}
+            style={{
+              backgroundColor:
+                FEEDBACK_COLORS[feedback.toLowerCase()] ||
+                feedbackColor ||
+                "#E2E8F0",
+            }}
             className="px-3 py-1 rounded-full mr-1"
           >
             <Text className="text-[10px] font-bold text-black uppercase">

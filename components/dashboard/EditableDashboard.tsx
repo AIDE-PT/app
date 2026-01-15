@@ -1,4 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   LayoutAnimation,
@@ -14,7 +15,7 @@ import { Button } from "@/components/buttons/button";
 import Navbar from "@/components/navBar/NavBar";
 import ArrowIcon from "@/components/svg/ArrowIcon";
 import { ResizeIcon } from "@/components/svg/ResizeIcon";
-import WidgetIcon from "@/components/svg/WidgetIcon";
+import WidgetIcon, { IconType } from "@/components/svg/WidgetIcon";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import {
   DASHBOARD_CONFIG,
@@ -35,7 +36,33 @@ if (
 
 const STORAGE_KEY = "@dashboard_layout";
 
+const PT_TO_EN_MAP: Record<string, IconType> = {
+  pressao: "bloodPressure",
+  glicose: "glucose",
+  bpm: "heartRate",
+  cal: "cal",
+  passos: "steps",
+  stress: "stress",
+  sono: "sleep",
+  o2: "o2",
+  temp: "temp",
+};
+
+const DEFAULT_VALUES: Record<string, { value: string; feedback: string }> = {
+  bloodPressure: { value: "120/80", feedback: "normal" },
+  glucose: { value: "98", feedback: "ok" },
+  heartRate: { value: "73", feedback: "normal" },
+  cal: { value: "1200", feedback: "low" },
+  steps: { value: "5432", feedback: "good" },
+  stress: { value: "24", feedback: "calm" },
+  sleep: { value: "7h", feedback: "good" },
+  o2: { value: "98", feedback: "normal" },
+  temp: { value: "36.6", feedback: "normal" },
+};
+
 export default function EditableDashboard() {
+  const router = useRouter();
+  const { selectedMetrics } = useLocalSearchParams();
   const [activeWidgets, setActiveWidgets] = useState(DASHBOARD_CONFIG);
   const [hiddenWidgets, setHiddenWidgets] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -52,6 +79,30 @@ export default function EditableDashboard() {
   // 🔹 Load
   useEffect(() => {
     const load = async () => {
+      // 1. Check if we have incoming metrics from Recommendations
+      if (selectedMetrics) {
+        try {
+          const metricsList = JSON.parse(selectedMetrics as string);
+          if (Array.isArray(metricsList) && metricsList.length > 0) {
+            const newWidgets = metricsList.map((m: string) => {
+              const type = PT_TO_EN_MAP[m] || "heartRate";
+              return {
+                id: `${type}-${Date.now()}-${Math.random()}`,
+                type: type,
+                variant: "1-1",
+                value: DEFAULT_VALUES[type]?.value || "--",
+                feedback: DEFAULT_VALUES[type]?.feedback || "",
+              };
+            });
+            setActiveWidgets(newWidgets as any);
+            return; // Skip loading from storage if we have new params
+          }
+        } catch (e) {
+          console.log("Error parsing metrics", e);
+        }
+      }
+
+      // 2. Fallback to storage
       try {
         const saved = await AsyncStorage.getItem(STORAGE_KEY);
         if (saved) {
@@ -64,7 +115,7 @@ export default function EditableDashboard() {
       }
     };
     load();
-  }, []);
+  }, [selectedMetrics]);
 
   // 🔹 Save
   const save = async () => {
@@ -128,7 +179,7 @@ export default function EditableDashboard() {
           selectedCuidado={selectedCuidado}
           onSelectCuidado={setSelectedCuidado}
           onNotificationPress={() => console.log("Notificações")}
-          onSettingsPress={() => console.log("Definições")}
+          onSettingsPress={() => router.push("/definicoes")}
           className="z-50"
         />
 
