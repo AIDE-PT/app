@@ -1,8 +1,10 @@
-/* eslint-disable prettier/prettier */
 import CalendarIcon from "@/components/svg/CalendarIcon";
 import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, Platform } from "react-native";
-import DateTimePicker, { DateTimePickerAndroid, DateTimePickerEvent } from "@react-native-community/datetimepicker";
+import DateTimePicker, {
+  DateTimePickerAndroid,
+  DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 
 interface CalendarButtonProps {
   label?: string;
@@ -18,7 +20,7 @@ export const CalendarButton = ({
 
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     // No Android o picker fecha-se sozinho após seleção (dismissed ou set)
-    setShow(Platform.OS === 'ios');
+    setShow(Platform.OS === "ios");
 
     if (selectedDate) {
       setDate(selectedDate);
@@ -30,15 +32,16 @@ export const CalendarButton = ({
     DateTimePickerAndroid.open({
       value: date,
       onChange,
-      mode: 'date',
-      display: 'default',
+      mode: "date",
+      display: "default",
     });
   };
 
   return (
     <>
       <TouchableOpacity
-        onPress={Platform.OS === 'android' ? showMode : () => setShow(true)} style={styles.buttonShadow}
+        onPress={Platform.OS === "android" ? showMode : () => setShow(true)}
+        style={styles.buttonShadow}
         className="flex-row items-center bg-white px-4 py-2 rounded-full border border-gray-100 self-start ml-4"
       >
         <CalendarIcon />
@@ -49,7 +52,7 @@ export const CalendarButton = ({
         <DateTimePicker
           value={date}
           mode="date"
-          display={Platform.OS === 'ios' ? 'inline' : 'default'}
+          display={Platform.OS === "ios" ? "inline" : "default"}
           onChange={onChange}
         />
       )}

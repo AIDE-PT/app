@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
@@ -35,7 +34,11 @@ if (
 
 const STORAGE_KEY = "@dashboard_layout";
 
-export default function EditableDashboard({ notEditable = false }: { notEditable?: boolean }) {
+export default function EditableDashboard({
+  notEditable = false,
+}: {
+  notEditable?: boolean;
+}) {
   const [activeWidgets, setActiveWidgets] = useState(DASHBOARD_CONFIG);
   const [hiddenWidgets, setHiddenWidgets] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
@@ -50,14 +53,14 @@ export default function EditableDashboard({ notEditable = false }: { notEditable
       if (saved) {
         const parsed = JSON.parse(saved);
 
-        // MECANISMO DE REPARAÇÃO: 
+        // MECANISMO DE REPARAÇÃO:
         // Se o widget salvo não tiver endpoint, injetamos o endpoint correto do CONFIG
         const repair = (list: any[]) =>
-          list.map(w => {
-            const original = DASHBOARD_CONFIG.find(c => c.id === w.id);
+          list.map((w) => {
+            const original = DASHBOARD_CONFIG.find((c) => c.id === w.id);
             return {
               ...w,
-              endpoint: w.endpoint || original?.endpoint // Garante que nunca é undefined
+              endpoint: w.endpoint || original?.endpoint, // Garante que nunca é undefined
             };
           });
 
@@ -127,7 +130,9 @@ export default function EditableDashboard({ notEditable = false }: { notEditable
   return (
     <SafeAreaView className="flex-1 bg-[#ECF5FF]">
       <View className="px-6 py-4">
-        <Text className="text-xl font-bold text-slate-800">Painel de Controlo</Text>
+        <Text className="text-xl font-bold text-slate-800">
+          Painel de Controlo
+        </Text>
       </View>
 
       <ScrollView className="flex-1 px-4">
@@ -136,7 +141,7 @@ export default function EditableDashboard({ notEditable = false }: { notEditable
             return (
               <TouchableOpacity
                 key={item.id}
-                onLongPress={notEditable ? () => { } : () => setIsEditing(true)}
+                onLongPress={notEditable ? () => {} : () => setIsEditing(true)}
                 activeOpacity={0.9}
                 className="relative"
               >
@@ -197,7 +202,10 @@ export default function EditableDashboard({ notEditable = false }: { notEditable
                 >
                   <WidgetIcon variant={item.type} />
                   <Text className="text-sm font-bold text-slate-700">
-                    {METRIC_STYLES[item.type as keyof typeof METRIC_STYLES]?.title}
+                    {
+                      METRIC_STYLES[item.type as keyof typeof METRIC_STYLES]
+                        ?.title
+                    }
                   </Text>
                   <Text className="text-blue-500 font-bold text-lg">＋</Text>
                 </TouchableOpacity>
