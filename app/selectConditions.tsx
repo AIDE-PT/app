@@ -1,3 +1,4 @@
+import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -5,7 +6,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
 import { ChipButton } from "../components/buttons/ChipButton";
 import { SearchBar } from "../components/input/SearchBar";
-import LightBackground from "@/components/DotBackground";
 
 import "../global.css";
 
@@ -37,6 +37,17 @@ export default function SelectConditions() {
     condition.toLowerCase().includes(searchText.toLowerCase()),
   );
 
+  const [fontsLoaded] = useFonts({
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
+
   const handleAdvance = () => {
     router.push({
       pathname: "/recommendations" as any,
@@ -45,16 +56,15 @@ export default function SelectConditions() {
   };
 
   return (
-    <LightBackground>
-      <SafeAreaView className="flex-1 px-6">
-        <View className="mt-12 mb-2">
-          <Text className="text-3xl font-bold text-black/90">Para começar</Text>
-          <Text className="text-base text-black/60 mt-1">
-            Selecione as suas doenças
+ <View className="flex-1 px-4 pt-10 bg-aide-background">
+       <SafeAreaView className="flex-1">
+        <View className="mt-12 mb-6">
+          <Text className="font-safiro text-3xl text-black/90">
+            Só mais uma coisa...
           </Text>
         </View>
 
-        <View className="mt-6 mb-4">
+        <View className="mb-6">
           <SearchBar
             placeholder="Doenças que tenha"
             value={searchText}
@@ -62,7 +72,7 @@ export default function SelectConditions() {
           />
         </View>
 
-        <View className="flex-row flex-wrap gap-2">
+        <View className="flex-row flex-wrap gap-4">
           {filteredConditions.map((condition) => (
             <ChipButton
               key={condition}
@@ -79,6 +89,6 @@ export default function SelectConditions() {
           <Button variant="primary" label="Avançar" onPress={handleAdvance} />
         </View>
       </SafeAreaView>
-    </LightBackground>
+    </View>
   );
 }

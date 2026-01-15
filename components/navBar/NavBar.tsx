@@ -1,4 +1,6 @@
+import React, { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
+import { AddWidgetModal } from "../modals/addWidgetModal";
 import AddIcon from "../svg/AddIcon";
 import CalendarIcon from "../svg/CalendarIcon";
 import HomeIcon from "../svg/HomeIcon";
@@ -8,18 +10,23 @@ interface navBarProps {
   dark?: boolean;
 }
 const Navbar = ({ dark }: navBarProps) => {
+  const [isModalVisible, setModalVisible] = useState(false);
+
   const styleBall =
-    "items-center bg-white  w-[56px] h-[56px] rounded-[100px] justify-center";
+    "items-center bg-white  w-[52px] h-[52px] rounded-[100px] justify-center";
 
   return (
     <>
       <View className="w-200" />
-      <View className="absolute bottom-6 left-6 right-6">
+      <View className="absolute bottom-6 w-full items-center">
         <View
           style={{ boxShadow: "0 4px 24.1px 0 rgba(0, 0, 0, 0.25)" }}
-          className={`flex-row justify-between items-center p-2 rounded-[100px] border border-white/10 ${dark ? "bg-black/25" : "bg-[#DBEDF8]/90"}`}
+          className={`flex-row items-center p-2 gap-4 rounded-[100px] border border-white/10 ${dark ? "bg-black/25" : "bg-[#DBEDF8]/90"}`}
         >
-          <TouchableOpacity className={styleBall}>
+          <TouchableOpacity
+            className={styleBall}
+            onPress={() => setModalVisible(true)}
+          >
             <AddIcon />
           </TouchableOpacity>
 
@@ -36,6 +43,10 @@ const Navbar = ({ dark }: navBarProps) => {
           </TouchableOpacity>
         </View>
       </View>
+      <AddWidgetModal
+        visible={isModalVisible}
+        onClose={() => setModalVisible(false)}
+      />
     </>
   );
 };

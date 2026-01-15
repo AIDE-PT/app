@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
-import { GradientBackground } from "../components/GradientBackground";
 import { Input } from "../components/input/Input";
 import "../global.css";
 
@@ -55,13 +54,16 @@ export default function Register() {
   // };
 
   return (
-    <GradientBackground>
+ <View className="flex-1 px-4 pt-10 bg-aide-background">
       <SafeAreaView className="flex-1">
-        <View className="flex-1 px-6 pt-10">
-          {/* Title */}
-          <Text className="font-safiro text-[32px] text-[#1A1A2E] mb-10">
+        <View className="flex-1">
+          {/* Título e Subtítulo */}
+        <View className="mt-12 mb-8">
+          <Text className="font-safiro text-[32px] text-[#1A1A2E]">
             Registo
           </Text>
+
+          </View>
 
           {/* Input Fields */}
           <View className="gap-4 mb-4">
@@ -118,7 +120,7 @@ export default function Register() {
           <View className="flex-1" />
 
           {/* Bottom Section */}
-          <View className="items-center pb-8">
+          <View className="items-center mb-10">
             {/* Register Button */}
             <Button
               variant="primary"
@@ -128,7 +130,7 @@ export default function Register() {
 
             {/* Login Link */}
             <View className="flex-row mt-6">
-              <Text className="font-open-sans text-[14px] text-[#6B7280]">
+              <Text className="font-open-sans font-bold text-[14px] text-[#6B7280]">
                 Já tens uma conta?{" "}
               </Text>
               <TouchableOpacity onPress={() => router.push("/login")}>
@@ -140,6 +142,6 @@ export default function Register() {
           </View>
         </View>
       </SafeAreaView>
-    </GradientBackground>
+      </View>
   );
 }

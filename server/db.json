@@ -1,808 +1,808 @@
 {
   "bpm": [
     {
-      "id": "7171a3d2-6d84-4b48-9246-5e912deaf668",
-      "value": 86,
-      "timestamp": "2026-01-15T12:55:57.472Z"
-    },
-    {
-      "id": "27321efd-b185-43c8-ad13-e9b125f44364",
-      "value": 82,
-      "timestamp": "2026-01-15T12:56:07.474Z"
-    },
-    {
-      "id": "23711617-414b-4b8b-9501-2c697f43a0e2",
+      "id": "609e177a-de2d-4d28-8187-a0641f2fbf97",
       "value": 78,
-      "timestamp": "2026-01-15T12:56:17.478Z"
+      "timestamp": "2026-01-15T15:37:30.984Z"
     },
     {
-      "id": "8a52d528-cbd3-403d-83c6-08c8426d6c49",
-      "value": 75,
-      "timestamp": "2026-01-15T12:56:27.484Z"
-    },
-    {
-      "id": "3e484d8d-2c23-49ce-b26e-c6dfa5cad158",
+      "id": "87e9e034-d41a-48d6-87cd-abd86ed7b3bb",
       "value": 77,
-      "timestamp": "2026-01-15T12:56:37.491Z"
+      "timestamp": "2026-01-15T15:37:40.984Z"
     },
     {
-      "id": "dbd6cc20-0517-42a2-bf5f-9b345ab8b50f",
-      "value": 74,
-      "timestamp": "2026-01-15T12:56:47.492Z"
-    },
-    {
-      "id": "42c215e4-ce49-4dd7-bf7a-23b7078166d5",
-      "value": 76,
-      "timestamp": "2026-01-15T12:56:57.495Z"
-    },
-    {
-      "id": "868bd8f7-faaa-4b71-9c63-f198a256d2e5",
-      "value": 75,
-      "timestamp": "2026-01-15T12:57:07.500Z"
-    },
-    {
-      "id": "ee32f23f-9e6f-420b-898e-8a25d2f6a3e4",
-      "value": 71,
-      "timestamp": "2026-01-15T12:57:17.507Z"
-    },
-    {
-      "id": "e665a96a-24ff-4aed-8315-573a116bbb0a",
-      "value": 70,
-      "timestamp": "2026-01-15T12:57:27.508Z"
-    },
-    {
-      "id": "488b6c7f-dd37-405c-9e8d-936671fed710",
-      "value": 70,
-      "timestamp": "2026-01-15T12:57:37.511Z"
-    },
-    {
-      "id": "5e844d10-dabb-42a7-82a5-22e7d5a733c3",
-      "value": 75,
-      "timestamp": "2026-01-15T12:57:47.515Z"
-    },
-    {
-      "id": "7cd96e02-11a0-4d1d-ac7e-16f61c2a57fd",
-      "value": 74,
-      "timestamp": "2026-01-15T12:57:57.521Z"
-    },
-    {
-      "id": "9dd88eb2-e996-435b-ac94-b2842082dbba",
-      "value": 70,
-      "timestamp": "2026-01-15T12:58:07.521Z"
-    },
-    {
-      "id": "b89f5fae-082b-48ea-9597-986fc1a2ce29",
-      "value": 75,
-      "timestamp": "2026-01-15T12:58:17.523Z"
-    },
-    {
-      "id": "6c2fbca6-3001-4a85-9092-1b87b2778904",
-      "value": 74,
-      "timestamp": "2026-01-15T12:58:27.528Z"
-    },
-    {
-      "id": "40b643fa-87c4-4039-af2b-81eead5a96f5",
-      "value": 73,
-      "timestamp": "2026-01-15T12:58:37.534Z"
-    },
-    {
-      "id": "879e1ba2-c50c-4b6b-bbf9-2a8b4ba5d7b3",
-      "value": 76,
-      "timestamp": "2026-01-15T12:58:47.534Z"
-    },
-    {
-      "id": "a172d275-10c5-4ac6-9b53-fba05000d9a8",
+      "id": "a85ca602-43c8-436c-becc-72181ad7f33f",
       "value": 80,
-      "timestamp": "2026-01-15T12:58:57.536Z"
+      "timestamp": "2026-01-15T15:37:50.984Z"
     },
     {
-      "id": "ebdbc896-4315-4446-8249-3c0376b93ef7",
-      "value": 82,
-      "timestamp": "2026-01-15T12:59:07.540Z"
-    },
-    {
-      "id": "25bef93b-aea3-4cec-9579-34766582f0d2",
+      "id": "ae3c8dac-ffc3-4512-8c53-bc87dab7023b",
       "value": 83,
-      "timestamp": "2026-01-15T12:59:17.546Z"
+      "timestamp": "2026-01-15T15:38:00.983Z"
     },
     {
-      "id": "4268c60b-428d-4e1e-b9ee-54d50bb493d2",
-      "value": 84,
-      "timestamp": "2026-01-15T12:59:27.553Z"
-    },
-    {
-      "id": "da399838-f848-4860-a9bf-f31f0972f531",
-      "value": 79,
-      "timestamp": "2026-01-15T12:59:37.555Z"
-    },
-    {
-      "id": "d07feb20-2454-4a9c-823a-0772eff1842d",
-      "value": 78,
-      "timestamp": "2026-01-15T12:59:47.558Z"
-    },
-    {
-      "id": "98af6661-e682-4fb6-a209-310cf94da7a9",
-      "value": 74,
-      "timestamp": "2026-01-15T12:59:57.563Z"
-    },
-    {
-      "id": "e5f2f5a3-3c08-4bdb-9bac-9fc90d0af27c",
-      "value": 78,
-      "timestamp": "2026-01-15T13:00:07.570Z"
-    },
-    {
-      "id": "c29c01df-92fd-41f9-a066-1e8bfce03ed8",
+      "id": "252b05bc-9173-4860-a94f-220831428283",
       "value": 80,
-      "timestamp": "2026-01-15T13:00:17.571Z"
+      "timestamp": "2026-01-15T15:38:10.984Z"
     },
     {
-      "id": "3ee97aec-9590-451c-a558-e110f24b6425",
-      "value": 78,
-      "timestamp": "2026-01-15T13:00:27.574Z"
+      "id": "34a0c1df-f8f9-4f9e-89ad-1bbffb62e7a6",
+      "value": 77,
+      "timestamp": "2026-01-15T15:38:20.985Z"
     },
     {
-      "id": "f5550565-4359-4e14-9a91-ea53dc9f84a0",
-      "value": 75,
-      "timestamp": "2026-01-15T13:00:37.578Z"
-    },
-    {
-      "id": "9693fa6e-06f6-405e-9ae3-1bf061006388",
+      "id": "68e01b7c-7ac3-42c2-bf04-af7c36373922",
       "value": 73,
-      "timestamp": "2026-01-15T13:00:47.585Z"
+      "timestamp": "2026-01-15T15:38:30.985Z"
     },
     {
-      "id": "7efde1f6-6ece-4852-aa9a-d6a96e98b1d3",
-      "value": 72,
-      "timestamp": "2026-01-15T13:00:57.585Z"
+      "id": "0df8611f-7b2b-48c8-98f2-9c92953ad40f",
+      "value": 73,
+      "timestamp": "2026-01-15T15:38:40.986Z"
     },
     {
-      "id": "ac9f5898-6f26-46d6-b207-473eb98d2f7c",
-      "value": 69,
-      "timestamp": "2026-01-15T13:01:07.587Z"
+      "id": "4d456759-5042-47bc-bb5a-8be685617a17",
+      "value": 74,
+      "timestamp": "2026-01-15T15:38:50.986Z"
     },
     {
-      "id": "5aa5b264-34a0-48fb-a72e-d4186c5379d8",
-      "value": 68,
-      "timestamp": "2026-01-15T13:01:17.591Z"
+      "id": "4769c634-287f-4bec-bb18-fb5cf8e194bd",
+      "value": 74,
+      "timestamp": "2026-01-15T15:39:00.987Z"
     },
     {
-      "id": "89a83445-6c37-40aa-a7f4-3f3f79238dea",
-      "value": 69,
-      "timestamp": "2026-01-15T13:01:27.597Z"
-    },
-    {
-      "id": "a7aa29d4-1c75-4bb5-ac1b-dd82e60059ef",
-      "value": 72,
-      "timestamp": "2026-01-15T13:01:37.605Z"
-    },
-    {
-      "id": "823039c6-350e-400c-abac-3373ad2db30c",
+      "id": "c90386ef-39c6-41a4-a7d6-08ae6ac7dc43",
       "value": 71,
-      "timestamp": "2026-01-15T13:01:47.606Z"
+      "timestamp": "2026-01-15T15:39:10.987Z"
     },
     {
-      "id": "d7732b1c-0e3f-4d5e-9267-8298362562a5",
+      "id": "67fb4b80-aadc-4b7f-a202-ab108e972dea",
+      "value": 71,
+      "timestamp": "2026-01-15T15:39:20.987Z"
+    },
+    {
+      "id": "e9d83589-ba76-454d-8f66-8148992d5448",
+      "value": 73,
+      "timestamp": "2026-01-15T15:39:30.987Z"
+    },
+    {
+      "id": "34bd6d3a-6d2e-4389-945f-a986d1a7c737",
+      "value": 74,
+      "timestamp": "2026-01-15T15:39:40.987Z"
+    },
+    {
+      "id": "a4376e96-64eb-4746-b58d-083208f479af",
+      "value": 78,
+      "timestamp": "2026-01-15T15:39:50.987Z"
+    },
+    {
+      "id": "1ea924d0-ddd5-40b1-b0a1-9215bcf50f86",
+      "value": 74,
+      "timestamp": "2026-01-15T15:40:00.988Z"
+    },
+    {
+      "id": "041b16e5-2231-4c49-b9f8-4345de6277c0",
+      "value": 73,
+      "timestamp": "2026-01-15T15:40:10.987Z"
+    },
+    {
+      "id": "875c033f-5916-4ea1-98df-325d98c9aa92",
+      "value": 71,
+      "timestamp": "2026-01-15T15:40:20.988Z"
+    },
+    {
+      "id": "334228ac-6355-4dd8-a8dc-f8270234581f",
+      "value": 71,
+      "timestamp": "2026-01-15T15:40:30.989Z"
+    },
+    {
+      "id": "e6c144ab-5d9d-40ed-973e-89685730698b",
+      "value": 75,
+      "timestamp": "2026-01-15T15:40:40.989Z"
+    },
+    {
+      "id": "9fc83fdd-5ebe-4048-99f3-364f273ef5ff",
+      "value": 76,
+      "timestamp": "2026-01-15T15:40:50.990Z"
+    },
+    {
+      "id": "b902b4a6-3851-443a-8f73-2c2a80deeda3",
+      "value": 76,
+      "timestamp": "2026-01-15T15:41:00.992Z"
+    },
+    {
+      "id": "8a63b6b9-f7f1-4688-8dac-9f2de203a8f9",
       "value": 72,
-      "timestamp": "2026-01-15T13:01:57.610Z"
+      "timestamp": "2026-01-15T15:41:10.994Z"
     },
     {
-      "id": "514dce65-3cd4-4572-9563-302bc2fdcd4e",
-      "value": 76,
-      "timestamp": "2026-01-15T13:02:07.616Z"
+      "id": "4c4c460e-6638-4332-b270-80b8b8ebedc8",
+      "value": 74,
+      "timestamp": "2026-01-15T15:41:20.994Z"
     },
     {
-      "id": "4e539550-3f6d-4a26-8d64-7ab6fcb2f8e2",
-      "value": 75,
-      "timestamp": "2026-01-15T13:02:17.623Z"
+      "id": "3f1e4456-9abb-47c2-82a1-443a301ea5e2",
+      "value": 71,
+      "timestamp": "2026-01-15T15:41:30.995Z"
     },
     {
-      "id": "28ebf88c-ac25-4920-9032-799d6262a58e",
-      "value": 75,
-      "timestamp": "2026-01-15T13:02:27.624Z"
+      "id": "da9e5069-7054-4ffc-8406-4e6f32dde19b",
+      "value": 69,
+      "timestamp": "2026-01-15T15:41:40.995Z"
     },
     {
-      "id": "3abf2632-4102-456d-97eb-2c8f96522f96",
-      "value": 79,
-      "timestamp": "2026-01-15T13:02:37.627Z"
+      "id": "9839b53f-5b22-4995-a49d-dc2c50132b7b",
+      "value": 69,
+      "timestamp": "2026-01-15T15:41:50.996Z"
     },
     {
-      "id": "2a36ce7a-69bc-4f53-a594-dadc225e7e8e",
-      "value": 81,
-      "timestamp": "2026-01-15T13:02:47.632Z"
+      "id": "758ea9c0-6856-47c3-8c22-d678f59eebfb",
+      "value": 74,
+      "timestamp": "2026-01-15T15:42:00.997Z"
     },
     {
-      "id": "afb86bc5-4394-4ce1-946c-2408785f0c07",
-      "value": 84,
-      "timestamp": "2026-01-15T13:02:57.639Z"
+      "id": "3127599e-d05a-4856-ada3-2d7611347cb4",
+      "value": 78,
+      "timestamp": "2026-01-15T15:42:10.997Z"
     },
     {
-      "id": "54b04289-8eef-47a8-b83d-de2cc5b9f3ff",
+      "id": "18c1ed41-555a-4f4e-8240-3e30c43d9274",
       "value": 80,
-      "timestamp": "2026-01-15T13:03:07.640Z"
+      "timestamp": "2026-01-15T15:42:20.996Z"
     },
     {
-      "id": "977ed7fb-c585-4e7a-bda2-4d9dfc758e0d",
+      "id": "50ee1539-8562-489a-b401-72fb36999cfd",
+      "value": 80,
+      "timestamp": "2026-01-15T15:42:30.997Z"
+    },
+    {
+      "id": "1a22db8c-b562-41ba-babb-6074ae27ac75",
+      "value": 80,
+      "timestamp": "2026-01-15T15:42:40.996Z"
+    },
+    {
+      "id": "2c821dd1-beb0-49c9-9b02-022d44c5d7ca",
       "value": 76,
-      "timestamp": "2026-01-15T13:03:17.642Z"
+      "timestamp": "2026-01-15T15:42:50.997Z"
     },
     {
-      "id": "37a082a0-15cf-44c3-b2a6-b68ab15ac83a",
+      "id": "8dad9745-c560-46e2-a0aa-0f925fe0ca9e",
+      "value": 80,
+      "timestamp": "2026-01-15T15:43:00.997Z"
+    },
+    {
+      "id": "398bb213-a274-4dbe-b6b8-79cdb721f3ef",
       "value": 81,
-      "timestamp": "2026-01-15T13:03:27.647Z"
+      "timestamp": "2026-01-15T15:43:10.998Z"
     },
     {
-      "id": "aec6d11f-9fa8-4000-987d-f835c879518a",
-      "value": 85,
-      "timestamp": "2026-01-15T13:03:37.653Z"
+      "id": "f4ca428c-f39a-4711-a8a5-986f63f45ca7",
+      "value": 81,
+      "timestamp": "2026-01-15T15:43:20.999Z"
     },
     {
-      "id": "8ad1bcd7-8262-4af5-a2d8-a3f98a1fa063",
-      "value": 87,
-      "timestamp": "2026-01-15T13:03:47.653Z"
+      "id": "82435aba-568f-4efa-8192-53f168d833a8",
+      "value": 81,
+      "timestamp": "2026-01-15T15:43:31.000Z"
     },
     {
-      "id": "1580f8af-16e3-4afe-a4a1-84fd0ecf4b45",
-      "value": 85,
-      "timestamp": "2026-01-15T13:03:57.655Z"
+      "id": "c5a25a8c-95c5-4a1f-a531-a3821fc36bc3",
+      "value": 77,
+      "timestamp": "2026-01-15T15:43:41.000Z"
     },
     {
-      "id": "f494dfad-9131-4bf9-a454-56e294ce42be",
-      "value": 88,
-      "timestamp": "2026-01-15T13:04:07.659Z"
+      "id": "06399a81-992d-4721-9bde-64954418e8fc",
+      "value": 80,
+      "timestamp": "2026-01-15T15:43:51.000Z"
+    },
+    {
+      "id": "a4253b3e-9e28-48f9-81f6-3d62df197f4d",
+      "value": 78,
+      "timestamp": "2026-01-15T15:44:01.000Z"
+    },
+    {
+      "id": "236d81ef-6193-4096-a27b-e65196add1e3",
+      "value": 76,
+      "timestamp": "2026-01-15T15:44:11.001Z"
+    },
+    {
+      "id": "70d41488-c5ba-4552-9baa-78793e1e3eb6",
+      "value": 80,
+      "timestamp": "2026-01-15T15:44:21.001Z"
+    },
+    {
+      "id": "6dee23c0-2d0e-4eb4-a0e3-4e96627f4c8b",
+      "value": 81,
+      "timestamp": "2026-01-15T15:44:31.001Z"
+    },
+    {
+      "id": "d4cb704c-7b01-426f-9dd6-d67e8f4a555c",
+      "value": 81,
+      "timestamp": "2026-01-15T15:44:41.002Z"
+    },
+    {
+      "id": "32d61d51-d24b-476a-a3fb-e30359b5aeef",
+      "value": 78,
+      "timestamp": "2026-01-15T15:44:51.004Z"
+    },
+    {
+      "id": "e79a5026-c3bf-40fe-be7f-773aca2e47cc",
+      "value": 81,
+      "timestamp": "2026-01-15T15:45:01.003Z"
+    },
+    {
+      "id": "2d5431fd-429d-4bda-adf1-aed50560a22c",
+      "value": 79,
+      "timestamp": "2026-01-15T15:45:11.003Z"
+    },
+    {
+      "id": "827dc409-e6ef-4381-af69-8274a8f30c55",
+      "value": 79,
+      "timestamp": "2026-01-15T15:45:21.004Z"
+    },
+    {
+      "id": "898287eb-6be3-4c0a-b010-50b2639884cc",
+      "value": 76,
+      "timestamp": "2026-01-15T15:45:31.005Z"
+    },
+    {
+      "id": "83894789-cb8b-4331-ad82-f1cdf5f05c4e",
+      "value": 73,
+      "timestamp": "2026-01-15T15:45:41.006Z"
     }
   ],
   "bloodPressure": [
     {
-      "id": "2d93699d-de15-4422-81b5-95565abdaf3f",
-      "systolic": 121,
-      "diastolic": 77,
-      "timestamp": "2026-01-15T12:55:57.472Z"
-    },
-    {
-      "id": "4cd9ba5b-d707-47ee-ba0c-b662e2e79f70",
-      "systolic": 123,
-      "diastolic": 77,
-      "timestamp": "2026-01-15T12:56:07.474Z"
-    },
-    {
-      "id": "cbabdfe1-c7f8-47e8-970a-bf50da3bc5df",
-      "systolic": 125,
-      "diastolic": 75,
-      "timestamp": "2026-01-15T12:56:17.478Z"
-    },
-    {
-      "id": "5bc18937-83ce-4691-b888-1f022e8c9ab1",
-      "systolic": 128,
-      "diastolic": 73,
-      "timestamp": "2026-01-15T12:56:27.484Z"
-    },
-    {
-      "id": "96c457af-355a-460c-82b7-b76a4fa5f4ff",
-      "systolic": 126,
+      "id": "6faf605c-abb7-4eb0-bd6e-0ed7cadb9a8b",
+      "systolic": 113,
       "diastolic": 74,
-      "timestamp": "2026-01-15T12:56:37.491Z"
+      "timestamp": "2026-01-15T15:37:30.984Z"
     },
     {
-      "id": "03a2c818-c5fb-467a-94e4-413b5e5987bc",
-      "systolic": 124,
-      "diastolic": 77,
-      "timestamp": "2026-01-15T12:56:47.492Z"
+      "id": "aaf014df-b794-45bc-850d-8fcc31689d32",
+      "systolic": 117,
+      "diastolic": 74,
+      "timestamp": "2026-01-15T15:37:40.984Z"
     },
     {
-      "id": "bbca0d8a-c285-4b38-8369-0f0e0709c87a",
-      "systolic": 127,
+      "id": "f950dfad-2944-48f0-be66-709b1276a3f8",
+      "systolic": 115,
+      "diastolic": 74,
+      "timestamp": "2026-01-15T15:37:50.984Z"
+    },
+    {
+      "id": "c4e7e597-4aeb-4c15-a611-0b752e7b3588",
+      "systolic": 115,
+      "diastolic": 74,
+      "timestamp": "2026-01-15T15:38:00.983Z"
+    },
+    {
+      "id": "37bad3ee-1162-4f8e-b101-a1ccff9c4371",
+      "systolic": 112,
       "diastolic": 75,
-      "timestamp": "2026-01-15T12:56:57.495Z"
+      "timestamp": "2026-01-15T15:38:10.984Z"
     },
     {
-      "id": "33bf51fb-528e-45d5-b035-e890694e77a6",
-      "systolic": 127,
+      "id": "14fc9796-127b-4679-8af9-2ff357806db0",
+      "systolic": 114,
+      "diastolic": 74,
+      "timestamp": "2026-01-15T15:38:20.985Z"
+    },
+    {
+      "id": "ad8359b7-8153-48fb-8581-f8cbbae1014e",
+      "systolic": 111,
+      "diastolic": 74,
+      "timestamp": "2026-01-15T15:38:30.985Z"
+    },
+    {
+      "id": "2051314a-1903-470e-aafe-95c2ad02b5ec",
+      "systolic": 114,
+      "diastolic": 73,
+      "timestamp": "2026-01-15T15:38:40.986Z"
+    },
+    {
+      "id": "561ba2d4-41fc-4fd3-925a-e08e4197d4a3",
+      "systolic": 113,
+      "diastolic": 73,
+      "timestamp": "2026-01-15T15:38:50.986Z"
+    },
+    {
+      "id": "4790fd15-548c-442f-ae55-65371a1daa66",
+      "systolic": 112,
+      "diastolic": 75,
+      "timestamp": "2026-01-15T15:39:00.987Z"
+    },
+    {
+      "id": "eca107fb-25ef-403f-9921-2b8ec1538725",
+      "systolic": 113,
+      "diastolic": 73,
+      "timestamp": "2026-01-15T15:39:10.987Z"
+    },
+    {
+      "id": "a5f1d19b-b4df-4d18-a82d-67a2f955ca36",
+      "systolic": 110,
+      "diastolic": 75,
+      "timestamp": "2026-01-15T15:39:20.987Z"
+    },
+    {
+      "id": "fb0a7b93-3307-4329-a769-b93104758d6a",
+      "systolic": 112,
       "diastolic": 76,
-      "timestamp": "2026-01-15T12:57:07.500Z"
+      "timestamp": "2026-01-15T15:39:30.987Z"
     },
     {
-      "id": "5c669234-6cc7-487e-b2f3-e2036ab4f066",
-      "systolic": 126,
-      "diastolic": 74,
-      "timestamp": "2026-01-15T12:57:17.507Z"
+      "id": "87ea3abb-a139-40c6-998a-9733ed32de50",
+      "systolic": 115,
+      "diastolic": 77,
+      "timestamp": "2026-01-15T15:39:40.987Z"
     },
     {
-      "id": "e73b1187-9085-4437-ace6-731e75a80700",
-      "systolic": 126,
-      "diastolic": 73,
-      "timestamp": "2026-01-15T12:57:27.508Z"
+      "id": "93f9e6f6-af03-4ce8-8b35-7d26512a6d58",
+      "systolic": 117,
+      "diastolic": 79,
+      "timestamp": "2026-01-15T15:39:50.987Z"
     },
     {
-      "id": "5b9d51f7-d632-4de2-bc89-d10432d6e4aa",
-      "systolic": 122,
-      "diastolic": 74,
-      "timestamp": "2026-01-15T12:57:37.511Z"
+      "id": "2ea678d9-ddda-4071-95a5-5d382ebf78a2",
+      "systolic": 117,
+      "diastolic": 80,
+      "timestamp": "2026-01-15T15:40:00.988Z"
     },
     {
-      "id": "0cf6e50d-268d-4083-854a-b86f56955a2c",
+      "id": "fad646f3-5ecf-4171-823d-fcfca432a31c",
+      "systolic": 116,
+      "diastolic": 79,
+      "timestamp": "2026-01-15T15:40:10.987Z"
+    },
+    {
+      "id": "66cfc86c-856b-4355-b05d-ff2ca861751b",
+      "systolic": 116,
+      "diastolic": 79,
+      "timestamp": "2026-01-15T15:40:20.988Z"
+    },
+    {
+      "id": "754fd801-e710-4603-9065-57483707035c",
       "systolic": 119,
-      "diastolic": 73,
-      "timestamp": "2026-01-15T12:57:47.515Z"
-    },
-    {
-      "id": "5c49c614-39fd-48d9-ab3a-e89e48a821e2",
-      "systolic": 121,
-      "diastolic": 76,
-      "timestamp": "2026-01-15T12:57:57.521Z"
-    },
-    {
-      "id": "09b295b5-b0ea-4e4d-b5a7-ddf4e82ed633",
-      "systolic": 124,
-      "diastolic": 78,
-      "timestamp": "2026-01-15T12:58:07.521Z"
-    },
-    {
-      "id": "1513ca72-c067-4d70-8a2c-89d91d9acfeb",
-      "systolic": 126,
       "diastolic": 80,
-      "timestamp": "2026-01-15T12:58:17.523Z"
+      "timestamp": "2026-01-15T15:40:30.989Z"
     },
     {
-      "id": "3a11990b-f2e2-4a43-b5ba-193b0b11c125",
-      "systolic": 127,
-      "diastolic": 81,
-      "timestamp": "2026-01-15T12:58:27.528Z"
-    },
-    {
-      "id": "61dc9d42-adec-4a66-b032-9dcf9ca2de52",
-      "systolic": 129,
-      "diastolic": 83,
-      "timestamp": "2026-01-15T12:58:37.534Z"
-    },
-    {
-      "id": "281d32ec-25d9-4e60-a7a0-9c706468969f",
-      "systolic": 130,
+      "id": "169f1c2f-50b4-466b-88f4-bf053e793534",
+      "systolic": 120,
       "diastolic": 82,
-      "timestamp": "2026-01-15T12:58:47.534Z"
+      "timestamp": "2026-01-15T15:40:40.989Z"
     },
     {
-      "id": "0e0d95f4-7c6d-4d51-962e-dc5610069601",
-      "systolic": 129,
-      "diastolic": 80,
-      "timestamp": "2026-01-15T12:58:57.536Z"
-    },
-    {
-      "id": "c21fe0fc-4256-4fbd-b6cd-5b96f794843f",
-      "systolic": 125,
-      "diastolic": 82,
-      "timestamp": "2026-01-15T12:59:07.540Z"
-    },
-    {
-      "id": "0417caa5-72a3-4ab7-ad16-bcf00a174fba",
-      "systolic": 127,
-      "diastolic": 82,
-      "timestamp": "2026-01-15T12:59:17.546Z"
-    },
-    {
-      "id": "adcfb671-1a73-4de4-b21e-a892832437e8",
-      "systolic": 129,
-      "diastolic": 80,
-      "timestamp": "2026-01-15T12:59:27.553Z"
-    },
-    {
-      "id": "3b93f504-2381-4d96-898e-afa7108a1df0",
-      "systolic": 126,
-      "diastolic": 78,
-      "timestamp": "2026-01-15T12:59:37.555Z"
-    },
-    {
-      "id": "3b43b37c-281a-4baf-9276-6caa39f4e6ca",
-      "systolic": 123,
-      "diastolic": 75,
-      "timestamp": "2026-01-15T12:59:47.558Z"
-    },
-    {
-      "id": "9525e368-5a08-4fe5-8f35-ac817970fa89",
+      "id": "ddb9ef8e-03b1-4e64-b749-206a5682dc1c",
       "systolic": 122,
-      "diastolic": 77,
-      "timestamp": "2026-01-15T12:59:57.563Z"
+      "diastolic": 82,
+      "timestamp": "2026-01-15T15:40:50.990Z"
     },
     {
-      "id": "88ad16b3-a7de-4c8f-9500-52d760bbc342",
-      "systolic": 125,
+      "id": "b6feee74-9f57-411d-a8c9-242bcb9705ba",
+      "systolic": 118,
+      "diastolic": 84,
+      "timestamp": "2026-01-15T15:41:00.992Z"
+    },
+    {
+      "id": "c399ca85-849b-4123-bec8-16d6cdc8f692",
+      "systolic": 116,
+      "diastolic": 84,
+      "timestamp": "2026-01-15T15:41:10.994Z"
+    },
+    {
+      "id": "def17742-dac7-4014-a9ea-32d4b4b9a5d4",
+      "systolic": 119,
+      "diastolic": 81,
+      "timestamp": "2026-01-15T15:41:20.994Z"
+    },
+    {
+      "id": "885b7736-8472-48e2-a496-d5ef39cc1c8c",
+      "systolic": 117,
       "diastolic": 79,
-      "timestamp": "2026-01-15T13:00:07.570Z"
+      "timestamp": "2026-01-15T15:41:30.995Z"
     },
     {
-      "id": "8e2899e3-cec2-489a-b2c2-262aa60baa48",
-      "systolic": 127,
-      "diastolic": 76,
-      "timestamp": "2026-01-15T13:00:17.571Z"
-    },
-    {
-      "id": "de4e0f48-4e01-4a19-82e6-a18e3613962c",
-      "systolic": 126,
+      "id": "b62d6fd3-91af-48f1-b2c7-4c4ef73b9db0",
+      "systolic": 116,
       "diastolic": 79,
-      "timestamp": "2026-01-15T13:00:27.574Z"
+      "timestamp": "2026-01-15T15:41:40.995Z"
     },
     {
-      "id": "b11d22a5-6284-4e13-b78c-fe07042a2aba",
-      "systolic": 126,
+      "id": "7db25ec3-9264-4ab0-8c2c-759f0e4b5426",
+      "systolic": 115,
+      "diastolic": 78,
+      "timestamp": "2026-01-15T15:41:50.996Z"
+    },
+    {
+      "id": "ba3ebeb5-ee3d-4514-8ed3-77fe6270538a",
+      "systolic": 116,
+      "diastolic": 79,
+      "timestamp": "2026-01-15T15:42:00.997Z"
+    },
+    {
+      "id": "397e5fc7-8ad4-4ea1-a531-0afcbcab9432",
+      "systolic": 116,
+      "diastolic": 81,
+      "timestamp": "2026-01-15T15:42:10.997Z"
+    },
+    {
+      "id": "300300cc-806e-4f9b-908c-df27e3da26cd",
+      "systolic": 115,
       "diastolic": 80,
-      "timestamp": "2026-01-15T13:00:37.578Z"
+      "timestamp": "2026-01-15T15:42:20.996Z"
     },
     {
-      "id": "472f2611-7083-4a08-a140-6c4b01be3fb8",
-      "systolic": 125,
-      "diastolic": 78,
-      "timestamp": "2026-01-15T13:00:47.585Z"
+      "id": "a2884954-f802-42bb-9661-c34fc03cd9bd",
+      "systolic": 114,
+      "diastolic": 81,
+      "timestamp": "2026-01-15T15:42:30.997Z"
     },
     {
-      "id": "48b460ca-ea44-47ef-b90b-0c2e3948d655",
-      "systolic": 128,
-      "diastolic": 76,
-      "timestamp": "2026-01-15T13:00:57.585Z"
+      "id": "e1710102-66ee-4dd9-a678-a40e9a41f748",
+      "systolic": 111,
+      "diastolic": 82,
+      "timestamp": "2026-01-15T15:42:40.996Z"
     },
     {
-      "id": "9088ec4c-97a1-43e6-bd53-04226cc3d14b",
-      "systolic": 128,
-      "diastolic": 74,
-      "timestamp": "2026-01-15T13:01:07.587Z"
+      "id": "38275ff2-27ee-4ae2-a29a-56f0940b3c90",
+      "systolic": 110,
+      "diastolic": 80,
+      "timestamp": "2026-01-15T15:42:50.997Z"
     },
     {
-      "id": "a638b256-5215-4289-95a2-f15a2ac57f8d",
-      "systolic": 128,
-      "diastolic": 76,
-      "timestamp": "2026-01-15T13:01:17.591Z"
+      "id": "0a553a92-8538-4425-8db7-0c5d86cfe179",
+      "systolic": 113,
+      "diastolic": 82,
+      "timestamp": "2026-01-15T15:43:00.997Z"
     },
     {
-      "id": "905a2eb2-40e5-4a4c-a7db-bf4998d2677e",
-      "systolic": 124,
-      "diastolic": 74,
-      "timestamp": "2026-01-15T13:01:27.597Z"
-    },
-    {
-      "id": "acb51f4c-2875-40f4-bdd9-fc0282e61dc3",
-      "systolic": 124,
-      "diastolic": 77,
-      "timestamp": "2026-01-15T13:01:37.605Z"
-    },
-    {
-      "id": "9fdead5e-428c-4c2e-b7f0-7e0307745b9c",
-      "systolic": 123,
+      "id": "b642de35-0b76-43db-a407-6b403a4ae7ea",
+      "systolic": 116,
       "diastolic": 79,
-      "timestamp": "2026-01-15T13:01:47.606Z"
+      "timestamp": "2026-01-15T15:43:10.998Z"
     },
     {
-      "id": "a7404a0c-6a39-4763-81da-b89d6d830264",
-      "systolic": 126,
+      "id": "b8ec576d-4ef8-4607-ae20-4387632af729",
+      "systolic": 115,
       "diastolic": 77,
-      "timestamp": "2026-01-15T13:01:57.610Z"
+      "timestamp": "2026-01-15T15:43:20.999Z"
     },
     {
-      "id": "f75d7bc4-fd06-469f-9df3-418cd46e85fc",
-      "systolic": 129,
-      "diastolic": 78,
-      "timestamp": "2026-01-15T13:02:07.616Z"
+      "id": "4e5f066a-c078-4cd9-aa94-80376cabcda5",
+      "systolic": 113,
+      "diastolic": 76,
+      "timestamp": "2026-01-15T15:43:31.000Z"
     },
     {
-      "id": "1472f51e-f611-4638-81be-3fe123095633",
-      "systolic": 130,
+      "id": "2ba1d578-9f81-424c-bbff-7debfe457d9b",
+      "systolic": 114,
+      "diastolic": 77,
+      "timestamp": "2026-01-15T15:43:41.000Z"
+    },
+    {
+      "id": "e3c498ff-05c1-4b2e-80c2-7143de9c97f5",
+      "systolic": 112,
+      "diastolic": 77,
+      "timestamp": "2026-01-15T15:43:51.000Z"
+    },
+    {
+      "id": "5e90c329-ff7c-4aa1-a489-1fd438bedc8f",
+      "systolic": 115,
       "diastolic": 79,
-      "timestamp": "2026-01-15T13:02:17.623Z"
+      "timestamp": "2026-01-15T15:44:01.000Z"
     },
     {
-      "id": "c985d216-9cfc-4284-82cf-57120228a846",
-      "systolic": 130,
+      "id": "18f968d2-735a-4c35-ac83-768e28156e8d",
+      "systolic": 118,
+      "diastolic": 80,
+      "timestamp": "2026-01-15T15:44:11.001Z"
+    },
+    {
+      "id": "1bf34fe7-abe3-4c3c-82b9-468b460d0de6",
+      "systolic": 119,
+      "diastolic": 78,
+      "timestamp": "2026-01-15T15:44:21.001Z"
+    },
+    {
+      "id": "b3b30c5f-4ce0-4d08-b209-e186b1811b65",
+      "systolic": 122,
       "diastolic": 76,
-      "timestamp": "2026-01-15T13:02:27.624Z"
+      "timestamp": "2026-01-15T15:44:31.001Z"
     },
     {
-      "id": "84a3fe07-fb09-43c3-aa38-58fbb44fbf15",
-      "systolic": 127,
+      "id": "9f4c2171-dc31-47f7-8b74-42d866d33f7d",
+      "systolic": 119,
       "diastolic": 76,
-      "timestamp": "2026-01-15T13:02:37.627Z"
+      "timestamp": "2026-01-15T15:44:41.002Z"
     },
     {
-      "id": "e3330297-6998-4cbe-b895-663f07e9b285",
-      "systolic": 124,
+      "id": "32ea2fe2-391c-4046-9347-757ed86bfb8b",
+      "systolic": 117,
+      "diastolic": 74,
+      "timestamp": "2026-01-15T15:44:51.004Z"
+    },
+    {
+      "id": "c0705c59-86f3-4358-8480-0eb1529fb536",
+      "systolic": 115,
+      "diastolic": 76,
+      "timestamp": "2026-01-15T15:45:01.003Z"
+    },
+    {
+      "id": "e5d190c3-d622-4656-b161-89975e36bffd",
+      "systolic": 115,
       "diastolic": 75,
-      "timestamp": "2026-01-15T13:02:47.632Z"
+      "timestamp": "2026-01-15T15:45:11.003Z"
     },
     {
-      "id": "7310c50d-b7b8-4eba-ba0c-3a96dd31ecfb",
-      "systolic": 126,
-      "diastolic": 77,
-      "timestamp": "2026-01-15T13:02:57.639Z"
+      "id": "bca8b7b0-0725-4647-a401-c0c0b33d70a5",
+      "systolic": 113,
+      "diastolic": 75,
+      "timestamp": "2026-01-15T15:45:21.004Z"
     },
     {
-      "id": "18b484d3-8882-41e3-80d6-cc2cef3b5cf4",
-      "systolic": 126,
-      "diastolic": 79,
-      "timestamp": "2026-01-15T13:03:07.640Z"
-    },
-    {
-      "id": "2774057c-3742-4a9e-8ed8-4c284940fac6",
-      "systolic": 129,
-      "diastolic": 78,
-      "timestamp": "2026-01-15T13:03:17.642Z"
-    },
-    {
-      "id": "53320ba9-84f2-4f5c-b6eb-967136b25b5f",
-      "systolic": 125,
-      "diastolic": 79,
-      "timestamp": "2026-01-15T13:03:27.647Z"
-    },
-    {
-      "id": "dcb833ee-53fa-4395-ab1a-ab2e94fba9d5",
-      "systolic": 125,
-      "diastolic": 77,
-      "timestamp": "2026-01-15T13:03:37.653Z"
-    },
-    {
-      "id": "b46c6e22-220f-4acc-9eb5-897416a1cc20",
-      "systolic": 128,
+      "id": "c6a87ab2-70f0-4ad5-9774-8ad1be78dc72",
+      "systolic": 111,
       "diastolic": 76,
-      "timestamp": "2026-01-15T13:03:47.653Z"
+      "timestamp": "2026-01-15T15:45:31.005Z"
     },
     {
-      "id": "36518c06-3bd8-444e-ba19-2d5fb578c9a9",
-      "systolic": 124,
-      "diastolic": 78,
-      "timestamp": "2026-01-15T13:03:57.655Z"
-    },
-    {
-      "id": "63fc5f40-0f63-4c9c-a14a-f430bcb79759",
-      "systolic": 125,
-      "diastolic": 78,
-      "timestamp": "2026-01-15T13:04:07.659Z"
+      "id": "b6075a6d-a3dc-45dc-8aa1-a4969f4d3f98",
+      "systolic": 110,
+      "diastolic": 76,
+      "timestamp": "2026-01-15T15:45:41.006Z"
     }
   ],
   "glycemia": [
     {
-      "id": "3b0c355c-e049-4fa6-bf4c-55c43b7f718e",
+      "id": "c3064f7b-7418-42ac-a5df-3b0a58869b2f",
+      "value": 102,
+      "timestamp": "2026-01-15T15:37:30.984Z"
+    },
+    {
+      "id": "51387e89-2bab-426c-b547-18cf6eb8915f",
+      "value": 100,
+      "timestamp": "2026-01-15T15:37:40.984Z"
+    },
+    {
+      "id": "ca2645ff-8a04-4646-9115-9b7a66575768",
+      "value": 99,
+      "timestamp": "2026-01-15T15:37:50.984Z"
+    },
+    {
+      "id": "d6918182-2814-4b85-8dcc-46852a08a3b3",
+      "value": 97,
+      "timestamp": "2026-01-15T15:38:00.983Z"
+    },
+    {
+      "id": "8086898e-503d-487d-b34f-be0658431a40",
+      "value": 95,
+      "timestamp": "2026-01-15T15:38:10.984Z"
+    },
+    {
+      "id": "b047b753-baa1-4f7e-b0a1-0149d46bf749",
+      "value": 95,
+      "timestamp": "2026-01-15T15:38:20.985Z"
+    },
+    {
+      "id": "b919c888-efb6-4291-8720-746656251106",
+      "value": 97,
+      "timestamp": "2026-01-15T15:38:30.985Z"
+    },
+    {
+      "id": "97551475-b8ef-4d88-9741-34b61e534250",
+      "value": 100,
+      "timestamp": "2026-01-15T15:38:40.986Z"
+    },
+    {
+      "id": "feddc12d-77e1-4fb2-9e56-42412e4f9f3c",
       "value": 98,
-      "timestamp": "2026-01-15T12:55:57.472Z"
+      "timestamp": "2026-01-15T15:38:50.986Z"
     },
     {
-      "id": "c12b76ec-e1b8-4dec-8151-6dfa77d93813",
-      "value": 101,
-      "timestamp": "2026-01-15T12:56:07.474Z"
+      "id": "bd9ef964-e10a-4a26-ac0f-b7d49335efcd",
+      "value": 96,
+      "timestamp": "2026-01-15T15:39:00.987Z"
     },
     {
-      "id": "6d7441dd-802b-415a-a856-5f6495491f24",
-      "value": 101,
-      "timestamp": "2026-01-15T12:56:17.478Z"
+      "id": "afae540f-0f96-4272-8d77-27c43c6d01ba",
+      "value": 94,
+      "timestamp": "2026-01-15T15:39:10.987Z"
     },
     {
-      "id": "1eeab141-0f2f-4291-acec-eadaf0cf9462",
-      "value": 101,
-      "timestamp": "2026-01-15T12:56:27.484Z"
+      "id": "cde1f083-2432-4652-b4a2-b7b83feaf0c0",
+      "value": 92,
+      "timestamp": "2026-01-15T15:39:20.987Z"
     },
     {
-      "id": "ff53056d-8dad-45af-ab2f-0639aa563cbe",
-      "value": 103,
-      "timestamp": "2026-01-15T12:56:37.491Z"
+      "id": "3eb1027b-794e-483a-949b-1f45f052f120",
+      "value": 94,
+      "timestamp": "2026-01-15T15:39:30.987Z"
     },
     {
-      "id": "6f4a0c2f-fa9c-405e-8ccc-e6a9dd18e585",
-      "value": 102,
-      "timestamp": "2026-01-15T12:56:47.492Z"
+      "id": "9d423a4b-9c60-4023-947f-b7fdbb3f426a",
+      "value": 95,
+      "timestamp": "2026-01-15T15:39:40.987Z"
     },
     {
-      "id": "626fb6d3-67b3-4f11-b44e-b22c636c1a8b",
-      "value": 99,
-      "timestamp": "2026-01-15T12:56:57.495Z"
+      "id": "cb18e9f8-9c61-47ec-8765-8f8482a750e3",
+      "value": 97,
+      "timestamp": "2026-01-15T15:39:50.987Z"
     },
     {
-      "id": "a1c2cdec-434f-46cc-b6f5-9ac8b0de9f54",
+      "id": "90c5e001-dba5-461d-94e1-16c9653e61cd",
       "value": 100,
-      "timestamp": "2026-01-15T12:57:07.500Z"
+      "timestamp": "2026-01-15T15:40:00.988Z"
     },
     {
-      "id": "51f61a36-a958-48c5-808f-33cd60aa2129",
-      "value": 102,
-      "timestamp": "2026-01-15T12:57:17.507Z"
-    },
-    {
-      "id": "57c80eb0-b76d-43bf-8202-260d0ecfe4d6",
+      "id": "be93c2b7-9ef1-4807-9873-c0fc212092d8",
       "value": 101,
-      "timestamp": "2026-01-15T12:57:27.508Z"
+      "timestamp": "2026-01-15T15:40:10.987Z"
     },
     {
-      "id": "31871974-c885-4cc8-97d4-5bc1e2626aca",
-      "value": 99,
-      "timestamp": "2026-01-15T12:57:37.511Z"
+      "id": "b807b1d5-9495-4f52-a0d2-78ccf8872fef",
+      "value": 100,
+      "timestamp": "2026-01-15T15:40:20.988Z"
     },
     {
-      "id": "5f60cd58-06e6-4cf6-944a-a5a2fa1c3437",
+      "id": "7e6e66d6-18a7-4337-8266-47acd9a0ed07",
+      "value": 100,
+      "timestamp": "2026-01-15T15:40:30.989Z"
+    },
+    {
+      "id": "806bb49e-1878-4eef-bc30-a599ba192aa7",
       "value": 98,
-      "timestamp": "2026-01-15T12:57:47.515Z"
+      "timestamp": "2026-01-15T15:40:40.989Z"
     },
     {
-      "id": "4b0edba7-0503-47e2-bb30-7afc546508af",
-      "value": 99,
-      "timestamp": "2026-01-15T12:57:57.521Z"
-    },
-    {
-      "id": "ce267722-5867-4992-a6f4-2d406b186d8b",
-      "value": 102,
-      "timestamp": "2026-01-15T12:58:07.521Z"
-    },
-    {
-      "id": "b10e4909-829c-45ad-afd0-76f34a5c653f",
-      "value": 104,
-      "timestamp": "2026-01-15T12:58:17.523Z"
-    },
-    {
-      "id": "c4c3db65-6861-4257-b339-5d5707ab71a8",
-      "value": 105,
-      "timestamp": "2026-01-15T12:58:27.528Z"
-    },
-    {
-      "id": "4cd9a109-dc6e-4ad0-8bb2-af56d1602715",
-      "value": 105,
-      "timestamp": "2026-01-15T12:58:37.534Z"
-    },
-    {
-      "id": "82957e6d-0798-4de8-9680-055f27eb672e",
-      "value": 104,
-      "timestamp": "2026-01-15T12:58:47.534Z"
-    },
-    {
-      "id": "62757f66-2438-44b4-81c8-0dab1ccfdfba",
-      "value": 105,
-      "timestamp": "2026-01-15T12:58:57.536Z"
-    },
-    {
-      "id": "bd40c8f2-e25b-47f6-9d81-62476d4d5c52",
-      "value": 106,
-      "timestamp": "2026-01-15T12:59:07.540Z"
-    },
-    {
-      "id": "9dbaaf29-130f-4aa2-b1da-eb8e8df6e015",
-      "value": 107,
-      "timestamp": "2026-01-15T12:59:17.546Z"
-    },
-    {
-      "id": "247fabb8-7574-40d2-af4b-a8d59ef22d21",
-      "value": 104,
-      "timestamp": "2026-01-15T12:59:27.553Z"
-    },
-    {
-      "id": "c33e08f4-7950-4d42-bdce-03129c1c4727",
-      "value": 103,
-      "timestamp": "2026-01-15T12:59:37.555Z"
-    },
-    {
-      "id": "ba742b01-0a79-4a82-a6d7-a906cf714072",
-      "value": 104,
-      "timestamp": "2026-01-15T12:59:47.558Z"
-    },
-    {
-      "id": "5de0c3ff-e3e6-4dc8-bc0e-99b59ee76305",
-      "value": 104,
-      "timestamp": "2026-01-15T12:59:57.563Z"
-    },
-    {
-      "id": "06da98b9-5473-40f4-ab08-fd1351058680",
-      "value": 106,
-      "timestamp": "2026-01-15T13:00:07.570Z"
-    },
-    {
-      "id": "4df2318f-ef3e-43c7-b8ab-0ea2fc7b2101",
-      "value": 105,
-      "timestamp": "2026-01-15T13:00:17.571Z"
-    },
-    {
-      "id": "50d0b372-c743-41cd-96c7-30284b0470ab",
-      "value": 107,
-      "timestamp": "2026-01-15T13:00:27.574Z"
-    },
-    {
-      "id": "92d55f07-0db1-4929-a505-837bd4ae187b",
-      "value": 107,
-      "timestamp": "2026-01-15T13:00:37.578Z"
-    },
-    {
-      "id": "88c41a4b-7ce0-4c22-bc39-ae4bed5db00b",
-      "value": 107,
-      "timestamp": "2026-01-15T13:00:47.585Z"
-    },
-    {
-      "id": "5bacddf6-7bc8-43e1-815c-7ef991def50b",
-      "value": 107,
-      "timestamp": "2026-01-15T13:00:57.585Z"
-    },
-    {
-      "id": "8e28de72-52b0-4a8e-9a6c-0cbd184e5d62",
-      "value": 105,
-      "timestamp": "2026-01-15T13:01:07.587Z"
-    },
-    {
-      "id": "3e958d0f-2423-4a4a-99c2-f5ba57b85e87",
-      "value": 105,
-      "timestamp": "2026-01-15T13:01:17.591Z"
-    },
-    {
-      "id": "91f6a8bf-4b69-40e3-9158-3fa107854047",
-      "value": 104,
-      "timestamp": "2026-01-15T13:01:27.597Z"
-    },
-    {
-      "id": "97c71db7-b454-4709-951b-50e3474c6e41",
-      "value": 102,
-      "timestamp": "2026-01-15T13:01:37.605Z"
-    },
-    {
-      "id": "0487e486-cdfa-44f3-b7c8-9b11d4fe40fb",
-      "value": 104,
-      "timestamp": "2026-01-15T13:01:47.606Z"
-    },
-    {
-      "id": "65547a35-5bee-4205-991b-4c6b5f7e7c7a",
-      "value": 103,
-      "timestamp": "2026-01-15T13:01:57.610Z"
-    },
-    {
-      "id": "f9be147f-ce4d-461e-9120-0650c2c26b2f",
-      "value": 102,
-      "timestamp": "2026-01-15T13:02:07.616Z"
-    },
-    {
-      "id": "46ffa189-5e3e-4e09-9c3f-32e0228e94fc",
-      "value": 102,
-      "timestamp": "2026-01-15T13:02:17.623Z"
-    },
-    {
-      "id": "9a3d0142-8ede-47a2-b645-ce011f54172a",
-      "value": 103,
-      "timestamp": "2026-01-15T13:02:27.624Z"
-    },
-    {
-      "id": "30a249ed-829a-4bc9-8de5-fc61d2032c55",
-      "value": 100,
-      "timestamp": "2026-01-15T13:02:37.627Z"
-    },
-    {
-      "id": "1e253608-9805-45bb-a35e-fa2ea8b57d68",
-      "value": 102,
-      "timestamp": "2026-01-15T13:02:47.632Z"
-    },
-    {
-      "id": "47ead23f-3978-4904-8555-c9dc93129d32",
-      "value": 103,
-      "timestamp": "2026-01-15T13:02:57.639Z"
-    },
-    {
-      "id": "53e40563-3e36-468f-9fc7-615de463b4bd",
-      "value": 104,
-      "timestamp": "2026-01-15T13:03:07.640Z"
-    },
-    {
-      "id": "4a7abfa2-db80-45c0-b979-9682eef58071",
+      "id": "cd7cb004-9e70-4a8b-a133-a578e230e408",
       "value": 101,
-      "timestamp": "2026-01-15T13:03:17.642Z"
+      "timestamp": "2026-01-15T15:40:50.990Z"
     },
     {
-      "id": "e427fed9-3cb6-4460-a1ae-c038757e4588",
+      "id": "625f3469-c2fa-4e4b-80c1-8632d10f1e17",
       "value": 100,
-      "timestamp": "2026-01-15T13:03:27.647Z"
+      "timestamp": "2026-01-15T15:41:00.992Z"
     },
     {
-      "id": "37c87a21-ed1a-4d18-9e04-281c7c08a387",
+      "id": "2a36f144-97c1-4855-b63e-403dc0f9e785",
       "value": 100,
-      "timestamp": "2026-01-15T13:03:37.653Z"
+      "timestamp": "2026-01-15T15:41:10.994Z"
     },
     {
-      "id": "51ad3596-6184-4f7e-96d6-5313413ba50c",
+      "id": "933f61ff-ba8a-42e8-ab4f-b24885ece018",
+      "value": 102,
+      "timestamp": "2026-01-15T15:41:20.994Z"
+    },
+    {
+      "id": "d1e7838a-aaf2-42f4-8366-932a82ab9cb4",
+      "value": 104,
+      "timestamp": "2026-01-15T15:41:30.995Z"
+    },
+    {
+      "id": "5dd7413f-30fc-4ad0-b3ac-8198fddb6075",
+      "value": 103,
+      "timestamp": "2026-01-15T15:41:40.995Z"
+    },
+    {
+      "id": "ab85760c-bda4-40b3-a2bb-95b41d99452c",
+      "value": 103,
+      "timestamp": "2026-01-15T15:41:50.996Z"
+    },
+    {
+      "id": "891cf802-c0ec-4648-893f-cd4e8546f004",
+      "value": 100,
+      "timestamp": "2026-01-15T15:42:00.997Z"
+    },
+    {
+      "id": "27e1eb28-92dc-430a-a608-56a022480582",
       "value": 99,
-      "timestamp": "2026-01-15T13:03:47.653Z"
+      "timestamp": "2026-01-15T15:42:10.997Z"
     },
     {
-      "id": "567f5741-68d6-4a60-a900-d7ee59f7a838",
+      "id": "04ef60de-c2d7-4dcb-a8cc-d6d47dd9c863",
+      "value": 99,
+      "timestamp": "2026-01-15T15:42:20.996Z"
+    },
+    {
+      "id": "514bb538-ace8-4bd1-b5d4-3ba6ec859bd9",
+      "value": 101,
+      "timestamp": "2026-01-15T15:42:30.997Z"
+    },
+    {
+      "id": "543d8364-207a-4b9f-a693-a25eb94c12db",
+      "value": 103,
+      "timestamp": "2026-01-15T15:42:40.996Z"
+    },
+    {
+      "id": "8b78af8e-0104-4188-9455-735b43ec940d",
+      "value": 105,
+      "timestamp": "2026-01-15T15:42:50.997Z"
+    },
+    {
+      "id": "f3bdb305-3568-4ef6-b0ec-794077ad8a53",
+      "value": 105,
+      "timestamp": "2026-01-15T15:43:00.997Z"
+    },
+    {
+      "id": "7c9b851a-65d9-4c91-86f6-5abcc69607df",
+      "value": 103,
+      "timestamp": "2026-01-15T15:43:10.998Z"
+    },
+    {
+      "id": "e86f83ea-bd33-41f2-916d-9ae695ed71d7",
+      "value": 104,
+      "timestamp": "2026-01-15T15:43:20.999Z"
+    },
+    {
+      "id": "aafbc2b1-062f-4966-9387-5f3634aed4ba",
+      "value": 105,
+      "timestamp": "2026-01-15T15:43:31.000Z"
+    },
+    {
+      "id": "316857b9-9aa8-467f-8172-9978541bae31",
+      "value": 104,
+      "timestamp": "2026-01-15T15:43:41.000Z"
+    },
+    {
+      "id": "69b443ff-570f-488e-a828-49767e6eb3ce",
+      "value": 103,
+      "timestamp": "2026-01-15T15:43:51.000Z"
+    },
+    {
+      "id": "f3476310-d4df-4c2a-ad9f-95cb039c0e32",
+      "value": 103,
+      "timestamp": "2026-01-15T15:44:01.000Z"
+    },
+    {
+      "id": "269797c7-3723-4089-b595-98e6c31373c6",
+      "value": 100,
+      "timestamp": "2026-01-15T15:44:11.001Z"
+    },
+    {
+      "id": "511f40e0-3e18-470c-a674-f87b9656f365",
+      "value": 102,
+      "timestamp": "2026-01-15T15:44:21.001Z"
+    },
+    {
+      "id": "bd9fada4-e65a-4a92-9554-7b49879bb7e9",
+      "value": 100,
+      "timestamp": "2026-01-15T15:44:31.001Z"
+    },
+    {
+      "id": "9af01e4f-6adb-49e5-94b0-a3b27ab26d8d",
+      "value": 103,
+      "timestamp": "2026-01-15T15:44:41.002Z"
+    },
+    {
+      "id": "0edf6b19-eb15-484c-a6e1-3cda47829c07",
+      "value": 102,
+      "timestamp": "2026-01-15T15:44:51.004Z"
+    },
+    {
+      "id": "61f074cb-10b8-4058-9038-f19c36cbe101",
+      "value": 103,
+      "timestamp": "2026-01-15T15:45:01.003Z"
+    },
+    {
+      "id": "721970cb-a512-48b9-9bef-0f79cc6a04c9",
+      "value": 100,
+      "timestamp": "2026-01-15T15:45:11.003Z"
+    },
+    {
+      "id": "f67c2062-7aee-4654-82f7-de8571d593f4",
+      "value": 101,
+      "timestamp": "2026-01-15T15:45:21.004Z"
+    },
+    {
+      "id": "68ee3a77-eaf4-41b0-8b57-c7c5b5317aee",
+      "value": 99,
+      "timestamp": "2026-01-15T15:45:31.005Z"
+    },
+    {
+      "id": "fda51b62-6bfc-41df-8d8d-84e3df61d102",
       "value": 98,
-      "timestamp": "2026-01-15T13:03:57.655Z"
-    },
-    {
-      "id": "754e0f9b-7f81-4aa1-9e47-592193af48ff",
-      "value": 99,
-      "timestamp": "2026-01-15T13:04:07.659Z"
+      "timestamp": "2026-01-15T15:45:41.006Z"
     }
   ],
   "sleep": [
@@ -849,758 +849,758 @@
   ],
   "o2": [
     {
-      "id": "6bcec639-d938-4f6a-a3fb-e401fe9555d5",
+      "id": "ff61db00-26b3-4e1d-977d-aa29939468fb",
       "value": 98,
-      "timestamp": "2026-01-15T12:55:57.472Z"
+      "timestamp": "2026-01-15T15:37:30.984Z"
     },
     {
-      "id": "ea7be498-9d0c-4875-9d65-f5e1bab1e968",
+      "id": "25965c08-ea9f-47b5-84c2-a1807417799d",
       "value": 98,
-      "timestamp": "2026-01-15T12:56:07.474Z"
+      "timestamp": "2026-01-15T15:37:40.984Z"
     },
     {
-      "id": "303fcdb6-b4d3-4591-91e3-d0513ea11429",
-      "value": 98,
-      "timestamp": "2026-01-15T12:56:17.478Z"
-    },
-    {
-      "id": "52318976-404d-4d15-8311-d17a65cc2c4d",
-      "value": 98,
-      "timestamp": "2026-01-15T12:56:27.484Z"
-    },
-    {
-      "id": "1e9b8a12-cb12-4691-95a1-cc6daa68d2fb",
-      "value": 98,
-      "timestamp": "2026-01-15T12:56:37.491Z"
-    },
-    {
-      "id": "ae20f5ee-045b-4085-a9ed-38aaf5baea70",
-      "value": 98,
-      "timestamp": "2026-01-15T12:56:47.492Z"
-    },
-    {
-      "id": "5a332453-dd85-4edd-981a-55d76809b6ee",
-      "value": 98,
-      "timestamp": "2026-01-15T12:56:57.495Z"
-    },
-    {
-      "id": "d5458f0e-d9db-4c8c-b390-42d654421f1a",
+      "id": "879e5370-3fc7-4e08-8ca2-53e0b2f5be8f",
       "value": 99,
-      "timestamp": "2026-01-15T12:57:07.500Z"
+      "timestamp": "2026-01-15T15:37:50.984Z"
     },
     {
-      "id": "73f979b0-2a9e-4783-93f8-f9bc741df2d0",
+      "id": "b0ea1e82-4981-410d-8c47-1ca7c03670b9",
       "value": 99,
-      "timestamp": "2026-01-15T12:57:17.507Z"
+      "timestamp": "2026-01-15T15:38:00.983Z"
     },
     {
-      "id": "4e96c4b2-b642-46ca-8b41-684245aedc0f",
+      "id": "b0aab1e7-080a-4293-bed8-9a00acb67711",
       "value": 99,
-      "timestamp": "2026-01-15T12:57:27.508Z"
+      "timestamp": "2026-01-15T15:38:10.984Z"
     },
     {
-      "id": "0f9ab38e-6a87-46ed-9de8-029ddcd4ac82",
-      "value": 98,
-      "timestamp": "2026-01-15T12:57:37.511Z"
-    },
-    {
-      "id": "b56b3b7b-f180-4145-bc0b-6941100a7f45",
-      "value": 98,
-      "timestamp": "2026-01-15T12:57:47.515Z"
-    },
-    {
-      "id": "2f569d97-45e6-412e-b172-81925f27e642",
-      "value": 98,
-      "timestamp": "2026-01-15T12:57:57.521Z"
-    },
-    {
-      "id": "742c1549-9610-4f2e-8e50-0441c619d352",
+      "id": "44907008-acb4-44b4-a9ce-deafd649a058",
       "value": 99,
-      "timestamp": "2026-01-15T12:58:07.521Z"
+      "timestamp": "2026-01-15T15:38:20.985Z"
     },
     {
-      "id": "8f0ed6ae-376a-408f-ad1a-971e609e94b4",
+      "id": "5c3d8fab-2be4-4d19-8de6-bf737709aae9",
       "value": 99,
-      "timestamp": "2026-01-15T12:58:17.523Z"
+      "timestamp": "2026-01-15T15:38:30.985Z"
     },
     {
-      "id": "0566a91d-ef93-406d-895f-90925c5c9eb9",
+      "id": "b03dd866-2e8a-4a31-81dd-cf64c7941bd5",
       "value": 99,
-      "timestamp": "2026-01-15T12:58:27.528Z"
+      "timestamp": "2026-01-15T15:38:40.986Z"
     },
     {
-      "id": "67bb3f01-2ce0-4d4d-a9e6-71fa98506c5a",
+      "id": "7b677bc0-c305-4e02-851e-0a7fce05dae7",
+      "value": 98,
+      "timestamp": "2026-01-15T15:38:50.986Z"
+    },
+    {
+      "id": "6cf7176e-d3da-41eb-8e0c-55a27445ae22",
+      "value": 98,
+      "timestamp": "2026-01-15T15:39:00.987Z"
+    },
+    {
+      "id": "d55af1e5-c778-47f8-94a0-117abd7d87a0",
+      "value": 98,
+      "timestamp": "2026-01-15T15:39:10.987Z"
+    },
+    {
+      "id": "339171b3-dbda-4f03-8e30-99d8cf268d83",
+      "value": 98,
+      "timestamp": "2026-01-15T15:39:20.987Z"
+    },
+    {
+      "id": "111f3d72-fa35-4c9f-b4e2-bb350c1fc232",
       "value": 99,
-      "timestamp": "2026-01-15T12:58:37.534Z"
+      "timestamp": "2026-01-15T15:39:30.987Z"
     },
     {
-      "id": "750b580e-da4f-4276-94d0-e7fcfb844cdf",
-      "value": 98,
-      "timestamp": "2026-01-15T12:58:47.534Z"
-    },
-    {
-      "id": "f8975bde-6aa1-4398-9614-6aabdcb3dffb",
-      "value": 98,
-      "timestamp": "2026-01-15T12:58:57.536Z"
-    },
-    {
-      "id": "f7d7197a-414a-44aa-b975-4e9bb0e254ed",
-      "value": 98,
-      "timestamp": "2026-01-15T12:59:07.540Z"
-    },
-    {
-      "id": "707e8876-b59d-47b7-92b9-390037515018",
-      "value": 98,
-      "timestamp": "2026-01-15T12:59:17.546Z"
-    },
-    {
-      "id": "32139601-414e-472e-8efb-1f3cc44d0fd0",
-      "value": 98,
-      "timestamp": "2026-01-15T12:59:27.553Z"
-    },
-    {
-      "id": "521e6c2f-d8fd-498e-8f7e-c64518fa1ff3",
-      "value": 98,
-      "timestamp": "2026-01-15T12:59:37.555Z"
-    },
-    {
-      "id": "6bbace62-b683-474b-aa89-2092970869cf",
-      "value": 98,
-      "timestamp": "2026-01-15T12:59:47.558Z"
-    },
-    {
-      "id": "5dee2b71-3ed6-43ee-85e6-b125aaef69fd",
+      "id": "fc62f556-f5b4-4fca-a856-e02611b5988e",
       "value": 99,
-      "timestamp": "2026-01-15T12:59:57.563Z"
+      "timestamp": "2026-01-15T15:39:40.987Z"
     },
     {
-      "id": "85d65f62-d971-450c-9f60-e80de3c39567",
+      "id": "2521a17f-1e6c-4f97-8d0b-a0d5157292ba",
       "value": 99,
-      "timestamp": "2026-01-15T13:00:07.570Z"
+      "timestamp": "2026-01-15T15:39:50.987Z"
     },
     {
-      "id": "870505af-8d1c-4f70-b9ba-efbd12705e4f",
+      "id": "a8bf42cd-d7a3-4f09-bfc5-154284906564",
       "value": 99,
-      "timestamp": "2026-01-15T13:00:17.571Z"
+      "timestamp": "2026-01-15T15:40:00.988Z"
     },
     {
-      "id": "3c860ae4-5670-4875-a035-00647b80fa31",
-      "value": 98,
-      "timestamp": "2026-01-15T13:00:27.574Z"
-    },
-    {
-      "id": "36a5a97d-6e0d-404f-b437-803242b433a7",
-      "value": 98,
-      "timestamp": "2026-01-15T13:00:37.578Z"
-    },
-    {
-      "id": "3d5a6d2d-d518-4a00-a6de-d5107349eb0b",
-      "value": 98,
-      "timestamp": "2026-01-15T13:00:47.585Z"
-    },
-    {
-      "id": "7f904041-d611-4c48-9866-712a97ad7d26",
-      "value": 98,
-      "timestamp": "2026-01-15T13:00:57.585Z"
-    },
-    {
-      "id": "f67fefae-32fb-49e7-863d-22a79a5b8b3d",
-      "value": 98,
-      "timestamp": "2026-01-15T13:01:07.587Z"
-    },
-    {
-      "id": "f76e9602-dc75-4a1f-ac5e-41f71a5f9d93",
-      "value": 98,
-      "timestamp": "2026-01-15T13:01:17.591Z"
-    },
-    {
-      "id": "a46bbc79-5b3e-436e-9d31-57cd3e775f16",
-      "value": 98,
-      "timestamp": "2026-01-15T13:01:27.597Z"
-    },
-    {
-      "id": "1f2d55db-6537-4e8a-9d94-2ec572efdce4",
-      "value": 98,
-      "timestamp": "2026-01-15T13:01:37.605Z"
-    },
-    {
-      "id": "94e9f00c-64fc-4197-b854-88684c33a3f4",
-      "value": 98,
-      "timestamp": "2026-01-15T13:01:47.606Z"
-    },
-    {
-      "id": "c53f10ec-6001-47a0-9b55-2a251502ffc6",
-      "value": 98,
-      "timestamp": "2026-01-15T13:01:57.610Z"
-    },
-    {
-      "id": "ffbb2c1d-fedb-454c-825f-19608de7f073",
-      "value": 98,
-      "timestamp": "2026-01-15T13:02:07.616Z"
-    },
-    {
-      "id": "c2ff2625-7355-490b-85cd-a0797b516196",
-      "value": 98,
-      "timestamp": "2026-01-15T13:02:17.623Z"
-    },
-    {
-      "id": "7b033a15-1cbc-4855-a08d-bdcbed9ba4d7",
+      "id": "93b79e92-95ed-4e4d-98a1-e6cf572aadb5",
       "value": 99,
-      "timestamp": "2026-01-15T13:02:27.624Z"
+      "timestamp": "2026-01-15T15:40:10.987Z"
     },
     {
-      "id": "37b9d270-b125-46c9-ac46-353bc26f02e1",
+      "id": "c6d8ecc0-9fa0-4b68-a419-a4f3ae6daf36",
       "value": 99,
-      "timestamp": "2026-01-15T13:02:37.627Z"
+      "timestamp": "2026-01-15T15:40:20.988Z"
     },
     {
-      "id": "17eed934-b249-4a04-92bb-c336c73b1ba6",
+      "id": "d21b8916-3caf-43e2-bcfc-b8a0a7e29aa9",
+      "value": 99,
+      "timestamp": "2026-01-15T15:40:30.989Z"
+    },
+    {
+      "id": "88ac9f50-6575-4ab0-9aac-7a2b4e53e6af",
       "value": 98,
-      "timestamp": "2026-01-15T13:02:47.632Z"
+      "timestamp": "2026-01-15T15:40:40.989Z"
     },
     {
-      "id": "d8bb8da4-e37d-415a-ab7e-353606fe7c9d",
-      "value": 99,
-      "timestamp": "2026-01-15T13:02:57.639Z"
-    },
-    {
-      "id": "680694bc-f69d-4ad0-bde7-581d31cce107",
-      "value": 99,
-      "timestamp": "2026-01-15T13:03:07.640Z"
-    },
-    {
-      "id": "da15c795-670d-4fdb-8a62-232f2e528d22",
-      "value": 99,
-      "timestamp": "2026-01-15T13:03:17.642Z"
-    },
-    {
-      "id": "02479a9d-df8e-46d9-a20a-9e8a559a5288",
-      "value": 99,
-      "timestamp": "2026-01-15T13:03:27.647Z"
-    },
-    {
-      "id": "36a0134e-7e47-4ab4-8894-a88225381e0c",
+      "id": "4ae02d02-efa3-4f70-ab0f-5edd63aa1ef7",
       "value": 98,
-      "timestamp": "2026-01-15T13:03:37.653Z"
+      "timestamp": "2026-01-15T15:40:50.990Z"
     },
     {
-      "id": "22125360-744a-45ba-b729-81ea6a742c9b",
-      "value": 99,
-      "timestamp": "2026-01-15T13:03:47.653Z"
-    },
-    {
-      "id": "f1e3d568-8282-4a66-bd61-490241a4dcc3",
-      "value": 99,
-      "timestamp": "2026-01-15T13:03:57.655Z"
-    },
-    {
-      "id": "7870e921-80a7-4708-90c9-5da9ccc9039c",
+      "id": "d0035a0a-4f13-43ba-9673-1e6538c093b3",
       "value": 98,
-      "timestamp": "2026-01-15T13:04:07.659Z"
+      "timestamp": "2026-01-15T15:41:00.992Z"
+    },
+    {
+      "id": "bda22645-353f-4a9d-8211-1acd51cb2dd1",
+      "value": 98,
+      "timestamp": "2026-01-15T15:41:10.994Z"
+    },
+    {
+      "id": "f1dcfe93-0b62-4480-b60e-f4ab4c45de03",
+      "value": 98,
+      "timestamp": "2026-01-15T15:41:20.994Z"
+    },
+    {
+      "id": "2e614a32-fdc8-4064-8527-963ad54f2039",
+      "value": 98,
+      "timestamp": "2026-01-15T15:41:30.995Z"
+    },
+    {
+      "id": "c0551485-ffdf-462b-be7e-5aeda1103494",
+      "value": 98,
+      "timestamp": "2026-01-15T15:41:40.995Z"
+    },
+    {
+      "id": "d3927829-ebbf-4037-bc5d-d0d5fe6a968b",
+      "value": 98,
+      "timestamp": "2026-01-15T15:41:50.996Z"
+    },
+    {
+      "id": "21334be4-ce06-4b29-b1fb-0b23d6c925f8",
+      "value": 98,
+      "timestamp": "2026-01-15T15:42:00.997Z"
+    },
+    {
+      "id": "43e588b3-9d14-4cf2-999e-9a01b1d23f08",
+      "value": 98,
+      "timestamp": "2026-01-15T15:42:10.997Z"
+    },
+    {
+      "id": "83fda4f9-b0f8-4c65-b766-8352892d9c9a",
+      "value": 98,
+      "timestamp": "2026-01-15T15:42:20.996Z"
+    },
+    {
+      "id": "4cde2f5a-f6dd-4532-b986-c7a1ba36aca9",
+      "value": 98,
+      "timestamp": "2026-01-15T15:42:30.997Z"
+    },
+    {
+      "id": "dec7d79d-da05-4577-b44a-3e88588c3476",
+      "value": 98,
+      "timestamp": "2026-01-15T15:42:40.996Z"
+    },
+    {
+      "id": "2253cbf3-c600-4d95-afbf-f7e784c0ae79",
+      "value": 99,
+      "timestamp": "2026-01-15T15:42:50.997Z"
+    },
+    {
+      "id": "1d369b94-b0cd-4b61-9788-3b0845c7f381",
+      "value": 99,
+      "timestamp": "2026-01-15T15:43:00.997Z"
+    },
+    {
+      "id": "757b1bcd-59a9-4617-b186-a100c348e66c",
+      "value": 98,
+      "timestamp": "2026-01-15T15:43:10.998Z"
+    },
+    {
+      "id": "bafeacb3-f313-4fc9-9234-b32ef3cbea98",
+      "value": 98,
+      "timestamp": "2026-01-15T15:43:20.999Z"
+    },
+    {
+      "id": "44d6c18e-c02a-47a1-86e6-32a33d4ac4c3",
+      "value": 98,
+      "timestamp": "2026-01-15T15:43:31.000Z"
+    },
+    {
+      "id": "274d3802-7f93-4ffa-a8fb-0122fc45e60a",
+      "value": 98,
+      "timestamp": "2026-01-15T15:43:41.000Z"
+    },
+    {
+      "id": "5915fb07-1f48-449d-9295-90978d8b715d",
+      "value": 98,
+      "timestamp": "2026-01-15T15:43:51.000Z"
+    },
+    {
+      "id": "6a271ef0-2100-4288-9580-de46f941a775",
+      "value": 98,
+      "timestamp": "2026-01-15T15:44:01.000Z"
+    },
+    {
+      "id": "853c9e5a-8c3d-4d55-bd1a-c23db89c0ea0",
+      "value": 98,
+      "timestamp": "2026-01-15T15:44:11.001Z"
+    },
+    {
+      "id": "93453ee6-677c-4ef5-861e-0befb314edda",
+      "value": 98,
+      "timestamp": "2026-01-15T15:44:21.001Z"
+    },
+    {
+      "id": "28c3f702-fa9a-4ccf-98ba-673ef74aef1f",
+      "value": 98,
+      "timestamp": "2026-01-15T15:44:31.001Z"
+    },
+    {
+      "id": "0dcfe495-7ae6-4a70-aa5f-9a7e94a8ba91",
+      "value": 98,
+      "timestamp": "2026-01-15T15:44:41.002Z"
+    },
+    {
+      "id": "33a97841-973a-4b77-ba90-0d141e5bda73",
+      "value": 99,
+      "timestamp": "2026-01-15T15:44:51.004Z"
+    },
+    {
+      "id": "be85b690-41f2-4855-8355-259d8380e7cf",
+      "value": 99,
+      "timestamp": "2026-01-15T15:45:01.003Z"
+    },
+    {
+      "id": "112b72f6-54e6-44f2-ba23-40691db32bf6",
+      "value": 99,
+      "timestamp": "2026-01-15T15:45:11.003Z"
+    },
+    {
+      "id": "7eb20ace-12a6-474a-b7ed-ebb7683abd36",
+      "value": 98,
+      "timestamp": "2026-01-15T15:45:21.004Z"
+    },
+    {
+      "id": "fb969d1a-2969-4014-bf59-3d2862d1d3e6",
+      "value": 98,
+      "timestamp": "2026-01-15T15:45:31.005Z"
+    },
+    {
+      "id": "7f15afff-9bd3-4f59-b525-19dee16f0670",
+      "value": 99,
+      "timestamp": "2026-01-15T15:45:41.006Z"
     }
   ],
   "temperature": [
     {
-      "id": "5e6db21b-9094-4b15-92ca-7c4adb8bf93c",
-      "value": 36.3,
-      "timestamp": "2026-01-15T12:55:57.472Z"
-    },
-    {
-      "id": "277db1d0-7655-499a-86b7-103ead17a066",
-      "value": 36.2,
-      "timestamp": "2026-01-15T12:56:07.474Z"
-    },
-    {
-      "id": "1e4bb2f7-9728-444e-856d-10c4f56d33d1",
-      "value": 36.4,
-      "timestamp": "2026-01-15T12:56:17.478Z"
-    },
-    {
-      "id": "a1ec4581-26ae-48ee-9e6e-fdbb99edc6ad",
-      "value": 36.5,
-      "timestamp": "2026-01-15T12:56:27.484Z"
-    },
-    {
-      "id": "94f55e78-e9d9-4443-9b41-cdd58a610810",
-      "value": 36.5,
-      "timestamp": "2026-01-15T12:56:37.491Z"
-    },
-    {
-      "id": "86560aa4-4851-4d8c-84dd-0b818db0bf34",
-      "value": 36.4,
-      "timestamp": "2026-01-15T12:56:47.492Z"
-    },
-    {
-      "id": "867894b8-0e6a-45e5-ac52-27be1519b274",
-      "value": 36.4,
-      "timestamp": "2026-01-15T12:56:57.495Z"
-    },
-    {
-      "id": "0ee385e2-d04d-4e18-b6ba-2b4e1bf45aa0",
+      "id": "479368b9-848a-4204-8c91-b70bb79c590f",
       "value": 36.6,
-      "timestamp": "2026-01-15T12:57:07.500Z"
+      "timestamp": "2026-01-15T15:37:30.984Z"
     },
     {
-      "id": "0ae83784-2f12-476a-84ae-8175c7f91966",
-      "value": 36.8,
-      "timestamp": "2026-01-15T12:57:17.507Z"
-    },
-    {
-      "id": "a2d691d3-37d6-4249-9edc-dff77afa6a6a",
-      "value": 36.7,
-      "timestamp": "2026-01-15T12:57:27.508Z"
-    },
-    {
-      "id": "e8c69723-3a45-48f3-ac8f-457c7828713d",
-      "value": 36.7,
-      "timestamp": "2026-01-15T12:57:37.511Z"
-    },
-    {
-      "id": "a6b8418d-154b-46cb-9f1b-7243b430c800",
-      "value": 36.8,
-      "timestamp": "2026-01-15T12:57:47.515Z"
-    },
-    {
-      "id": "b8478d9b-c337-4f01-97ad-e220f6270124",
-      "value": 36.7,
-      "timestamp": "2026-01-15T12:57:57.521Z"
-    },
-    {
-      "id": "ed0888a6-b47b-4f7d-bc04-5d3fe85a5b69",
-      "value": 36.8,
-      "timestamp": "2026-01-15T12:58:07.521Z"
-    },
-    {
-      "id": "915f95b7-a64b-443f-a168-c3570190a082",
-      "value": 36.8,
-      "timestamp": "2026-01-15T12:58:17.523Z"
-    },
-    {
-      "id": "8c5dbacf-5f55-4d7b-9eb7-5855ecbbd6cd",
-      "value": 36.7,
-      "timestamp": "2026-01-15T12:58:27.528Z"
-    },
-    {
-      "id": "5f1d7189-c771-447f-a23d-072f08cfcd40",
-      "value": 36.8,
-      "timestamp": "2026-01-15T12:58:37.534Z"
-    },
-    {
-      "id": "f37565ea-ef3f-42a2-b979-83cdeab16781",
-      "value": 36.8,
-      "timestamp": "2026-01-15T12:58:47.534Z"
-    },
-    {
-      "id": "4f3a82cb-7508-4ea7-ae11-e4ad42ab6d7c",
-      "value": 36.7,
-      "timestamp": "2026-01-15T12:58:57.536Z"
-    },
-    {
-      "id": "1601c975-488d-464b-9200-a5871ac52f64",
-      "value": 36.5,
-      "timestamp": "2026-01-15T12:59:07.540Z"
-    },
-    {
-      "id": "84cf613a-2cf8-44b1-b7d5-bdbb017d60de",
-      "value": 36.4,
-      "timestamp": "2026-01-15T12:59:17.546Z"
-    },
-    {
-      "id": "d9274fb3-0967-4865-9dfb-78c6139db128",
+      "id": "181e9e80-d65a-4922-8f43-aa5e1a11f943",
       "value": 36.6,
-      "timestamp": "2026-01-15T12:59:27.553Z"
+      "timestamp": "2026-01-15T15:37:40.984Z"
     },
     {
-      "id": "04d812d9-215c-406f-91f8-a8b684c759b6",
+      "id": "12e02e71-e707-49df-81f3-a9ec1a331097",
       "value": 36.8,
-      "timestamp": "2026-01-15T12:59:37.555Z"
+      "timestamp": "2026-01-15T15:37:50.984Z"
     },
     {
-      "id": "661e756e-c2e0-41a6-be10-c2899ec77afe",
-      "value": 36.6,
-      "timestamp": "2026-01-15T12:59:47.558Z"
-    },
-    {
-      "id": "c6ecea0d-c0d4-483e-8aec-11517f2d8088",
-      "value": 36.6,
-      "timestamp": "2026-01-15T12:59:57.563Z"
-    },
-    {
-      "id": "96218ad2-1eb8-40bf-818e-f901b790c056",
-      "value": 36.6,
-      "timestamp": "2026-01-15T13:00:07.570Z"
-    },
-    {
-      "id": "90ae4962-cec6-4bec-b2a4-296a1edd14d0",
-      "value": 36.5,
-      "timestamp": "2026-01-15T13:00:17.571Z"
-    },
-    {
-      "id": "18185558-1309-4e55-a70c-ab22efc72eea",
-      "value": 36.5,
-      "timestamp": "2026-01-15T13:00:27.574Z"
-    },
-    {
-      "id": "42565dbc-145b-4902-992c-efab423aff57",
-      "value": 36.4,
-      "timestamp": "2026-01-15T13:00:37.578Z"
-    },
-    {
-      "id": "18f169a5-6b1a-4f59-ac31-72f9ed0438f3",
-      "value": 36.5,
-      "timestamp": "2026-01-15T13:00:47.585Z"
-    },
-    {
-      "id": "9650bd2f-0c53-4a1d-9ffa-dfa943d74b1c",
-      "value": 36.5,
-      "timestamp": "2026-01-15T13:00:57.585Z"
-    },
-    {
-      "id": "028daec2-a4aa-454c-b4d5-9b4c86537c70",
-      "value": 36.4,
-      "timestamp": "2026-01-15T13:01:07.587Z"
-    },
-    {
-      "id": "bc8ff5ea-a9c2-4894-992d-b6784fda31f8",
-      "value": 36.5,
-      "timestamp": "2026-01-15T13:01:17.591Z"
-    },
-    {
-      "id": "7fa5ab9a-f8fd-4286-a629-587aa2fbb584",
-      "value": 36.5,
-      "timestamp": "2026-01-15T13:01:27.597Z"
-    },
-    {
-      "id": "65ad994d-a20b-4d5d-a0d8-5597e7783c4e",
-      "value": 36.6,
-      "timestamp": "2026-01-15T13:01:37.605Z"
-    },
-    {
-      "id": "2cc08082-8ab7-4324-bf45-ce17cc13d734",
+      "id": "bd89a550-6226-4d36-943b-c9ae9d896af2",
       "value": 36.7,
-      "timestamp": "2026-01-15T13:01:47.606Z"
+      "timestamp": "2026-01-15T15:38:00.983Z"
     },
     {
-      "id": "69d31ba3-edaf-41d4-bbd2-8e0bb6254d73",
-      "value": 36.7,
-      "timestamp": "2026-01-15T13:01:57.610Z"
-    },
-    {
-      "id": "d2bb1601-44dc-4bae-804c-dd16c6dd259d",
-      "value": 36.8,
-      "timestamp": "2026-01-15T13:02:07.616Z"
-    },
-    {
-      "id": "5b063cd8-e07c-4893-bf1f-b7d8367f22f4",
-      "value": 36.7,
-      "timestamp": "2026-01-15T13:02:17.623Z"
-    },
-    {
-      "id": "cf959b6b-26fc-4d15-be75-c552019c9f0d",
+      "id": "218218dc-993e-48b5-9395-77389235025f",
       "value": 36.9,
-      "timestamp": "2026-01-15T13:02:27.624Z"
+      "timestamp": "2026-01-15T15:38:10.984Z"
     },
     {
-      "id": "5ebb5a08-9591-4a03-9d6f-ebf990eb4518",
+      "id": "0ff55454-e2d9-46a3-a7d4-0594db88d754",
+      "value": 36.9,
+      "timestamp": "2026-01-15T15:38:20.985Z"
+    },
+    {
+      "id": "79c38b7b-9679-4719-9a0c-a108c2bca051",
       "value": 37,
-      "timestamp": "2026-01-15T13:02:37.627Z"
+      "timestamp": "2026-01-15T15:38:30.985Z"
     },
     {
-      "id": "7fee5232-b602-4f3d-a5fa-8459256b40a8",
+      "id": "00b59e2b-f317-428c-9932-fd004ec1fded",
       "value": 36.9,
-      "timestamp": "2026-01-15T13:02:47.632Z"
+      "timestamp": "2026-01-15T15:38:40.986Z"
     },
     {
-      "id": "9f977a1b-6db0-469d-883d-9ed170fa9bd9",
+      "id": "397af933-1660-4e56-9678-5df6909bad53",
+      "value": 36.8,
+      "timestamp": "2026-01-15T15:38:50.986Z"
+    },
+    {
+      "id": "cc171895-b6da-4300-8adf-9a968b88713c",
+      "value": 36.8,
+      "timestamp": "2026-01-15T15:39:00.987Z"
+    },
+    {
+      "id": "14804e0b-f69c-46c3-b175-9fdd9afb25aa",
+      "value": 36.8,
+      "timestamp": "2026-01-15T15:39:10.987Z"
+    },
+    {
+      "id": "a804c711-6ed3-4e94-b5bc-3751edbcabde",
       "value": 36.7,
-      "timestamp": "2026-01-15T13:02:57.639Z"
+      "timestamp": "2026-01-15T15:39:20.987Z"
     },
     {
-      "id": "2ce78c26-6bdd-49f9-94a3-5aec83f20154",
+      "id": "c578c0f7-1d3a-413c-8237-d01d02657256",
+      "value": 36.9,
+      "timestamp": "2026-01-15T15:39:30.987Z"
+    },
+    {
+      "id": "9365b6ee-1cfc-4483-9161-a5f9dc2e6d9d",
+      "value": 37,
+      "timestamp": "2026-01-15T15:39:40.987Z"
+    },
+    {
+      "id": "39b0b160-dbe5-439d-8ca3-e570de104d9d",
+      "value": 36.8,
+      "timestamp": "2026-01-15T15:39:50.987Z"
+    },
+    {
+      "id": "e800bc4b-e098-4dfd-8cad-11f3f630bb9c",
+      "value": 36.9,
+      "timestamp": "2026-01-15T15:40:00.988Z"
+    },
+    {
+      "id": "83c5c7ba-6035-414a-bd6e-826a4c18618b",
+      "value": 36.8,
+      "timestamp": "2026-01-15T15:40:10.987Z"
+    },
+    {
+      "id": "d2225308-1f3f-4753-a0b1-7eca670aba9b",
       "value": 36.7,
-      "timestamp": "2026-01-15T13:03:07.640Z"
+      "timestamp": "2026-01-15T15:40:20.988Z"
     },
     {
-      "id": "8b251243-4fb4-408e-a04c-01845e8b8825",
+      "id": "d23a9745-5538-4e63-a796-22aebe63c20b",
       "value": 36.6,
-      "timestamp": "2026-01-15T13:03:17.642Z"
+      "timestamp": "2026-01-15T15:40:30.989Z"
     },
     {
-      "id": "f229b884-94e9-4634-9d92-195c405a2870",
+      "id": "77347507-c4d8-407e-a848-f3921acc27ab",
       "value": 36.6,
-      "timestamp": "2026-01-15T13:03:27.647Z"
+      "timestamp": "2026-01-15T15:40:40.989Z"
     },
     {
-      "id": "6545060a-b2a6-4e9e-983f-f6fd7296c6fd",
+      "id": "0248dd11-50a6-4f5d-ba9e-1670d0ae50cd",
       "value": 36.6,
-      "timestamp": "2026-01-15T13:03:37.653Z"
+      "timestamp": "2026-01-15T15:40:50.990Z"
     },
     {
-      "id": "0c6dd59e-6e43-454b-ae5b-9909f33110f9",
+      "id": "304a7502-76f5-49b4-a6db-b49e46ec318c",
       "value": 36.5,
-      "timestamp": "2026-01-15T13:03:47.653Z"
+      "timestamp": "2026-01-15T15:41:00.992Z"
     },
     {
-      "id": "9aea468f-5cdb-4c16-88ed-3985308d5a73",
+      "id": "913f9754-2942-4ea3-a8b0-09b2142ec492",
+      "value": 36.5,
+      "timestamp": "2026-01-15T15:41:10.994Z"
+    },
+    {
+      "id": "98cc4855-8608-401b-a7e0-f890fef6affc",
+      "value": 36.3,
+      "timestamp": "2026-01-15T15:41:20.994Z"
+    },
+    {
+      "id": "80dcd125-8657-4dcf-a45e-99cb9d45e1c6",
+      "value": 36.2,
+      "timestamp": "2026-01-15T15:41:30.995Z"
+    },
+    {
+      "id": "52a72703-61b9-4a86-bcb7-590bea3d5833",
+      "value": 36.2,
+      "timestamp": "2026-01-15T15:41:40.995Z"
+    },
+    {
+      "id": "8ea1681a-786b-45bd-847b-0a08874beb61",
+      "value": 36.1,
+      "timestamp": "2026-01-15T15:41:50.996Z"
+    },
+    {
+      "id": "8ffcd3d4-7b36-45c4-baab-bca12bf827ae",
+      "value": 36.2,
+      "timestamp": "2026-01-15T15:42:00.997Z"
+    },
+    {
+      "id": "20fac870-9fc5-4a62-bcb0-3ad99275246a",
+      "value": 36.4,
+      "timestamp": "2026-01-15T15:42:10.997Z"
+    },
+    {
+      "id": "34c4aef1-462c-4ea5-a6f7-a74c2e49a5f4",
+      "value": 36.4,
+      "timestamp": "2026-01-15T15:42:20.996Z"
+    },
+    {
+      "id": "4f0709f0-56f6-463b-9ae8-9e8b9a61d7bc",
+      "value": 36.3,
+      "timestamp": "2026-01-15T15:42:30.997Z"
+    },
+    {
+      "id": "6aa7c06a-337f-488c-a826-22272430f439",
+      "value": 36.5,
+      "timestamp": "2026-01-15T15:42:40.996Z"
+    },
+    {
+      "id": "d50ff20d-15c6-4136-940d-db8aa3c0e99a",
+      "value": 36.5,
+      "timestamp": "2026-01-15T15:42:50.997Z"
+    },
+    {
+      "id": "40a438d7-bccf-4975-b128-77ae3d723298",
+      "value": 36.4,
+      "timestamp": "2026-01-15T15:43:00.997Z"
+    },
+    {
+      "id": "f04dfbcd-10d4-4a0b-9c3a-c2858e12ee5a",
+      "value": 36.3,
+      "timestamp": "2026-01-15T15:43:10.998Z"
+    },
+    {
+      "id": "85c5ecae-e1ad-4e5a-9799-2ff1ad0b548a",
+      "value": 36.5,
+      "timestamp": "2026-01-15T15:43:20.999Z"
+    },
+    {
+      "id": "ed6d9611-d690-4f8c-ac49-9aa10b9c6ced",
+      "value": 36.5,
+      "timestamp": "2026-01-15T15:43:31.000Z"
+    },
+    {
+      "id": "b00726bf-65b4-483d-aee8-671e13b9ab69",
       "value": 36.6,
-      "timestamp": "2026-01-15T13:03:57.655Z"
+      "timestamp": "2026-01-15T15:43:41.000Z"
     },
     {
-      "id": "823113aa-3768-4a94-a274-851684d580fc",
+      "id": "85359411-cdfd-40ab-b003-1dd98adfeb43",
       "value": 36.7,
-      "timestamp": "2026-01-15T13:04:07.659Z"
+      "timestamp": "2026-01-15T15:43:51.000Z"
+    },
+    {
+      "id": "13ad9a71-d36d-4122-9897-493a61947bd1",
+      "value": 36.9,
+      "timestamp": "2026-01-15T15:44:01.000Z"
+    },
+    {
+      "id": "49dbc8e3-53ca-47ef-a045-294d8b1bc3e7",
+      "value": 37,
+      "timestamp": "2026-01-15T15:44:11.001Z"
+    },
+    {
+      "id": "3f0a7c07-5072-42a5-9b14-70196da5bda9",
+      "value": 37,
+      "timestamp": "2026-01-15T15:44:21.001Z"
+    },
+    {
+      "id": "0564aeca-a07a-4e74-be7a-a0b4a98797d2",
+      "value": 37.1,
+      "timestamp": "2026-01-15T15:44:31.001Z"
+    },
+    {
+      "id": "85b87a37-0bfa-4484-aa2f-42e3613e5071",
+      "value": 37.2,
+      "timestamp": "2026-01-15T15:44:41.002Z"
+    },
+    {
+      "id": "33c2789c-1c10-4935-bbd6-088dbded6f7a",
+      "value": 37,
+      "timestamp": "2026-01-15T15:44:51.004Z"
+    },
+    {
+      "id": "bc938287-4d34-49db-a551-d88bda27c6be",
+      "value": 37.1,
+      "timestamp": "2026-01-15T15:45:01.003Z"
+    },
+    {
+      "id": "fd41c106-befb-4e6a-bedb-fcd5046b89a0",
+      "value": 37.1,
+      "timestamp": "2026-01-15T15:45:11.003Z"
+    },
+    {
+      "id": "4e77de30-cb47-474a-b6dd-545c78d75e1f",
+      "value": 37.1,
+      "timestamp": "2026-01-15T15:45:21.004Z"
+    },
+    {
+      "id": "748e7b7a-e990-4b17-8291-c7ab713812bc",
+      "value": 37,
+      "timestamp": "2026-01-15T15:45:31.005Z"
+    },
+    {
+      "id": "f1537df0-87f6-4f51-965f-da1e9e72ff9d",
+      "value": 37.1,
+      "timestamp": "2026-01-15T15:45:41.006Z"
     }
   ],
   "stress": [
     {
-      "id": "8fa21e1a-0812-4b3e-a698-37e2c6497c20",
+      "id": "00ca9876-5871-43f3-9a2d-fdf6c14306d4",
       "value": 48,
-      "timestamp": "2026-01-15T12:55:57.472Z"
+      "timestamp": "2026-01-15T15:37:30.984Z"
     },
     {
-      "id": "cb3aab1d-7a1e-4d59-b8a0-8dd4e6c32e8a",
-      "value": 51,
-      "timestamp": "2026-01-15T12:56:07.474Z"
-    },
-    {
-      "id": "48390296-7ae0-4259-93aa-03cbc561562a",
-      "value": 50,
-      "timestamp": "2026-01-15T12:56:17.478Z"
-    },
-    {
-      "id": "2d002edd-72dc-4a91-8c6b-113e79c89816",
-      "value": 47,
-      "timestamp": "2026-01-15T12:56:27.484Z"
-    },
-    {
-      "id": "7a0cb1db-937f-4428-bfc5-14929ecce672",
-      "value": 43,
-      "timestamp": "2026-01-15T12:56:37.491Z"
-    },
-    {
-      "id": "2db68670-ffd5-4f70-9445-db9d5532442c",
-      "value": 43,
-      "timestamp": "2026-01-15T12:56:47.492Z"
-    },
-    {
-      "id": "fd1869b5-b903-47a5-8d90-a030f2d5bce8",
-      "value": 40,
-      "timestamp": "2026-01-15T12:56:57.495Z"
-    },
-    {
-      "id": "920878be-6a76-46b1-b360-7e2280ec116a",
-      "value": 37,
-      "timestamp": "2026-01-15T12:57:07.500Z"
-    },
-    {
-      "id": "f9fb1f2e-b8eb-4cb8-91bf-b75a3cc59382",
-      "value": 35,
-      "timestamp": "2026-01-15T12:57:17.507Z"
-    },
-    {
-      "id": "1fa42039-290b-4335-8f7a-83542aa37100",
-      "value": 32,
-      "timestamp": "2026-01-15T12:57:27.508Z"
-    },
-    {
-      "id": "f6f3d2d8-d5ce-4193-b7fc-192dba1680a9",
-      "value": 30,
-      "timestamp": "2026-01-15T12:57:37.511Z"
-    },
-    {
-      "id": "02de9e17-6533-4894-812c-79656c3a45ec",
-      "value": 31,
-      "timestamp": "2026-01-15T12:57:47.515Z"
-    },
-    {
-      "id": "5d6b0bb4-f8ca-46f9-923f-e0e9664c7e6c",
-      "value": 29,
-      "timestamp": "2026-01-15T12:57:57.521Z"
-    },
-    {
-      "id": "d39b0ddf-095d-4c69-bd4e-401a46b3bf60",
-      "value": 26,
-      "timestamp": "2026-01-15T12:58:07.521Z"
-    },
-    {
-      "id": "6a21c6db-2623-4641-848a-1a2f7ccd60d1",
-      "value": 29,
-      "timestamp": "2026-01-15T12:58:17.523Z"
-    },
-    {
-      "id": "f5a7a083-6928-430a-8a34-8f26e4b69e68",
-      "value": 34,
-      "timestamp": "2026-01-15T12:58:27.528Z"
-    },
-    {
-      "id": "3965f3b8-55ce-4fd6-ad30-c1ecd496ed65",
-      "value": 33,
-      "timestamp": "2026-01-15T12:58:37.534Z"
-    },
-    {
-      "id": "7ae2ceb3-9b2a-4ff8-94ac-fa361802709c",
-      "value": 37,
-      "timestamp": "2026-01-15T12:58:47.534Z"
-    },
-    {
-      "id": "99ab0461-b020-481a-bd9d-64b9ef627ebe",
-      "value": 37,
-      "timestamp": "2026-01-15T12:58:57.536Z"
-    },
-    {
-      "id": "2126bd85-3d60-4d68-84b4-82c3ee9e3589",
-      "value": 34,
-      "timestamp": "2026-01-15T12:59:07.540Z"
-    },
-    {
-      "id": "5f733706-670e-4aff-9f8a-fd04e813c277",
-      "value": 33,
-      "timestamp": "2026-01-15T12:59:17.546Z"
-    },
-    {
-      "id": "5f86c93d-87ca-4922-8102-150dc7e8a017",
-      "value": 39,
-      "timestamp": "2026-01-15T12:59:27.553Z"
-    },
-    {
-      "id": "2cc778da-d298-4614-9e5b-f658006e8f13",
-      "value": 44,
-      "timestamp": "2026-01-15T12:59:37.555Z"
-    },
-    {
-      "id": "c7a65a6e-2837-48f4-a1a8-f6a98ad737d3",
-      "value": 48,
-      "timestamp": "2026-01-15T12:59:47.558Z"
-    },
-    {
-      "id": "01e246e2-4289-4aa8-9abe-ec0b7daf5a9c",
-      "value": 47,
-      "timestamp": "2026-01-15T12:59:57.563Z"
-    },
-    {
-      "id": "fadc332c-d603-48e9-845f-2deaa0363e89",
+      "id": "007dc3a4-2039-47c1-b9ec-15ad3aa7e780",
       "value": 46,
-      "timestamp": "2026-01-15T13:00:07.570Z"
+      "timestamp": "2026-01-15T15:37:40.984Z"
     },
     {
-      "id": "67d5fbd2-da92-408e-b250-e7540570fba9",
+      "id": "cbec8a7e-878b-4591-8a24-56f8ab031e23",
+      "value": 48,
+      "timestamp": "2026-01-15T15:37:50.984Z"
+    },
+    {
+      "id": "0b6fbe12-75b2-4d06-bf68-de57d8c23711",
+      "value": 52,
+      "timestamp": "2026-01-15T15:38:00.983Z"
+    },
+    {
+      "id": "eba4b2e9-31fc-44d6-8ca5-d8a67a46b916",
+      "value": 52,
+      "timestamp": "2026-01-15T15:38:10.984Z"
+    },
+    {
+      "id": "fdd75f37-a9ac-44dc-961b-7b1191bc8a1d",
+      "value": 56,
+      "timestamp": "2026-01-15T15:38:20.985Z"
+    },
+    {
+      "id": "4fbb6659-7804-4a01-8587-9def144b7713",
+      "value": 55,
+      "timestamp": "2026-01-15T15:38:30.985Z"
+    },
+    {
+      "id": "b1fa523a-7d5c-49f4-b531-5bd592d47c9e",
+      "value": 57,
+      "timestamp": "2026-01-15T15:38:40.986Z"
+    },
+    {
+      "id": "c85c166e-21e9-4069-accc-811aa7992094",
+      "value": 52,
+      "timestamp": "2026-01-15T15:38:50.986Z"
+    },
+    {
+      "id": "1971027a-ba4c-4bac-8f9f-6a9167b61461",
+      "value": 54,
+      "timestamp": "2026-01-15T15:39:00.987Z"
+    },
+    {
+      "id": "9061192f-09fb-453a-a4a7-d87e9455f4d7",
+      "value": 51,
+      "timestamp": "2026-01-15T15:39:10.987Z"
+    },
+    {
+      "id": "085c6a83-3aa6-4ff0-9f19-4093f19d55f4",
+      "value": 53,
+      "timestamp": "2026-01-15T15:39:20.987Z"
+    },
+    {
+      "id": "e1c7c72d-8a7f-4801-ab65-f07e7ae5750a",
+      "value": 52,
+      "timestamp": "2026-01-15T15:39:30.987Z"
+    },
+    {
+      "id": "65f73b7f-2e7d-4b6d-b6d4-0ef4be9f241c",
+      "value": 52,
+      "timestamp": "2026-01-15T15:39:40.987Z"
+    },
+    {
+      "id": "9e47f8bc-b402-4305-8c76-b11f40201088",
+      "value": 47,
+      "timestamp": "2026-01-15T15:39:50.987Z"
+    },
+    {
+      "id": "9fef6a16-3c25-4744-8e21-a67087e16390",
+      "value": 46,
+      "timestamp": "2026-01-15T15:40:00.988Z"
+    },
+    {
+      "id": "9bc827bc-f425-4e9c-9d47-308a865206f2",
       "value": 44,
-      "timestamp": "2026-01-15T13:00:17.571Z"
+      "timestamp": "2026-01-15T15:40:10.987Z"
     },
     {
-      "id": "41718aa6-4040-4f41-8869-2bd1c28c8f0c",
-      "value": 42,
-      "timestamp": "2026-01-15T13:00:27.574Z"
+      "id": "3ec878e9-4cf4-4c61-abb7-165db71c1079",
+      "value": 44,
+      "timestamp": "2026-01-15T15:40:20.988Z"
     },
     {
-      "id": "cf466d4f-eecb-456f-b855-2a59be52cdf3",
+      "id": "b20c5522-96b9-4bfd-adaa-d502a5f37426",
+      "value": 41,
+      "timestamp": "2026-01-15T15:40:30.989Z"
+    },
+    {
+      "id": "29dc69c6-5d0a-41ec-bebe-58a70b066ea1",
       "value": 40,
-      "timestamp": "2026-01-15T13:00:37.578Z"
+      "timestamp": "2026-01-15T15:40:40.989Z"
     },
     {
-      "id": "e24fa140-1d08-4d07-a747-57d52eaf1f1d",
+      "id": "b5320988-3bd6-4ffc-a1b7-24eb33742a1e",
+      "value": 37,
+      "timestamp": "2026-01-15T15:40:50.990Z"
+    },
+    {
+      "id": "53007fb9-e578-4871-b02d-21670cfd460a",
+      "value": 40,
+      "timestamp": "2026-01-15T15:41:00.992Z"
+    },
+    {
+      "id": "dd9520b1-1dc4-42b0-9a43-23d58c0187b3",
       "value": 36,
-      "timestamp": "2026-01-15T13:00:47.585Z"
+      "timestamp": "2026-01-15T15:41:10.994Z"
     },
     {
-      "id": "cd213365-85bf-4694-95da-ef66afd145cf",
+      "id": "ec0544b3-495f-4369-ac6d-befcf325e759",
+      "value": 38,
+      "timestamp": "2026-01-15T15:41:20.994Z"
+    },
+    {
+      "id": "81c24a78-db2b-40c8-af15-ae4a189a761f",
+      "value": 39,
+      "timestamp": "2026-01-15T15:41:30.995Z"
+    },
+    {
+      "id": "c562626c-3ed6-46c4-8778-ac520cece614",
+      "value": 38,
+      "timestamp": "2026-01-15T15:41:40.995Z"
+    },
+    {
+      "id": "5a352a42-911f-4fe7-89ee-d2dc6b051c33",
+      "value": 37,
+      "timestamp": "2026-01-15T15:41:50.996Z"
+    },
+    {
+      "id": "3b5d0541-f441-47d1-b93c-44f146bb73fa",
+      "value": 38,
+      "timestamp": "2026-01-15T15:42:00.997Z"
+    },
+    {
+      "id": "b94e7dce-c549-4941-961b-c62de6cac692",
+      "value": 43,
+      "timestamp": "2026-01-15T15:42:10.997Z"
+    },
+    {
+      "id": "d8e0834b-47fb-42d2-9c98-a50055b694ee",
+      "value": 41,
+      "timestamp": "2026-01-15T15:42:20.996Z"
+    },
+    {
+      "id": "2381ea6f-8f67-4efe-9bd4-ead8a1a3b9fa",
+      "value": 38,
+      "timestamp": "2026-01-15T15:42:30.997Z"
+    },
+    {
+      "id": "63a22b14-ae1b-484c-99bc-bfbc61776f05",
+      "value": 36,
+      "timestamp": "2026-01-15T15:42:40.996Z"
+    },
+    {
+      "id": "08b8a168-d9b5-497c-a183-d2aba8fdd823",
+      "value": 37,
+      "timestamp": "2026-01-15T15:42:50.997Z"
+    },
+    {
+      "id": "858ec890-c4c5-46f6-8f46-c143447259b8",
+      "value": 40,
+      "timestamp": "2026-01-15T15:43:00.997Z"
+    },
+    {
+      "id": "5875c9ac-90da-4038-af50-d6629a2c49ab",
+      "value": 39,
+      "timestamp": "2026-01-15T15:43:10.998Z"
+    },
+    {
+      "id": "592e0187-c783-485b-bf58-123f80760acc",
+      "value": 42,
+      "timestamp": "2026-01-15T15:43:20.999Z"
+    },
+    {
+      "id": "700aa0d0-89fb-4d57-8c38-af80bd1772fe",
+      "value": 40,
+      "timestamp": "2026-01-15T15:43:31.000Z"
+    },
+    {
+      "id": "e1301c5b-8ac5-4498-bd8e-0f18cdc1ed3e",
+      "value": 39,
+      "timestamp": "2026-01-15T15:43:41.000Z"
+    },
+    {
+      "id": "1127e5c6-2758-43fc-89bf-23ced1afde3f",
+      "value": 36,
+      "timestamp": "2026-01-15T15:43:51.000Z"
+    },
+    {
+      "id": "3c1b146d-5d09-4fa5-b211-7a1a035ed2a9",
+      "value": 38,
+      "timestamp": "2026-01-15T15:44:01.000Z"
+    },
+    {
+      "id": "4ffa1aa7-2e64-4242-80dd-7ec398ec8564",
+      "value": 37,
+      "timestamp": "2026-01-15T15:44:11.001Z"
+    },
+    {
+      "id": "82394310-eb06-4855-840c-9aa6cee46c3f",
       "value": 33,
-      "timestamp": "2026-01-15T13:00:57.585Z"
+      "timestamp": "2026-01-15T15:44:21.001Z"
     },
     {
-      "id": "c5ceeae0-eda8-48c3-8357-e1f53ffc6d26",
-      "value": 31,
-      "timestamp": "2026-01-15T13:01:07.587Z"
-    },
-    {
-      "id": "f37f0ca8-985a-45f3-894d-8cdb96f5266d",
-      "value": 28,
-      "timestamp": "2026-01-15T13:01:17.591Z"
-    },
-    {
-      "id": "637f4b63-d922-411d-8966-3f05c0ae967b",
-      "value": 28,
-      "timestamp": "2026-01-15T13:01:27.597Z"
-    },
-    {
-      "id": "500b00d0-9b3d-4a5b-bcd9-c33b6c4ec384",
-      "value": 28,
-      "timestamp": "2026-01-15T13:01:37.605Z"
-    },
-    {
-      "id": "504871c7-aa91-424e-9ef0-7c555acb8108",
-      "value": 31,
-      "timestamp": "2026-01-15T13:01:47.606Z"
-    },
-    {
-      "id": "d5f70130-0aaa-40e7-9fea-9f517a7801f9",
-      "value": 31,
-      "timestamp": "2026-01-15T13:01:57.610Z"
-    },
-    {
-      "id": "6cd71737-474e-4c76-9985-2a271099cefa",
-      "value": 31,
-      "timestamp": "2026-01-15T13:02:07.616Z"
-    },
-    {
-      "id": "c54ef86d-6cde-47a2-ab23-5d81baf54b25",
-      "value": 32,
-      "timestamp": "2026-01-15T13:02:17.623Z"
-    },
-    {
-      "id": "c040fcb9-25b7-4e2f-9687-8d317374d6f1",
-      "value": 31,
-      "timestamp": "2026-01-15T13:02:27.624Z"
-    },
-    {
-      "id": "8d881a7f-3562-42d2-b15e-a4be15029adb",
-      "value": 32,
-      "timestamp": "2026-01-15T13:02:37.627Z"
-    },
-    {
-      "id": "14f698f0-5e57-4b8b-b587-9b6f6a03e2df",
+      "id": "a3803b0b-3c76-46cc-ba84-d85103a1caf3",
       "value": 34,
-      "timestamp": "2026-01-15T13:02:47.632Z"
+      "timestamp": "2026-01-15T15:44:31.001Z"
     },
     {
-      "id": "40bb20cf-8cc2-486e-a9fd-b72ed307f568",
-      "value": 31,
-      "timestamp": "2026-01-15T13:02:57.639Z"
+      "id": "f0b7faa0-0bcc-44db-9f71-5f3cf0e78e33",
+      "value": 34,
+      "timestamp": "2026-01-15T15:44:41.002Z"
     },
     {
-      "id": "47aa18f8-7481-46bc-b825-c2ae4ab389e7",
+      "id": "96fe1afb-b47f-469f-bf4b-b35bd1993e97",
+      "value": 39,
+      "timestamp": "2026-01-15T15:44:51.004Z"
+    },
+    {
+      "id": "d435330d-a117-4d5a-b6c2-b8132d4a5acd",
+      "value": 43,
+      "timestamp": "2026-01-15T15:45:01.003Z"
+    },
+    {
+      "id": "bc05439a-8f99-4cbf-8072-959b63cdb94a",
+      "value": 42,
+      "timestamp": "2026-01-15T15:45:11.003Z"
+    },
+    {
+      "id": "688a2fc6-c2d5-4a75-a38b-ccfc09e6da61",
+      "value": 38,
+      "timestamp": "2026-01-15T15:45:21.004Z"
+    },
+    {
+      "id": "10878e1c-a3e0-4cb1-8271-58134ecb4852",
       "value": 35,
-      "timestamp": "2026-01-15T13:03:07.640Z"
+      "timestamp": "2026-01-15T15:45:31.005Z"
     },
     {
-      "id": "c68a2355-a850-486c-a103-98527f72f1d4",
-      "value": 32,
-      "timestamp": "2026-01-15T13:03:17.642Z"
-    },
-    {
-      "id": "425c9c7d-6efe-48fd-aaff-9edf84c4c178",
-      "value": 31,
-      "timestamp": "2026-01-15T13:03:27.647Z"
-    },
-    {
-      "id": "79213f67-e2ab-43e7-b02a-bf56f024a665",
-      "value": 32,
-      "timestamp": "2026-01-15T13:03:37.653Z"
-    },
-    {
-      "id": "3f3e295a-a67c-4e2c-9460-e94ec6ad2172",
-      "value": 33,
-      "timestamp": "2026-01-15T13:03:47.653Z"
-    },
-    {
-      "id": "b470343c-beaa-4257-aa93-7166902c77ae",
-      "value": 30,
-      "timestamp": "2026-01-15T13:03:57.655Z"
-    },
-    {
-      "id": "ebee43e1-b53e-4261-b836-1ff8a75c602f",
-      "value": 33,
-      "timestamp": "2026-01-15T13:04:07.659Z"
+      "id": "ee2ce6ce-e077-4ecf-9b01-5c7c8082b557",
+      "value": 38,
+      "timestamp": "2026-01-15T15:45:41.006Z"
     }
   ],
   "sleepStats": {
@@ -1608,29 +1608,29 @@
     "max": 6.6
   },
   "bpmStats": {
-    "min": 68,
-    "max": 88
+    "min": 67,
+    "max": 97
   },
   "bloodPressureStats": {
     "minSystolic": 110,
     "maxSystolic": 130,
-    "minDiastolic": 73,
+    "minDiastolic": 72,
     "maxDiastolic": 84
   },
   "glycemiaStats": {
-    "min": 92,
-    "max": 107
+    "min": 89,
+    "max": 109
   },
   "o2Stats": {
     "min": 98,
     "max": 99
   },
   "temperatureStats": {
-    "min": 36.2,
-    "max": 37
+    "min": 36.1,
+    "max": 37.2
   },
   "stressStats": {
     "min": 24,
-    "max": 52
+    "max": 59
   }
 }

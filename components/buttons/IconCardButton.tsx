@@ -40,19 +40,24 @@ const styles = StyleSheet.create({
   defaultCard: {
     backgroundColor: "#FFFFFF",
     borderColor: "rgba(80, 97, 255, 0.15)",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   selectedCard: {
     backgroundColor: "#DDEEF9",
     borderColor: "#7C89FF",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   iconContainer: {
     marginBottom: 8,
   },
   label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#1A1F36",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
+    fontFamily: "OpenSans-Regular",
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#000000",
   },
 });

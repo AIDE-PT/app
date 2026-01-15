@@ -1,3 +1,4 @@
+import BackButton from "@/components/buttons/backButton";
 import { useFonts } from "expo-font";
 import { Stack, useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -11,9 +12,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import LineChartSlim from "../components/charts/LineChartSlim";
 import MainDetails from "../components/details/main";
-import ArrowIcon from "../components/svg/ArrowIcon";
 import "../global.css";
-import LightBackground from "@/components/DotBackground";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -49,21 +48,12 @@ export default function MasterDetail() {
 
   return (
     <>
-      <Stack.Screen options={{ headerShown: false }} />
-      <LightBackground>
-        <SafeAreaView className="flex-1">
-          {/* Header */}
-          <View className="flex-row items-center px-4 pt-2 pb-4">
-            <TouchableOpacity
-              onPress={() => router.back()}
-              className="w-10 h-10 items-center justify-center"
-            >
-              <ArrowIcon variant="LEFT" dark size={24} />
-            </TouchableOpacity>
-            <Text className="flex-1 text-center text-2xl font-safiro text-black mr-10">
-              Batimentos Cardíacos
-            </Text>
-          </View>
+  <Stack.Screen options={{ headerShown: false }} />
+   <View className="flex-1 px-4 pt-10 bg-aide-background">
+         <SafeAreaView className="flex-1">
+        <View className="mb-4">
+          <BackButton label="Batimentos Cardíacos" dark/>
+        </View>
 
           <ScrollView
             className="flex-1"
@@ -71,8 +61,8 @@ export default function MasterDetail() {
             contentContainerStyle={{ paddingBottom: 32 }}
           >
             {/* Date Section */}
-            <View className="px-4 mb-6">
-              <Text className="text-lg font-open-sans text-gray-600 text-center mb-4">
+            <View className="mb-6">
+              <Text className="text-lg font-open-sans text-black text-center mb-4">
                 7 a 14 de Fevereiro
               </Text>
 
@@ -85,8 +75,8 @@ export default function MasterDetail() {
                   <TouchableOpacity
                     key={item.day}
                     onPress={() => setSelectedDay(item.day)}
-                    className={`w-14 h-20 rounded-2xl items-center justify-center ${
-                      selectedDay === item.day ? "bg-[#748FFC]" : "bg-white"
+                    className={`w-14 h-20 rounded-2xl items-center justify-center bg-white ${
+                      selectedDay === item.day ? "border-2 border-[#93B1FF]" : ""
                     }`}
                     style={{
                       elevation: 3,
@@ -99,16 +89,14 @@ export default function MasterDetail() {
                     <Text
                       className={`text-xs font-open-sans mb-1 ${
                         selectedDay === item.day
-                          ? "text-white/70"
+                          ? "text-black"
                           : "text-gray-400"
                       }`}
                     >
                       {item.weekday}
                     </Text>
                     <Text
-                      className={`text-xl font-bold font-open-sans ${
-                        selectedDay === item.day ? "text-white" : "text-black"
-                      }`}
+                      className={`text-xl font-bold font-open-sans text-black`}
                     >
                       {item.day}
                     </Text>
@@ -118,12 +106,12 @@ export default function MasterDetail() {
             </View>
 
             {/* Main Stats Card */}
-            <View className="px-4 mb-6">
+            <View className="mb-6">
               <MainDetails />
             </View>
 
             {/* Chart Section */}
-            <View className="px-4">
+            <View className="">
               <View
                 className="bg-white rounded-3xl p-5"
                 style={{
@@ -159,7 +147,7 @@ export default function MasterDetail() {
             </View>
 
             {/* Additional Info Section */}
-            <View className="px-4 mt-6">
+            <View className="mt-6">
               <View className="flex-row gap-3">
                 {/* Average Card */}
                 <View
@@ -208,7 +196,7 @@ export default function MasterDetail() {
             </View>
           </ScrollView>
         </SafeAreaView>
-      </LightBackground>
+      </View>
     </>
   );
 }

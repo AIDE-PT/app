@@ -1,29 +1,30 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
-  TouchableOpacity,
-  View,
-  Text,
   LayoutAnimation,
   Platform,
+  SafeAreaView,
+  Text,
+  TouchableOpacity,
   UIManager,
+  View,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
-import Navbar from "@/components/navBar/NavBar";
-import WidgetGrid from "@/components/widgets/WidgetGrid";
-import {
-  WidgetWrapper,
-  METRIC_STYLES,
-  DASHBOARD_CONFIG,
-  WidgetVariant,
-} from "@/components/widgets/WidgetWrapper";
-import WidgetIcon from "@/components/svg/WidgetIcon";
-import { ScrollView } from "react-native-gesture-handler";
 import { Button } from "@/components/buttons/button";
+import Navbar from "@/components/navBar/NavBar";
 import ArrowIcon from "@/components/svg/ArrowIcon";
 import { ResizeIcon } from "@/components/svg/ResizeIcon";
+import WidgetIcon from "@/components/svg/WidgetIcon";
+import WidgetGrid from "@/components/widgets/WidgetGrid";
+import {
+  DASHBOARD_CONFIG,
+  METRIC_STYLES,
+  WidgetVariant,
+  WidgetWrapper,
+} from "@/components/widgets/WidgetWrapper";
+import { ScrollView } from "react-native-gesture-handler";
 import { CloseIcon } from "../svg/CloseIcon";
+import TopBar from "../topBar/TopBar";
 
 if (
   Platform.OS === "android" &&
@@ -38,6 +39,15 @@ export default function EditableDashboard() {
   const [activeWidgets, setActiveWidgets] = useState(DASHBOARD_CONFIG);
   const [hiddenWidgets, setHiddenWidgets] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedCuidado, setSelectedCuidado] = useState({
+    id: "1",
+    name: "Emília Almeida",
+  });
+
+  const cuidados = [
+    { id: "1", name: "Emília Almeida" },
+    { id: "2", name: "João Silva" },
+  ];
 
   // 🔹 Load
   useEffect(() => {
@@ -111,12 +121,17 @@ export default function EditableDashboard() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-[#ECF5FF]">
-      <View className="px-6 py-4">
-        <Text className="text-xl font-bold text-slate-800">
-          Painel de Controlo
-        </Text>
-      </View>
+ <View className="flex-1 pt-10 bg-aide-background">
+      <SafeAreaView className="flex-1">
+
+        <TopBar
+          cuidados={cuidados}
+          selectedCuidado={selectedCuidado}
+          onSelectCuidado={setSelectedCuidado}
+          onNotificationPress={() => console.log("Notificações")}
+          onSettingsPress={() => console.log("Definições")}
+          className="z-50"
+        />
 
       <ScrollView className="flex-1 px-4">
         <WidgetGrid>
@@ -215,8 +230,9 @@ export default function EditableDashboard() {
           </View>
         )}
       </ScrollView>
-
       <Navbar />
     </SafeAreaView>
+  </View>
+
   );
 }
