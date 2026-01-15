@@ -1,5 +1,5 @@
 import React, { ReactNode } from "react";
-import { View, Text, Dimensions, ViewStyle } from "react-native";
+import { Dimensions, Text, View, ViewStyle } from "react-native";
 import SimpleLineChart from "../charts/LineChartSlim";
 import MiniSparkline from "../charts/MiniSparkline";
 import { IconType } from "../svg/WidgetIcon";
@@ -125,7 +125,7 @@ export function WidgetWrapper({
       {/* Header */}
       <View className="flex flex-row gap-2">
         {icon}
-        <Text className="text-aide-light-blue text-sm font-open-sans-semibold gap-2 uppercase tracking-widest ">
+        <Text className="text-aide-light-blue text-sm font-open-sans gap-2 uppercase tracking-widest ">
           {title}
         </Text>
       </View>
