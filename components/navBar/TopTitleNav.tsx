@@ -30,7 +30,7 @@ const TopTitleNav = ({
   };
 
   return (
-    <View className="px-5 pt-4 pb-3 bg-white">
+    <View className="px-5 pt-4 pb-3 bg-white shadow-sm">
       <View className="flex-row items-center mb-2">
         <TouchableOpacity
           onPress={handlePress}

@@ -14,7 +14,7 @@ const GerirPerfilFormulario = ({ formData, setFormData, isEditing }: Props) => {
   };
 
   return (
-    <View className="w-full px-6">
+    <View className="w-full px-4">
       <ElementoFormulario
         label="Nome"
         value={formData.nome}

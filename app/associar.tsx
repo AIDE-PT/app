@@ -49,7 +49,7 @@ export default function AssociarPage() {
   const handleConfirmAssociation = () => {
     console.log("Associado com sucesso!");
     setShowConfirmation(false);
-    // Add logic here to finish the process (e.g., redirect or success message)
+    router.push("./testDashboard");
   };
 
   return (

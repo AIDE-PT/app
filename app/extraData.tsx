@@ -1,3 +1,4 @@
+import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -12,7 +13,6 @@ import { z, ZodError } from "zod";
 import { Button } from "../components/buttons/button";
 import { Input } from "../components/input/Input";
 import "../global.css";
-import LightBackground from "@/components/DotBackground";
 
 const extraDataSchema = z.object({
   idade: z.coerce
@@ -75,46 +75,42 @@ const GenderSelector = ({
   }));
 
   return (
-    <View className="w-full">
-      <TouchableOpacity
-        onPress={toggleDropdown}
-        style={styles.inputShadow}
-        className={`w-full flex-row items-center justify-between px-4 py-1 rounded-[16px] border border-[#5061FF]/20 bg-white/90 ${
-          isOpen ? "rounded-b-none border-b-0" : ""
-        }`}
-      >
-        <Text
-          className={`h-12 leading-[48px] text-base ${selected ? "text-black/90" : "text-black/40"}`}
+    <View className="w-full shadow rounded-[25px]">
+      <View className="bg-white/75 rounded-[25px] overflow-hidden">
+        <TouchableOpacity
+          onPress={toggleDropdown}
+          className="w-full flex-row items-center justify-between px-5 py-0.5"
         >
-          {selected || "Género"}
-        </Text>
-        <ChevronIcon isOpen={isOpen} />
-      </TouchableOpacity>
-
-      <Animated.View
-        style={[animatedStyle, styles.dropdownShadow]}
-        className="bg-white/90 rounded-b-[16px] border border-t-0 border-[#5061FF]/20 overflow-hidden"
-      >
-        {options.map((option, index) => (
-          <TouchableOpacity
-            key={option}
-            onPress={() => selectOption(option)}
-            className={`px-4 py-3 ${
-              index < options.length - 1 ? "border-b border-[#5061FF]/10" : ""
-            } ${selected === option ? "bg-[#5061FF]/10" : ""}`}
+          <Text
+            className={`h-11 leading-[44px] text-base ${selected ? "text-black/90" : "text-black/40"}`}
           >
-            <Text
-              className={`text-base ${
-                selected === option
-                  ? "text-[#5061FF] font-semibold"
-                  : "text-black/90"
-              }`}
+            {selected || "Género"}
+          </Text>
+          <ChevronIcon isOpen={isOpen} />
+        </TouchableOpacity>
+
+        <Animated.View style={animatedStyle}>
+          {options.map((option, index) => (
+            <TouchableOpacity
+              key={option}
+              onPress={() => selectOption(option)}
+              className={`px-5 py-3 ${
+                index < options.length - 1 ? "border-b border-[#5061FF]/10" : ""
+              } ${selected === option ? "bg-[#5061FF]/10" : ""}`}
             >
-              {option}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </Animated.View>
+              <Text
+                className={`text-base ${
+                  selected === option
+                    ? "text-[#5061FF] font-semibold"
+                    : "text-black/90"
+                }`}
+              >
+                {option}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </Animated.View>
+      </View>
     </View>
   );
 };
@@ -130,11 +126,21 @@ const styles = StyleSheet.create({
 
 export default function ExtraData() {
   const router = useRouter();
+  const [fontsLoaded] = useFonts({
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  });
+
   const [idade, setIdade] = useState("");
   const [peso, setPeso] = useState("");
   const [altura, setAltura] = useState("");
   const [genero, setGenero] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  if (!fontsLoaded) {
+    return null;
+  }
 
   const handleAdvance = () => {
     try {
@@ -162,11 +168,10 @@ export default function ExtraData() {
   };
 
   return (
-    <LightBackground>
-      <SafeAreaView className="flex-1 px-6">
-        {/* Title */}
+    <View className="flex-1 px-4 pt-10 bg-aide-background">
+      <SafeAreaView className="flex-1">
         <View className="mt-12 mb-8">
-          <Text className="text-3xl font-bold text-black/90">
+          <Text className="font-safiro text-3xl text-black/90">
             Só mais uma coisa...
           </Text>
         </View>
@@ -235,6 +240,6 @@ export default function ExtraData() {
           <Button variant="primary" label="Avançar" onPress={handleAdvance} />
         </View>
       </SafeAreaView>
-    </LightBackground>
+    </View>
   );
 }

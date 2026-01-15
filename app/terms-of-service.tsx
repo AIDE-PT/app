@@ -66,14 +66,14 @@ const TermsContent = () => {
 
       {/* Content */}
       <Animated.ScrollView
-        className="flex-1 px-5 pt-4"
+        className="flex-1 pt-4"
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
+        contentContainerStyle={{ paddingHorizontal: 25, paddingBottom: 40 }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
         {/* Introduction */}
-        <View className="mb-6">
+        <View className="mb-6 mt-4">
           <Paragraph>
             Bem-vindo(a) ao AIDE. Estes Termos e Condições são fornecidos apenas
             para fins de protótipo e demonstração e não constituem um acordo

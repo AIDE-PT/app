@@ -225,7 +225,6 @@ export default function App() {
             Gerir a saúde e bem-estar na palma da tua mão.
           </Text>
 
-          {/* CTA Button */}
           <View className="items-center">
             <Button
               variant="primary"
