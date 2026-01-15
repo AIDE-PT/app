@@ -14,6 +14,25 @@ const COLUMN_WIDTH = (availableWidth - GRID_GAP * 2) / 3;
 
 export type WidgetVariant = "1-1" | "1-2" | "1-3" | "2-3";
 
+const FEEDBACK_COLORS: Record<string, string> = {
+  // Positive / Good -> Green
+  normal: "#dcfce7", // green-100
+  good: "#dcfce7",
+  ok: "#dcfce7",
+  estável: "#dcfce7",
+  calm: "#dcfce7",
+  meta: "#dcfce7",
+
+  // Warning / Attention -> Yellow/Orange
+  low: "#fef9c3", // yellow-100
+  high: "#fef9c3",
+  warning: "#fef9c3",
+
+  // Bad / Critical -> Red
+  bad: "#fee2e2", // red-100
+  critical: "#fee2e2",
+};
+
 interface WidgetWrapperProps {
   title: string;
   variant: WidgetVariant;
@@ -169,6 +188,12 @@ export const METRIC_STYLES: Record<
     color: "#64748B",
     feedbackColor: "#CBD5E1",
   },
+  glucose: {
+    title: "GLICOSE",
+    unit: "mg/dL",
+    color: "#EC4899",
+    feedbackColor: "#FCE7F3",
+  },
 };
 
 export interface DashboardItem {
@@ -190,7 +215,7 @@ export function WidgetWrapper({
   history,
 }: WidgetWrapperProps) {
   // TUA MATEMÁTICA ORIGINAL (Não mexer aqui)
-  const u1 = COLUMN_WIDTH - GRID_GAP;
+  const u1 = COLUMN_WIDTH;
   const u2 = u1 * 2 + GRID_GAP;
   const u3 = u1 * 3 + GRID_GAP * 2;
 
@@ -217,7 +242,7 @@ export function WidgetWrapper({
         { width, height, boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" },
         style,
       ]}
-      className={`${bg} rounded-[16px] p-2 justify-between border border-gray-100 overflow-hidden relative`}
+      className={`${bg} rounded-[20px] p-2 justify-between border border-gray-100 overflow-hidden relative`}
     >
       {/* Header */}
       <View className="flex flex-row gap-2">
@@ -232,7 +257,10 @@ export function WidgetWrapper({
         className={`${variant === "1-1" ? "flex-col" : "flex-row mb-auto justify-between items-end"} ml-2 mb-2`}
       >
         <View className="flex flex-row items-end">
-          <Text className="text-3xl font-bold text-red-500 leading-none">
+          <Text
+            style={{ color: "#000746" }}
+            className="text-3xl font-bold leading-none"
+          >
             {value}
           </Text>
           <Text className="text-xs text-gray-400 font-semibold ml-1 mb-1">
@@ -242,7 +270,12 @@ export function WidgetWrapper({
 
         {feedback && variant !== "1-1" && (
           <View
-            style={{ backgroundColor: feedbackColor }}
+            style={{
+              backgroundColor:
+                FEEDBACK_COLORS[feedback.toLowerCase()] ||
+                feedbackColor ||
+                "#E2E8F0",
+            }}
             className="px-3 py-1 rounded-full mr-1"
           >
             <Text className="text-[10px] font-bold text-black uppercase">

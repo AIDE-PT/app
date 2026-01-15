@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  StyleSheet,
   TextInput,
   TextInputProps,
   TouchableOpacity,
@@ -33,8 +32,7 @@ export const SearchBar = ({
   return (
     <View className="w-full">
       <View
-        style={styles.inputShadow}
-        className={`w-full flex-row items-center px-4 py-1 rounded-[16px] border border-[#5061FF]/20 
+        className={`w-full flex-row items-center px-4 py-1 rounded-[20px] border border-[#5061FF]/20 shadow
                     ${isDarkVariant ? "bg-black/60" : "bg-white/90"}`}
       >
         <TextInput
@@ -60,9 +58,3 @@ export const SearchBar = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  inputShadow: {
-    boxShadow: "0 0 50px -20px #5061FF inset",
-  },
-});

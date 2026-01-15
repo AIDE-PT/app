@@ -1,10 +1,11 @@
+import { useFonts } from "expo-font";
 import { useLocalSearchParams, useRouter } from "expo-router";
+
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
 import { IconCardButton } from "../components/buttons/IconCardButton";
-import LightBackground from "@/components/DotBackground";
 import {
   BpmIcon,
   CalIcon,
@@ -84,6 +85,16 @@ export default function Recommendations() {
     }
   }, [conditions]);
 
+  const [fontsLoaded] = useFonts({
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return null;
+  }
+
   const toggleMetric = (metric: HealthMetric) => {
     setSelectedMetrics((prev) =>
       prev.includes(metric)
@@ -94,17 +105,20 @@ export default function Recommendations() {
 
   const handleConcluir = () => {
     console.log("Selected metrics:", selectedMetrics);
-    router.push("/");
+    router.push({
+      pathname: "/testDashboard",
+      params: { selectedMetrics: JSON.stringify(selectedMetrics) },
+    } as any);
   };
 
   return (
-    <LightBackground>
-      <SafeAreaView className="flex-1 px-6">
-        <View className="mt-12 mb-6">
-          <Text className="text-3xl font-bold text-black/90">
+    <View className="flex-1 px-4 pt-10 bg-aide-background">
+      <SafeAreaView className="flex-1">
+        <View className="mt-12 mb-8">
+          <Text className="font-safiro text-3xl text-black/90">
             Nós recomendamos
           </Text>
-          <Text className="text-base text-black/60 mt-1">
+          <Text className="font-open-sans text-base text-black/60 mt-1">
             Baseado nas suas escolhas
           </Text>
         </View>
@@ -128,6 +142,6 @@ export default function Recommendations() {
           <Button variant="primary" label="Concluir" onPress={handleConcluir} />
         </View>
       </SafeAreaView>
-    </LightBackground>
+    </View>
   );
 }
