@@ -20,7 +20,7 @@ const BackButton = ({ label = "Voltar", className, dark }: BackButtonProps) => {
       <ArrowIcon variant="LEFT" dark={dark} />
       {label && (
         <Text
-          className={`${dark ? "text-black" : "text-white"} ml-2 text-3xl font-safiro`}
+          className={`${dark ? "text-black/60" : "text-black"} ml-2 text-2xl font-medium`}
         >
           {label}
         </Text>
