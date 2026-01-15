@@ -231,7 +231,7 @@ export default function App() {
               variant="primary"
               label="Começa Já!"
               onPress={() => {
-                router.push("/terms-of-service");
+                router.push("./terms-of-service");
               }}
             />
           </View>
