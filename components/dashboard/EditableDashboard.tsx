@@ -161,10 +161,10 @@ export default function EditableDashboard({
                 />
 
                 {isEditing && (
-                  <View className="absolute inset-0 bg-white/70 rounded-2xl items-center justify-center">
+                  <View className="absolute inset-0 bg-white/70 rounded-[16px] items-center justify-center border-2 border-dashed border-blue-400">
                     <TouchableOpacity
                       onPress={() => toggleVisibility(item.id, true)}
-                      className="absolute top-2 right-2 bg-red-500 w-6 h-6 rounded-full items-center justify-center"
+                      className="absolute -top-2 -right-2 bg-red-500 w-8 h-8 rounded-full items-center justify-center shadow-lg z-50"
                     >
                       <CloseIcon />
                     </TouchableOpacity>
