@@ -18,6 +18,26 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+function getRandomFloat(min, max, decimals = 1) {
+  const str = (Math.random() * (max - min) + min).toFixed(decimals);
+  return parseFloat(str);
+}
+
+function getRealisticVariation(currentValue, min, max, maxChange) {
+  const change = (Math.random() * 2 - 1) * maxChange; // Random change between -maxChange and +maxChange
+  let newValue = currentValue + change;
+
+  // Tendency to return to mean (optional, but helps keep data centered)
+  const mean = (min + max) / 2;
+  newValue += (mean - newValue) * 0.1;
+
+  // Clamp values
+  if (newValue < min) newValue = min;
+  if (newValue > max) newValue = max;
+
+  return newValue;
+}
+
 // --- Database Operations ---
 
 function readDatabase() {
@@ -31,6 +51,17 @@ function readDatabase() {
     if (!data.bpm) data.bpm = [];
     if (!data.bloodPressure) data.bloodPressure = [];
     if (!data.glycemia) data.glycemia = [];
+    if (!data.sleep) data.sleep = [];
+    if (!data.o2) data.o2 = [];
+    if (!data.temperature) data.temperature = [];
+    if (!data.stress) data.stress = [];
+
+    // Initialize sleep history if empty
+    if (data.sleep.length === 0) {
+      initializeSleepHistory(data);
+      // We need to save this immediately so stats are updated
+      writeDatabase(data);
+    }
 
     // Ensure stats objects exist but don't overwrite if they have valid data
     // If they look like defaults {min:0, max:0}, we might want to reset them or just let logic handle it.
@@ -78,11 +109,11 @@ function updateBPStats(data, systolic, diastolic) {
     data[statsKey].maxSystolic = Math.max(data[statsKey].maxSystolic, systolic);
     data[statsKey].minDiastolic = Math.min(
       data[statsKey].minDiastolic,
-      diastolic
+      diastolic,
     );
     data[statsKey].maxDiastolic = Math.max(
       data[statsKey].maxDiastolic,
-      diastolic
+      diastolic,
     );
   }
 }
@@ -90,7 +121,10 @@ function updateBPStats(data, systolic, diastolic) {
 // --- Data Generators ---
 
 function generateBPM(data, timestamp) {
-  const bpmVal = getRandomInt(60, 100);
+  const lastVal =
+    data.bpm.length > 0 ? data.bpm[data.bpm.length - 1].value : 75;
+  const bpmVal = Math.round(getRealisticVariation(lastVal, 60, 100, 5));
+
   data.bpm.push({
     id: generateId(),
     value: bpmVal,
@@ -101,8 +135,18 @@ function generateBPM(data, timestamp) {
 }
 
 function generateBloodPressure(data, timestamp) {
-  const systolic = getRandomInt(110, 130);
-  const diastolic = getRandomInt(70, 85);
+  const lastSys =
+    data.bloodPressure.length > 0
+      ? data.bloodPressure[data.bloodPressure.length - 1].systolic
+      : 120;
+  const lastDia =
+    data.bloodPressure.length > 0
+      ? data.bloodPressure[data.bloodPressure.length - 1].diastolic
+      : 80;
+
+  const systolic = Math.round(getRealisticVariation(lastSys, 110, 130, 4));
+  const diastolic = Math.round(getRealisticVariation(lastDia, 70, 85, 3));
+
   data.bloodPressure.push({
     id: generateId(),
     systolic: systolic,
@@ -114,7 +158,12 @@ function generateBloodPressure(data, timestamp) {
 }
 
 function generateGlycemia(data, timestamp) {
-  const glycemiaVal = getRandomInt(80, 120);
+  const lastVal =
+    data.glycemia.length > 0
+      ? data.glycemia[data.glycemia.length - 1].value
+      : 100;
+  const glycemiaVal = Math.round(getRealisticVariation(lastVal, 80, 120, 3));
+
   data.glycemia.push({
     id: generateId(),
     value: glycemiaVal,
@@ -124,10 +173,89 @@ function generateGlycemia(data, timestamp) {
   return glycemiaVal;
 }
 
+function generateO2(data, timestamp) {
+  const lastVal = data.o2.length > 0 ? data.o2[data.o2.length - 1].value : 98;
+  // O2 varies very little
+  const o2Val = Math.round(getRealisticVariation(lastVal, 98, 99, 1));
+
+  data.o2.push({
+    id: generateId(),
+    value: o2Val,
+    timestamp: timestamp,
+  });
+  updateSimpleStats(data, "o2", o2Val);
+  return o2Val;
+}
+
+function generateTemperature(data, timestamp) {
+  const lastVal =
+    data.temperature.length > 0
+      ? data.temperature[data.temperature.length - 1].value
+      : 36.5;
+  const tempVal = parseFloat(
+    getRealisticVariation(lastVal, 36.0, 37.5, 0.2).toFixed(1),
+  );
+
+  data.temperature.push({
+    id: generateId(),
+    value: tempVal,
+    timestamp: timestamp,
+  });
+  updateSimpleStats(data, "temperature", tempVal);
+  return tempVal;
+}
+
+function generateStress(data, timestamp) {
+  const lastVal =
+    data.stress.length > 0 ? data.stress[data.stress.length - 1].value : 30;
+  const stressVal = Math.round(getRealisticVariation(lastVal, 10, 80, 5));
+
+  data.stress.push({
+    id: generateId(),
+    value: stressVal,
+    timestamp: timestamp,
+  });
+  updateSimpleStats(data, "stress", stressVal);
+  return stressVal;
+}
+
+function generateSleep(data, timestamp) {
+  const lastVal =
+    data.sleep.length > 0 ? data.sleep[data.sleep.length - 1].value : 7.5;
+  // Sleep can vary by 1-2 hours, but usually stays around a person's average
+  const sleepVal = parseFloat(
+    getRealisticVariation(lastVal, 5.0, 9.0, 1.5).toFixed(1),
+  );
+
+  data.sleep.push({
+    id: generateId(),
+    value: sleepVal,
+    timestamp: timestamp,
+  });
+  updateSimpleStats(data, "sleep", sleepVal);
+  return sleepVal;
+}
+
+function initializeSleepHistory(data) {
+  const today = new Date();
+  // Generate 7 days back
+  for (let i = 7; i >= 1; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    d.setHours(7, 0, 0, 0); // Assume wake up at 7 AM
+    generateSleep(data, d.toISOString());
+  }
+}
+
 function maintainDataLimits(data, limit = 50) {
   if (data.bpm.length > limit) data.bpm.shift();
   if (data.bloodPressure.length > limit) data.bloodPressure.shift();
   if (data.glycemia.length > limit) data.glycemia.shift();
+  if (data.o2.length > limit) data.o2.shift();
+  if (data.temperature.length > limit) data.temperature.shift();
+  if (data.stress.length > limit) data.stress.shift();
+  // Sleep accumulates slowly (once a day), so 50 items is 50 days. Acceptable.
+  if (data.sleep.length > limit) data.sleep.shift();
 }
 
 // --- Server Management ---
@@ -163,12 +291,35 @@ function runSimulationStep() {
   const bpm = generateBPM(data, timestamp);
   const bp = generateBloodPressure(data, timestamp);
   const glycemia = generateGlycemia(data, timestamp);
+  const o2 = generateO2(data, timestamp);
+  const temp = generateTemperature(data, timestamp);
+  const stress = generateStress(data, timestamp);
+
+  // Daily Sleep Update Logic
+  let sleepLog = "";
+  const lastSleep =
+    data.sleep.length > 0 ? data.sleep[data.sleep.length - 1] : null;
+  const lastDate = lastSleep
+    ? new Date(lastSleep.timestamp).toDateString()
+    : null;
+  const todayDate = new Date().toDateString();
+
+  if (lastDate !== todayDate) {
+    const sleep = generateSleep(data, timestamp);
+    sleepLog = `, Sleep: ${sleep}h`;
+  }
 
   maintainDataLimits(data);
   writeDatabase(data);
 
   console.log(
-    `[${timestamp}] New readings - BPM: ${bpm}, BP: ${bp.systolic}/${bp.diastolic}, Gly: ${glycemia}`
+    `[${timestamp.slice(11, 19)}] Generated Data =>
+            BPM: ${bpm}
+            BP: ${bp.systolic}/${bp.diastolic}
+            Glycemia: ${glycemia}
+            O2: ${o2}%
+            Temp: ${temp}°C
+            Stress: ${stress}${sleepLog}`,
   );
 }
 
