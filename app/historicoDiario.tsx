@@ -6,7 +6,6 @@ import React from "react";
 import { SafeAreaView, ScrollView, View } from "react-native";
 import BackButton from "../components/buttons/backButton";
 
-
 const HistoricoDiario = () => {
   return (
     <SafeAreaView className="flex-1 bg-[#F5F9FF]">
