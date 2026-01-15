@@ -81,7 +81,7 @@ export default function WidgetIcon({ variant }: HealthIconProps) {
     case "glucose":
       return (
         <Svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-           <Path d="M7 1L7 13 M1 7 L13 7" stroke="#7C89FF" strokeWidth="2" />
+          <Path d="M7 1L7 13 M1 7 L13 7" stroke="#7C89FF" strokeWidth="2" />
         </Svg>
       );
     default:
