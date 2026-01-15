@@ -26,9 +26,10 @@ export default function PerfilScreen() {
 
   const handleAvançar = () => {
     if (selected === "cuidado") {
-      router.push("/extraData" as any);
+      router.push("/extraData");
+    } else {
+      router.push("./associar");
     }
-    // if (selected === "aider") router.push("/home_aider");
   };
 
   return (
