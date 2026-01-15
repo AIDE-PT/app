@@ -1,5 +1,5 @@
 import { useFonts } from "expo-font";
-import { useRouter } from "expo-router";
+import { useRouter, router } from "expo-router";
 import { useEffect } from "react";
 import { Dimensions, Text, View } from "react-native";
 import "react-native-gesture-handler";

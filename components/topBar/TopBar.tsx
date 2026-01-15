@@ -31,7 +31,7 @@ const TopBar = ({
 }: TopBarProps) => {
   return (
     <View
-      className={`flex-row items-center justify-between px-4 py-2 ${className}`}
+      className={`flex-row items-center justify-between z-50 px-4 py-2 ${className}`}
     >
       <View className="flex-1 mr-4">
         <ChoseCuidado

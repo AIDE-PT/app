@@ -5,12 +5,15 @@ import AddIcon from "../svg/AddIcon";
 import CalendarIcon from "../svg/CalendarIcon";
 import HomeIcon from "../svg/HomeIcon";
 import ProfileIcon from "../svg/ProfileIcon";
+import { useRouter } from "expo-router";
 
 interface navBarProps {
   dark?: boolean;
+  notEditable?: boolean;
 }
-const Navbar = ({ dark }: navBarProps) => {
+const Navbar = ({ dark, notEditable = false }: navBarProps) => {
   const [isModalVisible, setModalVisible] = useState(false);
+  const router = useRouter();
 
   const styleBall =
     "items-center bg-white  w-[52px] h-[52px] rounded-[100px] justify-center";
@@ -25,16 +28,22 @@ const Navbar = ({ dark }: navBarProps) => {
         >
           <TouchableOpacity
             className={styleBall}
-            onPress={() => setModalVisible(true)}
+            onPress={notEditable ? () => setModalVisible(true) : () => {}}
           >
             <AddIcon />
           </TouchableOpacity>
 
-          <TouchableOpacity className={styleBall}>
+          <TouchableOpacity
+            className={styleBall}
+            onPress={() => router.push("./historicoDiario")}
+          >
             <CalendarIcon />
           </TouchableOpacity>
 
-          <TouchableOpacity className={styleBall}>
+          <TouchableOpacity
+            className={styleBall}
+            onPress={() => router.push("./testDashboard")}
+          >
             <HomeIcon />
           </TouchableOpacity>
 
@@ -43,10 +52,12 @@ const Navbar = ({ dark }: navBarProps) => {
           </TouchableOpacity>
         </View>
       </View>
-      <AddWidgetModal
-        visible={isModalVisible}
-        onClose={() => setModalVisible(false)}
-      />
+      {notEditable && (
+        <AddWidgetModal
+          visible={isModalVisible}
+          onClose={() => setModalVisible(false)}
+        />
+      )}
     </>
   );
 };

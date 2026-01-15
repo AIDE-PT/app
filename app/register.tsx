@@ -34,7 +34,6 @@ export default function Register() {
   if (!fontsLoaded) {
     return null;
   }
-
   const handleRegister = () => {
     // Validate passwords match
     if (password !== confirmPassword) {
@@ -42,7 +41,7 @@ export default function Register() {
       return;
     }
     // Handle registration logic
-    console.log("Register with:", { name, email, password });
+    router.push("./perfil");
   };
 
   // const handleGoogleRegister = () => {
