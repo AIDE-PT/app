@@ -1,6 +1,4 @@
 import BackButton from "@/components/buttons/backButton";
-import { useFonts } from "expo-font";
-import { useRouter } from "expo-router";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -13,7 +11,6 @@ import {
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
 
 const GerirPerfil = () => {
-  const router = useRouter();
   const [isEditing, setIsEditing] = useState(false);
 
   const [userData, setUserData] = useState({
@@ -22,12 +19,6 @@ const GerirPerfil = () => {
     contacto: "+351 983 987 657",
     nif: "231432256",
     password: "password123",
-  });
-
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
   });
 
   const handleSave = () => {

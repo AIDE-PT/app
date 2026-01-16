@@ -1,4 +1,5 @@
 import { useFonts } from "expo-font";
+import { router } from "expo-router";
 import React from "react";
 import { SafeAreaView, View } from "react-native";
 import BackButton from "../components/buttons/backButton";
@@ -17,9 +18,11 @@ const Definicoes = () => {
   return (
     <View className="flex-1 px-4 pt-10 bg-aide-background">
       <SafeAreaView className="flex-1">
-        <View className="mb-4">
-          <BackButton label="Definições" dark />
-        </View>
+        <BackButton
+          label="Histórico Diário"
+          dark
+          onPress={() => router.push("/testDashboard")}
+        />
 
         <DefinicoesLista />
       </SafeAreaView>
