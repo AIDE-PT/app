@@ -1,7 +1,7 @@
 import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -114,15 +114,6 @@ const GenderSelector = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  inputShadow: {
-    boxShadow: "0 0 50px -20px #5061FF inset",
-  },
-  dropdownShadow: {
-    boxShadow: "0 0 50px -20px #5061FF inset",
-  },
-});
 
 export default function ExtraData() {
   const router = useRouter();
