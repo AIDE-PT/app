@@ -14,15 +14,6 @@ function generateId() {
     : Date.now() + Math.random().toString();
 }
 
-function getRandomInt(min, max) {
-  return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function getRandomFloat(min, max, decimals = 1) {
-  const str = (Math.random() * (max - min) + min).toFixed(decimals);
-  return parseFloat(str);
-}
-
 function getRealisticVariation(currentValue, min, max, maxChange) {
   const change = (Math.random() * 2 - 1) * maxChange; // Random change between -maxChange and +maxChange
   let newValue = currentValue + change;
