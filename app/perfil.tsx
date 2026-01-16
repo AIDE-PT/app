@@ -1,4 +1,3 @@
-import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -17,12 +16,6 @@ import { Profilecard } from "../components/profilecard";
 export default function PerfilScreen() {
   const router = useRouter();
   const [selected, setSelected] = useState<"aider" | "cuidado" | null>(null);
-
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
-  });
 
   const handleAvançar = () => {
     if (selected === "cuidado") {

@@ -13,7 +13,7 @@ const emailSchema = z.string().email({ message: "E-mail inválido" });
 export default function AssociarPage() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
-  const [lastScan, setLastScan] = useState("");
+  const [, setLastScan] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const handleAvançar = () => {

@@ -113,7 +113,6 @@ import EyeIcon from "../svg/EyeIcon";
 
 import {
   Platform,
-  StyleSheet,
   Text,
   TextInput,
   TextInputProps,
@@ -241,9 +240,3 @@ export const Input = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  inputShadow: {
-    boxShadow: "0 0 50px -20px #5061FF inset",
-  },
-});

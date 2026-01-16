@@ -247,7 +247,7 @@ export function WidgetWrapper({
       {/* Header */}
       <View className="flex flex-row gap-2">
         {icon}
-        <Text className="text-aide-light-blue text-sm font-open-sans gap-2 uppercase tracking-widest ">
+        <Text className="text-aide-light-blue text-[14px] font-open-sans gap-2 uppercase tracking-widest ">
           {title}
         </Text>
       </View>
