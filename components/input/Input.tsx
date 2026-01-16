@@ -117,7 +117,7 @@ import {
   TextInput,
   TextInputProps,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 
 interface InputDTO extends TextInputProps {
