@@ -1,6 +1,6 @@
 import BackButton from "@/components/buttons/backButton";
 import { useFonts } from "expo-font";
-import { Stack, useRouter } from "expo-router";
+import { Stack } from "expo-router";
 import React, { useState } from "react";
 import {
   Dimensions,
@@ -33,7 +33,6 @@ const heartRateData = [
 ];
 
 export default function MasterDetail() {
-  const router = useRouter();
   const [selectedDay, setSelectedDay] = useState(10);
 
   const [fontsLoaded] = useFonts({

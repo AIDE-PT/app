@@ -7,13 +7,19 @@ interface BackButtonProps {
   label?: string;
   dark?: boolean;
   className?: string;
+  onPress?: () => void;
 }
 
-const BackButton = ({ label = "Voltar", className, dark }: BackButtonProps) => {
+const BackButton = ({
+  label = "Voltar",
+  className,
+  dark,
+  onPress,
+}: BackButtonProps) => {
   const router = useRouter();
   return (
     <TouchableOpacity
-      onPress={() => router.back()}
+      onPress={onPress || (() => router.back())}
       activeOpacity={0.7}
       className={`flex-row items-center self-start py-2  ${className}`}
     >
