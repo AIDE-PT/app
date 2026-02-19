@@ -1,0 +1,85 @@
+import React from "react";
+import { TouchableOpacity, View } from "react-native";
+import ChoseCuidado from "../buttons/choseCuidado";
+import NotificationBell from "../svg/NotificationBell";
+import SettingsIcon from "../svg/Settings";
+import { useTheme } from "@/hooks/useTheme";
+
+interface Cuidado {
+  id: string;
+  name: string;
+}
+
+interface TopBarProps {
+  cuidados: Cuidado[];
+  selectedCuidado?: Cuidado;
+  onSelectCuidado: (cuidado: Cuidado) => void;
+  onNotificationPress?: () => void;
+  onSettingsPress?: () => void;
+  className?: string;
+  showBackground?: boolean;
+}
+
+const TopBar = ({
+  cuidados,
+  selectedCuidado,
+  onSelectCuidado,
+  onNotificationPress,
+  onSettingsPress,
+  className,
+  showBackground = false,
+}: TopBarProps) => {
+  const { isDark } = useTheme();
+
+  const iconColor = isDark ? "white" : "#000000";
+  const ballBg = isDark ? "bg-[#131632]" : "bg-white";
+  const styleBall = `items-center w-[50px] h-[50px] rounded-[100px] justify-center ${ballBg}`;
+
+  const backgroundStyle = showBackground ? {
+    backgroundColor: isDark ? "rgba(0, 4, 18, 0.85)" : "#DBEDF880",
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    paddingTop: 58,
+    paddingBottom: 16,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
+    elevation: 4,
+  } : {};
+
+  return (
+    <View
+      className={`flex-row items-center justify-between z-50 px-4 py-2 ${className}`}
+      style={backgroundStyle}
+    >
+      <View className="flex-1 mr-4">
+        <ChoseCuidado
+          cuidados={cuidados}
+          selectedCuidado={selectedCuidado}
+          onSelect={onSelectCuidado}
+        />
+      </View>
+
+      <View className="flex-row gap-3">
+        <TouchableOpacity
+          style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+          className={styleBall}
+          onPress={onNotificationPress}
+        >
+          <NotificationBell color={iconColor} />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+          className={styleBall}
+          onPress={onSettingsPress}
+        >
+          <SettingsIcon color={iconColor} />
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
+};
+
+export default TopBar;
