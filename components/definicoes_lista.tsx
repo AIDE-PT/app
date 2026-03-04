@@ -1,6 +1,6 @@
+import { useRouter } from "expo-router";
 import React from "react";
 import { View } from "react-native";
-import { useRouter } from "expo-router";
 import ElementoDefinicao from "./elemento_definicao";
 
 const DefinicoesLista = () => {
@@ -24,11 +24,15 @@ const DefinicoesLista = () => {
         <ElementoDefinicao
           key={index}
           title={item}
-          onPress={() =>
-            item === "Gerir perfil"
-              ? router.push("/gerir_perfil")
-              : console.log(item)
-          }
+          onPress={() => {
+            if (item === "Gerir perfil") {
+              router.push("/gerir_perfil");
+            } else if (item === "Gerir Dispositivos (sensores)") {
+              router.push("/dispositivos");
+            } else {
+              console.log(item);
+            }
+          }}
         />
       ))}
     </View>

@@ -10,7 +10,7 @@ interface SocialButtonDTO {
 }
 
 // Google Icon Component
-const GoogleIcon = ({ size = 20 }: { size?: number }) => (
+const GoogleIcon = ({ size = 22 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24">
     <Path
       d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -32,7 +32,7 @@ const GoogleIcon = ({ size = 20 }: { size?: number }) => (
 );
 
 // Apple Icon Component
-const AppleIcon = ({ size = 20 }: { size?: number }) => (
+const AppleIcon = ({ size = 22 }: { size?: number }) => (
   <Svg width={size} height={size} viewBox="0 0 24 24" fill="#000000">
     <Path
       d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z"
@@ -43,11 +43,11 @@ const AppleIcon = ({ size = 20 }: { size?: number }) => (
 
 const providerConfig = {
   google: {
-    icon: <GoogleIcon />,
+    icon: <GoogleIcon size={26} />,
     defaultLabel: "Google",
   },
   apple: {
-    icon: <AppleIcon />,
+    icon: <AppleIcon size={30} />,
     defaultLabel: "Apple",
   },
 };
@@ -60,11 +60,11 @@ export const SocialButton = ({ provider, onPress, label }: SocialButtonDTO) => {
     <TouchableOpacity
       onPress={onPress}
       style={styles.buttonShadow}
-      className="w-full flex-row items-center justify-center p-4 rounded-[16px] bg-[#F5F8FB] border border-[#E5E7EB]"
+      className="w-full flex-row items-center justify-center p-4 rounded-[20px] bg-[#F5F8FB] border border-[#E5E7EB]"
       activeOpacity={0.7}
     >
       <View className="mr-3">{config.icon}</View>
-      <Text className="font-open-sans-semibold text-[16px] text-aide-text/90">
+      <Text className="font-open-sans-semibold text-[18px] text-aide-text/90">
         {displayLabel}
       </Text>
     </TouchableOpacity>

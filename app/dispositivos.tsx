@@ -1,15 +1,14 @@
 import { useFonts } from "expo-font";
-import { router } from "expo-router";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import BackButton from "../components/buttons/backButton";
 import AddDeviceModal, { Device } from "../components/modals/AddDeviceModal";
 import DeviceConnectionModal from "../components/modals/DeviceConnectionModal";
 import DeviceManagementModal, {
   DeviceWithStatus,
 } from "../components/modals/DeviceManagementModal";
 import AddIcon from "../components/svg/AddIcon";
-import ArrowIcon from "../components/svg/ArrowIcon";
 
 const ALL_DEVICES: Device[] = [
   { id: "apple-healthkit", name: "Apple Healthkit" },
@@ -105,19 +104,13 @@ export default function DispositivosPage() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-[#ECF5FF]">
-      <View className="flex-1">
-        {/* Header - Consistent with associar.tsx */}
-        <View className="px-6 pt-12 flex-row items-center">
-          <TouchableOpacity onPress={() => router.back()} className="p-2">
-            <ArrowIcon variant="LEFT" dark size={24} />
-          </TouchableOpacity>
-          <Text className="font-safiro text-2xl text-black ml-2">
-            Gerir Dispositivos
-          </Text>
+    <View className="flex-1 px-4 pt-10 bg-aide-background">
+      <SafeAreaView className="flex-1">
+        <View className="mb-4">
+          <BackButton label="Gerir Dispositivos" dark />
         </View>
 
-        <View className="flex-1 px-8 pt-10">
+        <View className="mb-8">
           <Text className="font-open-sans text-[18px] text-[#00072099] mb-8 leading-6">
             Adicione uma fonte de dados para aceder a novas metricas
           </Text>
@@ -147,13 +140,13 @@ export default function DispositivosPage() {
                         nameWords.map((word, index) => (
                           <Text
                             key={index}
-                            className="font-open-sans font-bold text-sm text-black leading-4"
+                            className="font-open-sans font-bold text-sm text-black leading-5"
                           >
                             {word}
                           </Text>
                         ))
                       ) : (
-                        <Text className="font-open-sans font-bold text-base text-black">
+                        <Text className="font-open-sans font-bold text-[18px] text-black">
                           {device.name}
                         </Text>
                       )}
@@ -179,38 +172,38 @@ export default function DispositivosPage() {
             </TouchableOpacity>
           </View>
         </View>
-      </View>
 
-      {/* Add Device Modal */}
-      <AddDeviceModal
-        visible={addModalVisible}
-        onClose={() => setAddModalVisible(false)}
-        availableDevices={availableDevices}
-        onSelectDevice={handleSelectDevice}
-      />
+        {/* Add Device Modal */}
+        <AddDeviceModal
+          visible={addModalVisible}
+          onClose={() => setAddModalVisible(false)}
+          availableDevices={availableDevices}
+          onSelectDevice={handleSelectDevice}
+        />
 
-      {/* Connection Confirmation Modal */}
-      <DeviceConnectionModal
-        visible={connectionModalVisible}
-        onClose={() => {
-          setConnectionModalVisible(false);
-          setPendingDevice(null);
-        }}
-        onConfirm={handleConnectionConfirm}
-        device={pendingDevice}
-      />
+        {/* Connection Confirmation Modal */}
+        <DeviceConnectionModal
+          visible={connectionModalVisible}
+          onClose={() => {
+            setConnectionModalVisible(false);
+            setPendingDevice(null);
+          }}
+          onConfirm={handleConnectionConfirm}
+          device={pendingDevice}
+        />
 
-      {/* Device Management Modal */}
-      <DeviceManagementModal
-        visible={managementModalVisible}
-        onClose={() => {
-          setManagementModalVisible(false);
-          setSelectedDevice(null);
-        }}
-        onRemove={handleRemoveDevice}
-        onToggleDataSharing={handleToggleDataSharing}
-        device={selectedDevice}
-      />
-    </SafeAreaView>
+        {/* Device Management Modal */}
+        <DeviceManagementModal
+          visible={managementModalVisible}
+          onClose={() => {
+            setManagementModalVisible(false);
+            setSelectedDevice(null);
+          }}
+          onRemove={handleRemoveDevice}
+          onToggleDataSharing={handleToggleDataSharing}
+          device={selectedDevice}
+        />
+      </SafeAreaView>
+    </View>
   );
 }
