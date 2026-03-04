@@ -114,7 +114,6 @@ import CalendarIcon from "../svg/CalendarIcon";
 import {
   TextInput,
   View,
-  StyleSheet,
   TextInputProps,
   TouchableOpacity,
   Platform,
@@ -241,4 +240,3 @@ export const Input = ({
     </View>
   );
 };
-
