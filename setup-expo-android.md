@@ -26,11 +26,13 @@ que a app requer um development build e não é compatível com o Expo Go.
 ---
 
 ## Passo 2 — Correr `expo run:android`
+
 ```bash
 npx expo run:android
 ```
 
 **Erro:**
+
 ```
 Failed to resolve the Android SDK path. Default install location not found:
 C:\Users\leofi\AppData\Local\Android\Sdk.
@@ -41,6 +43,7 @@ Error: 'adb' is not recognized as an internal or external command.
 **Causa:** Android Studio não estava instalado.
 
 **Solução:**
+
 1. Instalar o Android Studio em https://developer.android.com/studio
 2. Configurar variáveis de ambiente do sistema:
    - `ANDROID_HOME` = `C:\Users\leofi\AppData\Local\Android\Sdk`
@@ -56,6 +59,7 @@ Error: 'adb' is not recognized as an internal or external command.
 ## Passo 3 — Emulador offline
 
 **Erro:**
+
 ```
 CommandError: Failed to get properties for device (emulator-5554):
 adb.exe: device offline
@@ -64,11 +68,13 @@ adb.exe: device offline
 **Causa:** O emulador ainda não tinha terminado de arrancar.
 
 **Solução:**
+
 ```bash
 adb kill-server
 adb start-server
 adb devices
 ```
+
 Aguardar o emulador carregar completamente (ecrã inicial do Android visível)
 antes de voltar a correr o comando.
 
@@ -77,6 +83,7 @@ antes de voltar a correr o comando.
 ## Passo 4 — JAVA_HOME não configurado
 
 **Erro:**
+
 ```
 ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
 ```
@@ -84,7 +91,9 @@ ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
 **Causa:** O JDK não estava configurado nas variáveis de ambiente.
 
 **Solução:**
+
 1. Verificar que o JDK do Android Studio existe:
+
 ```powershell
 Test-Path "C:\Program Files\Android\Android Studio\jbr"
 # Retorna: True
@@ -95,6 +104,7 @@ Test-Path "C:\Program Files\Android\Android Studio\jbr"
    - Adicionar ao `Path`: `C:\Program Files\Android\Android Studio\jbr\bin`
 
 3. Para aplicar na sessão atual do PowerShell sem reiniciar:
+
 ```powershell
 $env:JAVA_HOME = "C:\Program Files\Android\Android Studio\jbr"
 $env:PATH = "$env:JAVA_HOME\bin;$env:PATH"
@@ -106,6 +116,7 @@ java -version
 ## Passo 5 — SDK location not found (local.properties)
 
 **Erro:**
+
 ```
 SDK location not found. Define a valid SDK location with an ANDROID_HOME
 environment variable or by setting the sdk.dir path in your project's
@@ -116,17 +127,20 @@ local.properties file.
 `local.properties` não existia.
 
 **Tentativa falhada** — o `echo` do PowerShell escreveu barras duplas erradas:
+
 ```powershell
 # ❌ Não usar — gera sdk.dir=C\\:\Users\\... (formato errado)
 echo "sdk.dir=C\:\\Users\\leofi\\AppData\\Local\\Android\\Sdk" > android\local.properties
 ```
 
 **Solução correta** — usar `Set-Content` com barras `/`:
+
 ```powershell
 Set-Content C:\Users\leofi\Desktop\ua\app\android\local.properties "sdk.dir=C\:/Users/leofi/AppData/Local/Android/Sdk"
 ```
 
 Verificar o conteúdo:
+
 ```powershell
 Get-Content C:\Users\leofi\Desktop\ua\app\android\local.properties
 # sdk.dir=C\:/Users/leofi/AppData/Local/Android/Sdk
@@ -135,6 +149,7 @@ Get-Content C:\Users\leofi\Desktop\ua\app\android\local.properties
 ---
 
 ## Passo 6 — Build com sucesso ✅
+
 ```bash
 npx expo run:android
 ```
@@ -145,13 +160,13 @@ A app compilou e instalou no emulador com sucesso.
 
 ## Resumo das variáveis de ambiente configuradas
 
-| Variável        | Valor                                                    |
-|-----------------|----------------------------------------------------------|
-| `ANDROID_HOME`  | `C:\Users\leofi\AppData\Local\Android\Sdk`               |
-| `JAVA_HOME`     | `C:\Program Files\Android\Android Studio\jbr`            |
-| `Path` (extra)  | `%ANDROID_HOME%\platform-tools`                          |
-| `Path` (extra)  | `%ANDROID_HOME%\emulator`                                |
-| `Path` (extra)  | `%JAVA_HOME%\bin`                                        |
+| Variável       | Valor                                         |
+| -------------- | --------------------------------------------- |
+| `ANDROID_HOME` | `C:\Users\leofi\AppData\Local\Android\Sdk`    |
+| `JAVA_HOME`    | `C:\Program Files\Android\Android Studio\jbr` |
+| `Path` (extra) | `%ANDROID_HOME%\platform-tools`               |
+| `Path` (extra) | `%ANDROID_HOME%\emulator`                     |
+| `Path` (extra) | `%JAVA_HOME%\bin`                             |
 
 ---
 
