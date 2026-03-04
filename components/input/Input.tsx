@@ -242,8 +242,3 @@ export const Input = ({
   );
 };
 
-const styles = StyleSheet.create({
-  inputShadow: {
-    boxShadow: "0 0 50px -20px #5061FF inset",
-  },
-});

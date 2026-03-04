@@ -39,7 +39,7 @@ export const Profilecard = ({
       useNativeDriver: true,
       friction: 8,
     }).start();
-  }, [isSelected]);
+  }, [isSelected, scale]);
 
   const isFaded = isOtherSelected && !isSelected;
 
