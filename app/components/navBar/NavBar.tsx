@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View, StyleSheet } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { BlurView } from "expo-blur";
 import { AddWidgetModal } from "../modals/addWidgetModal";
 import AddIcon from "../svg/AdicionarIcon";
 import CalendarIcon from "../svg/HistoricoDiarioIcon";
@@ -39,9 +40,18 @@ const Navbar = ({ dark: darkProp, notEditable = false }: navBarProps) => {
           className="rounded-[100px] p-[1px]"
           style={{ boxShadow: "0 2px 12px 0 rgba(0,0,0,0.08)" }}
         >
-          <View
-            className={`flex-row items-center p-2 gap-4 rounded-[100px] ${dark ? "bg-black/50" : "bg-[#DBEDF8]/90"}`}
-          >
+          <View style={styles.pill}>
+            <BlurView
+              intensity={60}
+              tint={dark ? "dark" : "light"}
+              style={StyleSheet.absoluteFillObject}
+            />
+            <View
+              style={[
+                StyleSheet.absoluteFillObject,
+                { backgroundColor: dark ? "rgba(0,4,18,0.55)" : "rgba(219,237,248,0.75)" },
+              ]}
+            />
             <TouchableOpacity
               className={`${styleBall} ${buttonBg}`}
               onPress={notEditable ? () => setModalVisible(true) : () => {}}
@@ -83,3 +93,14 @@ const Navbar = ({ dark: darkProp, notEditable = false }: navBarProps) => {
 };
 
 export default Navbar;
+
+const styles = StyleSheet.create({
+  pill: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 8,
+    gap: 16,
+    borderRadius: 100,
+    overflow: "hidden",
+  },
+});

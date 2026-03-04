@@ -1,5 +1,6 @@
 import { LinearGradient } from "expo-linear-gradient";
-import { Dimensions, View } from "react-native";
+import { useEffect, useRef } from "react";
+import { Animated, Dimensions, Easing, StyleSheet, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -37,26 +38,51 @@ const DotPattern = ({ isDark }: { isDark: boolean }) => {
   );
 };
 
+type BgStatus = "good" | "warning" | "critical";
+
+const BG_COLORS = {
+  good:     { dark: ["#000720", "#000746"] as const, light: ["#AECFFF", "#AECFFF"] as const },
+  warning:  { dark: ["#1A1200", "#2B1F00"] as const, light: ["#FFD84D", "#FFCF33"] as const },
+  critical: { dark: ["#1A0007", "#2A000F"] as const, light: ["#FF8FA3", "#FF7090"] as const },
+};
+
 interface LightBackgroundProps {
   children?: React.ReactNode;
+  status?: BgStatus;
 }
 
-export const LightBackground = ({ children }: LightBackgroundProps) => {
+export const LightBackground = ({ children, status = "good" }: LightBackgroundProps) => {
   const { isDark } = useTheme();
+
+  const fadeAnim = useRef({
+    good:     new Animated.Value(status === "good"     ? 1 : 0),
+    warning:  new Animated.Value(status === "warning"  ? 1 : 0),
+    critical: new Animated.Value(status === "critical" ? 1 : 0),
+  }).current;
+  const prevStatus = useRef<BgStatus>(status);
+
+  useEffect(() => {
+    if (prevStatus.current === status) return;
+    Animated.parallel([
+      Animated.timing(fadeAnim[prevStatus.current], { toValue: 0, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.timing(fadeAnim[status],             { toValue: 1, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+    ]).start();
+    prevStatus.current = status;
+  }, [status]);
 
   return (
     <View className="flex-1">
-      {/* Background Gradient */}
-      {isDark ? (
-        <LinearGradient
-          colors={["#000720", "#000746"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          className="absolute inset-0"
-        />
-      ) : (
-        <View className="absolute inset-0 bg-[#ECF5FF]" />
-      )}
+      {/* Cross-fading background gradients */}
+      {(["good", "warning", "critical"] as const).map((s) => (
+        <Animated.View key={s} style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim[s] }]}>
+          <LinearGradient
+            colors={BG_COLORS[s][isDark ? "dark" : "light"]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={StyleSheet.absoluteFillObject}
+          />
+        </Animated.View>
+      ))}
 
       {/* Dot Pattern Overlay */}
       <DotPattern isDark={isDark} />

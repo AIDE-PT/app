@@ -2,6 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import axios from "axios";
 import {
   Animated,
   GestureResponderEvent,
@@ -9,13 +11,13 @@ import {
   LayoutChangeEvent,
   Platform,
   Pressable,
-  SafeAreaView,
   ScrollView,
   Text,
   TouchableOpacity,
   UIManager,
   View,
 } from "react-native";
+import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Navbar from "@/components/navBar/NavBar";
 import WidgetIcon from "@/components/svg/WidgetIcon";
@@ -29,6 +31,7 @@ import TopBar from "../topBar/TopBar";
 import DashboardMetricWidget from "../widgets/DashboardMetricWidget";
 import { useTheme } from "@/hooks/useTheme";
 import { LightBackground } from "@/components/DotBackground";
+import HealthStatusHero from "./HealthStatusHero";
 
 if (
   Platform.OS === "android" &&
@@ -38,6 +41,23 @@ if (
 }
 
 const STORAGE_KEY = "@dashboard_layout";
+
+const API_BASE = Platform.select({
+  android: "http://10.0.2.2:3000",
+  default: "http://localhost:3000",
+});
+
+interface Alert {
+  id: string;
+  severity: "high" | "medium" | "low";
+  read: boolean;
+}
+
+const fetchAlerts = async (): Promise<Alert[]> => {
+  const response = await axios.get(`${API_BASE}/alerts`);
+  return Array.isArray(response.data) ? response.data : [];
+};
+
 const SIZE_OPTIONS: { label: string; variant: WidgetVariant }[] = [
   { label: "1 x 1", variant: "1-1" },
   { label: "2 x 1", variant: "1-2" },
@@ -365,23 +385,53 @@ export default function EditableDashboard({
   });
 
   const { isDark } = useTheme();
+  const insets = useSafeAreaInsets();
+  const TOP_BAR_HEIGHT = 30;
+  const heroTopExtension = notEditable ? 0 : insets.top + TOP_BAR_HEIGHT;
+
+  const { data: alerts = [] } = useQuery<Alert[]>({
+    queryKey: ["alerts"],
+    queryFn: fetchAlerts,
+    refetchInterval: 15000,
+  });
+
+  const heroStatus: "good" | "warning" | "critical" = (() => {
+    const unread = alerts.filter((a) => !a.read);
+    if (unread.some((a) => a.severity === "high")) return "critical";
+    if (unread.some((a) => a.severity === "medium" || a.severity === "low")) return "warning";
+    return "good";
+  })();
 
   return (
-    <LightBackground>
-      <View className="flex-1">
-        <SafeAreaView className="flex-1" style={{ backgroundColor: 'transparent' }}>
-          {!notEditable && (
-            <TopBar
-              showBackground={true}
-              cuidados={cuidados}
-              selectedCuidado={selectedCuidado}
-              onSelectCuidado={setSelectedCuidado}
-              onNotificationPress={() => router.push("/notificacoes")}
-              onSettingsPress={() => router.push("/definicoes")}
-            />
-          )}
+    <LightBackground status={heroStatus}>
+      <View style={{ flex: 1 }}>
+        {/* TopBar as absolute overlay so Hero bleeds behind it */}
+        {!notEditable && (
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20 }}>
+            <SafeAreaView style={{ backgroundColor: 'transparent' }} edges={['top']}>
+              <TopBar
+                showBackground={true}
+                cuidados={cuidados}
+                selectedCuidado={selectedCuidado}
+                onSelectCuidado={setSelectedCuidado}
+                onNotificationPress={() => router.push("/notificacoes")}
+                onSettingsPress={() => router.push("/definicoes")}
+              />
+            </SafeAreaView>
+          </View>
+        )}
 
-        <ScrollView className="flex-1" scrollEnabled={draggingWidgetId === null}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['bottom']}>
+          <ScrollView style={{ flex: 1 }} scrollEnabled={draggingWidgetId === null}>
+            {/* Hero Section — extends to top edge, content padded below TopBar */}
+            <HealthStatusHero
+              userName="Juliana K."
+              cuidadoName={selectedCuidado.name}
+              status={heroStatus}
+              topExtension={heroTopExtension}
+              onCheckNotifications={() => router.push("/notificacoes")}
+            />
+
           <WidgetGrid
             contentRef={gridContentRef}
             onContentLayout={measureGrid}
@@ -531,10 +581,10 @@ export default function EditableDashboard({
               </View>
             )}
           </WidgetGrid>
-        </ScrollView>
-      </SafeAreaView>
-      <Navbar notEditable />
-    </View>
+          </ScrollView>
+        </SafeAreaView>
+        <Navbar notEditable />
+      </View>
     </LightBackground>
   );
 }

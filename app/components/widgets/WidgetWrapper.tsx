@@ -448,7 +448,7 @@ export function WidgetWrapper({
   const is12 = variant === "1-2";
   const is13 = variant === "1-3";
 
-  const bgColor = bg || (isDark ? "bg-aide-dark-card" : "bg-white");
+  const bgColor = bg || (isDark ? "bg-aide-dark-card" : "bg-white/90");
   const borderColor = isDark ? "border-white/10" : "border-gray-100";
   const textColor = isDark ? "#FFFFFF" : "#000746";
 

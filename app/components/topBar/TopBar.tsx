@@ -1,5 +1,6 @@
 import React from "react";
-import { TouchableOpacity, View } from "react-native";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
+import { BlurView } from "expo-blur";
 import ChoseCuidado from "../buttons/choseCuidado";
 import SOSButton from "../buttons/SOSButton";
 import NotificationBell from "../svg/NotificationBell";
@@ -39,7 +40,6 @@ const TopBar = ({
   const styleBall = `items-center w-[50px] h-[50px] rounded-[100px] justify-center ${ballBg}`;
 
   const backgroundStyle = showBackground ? {
-    backgroundColor: isDark ? "rgba(0, 4, 18, 0.85)" : "#DBEDF880",
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
     paddingTop: 58,
@@ -49,13 +49,26 @@ const TopBar = ({
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
+    overflow: 'hidden' as const,
   } : {};
+
+  const overlayColor = isDark ? "rgba(0, 4, 18, 0.55)" : "rgba(219, 237, 248, 0.45)";
 
   return (
     <View
       className={`flex-row z-50 px-4 py-2 ${profileType === "cuidado" ? "items-center justify-between" : "items-start justify-between"} ${className}`}
       style={backgroundStyle}
     >
+      {showBackground && (
+        <>
+          <BlurView
+            intensity={60}
+            tint={isDark ? "dark" : "light"}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: overlayColor }]} />
+        </>
+      )}
       {profileType === "cuidado" ? (
         <>
           <SOSButton />
