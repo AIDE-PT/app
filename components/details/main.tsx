@@ -19,7 +19,7 @@ const MainDetails = ({
 }: MainDetailsProps) => {
   return (
     <View
-      className="bg-white rounded-3xl p-5 flex-row justify-between items-center w-full"
+      className="bg-white rounded-3xl px-8 py-6 flex-row justify-between items-center w-full"
       style={{
         elevation: 3,
         shadowColor: "#000",

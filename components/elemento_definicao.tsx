@@ -1,7 +1,5 @@
 import React from "react";
-import { View } from "react-native";
-// Caminho correto a partir da pasta components
-import { Button } from "./buttons/button";
+import { Text, TouchableOpacity, View } from "react-native";
 
 interface Props {
   title: string;
@@ -10,10 +8,17 @@ interface Props {
 
 const ElementoDefinicao = ({ title, onPress }: Props) => {
   return (
-    <View className="mb-4 w-full px-6">
+    <View className="mb-4 w-full">
       {/* Container branco puro com sombra leve */}
       <View className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <Button label={title} onPress={onPress} variant="list" />
+        <TouchableOpacity
+          onPress={onPress}
+          className="p-3 bg-white/90 items-start"
+        >
+          <Text className="font-open-sans text-[16px] mx-2 text-black/90 text-left">
+            {title}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

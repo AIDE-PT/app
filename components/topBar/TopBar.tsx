@@ -19,7 +19,7 @@ interface TopBarProps {
 }
 
 const styleBall =
-  "items-center bg-white  w-[50px] h-[50px] rounded-[100px] justify-center";
+  "items-center bg-white  w-[50px] h-[50px] rounded-[100px] justify-center shadow";
 
 const TopBar = ({
   cuidados,
@@ -31,7 +31,7 @@ const TopBar = ({
 }: TopBarProps) => {
   return (
     <View
-      className={`flex-row items-center justify-between px-4 py-2 ${className}`}
+      className={`flex-row items-center justify-between z-50 px-4 py-2 ${className}`}
     >
       <View className="flex-1 mr-4">
         <ChoseCuidado
