@@ -88,7 +88,7 @@ export default function MiniSparkline({
       {yLabels && (
         <View style={{ position: "absolute", left: 0, top: 0, bottom: 0, justifyContent: "space-between", zIndex: 10 }}>
           {yLabels.map((label, index) => (
-            <Text key={index} style={{ fontSize: 7, color: showAllLabels ? "#3B82F6" : "#94A3B8", fontWeight: "bold" }}>{label}</Text>
+            <Text key={index} style={{ fontSize: 12, color: showAllLabels ? "#3B82F6" : "#94A3B8", fontWeight: "bold" }}>{label}</Text>
           ))}
         </View>
       )}

@@ -5,9 +5,10 @@ interface buttonDTO {
   variant: "primary" | "primaryDark" | "list" | "listDark";
   label: string;
   onPress: () => void;
+  disabled?: boolean;
 }
 
-export const Button = ({ variant = "primary", label, onPress }: buttonDTO) => {
+export const Button = ({ variant = "primary", label, onPress, disabled = false }: buttonDTO) => {
   const { isDark } = useTheme();
 
   const containerVariants = {
@@ -27,7 +28,8 @@ export const Button = ({ variant = "primary", label, onPress }: buttonDTO) => {
   return (
     <TouchableOpacity
       onPress={onPress}
-      className={`p-3 rounded-[20px] border border-[#5061FF]/20
+      disabled={disabled}
+      className={`p-3 rounded-[20px] border border-[#5061FF]/20 ${disabled ? "opacity-50" : ""}
                  ${containerVariants[variant]}`}
     >
       <Text className={`text-center mx-auto ${textVariants[variant]}`}>

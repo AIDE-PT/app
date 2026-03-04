@@ -10,15 +10,25 @@ import { useTheme } from "@/hooks/useTheme";
 interface CalendarButtonProps {
   label?: string;
   onDateChange?: (date: Date) => void;
+  onPress?: () => void;
 }
 
 export const CalendarButton = ({
   label = "Dia",
   onDateChange,
+  onPress,
 }: CalendarButtonProps) => {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
   const { isDark } = useTheme();
+
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+      return;
+    }
+    Platform.OS === "android" ? showMode() : setShow(true);
+  };
 
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     // No Android o picker fecha-se sozinho após seleção (dismissed ou set)
@@ -42,7 +52,7 @@ export const CalendarButton = ({
   return (
     <>
       <TouchableOpacity
-        onPress={Platform.OS === "android" ? showMode : () => setShow(true)}
+        onPress={handlePress}
         style={styles.buttonShadow}
         className={`flex-row items-center px-4 py-2 rounded-full border self-start ml-4 ${isDark ? "bg-[#1A1A2E] border-gray-700" : "bg-white border-gray-100"}`}
       >

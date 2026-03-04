@@ -1,9 +1,11 @@
 import React from "react";
 import { TouchableOpacity, View } from "react-native";
 import ChoseCuidado from "../buttons/choseCuidado";
+import SOSButton from "../buttons/SOSButton";
 import NotificationBell from "../svg/NotificationBell";
 import SettingsIcon from "../svg/Settings";
 import { useTheme } from "@/hooks/useTheme";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 
 interface Cuidado {
   id: string;
@@ -30,6 +32,7 @@ const TopBar = ({
   showBackground = false,
 }: TopBarProps) => {
   const { isDark } = useTheme();
+  const { profileType } = useUserProfile();
 
   const iconColor = isDark ? "white" : "#000000";
   const ballBg = isDark ? "bg-[#131632]" : "bg-white";
@@ -50,34 +53,58 @@ const TopBar = ({
 
   return (
     <View
-      className={`flex-row items-center justify-between z-50 px-4 py-2 ${className}`}
+      className={`flex-row z-50 px-4 py-2 ${profileType === "cuidado" ? "items-center justify-between" : "items-start justify-between"} ${className}`}
       style={backgroundStyle}
     >
-      <View className="flex-1 mr-4">
-        <ChoseCuidado
-          cuidados={cuidados}
-          selectedCuidado={selectedCuidado}
-          onSelect={onSelectCuidado}
-        />
-      </View>
+      {profileType === "cuidado" ? (
+        <>
+          <SOSButton />
 
-      <View className="flex-row gap-3">
-        <TouchableOpacity
-          style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
-          className={styleBall}
-          onPress={onNotificationPress}
-        >
-          <NotificationBell color={iconColor} />
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            className={styleBall}
+            onPress={onNotificationPress}
+          >
+            <NotificationBell color={iconColor} />
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
-          className={styleBall}
-          onPress={onSettingsPress}
-        >
-          <SettingsIcon color={iconColor} />
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity
+            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            className={styleBall}
+            onPress={onSettingsPress}
+          >
+            <SettingsIcon color={iconColor} />
+          </TouchableOpacity>
+        </>
+      ) : (
+        <>
+          <View className="flex-1 mr-4">
+            <ChoseCuidado
+              cuidados={cuidados}
+              selectedCuidado={selectedCuidado}
+              onSelect={onSelectCuidado}
+            />
+          </View>
+
+          <View className="flex-row gap-3">
+            <TouchableOpacity
+              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              className={styleBall}
+              onPress={onNotificationPress}
+            >
+              <NotificationBell color={iconColor} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              className={styleBall}
+              onPress={onSettingsPress}
+            >
+              <SettingsIcon color={iconColor} />
+            </TouchableOpacity>
+          </View>
+        </>
+      )}
     </View>
   );
 };

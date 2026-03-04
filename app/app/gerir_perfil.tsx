@@ -57,7 +57,7 @@ const GerirPerfil = () => {
 
           {/* Título e Lápis */}
           <View className="px-4 mb-2">
-            <Text className={`text-[11px] font-open-sans font-bold uppercase tracking-tighter ${isDark ? "text-white/60" : "text-black"}`}>
+            <Text className={`text-xs font-open-sans font-bold uppercase tracking-tighter ${isDark ? "text-white/60" : "text-black"}`}>
               Aqui pode fazer alterações às suas informações de{"\n"}
               identificação e de contacto.
             </Text>

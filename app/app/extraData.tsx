@@ -12,6 +12,7 @@ import { z, ZodError } from "zod";
 import { Button } from "../components/buttons/button";
 import { Input } from "../components/input/Input";
 import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
 import "../global.css";
 
 const extraDataSchema = z.object({
@@ -27,7 +28,7 @@ const extraDataSchema = z.object({
   genero: z.string().min(1, "Selecione um género"),
 });
 
-const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
+const ChevronIcon = ({ isOpen, isDark }: { isOpen: boolean; isDark: boolean }) => (
   <Svg
     width={20}
     height={20}
@@ -37,7 +38,7 @@ const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
   >
     <Path
       d="M6 9l6 6 6-6"
-      stroke="rgba(0,0,0,0.4)"
+      stroke={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"}
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -48,9 +49,11 @@ const ChevronIcon = ({ isOpen }: { isOpen: boolean }) => (
 const GenderSelector = ({
   selected,
   onSelect,
+  isDark,
 }: {
   selected: string;
   onSelect: (gender: string) => void;
+  isDark: boolean;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const options = ["Feminino", "Masculino", "Outro"];
@@ -76,17 +79,17 @@ const GenderSelector = ({
 
   return (
     <View className="w-full rounded-[25px]" style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}>
-      <View className="bg-white/75 rounded-[25px] overflow-hidden">
+      <View className={isDark ? "bg-aide-dark-card rounded-[25px] overflow-hidden" : "bg-white/75 rounded-[25px] overflow-hidden"}>
         <TouchableOpacity
           onPress={toggleDropdown}
           className="w-full flex-row items-center justify-between px-5 py-0.5"
         >
           <Text
-            className={`h-11 leading-[44px] text-base ${selected ? "text-black/90" : "text-black/40"}`}
+            className={`h-11 leading-[44px] text-base ${selected ? (isDark ? "text-white/90" : "text-black/90") : (isDark ? "text-white/40" : "text-black/40")}`}
           >
             {selected || "Género"}
           </Text>
-          <ChevronIcon isOpen={isOpen} />
+          <ChevronIcon isOpen={isOpen} isDark={isDark} />
         </TouchableOpacity>
 
         <Animated.View style={animatedStyle}>
@@ -102,7 +105,7 @@ const GenderSelector = ({
                 className={`text-base ${
                   selected === option
                     ? "text-[#5061FF] font-semibold"
-                    : "text-black/90"
+                    : (isDark ? "text-white/90" : "text-black/90")
                 }`}
               >
                 {option}
@@ -117,6 +120,7 @@ const GenderSelector = ({
 
 export default function ExtraData() {
   const router = useRouter();
+  const { isDark } = useTheme();
   const [idade, setIdade] = useState("");
   const [peso, setPeso] = useState("");
   const [altura, setAltura] = useState("");
@@ -150,10 +154,10 @@ export default function ExtraData() {
 
   return (
     <LightBackground>
-      <View className="flex-1 px-4 pt-10 bg-aide-background">
+      <View className="flex-1 px-4 pt-10 bg-transparent">
         <SafeAreaView className="flex-1">
         <View className="mt-12 mb-8">
-          <Text className="font-safiro text-3xl text-black/90">
+          <Text className={`font-safiro text-3xl ${isDark ? "text-white/90" : "text-black/90"}`}>
             Só mais uma coisa...
           </Text>
         </View>
@@ -205,7 +209,7 @@ export default function ExtraData() {
           </View>
 
           <View>
-            <GenderSelector selected={genero} onSelect={setGenero} />
+            <GenderSelector selected={genero} onSelect={setGenero} isDark={isDark} />
             {errors.genero && (
               <Text className="text-red-500 text-sm ml-2 mt-1">
                 {errors.genero}

@@ -3,21 +3,22 @@ import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
+import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
 import { LightBackground } from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
 
 // Divider with text
-// const DividerWithText = ({ text }: { text: string }) => (
-//   <View className="flex-row items-center my-6">
-//     <View className="flex-1 h-[1px] bg-[#D1D5DB]" />
-//     <Text className="font-open-sans text-[16px] text-[#6B7280] mx-4">
-//       {text}
-//     </Text>
-//     <View className="flex-1 h-[1px] bg-[#D1D5DB]" />
-//   </View>
-// );
+const DividerWithText = ({ text, isDark }: { text: string; isDark: boolean }) => (
+  <View className="flex-row items-center my-6">
+    <View className={`flex-1 h-[1px] ${isDark ? "bg-white/20" : "bg-[#D1D5DB]"}`} />
+    <Text className={`font-open-sans text-[16px] mx-4 ${isDark ? "text-white/60" : "text-[#6B7280]"}`}>
+      {text}
+    </Text>
+    <View className={`flex-1 h-[1px] ${isDark ? "bg-white/20" : "bg-[#D1D5DB]"}`} />
+  </View>
+);
 
 export default function Register() {
   const router = useRouter();
@@ -37,13 +38,13 @@ export default function Register() {
     router.push("/perfil");
   };
 
-  // const handleGoogleRegister = () => {
-  //     console.log("Register with Google");
-  // };
+  const handleGoogleRegister = () => {
+    console.log("Register with Google");
+  };
 
-  // const handleAppleRegister = () => {
-  //     console.log("Register with Apple");
-  // };
+  const handleAppleRegister = () => {
+    console.log("Register with Apple");
+  };
 
   return (
     <LightBackground>
@@ -92,21 +93,15 @@ export default function Register() {
             />
           </View>
 
-          {/* Divider - Social Registration (commented for now)
-                    <DividerWithText text="Ou" />
+          {/* Divider */}
+          <DividerWithText text="Ou" isDark={isDark} />
 
-                    <View className="gap-3 mb-6">
-                        <SocialButton
-                            provider="google"
-                            onPress={handleGoogleRegister}
-                        />
+          {/* Social Registration Buttons */}
+          <View className="gap-3 mb-6">
+            <SocialButton provider="google" onPress={handleGoogleRegister} />
 
-                        <SocialButton
-                            provider="apple"
-                            onPress={handleAppleRegister}
-                        />
-                    </View>
-                    */}
+            <SocialButton provider="apple" onPress={handleAppleRegister} />
+          </View>
 
           {/* Spacer */}
           <View className="flex-1" />

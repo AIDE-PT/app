@@ -11,6 +11,7 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from "react-native-svg";
+import { Feather } from "@expo/vector-icons";
 import { IconType } from "../svg/WidgetIcon";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -127,7 +128,7 @@ function StressMiniChart({ value, history, w, h, isDark }: { value: number; hist
         );
       })}
       {/* Centre value */}
-      <SvgText x={cx} y={cy + 4} fontSize={size * 0.16} fontWeight="800"
+      <SvgText x={cx} y={cy + (size * 0.1)} fontSize={size * 0.25} fontWeight="700"
         fill={isDark ? "#FFF" : "#111827"} textAnchor="middle">{Math.round(value)}</SvgText>
     </Svg>
   );
@@ -363,15 +364,23 @@ function BPMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: num
 }
 
 //  Status helper 
-function getStatus(type: IconType, valueStr: string): { text: string; color: string } {
+type MetricStatus = "normal" | "warning" | "alert";
+
+const STATUS_PALETTE: Record<MetricStatus, { bg: string; text: string; border: string }> = {
+  normal:  { bg: "#DCFCE7", text: "#166534", border: "#86EFAC" },
+  warning: { bg: "#FEF9C3", text: "#854D0E", border: "#FDE047" },
+  alert:   { bg: "#FEE2E2", text: "#991B1B", border: "#FCA5A5" },
+};
+
+function getStatus(type: IconType, valueStr: string): { text: string; status: MetricStatus } {
   const v = parseFloat(valueStr);
-  if (isNaN(v)) return { text: "normal", color: "#4CD964" };
+  if (isNaN(v)) return { text: "normal", status: "normal" };
   switch (type) {
-    case "heartRate": return v > 100 ? { text: "exercício", color: "#FFCC00" } : { text: "normal", color: "#4CD964" };
-    case "temp":      return v > 37.5 ? { text: "febre", color: "#FFCC00" } : { text: "normal", color: "#4CD964" };
-    case "stress":    return v < 40 ? { text: "baixo", color: "#4CD964" } : v <= 70 ? { text: "moderado", color: "#FFCC00" } : { text: "alto", color: "#EF4444" };
-    case "o2":        return v >= 96 ? { text: "normal", color: "#4CD964" } : v >= 94 ? { text: "baixo", color: "#FFCC00" } : { text: "critico", color: "#EF4444" };
-    default:          return { text: "normal", color: "#4CD964" };
+    case "heartRate": return v > 100 ? { text: "exercício", status: "warning" } : { text: "normal", status: "normal" };
+    case "temp":      return v > 37.5 ? { text: "febre", status: "warning" } : { text: "normal", status: "normal" };
+    case "stress":    return v < 40 ? { text: "baixo", status: "normal" } : v <= 70 ? { text: "moderado", status: "warning" } : { text: "alto", status: "alert" };
+    case "o2":        return v >= 96 ? { text: "normal", status: "normal" } : v >= 94 ? { text: "baixo", status: "warning" } : { text: "critico", status: "alert" };
+    default:          return { text: "normal", status: "normal" };
   }
 }
 
@@ -392,13 +401,13 @@ export const DASHBOARD_CONFIG: DASHBOARD_CONFIGProps[] = [
 
 export const METRIC_STYLES: Record<IconType, { title: string; unit: string; color: string; feedbackColor: string }> = {
   heartRate:     { title: "BPM",    unit: "bpm",   color: "#EF4444", feedbackColor: "#FACC15" },
-  steps:         { title: "Passos", unit: "steps", color: "#3B82F6", feedbackColor: "#10B981" },
+  steps:         { title: "Passos", unit: "", color: "#3B82F6", feedbackColor: "#10B981" },
   temp:          { title: "Temp",   unit: "ºC",    color: "#F59E0B", feedbackColor: "#FDE68A" },
   sleep:         { title: "Sono",   unit: "h",     color: "#6366F1", feedbackColor: "#C7D2FE" },
   o2:            { title: "O",    unit: "%",     color: "#06B6D4", feedbackColor: "#A5F3FC" },
   bloodPressure: { title: "BP",     unit: "mmHg",  color: "#EC4899", feedbackColor: "#FBCFE8" },
   cal:           { title: "Cal",    unit: "kcal",  color: "#F97316", feedbackColor: "#FED7AA" },
-  stress:        { title: "Stress", unit: "lvl",   color: "#64748B", feedbackColor: "#CBD5E1" },
+  stress:        { title: "Stress", unit: "",   color: "#64748B", feedbackColor: "#CBD5E1" },
   glucose:       { title: "Glicose",unit: "mg/dL", color: "#EC4899", feedbackColor: "#FCE7F3" },
 };
 
@@ -443,7 +452,8 @@ export function WidgetWrapper({
   const borderColor = isDark ? "border-white/10" : "border-gray-100";
   const textColor = isDark ? "#FFFFFF" : "#000746";
 
-  const status = metricType ? getStatus(metricType, value) : { text: feedback, color: "#4CD964" };
+  const status = metricType ? getStatus(metricType, value) : { text: feedback, status: "normal" as MetricStatus };
+  const palette = STATUS_PALETTE[status.status];
 
   //  Chart dimensions per size 
   // For 1-1: chart replaces bottom half. For 1-2/1-3: chart in the right side pocket.
@@ -451,14 +461,18 @@ export function WidgetWrapper({
   const CHART_HEIGHT = Math.max(chartAreaHeight - 4, 20);
 
   // Horizontal space for chart in wide variants
-  const valueAreaWidth = is11 ? width : (is12 ? width * 0.42 : width * 0.38);
-  const chartWidth = width - valueAreaWidth - (is11 ? 0 : 8);
+  let valueAreaWidth = is11 ? width : (is12 ? width * 0.42 : width * 0.38);
+  let chartWidth = width - valueAreaWidth - (is11 ? 0 : 8);
 
   //  Render per-metric chart 
   const renderChart = () => {
     if (!history || history.length < 2) return null;
-    const cw = is11 ? width : chartWidth;
-    const ch = is11 ? Math.round(height * 0.42) : CHART_HEIGHT;
+    let cw = is11 ? width : chartWidth;
+    let ch = is11 ? Math.round(height * 0.42) : CHART_HEIGHT;
+    if (metricType === "stress") {
+      ch = is11 ? height - 44 : height - 4; // Full height minus padding
+      cw = is11 ? width - 16 : chartWidth;
+    }
 
     switch (metricType) {
       case "heartRate":
@@ -501,11 +515,11 @@ export function WidgetWrapper({
           <View style={{ width: thermW + 4, paddingRight: 2 }} className="justify-between">
             <View className="flex-row items-center gap-1">
               {icon}
-              <Text className="text-aide-light-blue text-[11px] font-open-sans-semibold" numberOfLines={1}>{title}</Text>
+              <Text className="text-xs font-open-sans-semibold" numberOfLines={1}>{title}</Text>
             </View>
             <View className="flex-row items-end">
               <Text style={{ color: textColor }} className="text-xl font-bold leading-none">{value}</Text>
-              <Text className={`text-[9px] font-semibold ml-0.5 mb-0.5 ${isDark ? "text-white/50" : "text-gray-400"}`}>{unit}</Text>
+              <Text className={`text-xs font-semibold ml-0.5 mb-0.5 ${isDark ? "text-white/50" : "text-gray-400"}`}>{unit}</Text>
             </View>
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
               <TempMiniChart value={tempVal} w={thermW - 2} h={chartH - 8} isDark={isDark} />
@@ -528,14 +542,25 @@ export function WidgetWrapper({
           {icon}
           <Text className="text-aide-light-blue text-sm font-open-sans-semibold tracking-wide">{title}</Text>
         </View>
-        {/* Value */}
-        <View className="flex-row items-end mb-1">
-          <Text style={{ color: textColor }} className="text-2xl font-bold leading-none">{value}</Text>
-          <Text className={`text-[10px] font-semibold ml-1 mb-0.5 ${isDark ? "text-white/50" : "text-gray-400"}`}>{unit}</Text>
-        </View>
+        {/* Value - show custom steps indicator, otherwise show regular value */}
+        {(!metricType || metricType !== "stress") && (
+          <View className="flex-row items-end mb-1">
+            {metricType === "steps" ? (
+              <View className="-mt-2">
+                <Text style={{ color: textColor, lineHeight: 28 }} className="text-2xl font-bold">{value}</Text>
+                <Text className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-gray-400"}`}>/10000</Text>
+              </View>
+            ) : (
+              <>
+                <Text style={{ color: textColor }} className="text-2xl font-bold leading-none">{value}</Text>
+                <Text className={`text-xs font-semibold ml-1 mb-0.5 ${isDark ? "text-white/50" : "text-gray-400"}`}>{unit}</Text>
+              </>
+            )}
+          </View>
+        )}
         {/* Chart */}
         {chart && (
-          <View style={{ flex: 1, alignItems: "center", justifyContent: "flex-end" }}>
+          <View style={{ flex: 1, alignItems: "center", justifyContent: metricType === "stress" ? "center" : "flex-end" }}>
             {chart}
           </View>
         )}
@@ -555,7 +580,7 @@ export function WidgetWrapper({
     <View style={[{ width, height, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.12)" }, style]}
       className={`${bgColor} rounded-[20px] p-2 border ${borderColor} overflow-hidden flex-row`}>
       {/* Left: header + value + badge [+ thermometer for temp] */}
-      <View style={{ width: effectiveValueWidth, paddingRight: 4 }} className="justify-between">
+      <View style={{ width: effectiveValueWidth, paddingRight: 4 }} className={metricType === "steps" ? "justify-center" : "justify-between"}>
         {/* Header */}
         <View className="flex-row items-center gap-1">
           {icon}
@@ -563,32 +588,53 @@ export function WidgetWrapper({
         </View>
         {/* Value row — for temp, inline thermometer sits to the right of the number */}
         <View style={{ flex: 1, justifyContent: "center" }}>
-          <View className="flex-row items-center">
-            <View className="flex-row items-end" style={{ flex: 1 }}>
-              <Text style={{ color: textColor, fontSize: is13 ? 28 : 24 }} className="font-bold leading-none">{value}</Text>
-              <Text className={`text-xs font-semibold ml-1 mb-0.5 ${isDark ? "text-white/50" : "text-gray-400"}`}>{unit}</Text>
+          {(metricType !== "stress" || is11) && (
+            <View className="flex-row items-center">
+              <View className="flex-row items-end" style={{ flex: 1 }}>
+                {metricType === "steps" ? (
+                  <View>
+                    <Text style={{ color: textColor, lineHeight: 28 }} className="text-2xl font-bold">{value}</Text>
+                    <Text className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-gray-400"}`}>/10000</Text>
+                  </View>
+                ) : (
+                  <>
+                    <Text style={{ color: textColor, fontSize: is13 ? 28 : 24 }} className="font-bold leading-none">{value}</Text>
+                    <Text className={`text-xs font-semibold ml-1 mb-0.5 ${isDark ? "text-white/50" : "text-gray-400"}`}>{unit}</Text>
+                  </>
+                )}
+              </View>
+              {showInlineTherm && (
+                <TempMiniChart
+                  value={tempVal}
+                  w={thermInlineW}
+                  h={Math.max(CHART_HEIGHT - 10, 24)}
+                  isDark={isDark}
+                />
+              )}
             </View>
-            {showInlineTherm && (
-              <TempMiniChart
-                value={tempVal}
-                w={thermInlineW}
-                h={Math.max(CHART_HEIGHT - 10, 24)}
-                isDark={isDark}
-              />
-            )}
+          )}
+        </View>
+        {/* Status badge - only show for non-steps metrics */}
+        {metricType !== "stress" && metricType !== "steps" && (
+          <View className="self-start flex-row items-center gap-1.5 px-2 py-0.5 rounded-full mb-1"
+            style={{ backgroundColor: palette.bg, borderWidth: 1, borderColor: palette.border }}>
+            <Feather
+              name={status.status === "normal" ? "check-circle" : status.status === "warning" ? "alert-circle" : "alert-triangle"}
+              size={10} color={palette.text} />
+            <Text className="text-[10px] font-bold font-open-sans" style={{ color: palette.text }}>
+              {status.text}
+            </Text>
           </View>
-        </View>
-        {/* Status badge */}
-        <View style={{ backgroundColor: status.color }} className="self-start px-2 py-0.5 rounded-full mb-1">
-          <Text className="text-[10px] font-bold text-black">{status.text}</Text>
-        </View>
+        )}
+
       </View>
       {/* Right: chart */}
       {chart && (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center", paddingRight: metricType === "stress" ? 2 : 0, paddingTop: metricType === "steps" ? 26 : 0 }}>
           {chart}
         </View>
       )}
     </View>
   );
 }
+

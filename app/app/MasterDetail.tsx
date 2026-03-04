@@ -652,7 +652,7 @@ export default function MasterDetail() {
                         {[{color:"#86EFAC",label:"Normal"},{color:"#FDE68A",label:"Elevado"},{color:"#FCA5A5",label:"Crítico"}].map((r) => (
                           <View key={r.label} className="items-center gap-0.5">
                             <View className="w-3 h-3 rounded-full" style={{ backgroundColor: r.color }} />
-                            <Text className="text-[9px] font-open-sans"
+                            <Text className="text-xs font-open-sans"
                               style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#9CA3AF" }}>{r.label}</Text>
                           </View>
                         ))}
@@ -670,7 +670,7 @@ export default function MasterDetail() {
                     </View>
                     <View className="flex-row justify-between mt-1">
                       {["40","60","100","140+"].map((v) => (
-                        <Text key={v} className={`text-[9px] font-open-sans ${ts}`}>{v}</Text>
+                        <Text key={v} className={`text-xs font-open-sans ${ts}`}>{v}</Text>
                       ))}
                     </View>
                   </View>
@@ -697,8 +697,8 @@ export default function MasterDetail() {
                       {O2_LEGEND.map((r) => (
                         <View key={r.label} className="items-center gap-1">
                           <View className="w-8 h-3 rounded-full" style={{ backgroundColor: r.color }} />
-                          <Text className="text-[10px] font-open-sans" style={{ color: tAccent }}>{r.label}</Text>
-                          <Text className={`text-[9px] font-open-sans ${ts}`}>{r.desc}</Text>
+                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>{r.label}</Text>
+                          <Text className={`text-xs font-open-sans ${ts}`}>{r.desc}</Text>
                         </View>
                       ))}
                     </View>
@@ -729,8 +729,8 @@ export default function MasterDetail() {
                           style={{ width: `${Math.min(((history[0] ?? 0) / 10000) * 100, 100)}%`, backgroundColor: config.accent }} />
                       </View>
                       <View className="flex-row justify-between mt-1">
-                        <Text className={`text-[10px] font-open-sans ${ts}`}>0</Text>
-                        <Text className={`text-[10px] font-open-sans ${ts}`}>10 000</Text>
+                        <Text className={`text-xs font-open-sans ${ts}`}>0</Text>
+                        <Text className={`text-xs font-open-sans ${ts}`}>10 000</Text>
                       </View>
                     </View>
                   </View>
@@ -757,7 +757,7 @@ export default function MasterDetail() {
                               <View>
                                 <Text className="text-xs font-open-sans"
                                   style={{ color: tAccent, fontWeight: active ? "700" : "400" }}>{z.label}</Text>
-                                <Text className={`text-[9px] font-open-sans ${ts}`}>{z.display}</Text>
+                                <Text className={`text-xs font-open-sans ${ts}`}>{z.display}</Text>
                               </View>
                             </View>
                           );
@@ -784,8 +784,8 @@ export default function MasterDetail() {
                         style={{ width: `${Math.min((currentRaw / 2000) * 100, 100)}%`, backgroundColor: config.accent }} />
                     </View>
                     <View className="flex-row justify-between mt-1">
-                      <Text className={`text-[10px] font-open-sans ${ts}`}>0 kcal</Text>
-                      <Text className={`text-[10px] font-open-sans ${ts}`}>2 000 kcal</Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>0 kcal</Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>2 000 kcal</Text>
                     </View>
                   </View>
                 )}
@@ -801,7 +801,7 @@ export default function MasterDetail() {
                         {[{color:"#86EFAC",label:"Baixo"},{color:"#FDE68A",label:"Moderado"},{color:"#FCA5A5",label:"Alto"}].map((z) => (
                           <View key={z.label} className="flex-row items-center gap-1">
                             <View className="w-2 h-2 rounded-full" style={{ backgroundColor: z.color }} />
-                            <Text className="text-[9px] font-open-sans"
+                            <Text className="text-xs font-open-sans"
                               style={{ color: isDark ? "rgba(255,255,255,0.45)" : "#9CA3AF" }}>{z.label}</Text>
                           </View>
                         ))}
@@ -821,7 +821,79 @@ export default function MasterDetail() {
                 )}
 
                 {/* ── History Line Chart ────────────────────────────────── */}
-                {resolvedType !== "o2" && (
+                {resolvedType === "heart" ? (
+                  // Heart: Show average visualization
+                  <View className={`rounded-3xl p-5 border mb-5 ${cardBg}`} style={shadow}>
+                    <View className="flex-row justify-between items-center mb-4">
+                      <Text className="text-base font-safiro" style={{ color: tAccent }}>Médias</Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>Análise de padrões</Text>
+                    </View>
+                    {/* Average Visualization */}
+                    {(() => {
+                      const h = chartData || [];
+                      if (!h.length) {
+                        return (
+                          <View className="items-center justify-center py-8">
+                            <Text className={`text-sm ${ts}`}>Aguardando dados...</Text>
+                          </View>
+                        );
+                      }
+                      const avg = calcAvg(h);
+                      const highs = h.filter(v => v > 100);
+                      const lows = h.filter(v => v < 60);
+                      const avgHigh = highs.length ? calcAvg(highs) : null;
+                      const avgLow = lows.length ? calcAvg(lows) : null;
+                      
+                      return (
+                        <View className="flex-row items-center justify-between">
+                          {/* Main Average Circle */}
+                          <View className="items-center">
+                            <View className="w-24 h-24 rounded-full items-center justify-center border-4"
+                              style={{ borderColor: config.accent, backgroundColor: isDark ? "rgba(124,137,255,0.1)" : "#EEF0FF" }}>
+                              <Text className="text-3xl font-bold font-safiro" style={{ color: config.accent }}>
+                                {Math.round(avg)}
+                              </Text>
+                              <Text className={`text-xs ${ts}`}>Média</Text>
+                            </View>
+                          </View>
+                          
+                          {/* High and Low Averages */}
+                          <View className="flex-1 ml-4 gap-3">
+                            {/* High */}
+                            <View className="rounded-xl p-3 flex-row items-center justify-between"
+                              style={{ backgroundColor: isDark ? "rgba(252,165,165,0.1)" : "#FEF2F2" }}>
+                              <View className="flex-row items-center gap-2">
+                                <View className="w-8 h-8 rounded-full items-center justify-center"
+                                  style={{ backgroundColor: "#FCA5A5" }}>
+                                  <Feather name="trending-up" size={16} color="#991B1B" />
+                                </View>
+                                <Text className={`text-sm font-open-sans ${ts}`}>Média Alta</Text>
+                              </View>
+                              <Text className="text-lg font-bold font-safiro" style={{ color: "#EF4444" }}>
+                                {avgHigh !== null ? Math.round(avgHigh) : "--"}
+                              </Text>
+                            </View>
+                            
+                            {/* Low */}
+                            <View className="rounded-xl p-3 flex-row items-center justify-between"
+                              style={{ backgroundColor: isDark ? "rgba(134,239,172,0.1)" : "#F0FDF4" }}>
+                              <View className="flex-row items-center gap-2">
+                                <View className="w-8 h-8 rounded-full items-center justify-center"
+                                  style={{ backgroundColor: "#86EFAC" }}>
+                                  <Feather name="trending-down" size={16} color="#166534" />
+                                </View>
+                                <Text className={`text-sm font-open-sans ${ts}`}>Média Baixa</Text>
+                              </View>
+                              <Text className="text-lg font-bold font-safiro" style={{ color: "#22C55E" }}>
+                                {avgLow !== null ? Math.round(avgLow) : "--"}
+                              </Text>
+                            </View>
+                          </View>
+                        </View>
+                      );
+                    })()}
+                  </View>
+                ) : resolvedType !== "o2" ? (
                   <View className={`rounded-3xl p-5 border mb-5 ${cardBg}`} style={shadow}>
                     <View className="flex-row justify-between items-center mb-4">
                       <Text className="text-base font-safiro" style={{ color: tAccent }}>Histórico</Text>
@@ -842,7 +914,7 @@ export default function MasterDetail() {
                       {...(config.yMax !== undefined ? { yMax: config.yMax } : {})}
                     />
                   </View>
-                )}
+                ) : null}
 
                 {/* ── Extra Info Cards ──────────────────────────────────── */}
                 <View className="flex-row flex-wrap gap-3 mb-4">
@@ -863,29 +935,6 @@ export default function MasterDetail() {
                     </View>
                   ))}
                 </View>
-
-                {/* ── Zone Reference ────────────────────────────────────── */}
-                {resolvedType === "heart" && (
-                  <View className={`rounded-2xl p-4 border ${cardBg}`} style={shadow}>
-                    <Text className="text-sm font-open-sans mb-3" style={{ color: tAccent }}>
-                      Zonas de Frequência Cardíaca
-                    </Text>
-                    <ZoneList zones={HEART_ZONES} value={currentRaw} isDark={isDark} />
-                  </View>
-                )}
-                {resolvedType === "temp" && (
-                  <View className={`rounded-2xl p-4 border ${cardBg}`} style={shadow}>
-                    <Text className="text-sm font-open-sans mb-3" style={{ color: tAccent }}>
-                      Referência de Temperatura
-                    </Text>
-                    <View className="flex-row h-3 rounded-full overflow-hidden mb-4">
-                      {TEMP_ZONES.map((z) => (
-                        <View key={z.label} style={{ flex: 1, backgroundColor: z.color }} />
-                      ))}
-                    </View>
-                    <ZoneList zones={TEMP_ZONES} value={currentRaw} isDark={isDark} />
-                  </View>
-                )}
 
               </ScrollView>
             )}

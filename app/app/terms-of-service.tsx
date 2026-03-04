@@ -1,7 +1,8 @@
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
 import { ScrollView, SafeAreaView, Text, View } from "react-native";
 import BackButton from "../components/buttons/backButton";
+import { Button } from "../components/buttons/button";
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -51,6 +52,8 @@ const BulletPoint = ({ children, isDark }: BulletPointProps) => (
 
 const TermsOfService = () => {
   const { isDark } = useTheme();
+  const searchParams = useLocalSearchParams<{ fromStart?: string }>();
+  const fromStart = searchParams.fromStart === "true";
 
   return (
     <LightBackground>
@@ -59,7 +62,7 @@ const TermsOfService = () => {
           <BackButton
             label="Termos de Serviço"
             dark={!isDark}
-            onPress={() => router.push("/definicoes")}
+            onPress={() => router.push(fromStart ? "/" : "/definicoes")}
           />
 
           {/* Content */}
@@ -166,6 +169,17 @@ const TermsOfService = () => {
             </TermSection>
 
             <View className="h-10" />
+
+            {/* Register Button - Only show when coming from start page */}
+            {fromStart && (
+              <View className="items-center mb-8">
+                <Button
+                  variant="primary"
+                  label="Registar"
+                  onPress={() => router.push("/register")}
+                />
+              </View>
+            )}
           </ScrollView>
         </SafeAreaView>
       </View>

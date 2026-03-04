@@ -6,6 +6,7 @@ import { Button } from "../components/buttons/button";
 import { ChipButton } from "../components/buttons/ChipButton";
 import { SearchBar } from "../components/input/SearchBar";
 import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
 
 import "../global.css";
 
@@ -22,6 +23,7 @@ const ALL_CONDITIONS = [
 
 export default function SelectConditions() {
   const router = useRouter();
+  const { isDark } = useTheme();
   const [searchText, setSearchText] = useState("");
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
 
@@ -46,10 +48,10 @@ export default function SelectConditions() {
 
   return (
     <LightBackground>
-      <View className="flex-1 px-4 pt-10 bg-aide-background">
+      <View className="flex-1 px-4 pt-10 bg-transparent">
         <SafeAreaView className="flex-1">
         <View className="mt-12 mb-6">
-          <Text className="font-safiro text-3xl text-black/90">
+          <Text className={`font-safiro text-3xl ${isDark ? "text-white/90" : "text-black/90"}`}>
             Só mais uma coisa...
           </Text>
         </View>
@@ -59,6 +61,7 @@ export default function SelectConditions() {
             placeholder="Doenças que tenha"
             value={searchText}
             onChangeText={setSearchText}
+            variant={isDark ? "dark" : "light"}
           />
         </View>
 
@@ -69,6 +72,7 @@ export default function SelectConditions() {
               label={condition}
               selected={selectedConditions.includes(condition)}
               onPress={() => toggleCondition(condition)}
+              variant={isDark ? "dark" : "light"}
             />
           ))}
         </View>

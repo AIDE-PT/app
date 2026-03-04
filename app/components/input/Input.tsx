@@ -121,7 +121,7 @@ export const Input = ({
       </TouchableOpacity>
       {/* Feedback visual de erro */}
       {isEmail && !isEmailValid && (
-        <Text className="text-red-500 text-[10px] ml-4 mt-1 font-bold">
+        <Text className="text-red-500 text-xs ml-4 mt-1 font-bold">
           E-mail inválido
         </Text>
       )}

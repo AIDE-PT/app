@@ -12,15 +12,20 @@ import cuidado from "../assets/images/cuidado.png";
 import icon_aider from "../assets/images/icon_aider.png";
 import icon_cuidado from "../assets/images/icon_cuidado.png";
 import { Profilecard } from "../components/profilecard";
+import { Button } from "../components/buttons/button";
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 
 export default function PerfilScreen() {
   const router = useRouter();
   const [selected, setSelected] = useState<"aider" | "cuidado" | null>(null);
   const { isDark } = useTheme();
+  const { setProfileType } = useUserProfile();
 
   const handleAvançar = () => {
+    if (!selected) return;
+    setProfileType(selected);
     if (selected === "cuidado") {
       router.push("/extraData");
     } else {
@@ -72,21 +77,12 @@ export default function PerfilScreen() {
 
             {/* Botão Avançar */}
             <View className="items-center mt-10">
-              <TouchableOpacity
-                disabled={!selected}
+              <Button
+                variant="primary"
+                label="Avançar"
                 onPress={handleAvançar}
-                activeOpacity={0.8}
-                className={`w-full py-5 rounded-[22px] items-center ${
-                  selected ? "bg-[#7C94FF]" : isDark ? "bg-aide-dark-card" : "bg-white"
-                }`}
-                style={selected ? undefined : { boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
-              >
-                <Text
-                  className={`text-xl font-bold ${selected ? "text-white" : "text-gray-400"}`}
-                >
-                  Avançar
-                </Text>
-              </TouchableOpacity>
+                disabled={!selected}
+              />
             </View>
           </View>
         </ScrollView>

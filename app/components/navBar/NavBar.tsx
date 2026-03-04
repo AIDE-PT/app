@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { TouchableOpacity, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { AddWidgetModal } from "../modals/addWidgetModal";
-import AddIcon from "../svg/AddIcon";
-import CalendarIcon from "../svg/CalendarIcon";
-import HomeIcon from "../svg/HomeIcon";
-import ProfileIcon from "../svg/ProfileIcon";
+import AddIcon from "../svg/AdicionarIcon";
+import CalendarIcon from "../svg/HistoricoDiarioIcon";
+import HomeIcon from "../svg/HomeNovoIcon";
+import ProfileIcon from "../svg/PerfilIcon";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -31,38 +32,45 @@ const Navbar = ({ dark: darkProp, notEditable = false }: navBarProps) => {
     <>
       <View className="w-200" />
       <View className="absolute bottom-6 w-full items-center">
-        <View
-          style={{ boxShadow: "0 4px 24.1px 0 rgba(0, 0, 0, 0.25)" }}
-          className={`flex-row items-center p-2 gap-4 rounded-[100px] border border-white/10 ${dark ? "bg-black/50" : "bg-[#DBEDF8]/90"}`}
+        <LinearGradient
+          colors={dark ? ['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.04)'] : ['#FFFFFF', '#D1D5DB']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          className="rounded-[100px] p-[1px]"
+          style={{ boxShadow: "0 2px 12px 0 rgba(0,0,0,0.08)" }}
         >
-          <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
-            onPress={notEditable ? () => setModalVisible(true) : () => {}}
+          <View
+            className={`flex-row items-center p-2 gap-4 rounded-[100px] ${dark ? "bg-black/50" : "bg-[#DBEDF8]/90"}`}
           >
-            <AddIcon color={iconColor} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              className={`${styleBall} ${buttonBg}`}
+              onPress={notEditable ? () => setModalVisible(true) : () => {}}
+            >
+              <AddIcon color={iconColor} />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
-            onPress={() => router.push("/historicoDiario")}
-          >
-            <CalendarIcon color={iconColor} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              className={`${styleBall} ${buttonBg}`}
+              onPress={() => router.push("/historicoDiario")}
+            >
+              <CalendarIcon color={iconColor} />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
-            onPress={() => router.push("/testDashboard")}
-          >
-            <HomeIcon color={iconColor} />
-          </TouchableOpacity>
+            <TouchableOpacity
+              className={`${styleBall} ${buttonBg}`}
+              onPress={() => router.push("/testDashboard")}
+            >
+              <HomeIcon color={iconColor} />
+            </TouchableOpacity>
 
-          <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
-            onPress={() => router.push("/definicoes")}
-          >
-            <ProfileIcon color={iconColor} />
-          </TouchableOpacity>
-        </View>
+            <TouchableOpacity
+              className={`${styleBall} ${buttonBg}`}
+              onPress={() => router.push("/definicoes")}
+            >
+              <ProfileIcon color={iconColor} />
+            </TouchableOpacity>
+          </View>
+        </LinearGradient>
       </View>
       {notEditable && (
         <AddWidgetModal
