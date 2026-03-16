@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { BlurView } from "expo-blur";
 import ChoseCuidado from "../buttons/choseCuidado";
-import SOSButton from "../buttons/SOSButton";
+import SOSButton from "../buttons/sosButton";
 import NotificationBell from "../svg/NotificationBell";
 import SettingsIcon from "../svg/Settings";
 import { useTheme } from "@/hooks/useTheme";
