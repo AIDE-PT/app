@@ -6,7 +6,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
 import { IconCardButton } from "../components/buttons/IconCardButton";
 import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 import {
   BpmIcon,
   CalIcon,
@@ -61,7 +60,7 @@ const conditionToMetrics: Record<string, HealthMetric[]> = {
 
 export default function Recommendations() {
   const router = useRouter();
-  const { isDark } = useTheme();
+  const isDark = false;
   const { conditions } = useLocalSearchParams<{ conditions: string }>();
   const [selectedMetrics, setSelectedMetrics] = useState<HealthMetric[]>([]);
 
@@ -104,7 +103,7 @@ export default function Recommendations() {
   };
 
   return (
-    <LightBackground>
+    <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10 bg-transparent">
         <SafeAreaView className="flex-1">
         <View className="mt-12 mb-8">
@@ -124,7 +123,8 @@ export default function Recommendations() {
                 icon={metric.icon}
                 selected={selectedMetrics.includes(metric.id)}
                 onPress={() => toggleMetric(metric.id)}
-                variant={isDark ? "dark" : "light"}
+                variant="light"
+                forceLight
               />
             </View>
           ))}
@@ -133,7 +133,7 @@ export default function Recommendations() {
         <View className="flex-1" />
 
         <View className="items-center mb-8">
-          <Button variant="primary" label="Concluir" onPress={handleConcluir} />
+          <Button variant="primary" forceLight label="Concluir" onPress={handleConcluir} />
         </View>
       </SafeAreaView>
     </View>

@@ -194,6 +194,18 @@ export default function EditableDashboard({
     closeSizeMenu();
   };
 
+  const addWidget = useCallback((widgetId: string) => {
+    const widgetTemplate = DASHBOARD_CONFIG.find((widget) => widget.id === widgetId);
+    if (!widgetTemplate) return;
+
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setActiveWidgets((prev) => {
+      if (prev.some((widget) => widget.id === widgetId)) return prev;
+      return [...prev, { ...widgetTemplate }];
+    });
+    setIsEditing(true);
+  }, []);
+
   const closeSizeMenuImmediate = () => {
     menuAnimation.stopAnimation();
     menuAnimation.setValue(0);
@@ -407,7 +419,17 @@ export default function EditableDashboard({
       <View style={{ flex: 1 }}>
         {/* TopBar as absolute overlay so Hero bleeds behind it */}
         {!notEditable && (
-          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 20 }}>
+          <View
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 20,
+              elevation: 20,
+              overflow: "visible",
+            }}
+          >
             <SafeAreaView style={{ backgroundColor: 'transparent' }} edges={['top']}>
               <TopBar
                 showBackground={true}
@@ -493,8 +515,11 @@ export default function EditableDashboard({
                       onPress={() => toggleSizeMenu(item.id)}
                       className={`absolute top-2 right-2 h-7 w-7 rounded-full items-center justify-center z-40 ${isDark ? "bg-aide-dark-card border border-white/20" : "bg-white/90 border border-slate-200"}`}
                       disabled={Boolean(draggingWidgetId)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Mais opções para ${item.type}`}
+                      accessibilityHint="Abre opções de tamanho e remoção do widget."
                     >
-                      <Feather name="more-vertical" size={14} color={isDark ? "#ffffff" : "#1e293b"} />
+                      <Feather name="more-vertical" size={14} color={isDark ? "#ffffff" : "#1e293b"} accessible={false} />
                     </TouchableOpacity>
                   )}
 
@@ -530,6 +555,9 @@ export default function EditableDashboard({
                               setSize(item.id, option.variant);
                               closeSizeMenu();
                             }}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Tamanho ${option.label}`}
+                            accessibilityState={{ selected }}
                           >
                             <Text
                               className={`text-sm font-bold ${selected ? (isDark ? "text-blue-300" : "text-blue-700") : (isDark ? "text-slate-300" : "text-slate-600")}`}
@@ -537,7 +565,7 @@ export default function EditableDashboard({
                               {option.label}
                             </Text>
                             {selected && (
-                              <Feather name="check" size={13} color={isDark ? "#93c5fd" : "#1d4ed8"} />
+                              <Feather name="check" size={13} color={isDark ? "#93c5fd" : "#1d4ed8"} accessible={false} />
                             )}
                           </TouchableOpacity>
                         );
@@ -548,11 +576,13 @@ export default function EditableDashboard({
                         onPress={() => {
                           deleteWidget(item.id);
                         }}
+                        accessibilityRole="button"
+                        accessibilityLabel={`Eliminar widget ${item.type}`}
                       >
                         <Text className="text-xs font-bold text-red-500">
                           Eliminar
                         </Text>
-                        <Feather name="trash-2" size={13} color="#ef4444" />
+                        <Feather name="trash-2" size={13} color="#ef4444" accessible={false} />
                       </TouchableOpacity>
                     </Animated.View>
                   )}
@@ -583,7 +613,7 @@ export default function EditableDashboard({
           </WidgetGrid>
           </ScrollView>
         </SafeAreaView>
-        <Navbar notEditable />
+        <Navbar notEditable onAddWidget={addWidget} />
       </View>
     </LightBackground>
   );

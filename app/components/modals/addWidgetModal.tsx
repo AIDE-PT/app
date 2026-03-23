@@ -18,10 +18,20 @@ import { useTheme } from "@/hooks/useTheme";
 interface AddWidgetModalProps {
   visible: boolean;
   onClose: () => void;
+  onAddWidget: (widgetId: string) => void;
 }
 
-export const AddWidgetModal = ({ visible, onClose }: AddWidgetModalProps) => {
+export const AddWidgetModal = ({
+  visible,
+  onClose,
+  onAddWidget,
+}: AddWidgetModalProps) => {
   const { isDark } = useTheme();
+
+  const handleAdd = (widgetId: string) => {
+    onAddWidget(widgetId);
+    onClose();
+  };
 
   return (
     <BottomModal visible={visible} onClose={onClose}>
@@ -35,17 +45,17 @@ export const AddWidgetModal = ({ visible, onClose }: AddWidgetModalProps) => {
             <WidgetAdd
               label="BPM"
               Icon={BpmIcon}
-              onPress={() => console.log("Add BPM")}
+              onPress={() => handleAdd("heart")}
             />
             <WidgetAdd
               label="TEMP"
               Icon={TempIcon}
-              onPress={() => console.log("Add TEMP")}
+              onPress={() => handleAdd("temp")}
             />
             <WidgetAdd
               label="GLICOSE"
               Icon={GlicoseIcon}
-              onPress={() => console.log("Add GLICOSE")}
+              onPress={() => handleAdd("glycemia")}
             />
           </View>
         </View>
@@ -59,17 +69,17 @@ export const AddWidgetModal = ({ visible, onClose }: AddWidgetModalProps) => {
             <WidgetAdd
               label="PASSOS"
               Icon={PassosIcon}
-              onPress={() => console.log("Add PASSOS")}
+              onPress={() => handleAdd("steps")}
             />
             <WidgetAdd
               label="SONO"
               Icon={SonoIcon}
-              onPress={() => console.log("Add SONO")}
+              onPress={() => handleAdd("sleep")}
             />
             <WidgetAdd
               label="O2"
               Icon={O2Icon}
-              onPress={() => console.log("Add O2")}
+              onPress={() => handleAdd("o2")}
             />
           </View>
         </View>
@@ -83,17 +93,17 @@ export const AddWidgetModal = ({ visible, onClose }: AddWidgetModalProps) => {
             <WidgetAdd
               label="PRESSÃO"
               Icon={PressaoIcon}
-              onPress={() => console.log("Add PRESSAO")}
+              onPress={() => handleAdd("blood Pressure")}
             />
             <WidgetAdd
               label="CAL"
               Icon={CalIcon}
-              onPress={() => console.log("Add CAL")}
+              onPress={() => handleAdd("glycemia")}
             />
             <WidgetAdd
               label="STRESS"
               Icon={StressIcon}
-              onPress={() => console.log("Add STRESS")}
+              onPress={() => handleAdd("stress")}
             />
           </View>
         </View>

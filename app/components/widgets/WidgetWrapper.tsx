@@ -21,6 +21,11 @@ const GRID_GAP = 12;
 const availableWidth = screenWidth - GRID_PADDING * 2;
 const COLUMN_WIDTH = (availableWidth - GRID_GAP * 2) / 3;
 const BRAND_BLUE = "#7C89FF";
+const DEFAULT_SEMANTIC = {
+  success: "#4CD964",
+  warning: "#FFCC00",
+  danger: "#FF5151",
+};
 
 export type WidgetVariant = "1-1" | "1-2" | "1-3" | "2-3";
 
@@ -36,7 +41,7 @@ function smoothPath(pts: { x: number; y: number }[], t = 0.35): string {
 }
 
 //  1. Heart  coloured zone bands + line 
-function HeartMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: number; isDark: boolean }) {
+function HeartMiniChart({ data, w, h, isDark, semantic = DEFAULT_SEMANTIC }: { data: number[]; w: number; h: number; isDark: boolean; semantic?: { success: string; warning: string; danger: string } }) {
   const pts = data.slice(-16);
   if (pts.length < 2) return null;
   const mn = 40; const mx = 160;
@@ -45,9 +50,9 @@ function HeartMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: 
   const toY = (v: number) => pad.t + (1 - (v - mn) / (mx - mn)) * (h - pad.t - pad.b);
   const zones = [
     { lo: 40, hi: 60, color: "#93C5FD" },
-    { lo: 60, hi: 100, color: "#86EFAC" },
-    { lo: 100, hi: 140, color: "#FDE68A" },
-    { lo: 140, hi: 160, color: "#FECACA" },
+    { lo: 60, hi: 100, color: semantic.success },
+    { lo: 100, hi: 140, color: semantic.warning },
+    { lo: 140, hi: 160, color: semantic.danger },
   ];
   const linePath = smoothPath(pts.map((v, i) => ({ x: toX(i), y: toY(v) })));
   const fillPath = linePath + ` L ${toX(pts.length - 1)} ${h} L ${toX(0)} ${h} Z`;
@@ -73,17 +78,17 @@ function HeartMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: 
 }
 
 //  2. Stress/Heart — triple concentric zone rings (mirrors HeartTripleRings in MasterDetail) 
-function StressMiniChart({ value, history, w, h, isDark }: { value: number; history: number[]; w: number; h: number; isDark: boolean }) {
+function StressMiniChart({ value, history, w, h, isDark, semantic = DEFAULT_SEMANTIC }: { value: number; history: number[]; w: number; h: number; isDark: boolean; semantic?: { success: string; warning: string; danger: string } }) {
   const size = Math.min(w, h);
   const cx = size / 2; const cy = size / 2;
-  const trackColor = isDark ? "rgba(255,255,255,0.07)" : "#F3F4F6";
+  const trackColor = isDark ? "rgba(255,255,255,0.07)" : "rgba(15,23,42,0.14)";
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   // Zone rings matching the stress master detail (Baixo/Moderado/Alto zones)
   const scale = size / 220;
   const rings = [
-    { r: 46 * scale, min: 0,  max: 40,  color: "#86EFAC", label: "Baixo"    },
-    { r: 66 * scale, min: 40, max: 70,  color: "#FDE68A", label: "Moderado" },
-    { r: 86 * scale, min: 70, max: 100, color: "#FCA5A5", label: "Alto"     },
+    { r: 46 * scale, min: 0,  max: 40,  color: semantic.success, label: "Baixo"    },
+    { r: 66 * scale, min: 40, max: 70,  color: semantic.warning, label: "Moderado" },
+    { r: 86 * scale, min: 70, max: 100, color: semantic.danger, label: "Alto"     },
   ];
   const ringPct = (min: number, max: number) => {
     if (value <= min) return 0;
@@ -91,13 +96,15 @@ function StressMiniChart({ value, history, w, h, isDark }: { value: number; hist
     return (value - min) / (max - min);
   };
   const sw = Math.max(size * 0.038, 3);
+  const inactiveStroke = isDark ? sw : sw * 1.12;
+  const activeStroke = isDark ? sw * 1.25 : sw * 1.45;
   return (
     <Svg width={size} height={size}>
       <Defs>
         {rings.map((ring, i) => (
           <LinearGradient key={i} id={`srg${i}`} x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0%" stopColor={ring.color} stopOpacity="0.5" />
-            <Stop offset="100%" stopColor={ring.color} stopOpacity="1" />
+            <Stop offset="0%" stopColor={ring.color} stopOpacity={isDark ? 0.5 : 0.82} />
+            <Stop offset="100%" stopColor={ring.color} stopOpacity={isDark ? 1 : 0.98} />
           </LinearGradient>
         ))}
       </Defs>
@@ -110,10 +117,10 @@ function StressMiniChart({ value, history, w, h, isDark }: { value: number; hist
         const dotY = cy + ring.r * Math.sin(toRad(dotAngle));
         return (
           <G key={ring.label}>
-            <Circle cx={cx} cy={cy} r={ring.r} fill="none" stroke={trackColor} strokeWidth={isActive ? sw * 1.25 : sw} />
+            <Circle cx={cx} cy={cy} r={ring.r} fill="none" stroke={trackColor} strokeWidth={isActive ? activeStroke : inactiveStroke} />
             {pct > 0 && (
               <Circle cx={cx} cy={cy} r={ring.r} fill="none"
-                stroke={`url(#srg${i})`} strokeWidth={isActive ? sw * 1.25 : sw}
+                stroke={`url(#srg${i})`} strokeWidth={isActive ? activeStroke : inactiveStroke}
                 strokeLinecap="round"
                 strokeDasharray={`${circ * pct} ${circ}`}
                 transform={`rotate(-90 ${cx} ${cy})`} />
@@ -135,7 +142,7 @@ function StressMiniChart({ value, history, w, h, isDark }: { value: number; hist
 }
 
 //  3. Steps  vertical bar chart with goal line 
-function StepsMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: number; isDark: boolean }) {
+function StepsMiniChart({ data, w, h, isDark, semantic = DEFAULT_SEMANTIC }: { data: number[]; w: number; h: number; isDark: boolean; semantic?: { success: string; warning: string; danger: string } }) {
   const goal = 10000;
   const bars = data.slice(-10).reverse();
   if (!bars.length) return null;
@@ -144,7 +151,7 @@ function StepsMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: 
   const barW = Math.max(Math.floor(w / bars.length) - gap, 2);
   const toH = (v: number) => (v / dataMax) * h;
   const goalY = (1 - goal / dataMax) * h;
-  const barColor = (v: number) => v >= goal ? "#22C55E" : v >= goal * 0.7 ? BRAND_BLUE : "#94A3B8";
+  const barColor = (v: number) => v >= goal ? semantic.success : v >= goal * 0.7 ? BRAND_BLUE : "#94A3B8";
   const gIds = useMemo(() => bars.map(() => "sb" + Math.random().toString(36).slice(2, 6)), [bars.length]);
   return (
     <Svg width={w} height={h}>
@@ -161,13 +168,13 @@ function StepsMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: 
         const x = i * (barW + gap);
         return <Rect key={i} x={x} y={h - bh} width={barW} height={bh} rx={2} fill={`url(#${gIds[i]})`} />;
       })}
-      <Line x1={0} y1={goalY} x2={w} y2={goalY} stroke="#22C55E" strokeWidth="1" strokeDasharray="3,3" />
+      <Line x1={0} y1={goalY} x2={w} y2={goalY} stroke={semantic.success} strokeWidth="1" strokeDasharray="3,3" />
     </Svg>
   );
 }
 
 //  4. Temp — SVG thermometer (used in 1–1) 
-function TempMiniChart({ value, w, h, isDark }: { value: number; w: number; h: number; isDark: boolean }) {
+function TempMiniChart({ value, w, h, isDark, semantic = DEFAULT_SEMANTIC }: { value: number; w: number; h: number; isDark: boolean; semantic?: { success: string; warning: string; danger: string } }) {
   const tubeW = Math.max(Math.min(w * 0.22, 14), 7);
   const bulbR = Math.max(tubeW * 1.1, 7);
   const tubeX = w / 2;
@@ -179,7 +186,7 @@ function TempMiniChart({ value, w, h, isDark }: { value: number; w: number; h: n
   const fillPct = (clamp - tMin) / (tMax - tMin);
   const fillH = fillPct * tubeH;
   const fillY = tubeBot - fillH;
-  const fillColor = value > 38.5 ? "#EF4444" : value > 37.5 ? "#F59E0B" : value >= 36 ? "#22C55E" : "#60A5FA";
+  const fillColor = value > 38.5 ? semantic.danger : value > 37.5 ? semantic.warning : value >= 36 ? semantic.success : "#60A5FA";
   const track = isDark ? "rgba(255,255,255,0.1)" : "#E5E7EB";
   return (
     <Svg width={w} height={h}>
@@ -201,7 +208,7 @@ function TempMiniChart({ value, w, h, isDark }: { value: number; w: number; h: n
 }
 
 //  4b. Temp — line/area chart (used in 1–2 / 1–3) 
-function TempLineMiniChart({ data, value, w, h, isDark }: { data: number[]; value: number; w: number; h: number; isDark: boolean }) {
+function TempLineMiniChart({ data, value, w, h, isDark, semantic = DEFAULT_SEMANTIC }: { data: number[]; value: number; w: number; h: number; isDark: boolean; semantic?: { success: string; warning: string; danger: string } }) {
   const pts = data.slice(-16);
   if (pts.length < 2) return null;
   const mn = 35; const mx = 40;
@@ -210,7 +217,7 @@ function TempLineMiniChart({ data, value, w, h, isDark }: { data: number[]; valu
   const toY = (v: number) => pad.t + (1 - (Math.min(Math.max(v, mn), mx) - mn) / (mx - mn)) * (h - pad.t - pad.b);
   const linePath = smoothPath(pts.map((v, i) => ({ x: toX(i), y: toY(v) })));
   const fillPath = linePath + ` L ${toX(pts.length - 1)} ${h} L ${toX(0)} ${h} Z`;
-  const lineColor = value > 38.5 ? "#EF4444" : value > 37.5 ? "#F59E0B" : value >= 36 ? "#22C55E" : "#60A5FA";
+  const lineColor = value > 38.5 ? semantic.danger : value > 37.5 ? semantic.warning : value >= 36 ? semantic.success : "#60A5FA";
   const gId = useMemo(() => "tmp" + Math.random().toString(36).slice(2, 7), []);
   // Normal range band 36–37.5
   const normalTop = toY(37.5);
@@ -225,7 +232,7 @@ function TempLineMiniChart({ data, value, w, h, isDark }: { data: number[]; valu
       </Defs>
       {/* Normal zone band */}
       <Rect x={0} y={normalTop} width={w} height={Math.max(normalBot - normalTop, 0)}
-        fill="#22C55E" opacity={0.1} />
+        fill={semantic.success} opacity={0.1} />
       <Path d={fillPath} fill={`url(#${gId})`} />
       <Path d={linePath} fill="none" stroke={lineColor} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <Circle cx={toX(pts.length - 1)} cy={toY(pts[pts.length - 1])} r={3} fill={lineColor} />
@@ -234,7 +241,7 @@ function TempLineMiniChart({ data, value, w, h, isDark }: { data: number[]; valu
 }
 
 //  5. O2  arc gauge 
-function O2MiniChart({ value, w, h, isDark }: { value: number; w: number; h: number; isDark: boolean }) {
+function O2MiniChart({ value, w, h, isDark, semantic = DEFAULT_SEMANTIC }: { value: number; w: number; h: number; isDark: boolean; semantic?: { success: string; warning: string; danger: string } }) {
   const size = Math.min(w, h * 1.6);
   const r = size * 0.37;
   const cx = w / 2; const cy = h * 0.72;
@@ -248,11 +255,11 @@ function O2MiniChart({ value, w, h, isDark }: { value: number; w: number; h: num
     return `M ${cx + r * Math.cos(sr)} ${cy + r * Math.sin(sr)} A ${r} ${r} 0 ${large} 1 ${cx + r * Math.cos(er)} ${cy + r * Math.sin(er)}`;
   };
   const zones = [
-    { from: startA, to: startA + sweepA * 0.5, color: "#FECACA" },
-    { from: startA + sweepA * 0.5, to: startA + sweepA * 0.667, color: "#FDE68A" },
-    { from: startA + sweepA * 0.667, to: startA + sweepA, color: "#86EFAC" },
+    { from: startA, to: startA + sweepA * 0.5, color: semantic.danger },
+    { from: startA + sweepA * 0.5, to: startA + sweepA * 0.667, color: semantic.warning },
+    { from: startA + sweepA * 0.667, to: startA + sweepA, color: semantic.success },
   ];
-  const fillColor = value >= 96 ? "#22C55E" : value >= 94 ? "#F59E0B" : "#EF4444";
+  const fillColor = value >= 96 ? semantic.success : value >= 94 ? semantic.warning : semantic.danger;
   const track = isDark ? "rgba(255,255,255,0.07)" : "#E5E7EB";
   const dotX = cx + r * Math.cos(toRad(curA));
   const dotY = cy + r * Math.sin(toRad(curA));
@@ -303,7 +310,7 @@ function SleepMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: 
 }
 
 // 7. Glycemia - Line chart with zones
-function GlycemiaMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: number; isDark: boolean }) {
+function GlycemiaMiniChart({ data, w, h, isDark, semantic = DEFAULT_SEMANTIC }: { data: number[]; w: number; h: number; isDark: boolean; semantic?: { success: string; warning: string; danger: string } }) {
   const pts = data.slice(-16);
   if (pts.length < 2) return null;
   const mn = 50; const mx = 200;
@@ -324,7 +331,7 @@ function GlycemiaMiniChart({ data, w, h, isDark }: { data: number[]; w: number; 
         </LinearGradient>
       </Defs>
       {/* Zones */}
-      <Rect x={0} y={toY(140)} width={w} height={toY(70) - toY(140)} fill="#22C55E" opacity={0.1} />
+      <Rect x={0} y={toY(140)} width={w} height={toY(70) - toY(140)} fill={semantic.success} opacity={0.1} />
       
       <Path d={fillPath} fill={`url(#${gId})`} />
       <Path d={linePath} fill="none" stroke="#EC4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -366,11 +373,28 @@ function BPMiniChart({ data, w, h, isDark }: { data: number[]; w: number; h: num
 //  Status helper 
 type MetricStatus = "normal" | "warning" | "alert";
 
-const STATUS_PALETTE: Record<MetricStatus, { bg: string; text: string; border: string }> = {
-  normal:  { bg: "#DCFCE7", text: "#166534", border: "#86EFAC" },
-  warning: { bg: "#FEF9C3", text: "#854D0E", border: "#FDE047" },
-  alert:   { bg: "#FEE2E2", text: "#991B1B", border: "#FCA5A5" },
-};
+function buildStatusPalette(
+  semantic: { success: string; warning: string; danger: string },
+  isDark: boolean,
+): Record<MetricStatus, { bg: string; text: string; border: string }> {
+  return {
+    normal: {
+      bg: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.88)",
+      text: semantic.success,
+      border: semantic.success,
+    },
+    warning: {
+      bg: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.88)",
+      text: semantic.warning,
+      border: semantic.warning,
+    },
+    alert: {
+      bg: isDark ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.88)",
+      text: semantic.danger,
+      border: semantic.danger,
+    },
+  };
+}
 
 function getStatus(type: IconType, valueStr: string): { text: string; status: MetricStatus } {
   const v = parseFloat(valueStr);
@@ -429,7 +453,7 @@ interface WidgetWrapperProps {
 export function WidgetWrapper({
   title, icon, variant, feedback, unit, value, bg, style, history = [], metricType,
 }: WidgetWrapperProps) {
-  const { isDark } = useTheme();
+  const { isDark, colors } = useTheme();
 
   const u1 = COLUMN_WIDTH;
   const u2 = u1 * 2 + GRID_GAP;
@@ -452,8 +476,9 @@ export function WidgetWrapper({
   const borderColor = isDark ? "border-white/10" : "border-gray-100";
   const textColor = isDark ? "#FFFFFF" : "#000746";
 
+  const statusPalette = buildStatusPalette(colors.semantic, isDark);
   const status = metricType ? getStatus(metricType, value) : { text: feedback, status: "normal" as MetricStatus };
-  const palette = STATUS_PALETTE[status.status];
+  const palette = statusPalette[status.status];
 
   //  Chart dimensions per size 
   // For 1-1: chart replaces bottom half. For 1-2/1-3: chart in the right side pocket.
@@ -476,20 +501,20 @@ export function WidgetWrapper({
 
     switch (metricType) {
       case "heartRate":
-        return <HeartMiniChart data={history} w={cw} h={ch} isDark={isDark} />;
+        return <HeartMiniChart data={history} w={cw} h={ch} isDark={isDark} semantic={colors.semantic} />;
       case "stress":
-        return <StressMiniChart value={parseFloat(value) || 0} history={history} w={cw} h={ch} isDark={isDark} />;
+        return <StressMiniChart value={parseFloat(value) || 0} history={history} w={cw} h={ch} isDark={isDark} semantic={colors.semantic} />;
       case "steps":
-        return <StepsMiniChart data={history} w={cw} h={ch} isDark={isDark} />;
+        return <StepsMiniChart data={history} w={cw} h={ch} isDark={isDark} semantic={colors.semantic} />;
       case "temp":
-        return <TempLineMiniChart data={history} value={parseFloat(value) || 36.5} w={cw} h={ch} isDark={isDark} />;
+        return <TempLineMiniChart data={history} value={parseFloat(value) || 36.5} w={cw} h={ch} isDark={isDark} semantic={colors.semantic} />;
       case "o2":
-        return <O2MiniChart value={parseFloat(value) || 98} w={cw} h={ch} isDark={isDark} />;
+        return <O2MiniChart value={parseFloat(value) || 98} w={cw} h={ch} isDark={isDark} semantic={colors.semantic} />;
       case "sleep":
         return <SleepMiniChart data={history} w={cw} h={ch} isDark={isDark} />;
       case "cal":
       case "glucose":
-        return <GlycemiaMiniChart data={history} w={cw} h={ch} isDark={isDark} />;
+        return <GlycemiaMiniChart data={history} w={cw} h={ch} isDark={isDark} semantic={colors.semantic} />;
       case "bloodPressure":
         return <BPMiniChart data={history} w={cw} h={ch} isDark={isDark} />;
       default:
@@ -504,7 +529,6 @@ export function WidgetWrapper({
     // Temp gets the same side-by-side treatment so the thermometer icon is visible
     if (metricType === "temp") {
       const tempVal = parseFloat(value) || 36.5;
-      const tempColor = tempVal > 38.5 ? "#EF4444" : tempVal > 37.5 ? "#F59E0B" : tempVal >= 36 ? "#22C55E" : "#60A5FA";
       const thermW = Math.round(width * 0.28);
       const chartW = width - thermW - 6;
       const chartH = Math.max(height - 44, 20);
@@ -519,10 +543,10 @@ export function WidgetWrapper({
             </View>
             <View className="flex-row items-end">
               <Text style={{ color: textColor }} className="text-xl font-bold leading-none">{value}</Text>
-              <Text className={`text-xs font-semibold ml-0.5 mb-0.5 ${isDark ? "text-white/50" : "text-gray-400"}`}>{unit}</Text>
+              <Text className={`text-xs font-semibold ml-0.5 mb-0.5 ${isDark ? "text-white/50" : "text-black/90"}`}>{unit}</Text>
             </View>
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-              <TempMiniChart value={tempVal} w={thermW - 2} h={chartH - 8} isDark={isDark} />
+              <TempMiniChart value={tempVal} w={thermW - 2} h={chartH - 8} isDark={isDark} semantic={colors.semantic} />
             </View>
           </View>
           {/* Right: line chart */}
@@ -548,12 +572,12 @@ export function WidgetWrapper({
             {metricType === "steps" ? (
               <View className="-mt-2">
                 <Text style={{ color: textColor, lineHeight: 28 }} className="text-2xl font-bold">{value}</Text>
-                <Text className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-gray-400"}`}>/10000</Text>
+                <Text className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-black/90"}`}>/10000</Text>
               </View>
             ) : (
               <>
                 <Text style={{ color: textColor }} className="text-2xl font-bold leading-none">{value}</Text>
-                <Text className={`text-xs font-semibold ml-1 mb-0.5 ${isDark ? "text-white/50" : "text-gray-400"}`}>{unit}</Text>
+                <Text className={`text-xs font-semibold ml-1 mb-0.5 ${isDark ? "text-white/50" : "text-black/90"}`}>{unit}</Text>
               </>
             )}
           </View>
@@ -571,7 +595,6 @@ export function WidgetWrapper({
   //  1-2 / 1-3 / 2-3 layout: value left, chart right 
   // For temp: also render a small inline thermometer beside the value
   const tempVal = metricType === "temp" ? parseFloat(value) || 36.5 : 0;
-  const tempColor = tempVal > 38.5 ? "#EF4444" : tempVal > 37.5 ? "#F59E0B" : tempVal >= 36 ? "#22C55E" : "#60A5FA";
   const showInlineTherm = metricType === "temp";
   const thermInlineW = 18;
   const effectiveValueWidth = showInlineTherm ? valueAreaWidth + thermInlineW + 4 : valueAreaWidth;
@@ -594,12 +617,12 @@ export function WidgetWrapper({
                 {metricType === "steps" ? (
                   <View>
                     <Text style={{ color: textColor, lineHeight: 28 }} className="text-2xl font-bold">{value}</Text>
-                    <Text className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-gray-400"}`}>/10000</Text>
+                    <Text className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-black/90"}`}>/10000</Text>
                   </View>
                 ) : (
                   <>
                     <Text style={{ color: textColor, fontSize: is13 ? 28 : 24 }} className="font-bold leading-none">{value}</Text>
-                    <Text className={`text-xs font-semibold ml-1 mb-0.5 ${isDark ? "text-white/50" : "text-gray-400"}`}>{unit}</Text>
+                    <Text className={`text-xs font-semibold ml-1 mb-0.5 ${isDark ? "text-white/50" : "text-black/90"}`}>{unit}</Text>
                   </>
                 )}
               </View>

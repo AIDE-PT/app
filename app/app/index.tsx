@@ -17,7 +17,6 @@ import { Button } from "../components/buttons/button";
 import "../global.css";
 
 import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -27,7 +26,7 @@ const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 // AIDE Logo Component using the actual brand icon
 const AideLogo = ({ size = 80, isDark = false }: { size?: number; isDark?: boolean }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 324 324">
+    <Svg width={size} height={size} viewBox="0 0 324 324" accessible={false} focusable={false}>
       <Path
         d="M322.334 30.9101C322.334 13.027 307.801 -1.63785 290.007 0.147512C258.574 3.30136 227.713 11.0442 198.419 23.1779C159.134 39.4505 123.438 63.3017 93.3698 93.3696C63.3018 123.438 39.4506 159.133 23.1779 198.419C11.0442 227.712 3.30136 258.574 0.147512 290.006C-1.63785 307.8 13.027 322.333 30.9102 322.333C48.7934 322.333 63.0821 307.78 65.3117 290.037C68.1919 267.116 74.1315 244.634 83.0091 223.202C96.0272 191.773 115.108 163.217 139.163 139.162C163.217 115.108 191.774 96.027 223.202 83.0089C244.635 74.1313 267.116 68.1918 290.037 65.3116C307.781 63.082 322.334 48.7933 322.334 30.9101Z"
         fill={isDark ? "#000720" : "#ffffffff"}
@@ -179,11 +178,11 @@ const ConcentricRings = ({ isDark }: { isDark: boolean }) => {
 
 export default function App() {
   const router = useRouter();
-  const { isDark } = useTheme();
+  const isDark = false;
 
   return (
     <SafeAreaView className="flex-1">
-      <LightBackground>
+      <LightBackground forceLight>
         {/* Concentric Rings */}
         <ConcentricRings isDark={isDark} />
 
@@ -202,6 +201,8 @@ export default function App() {
           <View 
             className={`w-[100px] h-[100px] rounded-full justify-center items-center ${isDark ? "bg-[#5061FF]/50" : "bg-[#9AADE8]"}`}
             style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            accessibilityRole="image"
+            accessibilityLabel="Logótipo AIDE"
           >
             <AideLogo size={55} isDark={isDark} />
           </View>
@@ -223,6 +224,7 @@ export default function App() {
           <View className="items-center">
             <Button
               variant="primary"
+              forceLight
               label="Começa Já!"
               onPress={() => {
                 router.push("/terms-of-service?fromStart=true");

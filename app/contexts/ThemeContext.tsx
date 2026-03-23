@@ -1,40 +1,68 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import * as React from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 type ThemeType = "light" | "dark";
+export type ColorPaletteType =
+  | "default"
+  | "deuteranopia"
+  | "protanopia"
+  | "tritanopia"
+  | "highContrast";
 
 interface ThemeContextType {
   isDark: boolean;
   theme: ThemeType;
+  colorPalette: ColorPaletteType;
   setTheme: (theme: ThemeType) => void;
+  setColorPalette: (palette: ColorPaletteType) => void;
   toggleTheme: () => void;
 }
 
 const THEME_STORAGE_KEY = "@aide_theme";
+const COLOR_PALETTE_STORAGE_KEY = "@aide_color_palette";
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+export const ThemeProvider = ({
   children,
+}: {
+  children: React.ReactNode;
 }) => {
   const [theme, setThemeState] = useState<ThemeType>("light");
+  const [colorPalette, setColorPaletteState] =
+    useState<ColorPaletteType>("default");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load saved theme on mount
+  // Load saved theme and color palette on mount
   useEffect(() => {
-    const loadTheme = async () => {
+    const loadPreferences = async () => {
       try {
-        const savedTheme = await AsyncStorage.getItem(THEME_STORAGE_KEY);
+        const [savedTheme, savedPalette] = await Promise.all([
+          AsyncStorage.getItem(THEME_STORAGE_KEY),
+          AsyncStorage.getItem(COLOR_PALETTE_STORAGE_KEY),
+        ]);
+
         if (savedTheme === "dark" || savedTheme === "light") {
           setThemeState(savedTheme);
         }
+
+        if (
+          savedPalette === "default" ||
+          savedPalette === "deuteranopia" ||
+          savedPalette === "protanopia" ||
+          savedPalette === "tritanopia" ||
+          savedPalette === "highContrast"
+        ) {
+          setColorPaletteState(savedPalette);
+        }
       } catch (error) {
-        console.error("Error loading theme:", error);
+        console.error("Error loading theme preferences:", error);
       } finally {
         setIsLoading(false);
       }
     };
-    loadTheme();
+    loadPreferences();
   }, []);
 
   const setTheme = async (newTheme: ThemeType) => {
@@ -43,6 +71,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       setThemeState(newTheme);
     } catch (error) {
       console.error("Error saving theme:", error);
+    }
+  };
+
+  const setColorPalette = async (newPalette: ColorPaletteType) => {
+    try {
+      await AsyncStorage.setItem(COLOR_PALETTE_STORAGE_KEY, newPalette);
+      setColorPaletteState(newPalette);
+    } catch (error) {
+      console.error("Error saving color palette:", error);
     }
   };
 
@@ -61,7 +98,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       value={{
         isDark: theme === "dark",
         theme,
+        colorPalette,
         setTheme,
+        setColorPalette,
         toggleTheme,
       }}
     >

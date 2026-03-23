@@ -26,7 +26,7 @@ export default function DeviceConnectionModal({
 }: DeviceConnectionModalProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const { isDark } = useTheme();
+  const { isDark, colors } = useTheme();
 
   const handleConnect = () => {
     setIsConnecting(true);
@@ -114,13 +114,17 @@ export default function DeviceConnectionModal({
             <View className="px-8 mb-8 self-start">
               {isConnecting ? (
                 <View className="flex-row items-center gap-3">
-                  <ActivityIndicator size="small" color="#7C89FF" />
+                  <ActivityIndicator
+                    size="small"
+                    color="#7C89FF"
+                    accessibilityLabel={`A conectar ${device.name}`}
+                  />
                   <Text className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}>
                     A conectar via Bluetooth...
                   </Text>
                 </View>
               ) : isConnected ? (
-                <Text className="font-open-sans text-base text-[#4cd964]">
+                <Text className="font-open-sans text-base" style={{ color: colors.semantic.success }}>
                   ✓ Dispositivo conectado com sucesso!
                 </Text>
               ) : (

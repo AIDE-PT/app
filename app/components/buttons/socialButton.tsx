@@ -8,6 +8,7 @@ interface SocialButtonDTO {
   provider: SocialProvider;
   onPress: () => void;
   label?: string;
+  forceLight?: boolean;
 }
 
 // Google Icon Component
@@ -53,22 +54,23 @@ const providerConfig = {
   },
 };
 
-export const SocialButton = ({ provider, onPress, label }: SocialButtonDTO) => {
+export const SocialButton = ({ provider, onPress, label, forceLight = false }: SocialButtonDTO) => {
   const config = providerConfig[provider];
   const displayLabel = label || config.defaultLabel;
   const { isDark } = useTheme();
+  const useDarkStyling = !forceLight && isDark;
 
   return (
     <TouchableOpacity
       onPress={onPress}
       style={styles.buttonShadow}
-      className={`w-full flex-row items-center justify-center p-4 rounded-[20px] border ${isDark ? "bg-aide-dark-card border-white/20" : "bg-[#F5F8FB] border-[#E5E7EB]"}`}
+      className={`w-full flex-row items-center justify-center p-4 rounded-[20px] border ${useDarkStyling ? "bg-aide-dark-card border-white/20" : "bg-[#FFFFFF] border-[#E5E7EB]"}`}
       activeOpacity={0.7}
     >
       <View className="mr-3">
-        {provider === "apple" ? <AppleIcon size={30} isDark={isDark} /> : config.icon}
+        {provider === "apple" ? <AppleIcon size={30} isDark={useDarkStyling} /> : config.icon}
       </View>
-      <Text className={`font-open-sans-semibold text-[18px] ${isDark ? "text-white/90" : "text-aide-text/90"}`}>
+      <Text className={`font-open-sans-semibold text-[18px] ${useDarkStyling ? "text-white/90" : "text-aide-text/90"}`}>
         {displayLabel}
       </Text>
     </TouchableOpacity>

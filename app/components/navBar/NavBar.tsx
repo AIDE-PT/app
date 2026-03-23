@@ -13,8 +13,13 @@ import { useTheme } from "@/hooks/useTheme";
 interface navBarProps {
   dark?: boolean;
   notEditable?: boolean;
+  onAddWidget?: (widgetId: string) => void;
 }
-const Navbar = ({ dark: darkProp, notEditable = false }: navBarProps) => {
+const Navbar = ({
+  dark: darkProp,
+  notEditable = false,
+  onAddWidget,
+}: navBarProps) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const router = useRouter();
   const { isDark } = useTheme();
@@ -55,6 +60,9 @@ const Navbar = ({ dark: darkProp, notEditable = false }: navBarProps) => {
             <TouchableOpacity
               className={`${styleBall} ${buttonBg}`}
               onPress={notEditable ? () => setModalVisible(true) : () => {}}
+              accessibilityRole="button"
+              accessibilityLabel="Adicionar"
+              accessibilityHint="Abre a lista de widgets disponíveis."
             >
               <AddIcon color={iconColor} />
             </TouchableOpacity>
@@ -62,6 +70,9 @@ const Navbar = ({ dark: darkProp, notEditable = false }: navBarProps) => {
             <TouchableOpacity
               className={`${styleBall} ${buttonBg}`}
               onPress={() => router.push("/historicoDiario")}
+              accessibilityRole="button"
+              accessibilityLabel="Historico"
+              accessibilityHint="Abre o histórico diário."
             >
               <CalendarIcon color={iconColor} />
             </TouchableOpacity>
@@ -69,6 +80,9 @@ const Navbar = ({ dark: darkProp, notEditable = false }: navBarProps) => {
             <TouchableOpacity
               className={`${styleBall} ${buttonBg}`}
               onPress={() => router.push("/testDashboard")}
+              accessibilityRole="button"
+              accessibilityLabel="Inicio"
+              accessibilityHint="Abre o dashboard principal."
             >
               <HomeIcon color={iconColor} />
             </TouchableOpacity>
@@ -76,6 +90,9 @@ const Navbar = ({ dark: darkProp, notEditable = false }: navBarProps) => {
             <TouchableOpacity
               className={`${styleBall} ${buttonBg}`}
               onPress={() => router.push("/definicoes")}
+              accessibilityRole="button"
+              accessibilityLabel="Perfil"
+              accessibilityHint="Abre o perfil e definições."
             >
               <ProfileIcon color={iconColor} />
             </TouchableOpacity>
@@ -86,6 +103,7 @@ const Navbar = ({ dark: darkProp, notEditable = false }: navBarProps) => {
         <AddWidgetModal
           visible={isModalVisible}
           onClose={() => setModalVisible(false)}
+          onAddWidget={(widgetId) => onAddWidget?.(widgetId)}
         />
       )}
     </>

@@ -4,7 +4,6 @@ import { ScrollView, SafeAreaView, Text, View } from "react-native";
 import BackButton from "../components/buttons/backButton";
 import { Button } from "../components/buttons/button";
 import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 
 // Section component for each term section
 interface TermSectionProps {
@@ -51,17 +50,17 @@ const BulletPoint = ({ children, isDark }: BulletPointProps) => (
 );
 
 const TermsOfService = () => {
-  const { isDark } = useTheme();
+  const isDark = false;
   const searchParams = useLocalSearchParams<{ fromStart?: string }>();
   const fromStart = searchParams.fromStart === "true";
 
   return (
-    <LightBackground>
+    <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10">
         <SafeAreaView className="flex-1">
           <BackButton
             label="Termos de Serviço"
-            dark={!isDark}
+            dark={false}
             onPress={() => router.push(fromStart ? "/" : "/definicoes")}
           />
 
@@ -175,6 +174,7 @@ const TermsOfService = () => {
               <View className="items-center mb-8">
                 <Button
                   variant="primary"
+                  forceLight
                   label="Registar"
                   onPress={() => router.push("/register")}
                 />

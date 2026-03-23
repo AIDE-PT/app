@@ -110,7 +110,7 @@ const MetricCard = ({
         className={`items-center justify-center h-32 p-4 mb-4 rounded-[20px] ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
         style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
       >
-        <ActivityIndicator color={color} />
+        <ActivityIndicator color={color} accessibilityLabel={`A carregar ${title}`} />
       </View>
     );
   }
@@ -168,15 +168,15 @@ const MetricCard = ({
 };
 
 const HealthDataContent = () => {
-  const { isDark } = useTheme();
+  const { isDark, colors } = useTheme();
   
   return (
     <LightBackground>
-      <View className={`flex-1 px-4 pt-10 ${isDark ? "bg-transparent" : "bg-aide-background"}`}>
+      <View className="flex-1 bg-transparent px-4 pt-10">
         <SafeAreaView className="flex-1">
         <BackButton
           label="Gerir Dados"
-          dark={isDark ? false : true}
+          dark={isDark}
           onPress={() => router.push("/definicoes")}
         />
 
@@ -190,14 +190,14 @@ const HealthDataContent = () => {
             title="Heart Rate"
             endpoint="bpm"
             unit="BPM"
-            color="#FF5252"
+            color={colors.semantic.danger}
             isDark={isDark}
           />
           <MetricCard
             title="Blood Pressure"
             endpoint="bloodPressure"
             unit="mmHg"
-            color="#FF4081"
+            color={colors.semantic.danger}
             isBP
             isDark={isDark}
           />
@@ -205,35 +205,35 @@ const HealthDataContent = () => {
             title="Glycemia"
             endpoint="glycemia"
             unit="mg/dL"
-            color="#7C4DFF"
+            color={colors.semantic.warning}
             isDark={isDark}
           />
           <MetricCard
             title="Oxygen Saturation"
             endpoint="o2"
             unit="%"
-            color="#00BCD4"
+            color={colors.semantic.success}
             isDark={isDark}
           />
           <MetricCard
             title="Temperature"
             endpoint="temperature"
             unit="°C"
-            color="#FF9800"
+            color={colors.semantic.warning}
             isDark={isDark}
           />
           <MetricCard
             title="Stress Level"
             endpoint="stress"
             unit="pts"
-            color="#607D8B"
+            color={colors.semantic.warning}
             isDark={isDark}
           />
           <MetricCard
             title="Sleep Duration"
             endpoint="sleep"
             unit="hrs"
-            color="#3F51B5"
+            color={colors.semantic.success}
             isDark={isDark}
           />
         </View>

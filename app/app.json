@@ -10,7 +10,13 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "icon": "./assets/icon/colorBackground.png"
+      "icon": "./assets/icon/colorBackground.png",
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "pt",
+        "CFBundleLocalizations": [
+          "pt-PT"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -43,6 +49,9 @@
       ],
       "@react-native-community/datetimepicker"
     ],
+    "locales": {
+      "pt-PT": "./locales/pt-PT.json"
+    },
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true

@@ -74,11 +74,11 @@ export default function DeviceManagementModal({
             style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
           >
             {/* Drag handle */}
-            <View className={`w-[33px] h-[4px] rounded-full mt-4 mb-8 ${isDark ? "bg-white/30" : "bg-[#79747E]"}`} />
+            <View className={`w-[33px] h-[4px] rounded-full mt-4 mb-8 ${isDark ? "bg-white/40" : "bg-[#6E6872]"}`} />
 
             {/* Device Info */}
             <View className="flex-row items-center self-start px-8 mb-6">
-              <View className={`w-16 h-16 rounded-full items-center justify-center border border-white mr-4 ${isDark ? "bg-white/20" : "bg-[#E9E9E9]"}`}>
+              <View className={`w-16 h-16 rounded-full items-center justify-center border mr-4 ${isDark ? "border-white/20 bg-white/20" : "border-[#B8CFDF] bg-[#E9E9E9]"}`}>
                 <Text className={`font-open-sans font-bold text-[28px] ${isDark ? "text-white" : "text-black"}`}>
                   {device.name.charAt(0).toUpperCase()}
                 </Text>
@@ -110,13 +110,15 @@ export default function DeviceManagementModal({
                 value={shareData}
                 onValueChange={handleToggle}
                 trackColor={{ false: "#767577", true: "#7C89FF" }}
-                thumbColor={shareData ? "#ffffff" : "#f4f3f4"}
+                thumbColor={shareData ? "#ffffff" : "#FFFFFF"}
+                accessibilityLabel={`Partilhar dados de ${device.name}`}
+                accessibilityHint="Ativa ou desativa a partilha de dados deste dispositivo."
               />
             </View>
 
             {/* Remove Button */}
             <TouchableOpacity onPress={onRemove} className="w-full px-8">
-              <View className="bg-[#FF6B6B] py-3 rounded-[25px] items-center justify-center">
+              <View className="bg-[#E45858] py-3 rounded-[25px] items-center justify-center">
                 <Text className="font-open-sans font-semibold text-base text-white">
                   Remover dispositivo
                 </Text>

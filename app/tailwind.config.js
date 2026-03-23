@@ -23,6 +23,14 @@ module.exports = {
         "aide-green": "#4CD964",
         "aide-yellow": "#FFCC00",
 
+        // Colorblind-friendly semantic alternatives (for opt-in usage)
+        "aide-cb-success": "#2D9CDB",
+        "aide-cb-warning": "#F2994A",
+        "aide-cb-danger": "#C445C2",
+        "aide-cb-success-contrast": "#0077FF",
+        "aide-cb-warning-contrast": "#FF8A00",
+        "aide-cb-danger-contrast": "#D40000",
+
         // AIDE Brand Blues
         "aide-dark-blue": "#000746",
         "aide-normal-blue": "#5061FF",

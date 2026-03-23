@@ -1,4 +1,42 @@
-import { useThemeContext } from "@/contexts/ThemeContext";
+import {
+  type ColorPaletteType,
+  useThemeContext,
+} from "@/contexts/ThemeContext";
+
+const semanticPalettes: Record<
+  ColorPaletteType,
+  { success: string; warning: string; danger: string }
+> = {
+  // Current product defaults
+  default: {
+    success: "#4CD964",
+    warning: "#FFCC00",
+    danger: "#FF5151",
+  },
+  // Blue/Orange/Magenta reduces confusion for common red-green deficiencies
+  deuteranopia: {
+    success: "#2D9CDB",
+    warning: "#F2994A",
+    danger: "#C445C2",
+  },
+  protanopia: {
+    success: "#2D9CDB",
+    warning: "#F2C94C",
+    danger: "#9B51E0",
+  },
+  tritanopia: {
+    success: "#27AE60",
+    warning: "#E67E22",
+    danger: "#D64550",
+  },
+  highContrast: {
+    success: "#0077FF",
+    warning: "#FF8A00",
+    danger: "#D40000",
+  },
+};
+
+const DEFAULT_SEMANTIC = semanticPalettes.default;
 
 // Theme-aware color values
 export const themeColors = {
@@ -63,12 +101,23 @@ export const themeColors = {
 
 // Hook for accessing theme state and colors
 export const useTheme = () => {
-  const { isDark, theme, setTheme, toggleTheme } = useThemeContext();
+  const {
+    isDark,
+    theme,
+    colorPalette,
+    setTheme,
+    setColorPalette,
+    toggleTheme,
+  } = useThemeContext();
+
+  const semantic = semanticPalettes[colorPalette] ?? DEFAULT_SEMANTIC;
 
   return {
     isDark,
     theme,
+    colorPalette,
     setTheme,
+    setColorPalette,
     toggleTheme,
 
     // Convenience color getters
@@ -85,6 +134,7 @@ export const useTheme = () => {
       modal: isDark ? themeColors.modal.dark : themeColors.modal.light,
       input: isDark ? themeColors.input.dark : themeColors.input.light,
       border: isDark ? themeColors.border.dark : themeColors.border.light,
+      semantic,
     },
 
     // Utility functions for common patterns
@@ -102,6 +152,9 @@ export const useTheme = () => {
     getCardStyle: () => ({
       backgroundColor: isDark ? themeColors.card.dark : themeColors.card.light,
     }),
+
+    getStatusColor: (status: "success" | "warning" | "danger") =>
+      semantic[status],
 
     getBackgroundGradient: () => 
       isDark ? themeColors.background.dark.gradient : null,

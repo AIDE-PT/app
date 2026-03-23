@@ -49,10 +49,12 @@ const BG_COLORS = {
 interface LightBackgroundProps {
   children?: React.ReactNode;
   status?: BgStatus;
+  forceLight?: boolean;
 }
 
-export const LightBackground = ({ children, status = "good" }: LightBackgroundProps) => {
+export const LightBackground = ({ children, status = "good", forceLight = false }: LightBackgroundProps) => {
   const { isDark } = useTheme();
+  const useDarkMode = !forceLight && isDark;
 
   const fadeAnim = useRef({
     good:     new Animated.Value(status === "good"     ? 1 : 0),
@@ -76,7 +78,7 @@ export const LightBackground = ({ children, status = "good" }: LightBackgroundPr
       {(["good", "warning", "critical"] as const).map((s) => (
         <Animated.View key={s} style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim[s] }]}>
           <LinearGradient
-            colors={BG_COLORS[s][isDark ? "dark" : "light"]}
+            colors={BG_COLORS[s][useDarkMode ? "dark" : "light"]}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={StyleSheet.absoluteFillObject}
@@ -85,7 +87,7 @@ export const LightBackground = ({ children, status = "good" }: LightBackgroundPr
       ))}
 
       {/* Dot Pattern Overlay */}
-      <DotPattern isDark={isDark} />
+      <DotPattern isDark={useDarkMode} />
 
       {/* Content */}
       {children}

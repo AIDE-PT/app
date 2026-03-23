@@ -49,7 +49,7 @@ const TopBar = ({
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 4,
-    overflow: 'hidden' as const,
+    overflow: "visible" as const,
   } : {};
 
   const overlayColor = isDark ? "rgba(0, 4, 18, 0.55)" : "rgba(219, 237, 248, 0.45)";
@@ -64,9 +64,21 @@ const TopBar = ({
           <BlurView
             intensity={60}
             tint={isDark ? "dark" : "light"}
-            style={StyleSheet.absoluteFillObject}
+            style={[
+              StyleSheet.absoluteFillObject,
+              { borderBottomLeftRadius: 40, borderBottomRightRadius: 40 },
+            ]}
           />
-          <View style={[StyleSheet.absoluteFillObject, { backgroundColor: overlayColor }]} />
+          <View
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                backgroundColor: overlayColor,
+                borderBottomLeftRadius: 40,
+                borderBottomRightRadius: 40,
+              },
+            ]}
+          />
         </>
       )}
       {profileType === "cuidado" ? (
@@ -77,6 +89,9 @@ const TopBar = ({
             style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
             className={styleBall}
             onPress={onNotificationPress}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir notificações"
+            accessibilityHint="Mostra os alertas e notificações."
           >
             <NotificationBell color={iconColor} />
           </TouchableOpacity>
@@ -85,6 +100,9 @@ const TopBar = ({
             style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
             className={styleBall}
             onPress={onSettingsPress}
+            accessibilityRole="button"
+            accessibilityLabel="Abrir definições"
+            accessibilityHint="Abre as definições da aplicação."
           >
             <SettingsIcon color={iconColor} />
           </TouchableOpacity>
@@ -104,6 +122,9 @@ const TopBar = ({
               style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
               className={styleBall}
               onPress={onNotificationPress}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir notificações"
+              accessibilityHint="Mostra os alertas e notificações."
             >
               <NotificationBell color={iconColor} />
             </TouchableOpacity>
@@ -112,6 +133,9 @@ const TopBar = ({
               style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
               className={styleBall}
               onPress={onSettingsPress}
+              accessibilityRole="button"
+              accessibilityLabel="Abrir definições"
+              accessibilityHint="Abre as definições da aplicação."
             >
               <SettingsIcon color={iconColor} />
             </TouchableOpacity>

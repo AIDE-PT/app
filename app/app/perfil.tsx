@@ -14,13 +14,12 @@ import icon_cuidado from "../assets/images/icon_cuidado.png";
 import { Profilecard } from "../components/profilecard";
 import { Button } from "../components/buttons/button";
 import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 
 export default function PerfilScreen() {
   const router = useRouter();
   const [selected, setSelected] = useState<"aider" | "cuidado" | null>(null);
-  const { isDark } = useTheme();
+  const isDark = false;
   const { setProfileType } = useUserProfile();
 
   const handleAvançar = () => {
@@ -34,7 +33,7 @@ export default function PerfilScreen() {
   };
 
   return (
-    <LightBackground>
+    <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10">
         <SafeAreaView className="flex-1">
         <ScrollView
@@ -60,6 +59,7 @@ export default function PerfilScreen() {
                 isSelected={selected === "aider"}
                 isOtherSelected={selected === "cuidado"}
                 onPress={() => setSelected("aider")}
+                forceLight
               />
               <Profilecard
                 title="Cuidado"
@@ -69,6 +69,7 @@ export default function PerfilScreen() {
                 isSelected={selected === "cuidado"}
                 isOtherSelected={selected === "aider"}
                 onPress={() => setSelected("cuidado")}
+                forceLight
               />
             </View>
 
@@ -79,6 +80,7 @@ export default function PerfilScreen() {
             <View className="items-center mt-10">
               <Button
                 variant="primary"
+                forceLight
                 label="Avançar"
                 onPress={handleAvançar}
                 disabled={!selected}

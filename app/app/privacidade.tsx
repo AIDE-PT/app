@@ -81,7 +81,7 @@ const Privacidade = () => {
         <SafeAreaView className="flex-1">
           <BackButton
             label="Política de Privacidade"
-            dark={!isDark}
+            dark={isDark}
             onPress={() => router.push("/definicoes")}
           />
 

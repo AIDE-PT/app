@@ -12,42 +12,46 @@ export default function RecoverPassword() {
   const [email, setEmail] = useState("");
 
   return (
-    <LightBackground>
-      <View className="flex-1 px-4 pt-10 bg-aide-background">
+    <LightBackground forceLight>
+      <View className="flex-1 bg-transparent px-4 pt-10">
         <SafeAreaView className="flex-1">
-        <View className="mb-8">
-          <BackButton label="Recuperar Password" dark />
-        </View>
+          <View className="mb-8">
+            <BackButton label="Recuperar Password" dark={false} />
+          </View>
 
-        <View className="mt-6 mb-8">
-          <Text className="font-safiro text-[32px] text-[#1A1A2E] mb-2">
-            Recuperar acesso
-          </Text>
-          <Text className="font-open-sans text-[15px] text-[#4B5563] leading-6">
-            Introduza o seu email para receber instrucoes de redefinicao de
-            password.
-          </Text>
-        </View>
+          <View className="mb-8 mt-6">
+            <Text className="mb-2 font-safiro text-[32px] text-[#1A1A2E]">
+              Recuperar acesso
+            </Text>
+            <Text className="font-open-sans text-[15px] leading-6 text-[#4B5563]">
+              Introduza o seu email para receber instrucoes de redefinicao de
+              password.
+            </Text>
+          </View>
 
-        <Input
-          variant="light"
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChangeText={setEmail}
-        />
-
-        <View className="flex-1" />
-
-        <View className="items-center mb-10">
-          <Button
-            variant="primary"
-            label="Enviar"
-            onPress={() => router.push("/login")}
+          <Input
+            variant="light"
+            forceLight
+            type="email"
+            label="Email"
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            helperText="Recebera as instrucoes de recuperacao neste endereco."
           />
-        </View>
-      </SafeAreaView>
-    </View>
-  </LightBackground>
+
+          <View className="flex-1" />
+
+          <View className="mb-10 items-center">
+            <Button
+              variant="primary"
+              forceLight
+              label="Enviar"
+              onPress={() => router.push("/login")}
+            />
+          </View>
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 }

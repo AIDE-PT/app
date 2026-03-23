@@ -46,6 +46,9 @@ const TopTitleNav = ({
           onPress={handlePress}
           activeOpacity={0.7}
           className="py-2 mr-2"
+          accessibilityRole="button"
+          accessibilityLabel="Voltar"
+          accessibilityHint="Volta para o ecrã anterior."
         >
           <ArrowIcon variant="LEFT" dark={isTransparent ? true : dark} />
         </TouchableOpacity>

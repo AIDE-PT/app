@@ -69,6 +69,10 @@ export const ChoseCuidado = ({
             onPress={toggleDropdown}
             className="w-full flex-row items-center justify-center px-6 py-3"
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityLabel={selectedCuidado?.name ?? "Selecionar cuidado"}
+            accessibilityHint={isOpen ? "Fecha a lista de cuidados." : "Abre a lista de cuidados disponíveis."}
+            accessibilityState={{ expanded: isOpen }}
           >
             <Text className={`text-xl font-semibold mr-2 ${isDark ? "text-white" : "text-[#111111]"}`}>
               {selectedCuidado?.name ?? "Selecionar"}
@@ -83,6 +87,10 @@ export const ChoseCuidado = ({
                 onPress={() => handleSelect(cuidado)}
                 activeOpacity={0.7}
                 className={`px-6 py-3 ${index < cuidados.length - 1 ? (isDark ? "border-b border-white/10" : "border-b border-[#5061FF]/10") : ""} ${selectedCuidado?.id === cuidado.id ? (isDark ? "bg-blue-900/50" : "bg-[#5061FF]/10") : ""}`}
+                accessibilityRole="button"
+                accessibilityLabel={cuidado.name}
+                accessibilityHint="Seleciona este cuidado."
+                accessibilityState={{ selected: selectedCuidado?.id === cuidado.id }}
               >
                 <Text className={`text-lg font-medium text-center ${selectedCuidado?.id === cuidado.id ? (isDark ? "text-blue-300" : "text-[#5061FF]") : (isDark ? "text-white" : "text-[#111111]")}`}>
                   {cuidado.name}

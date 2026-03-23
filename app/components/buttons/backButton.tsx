@@ -19,17 +19,23 @@ const BackButton = ({
 }: BackButtonProps) => {
   const router = useRouter();
   const { isDark } = useTheme();
+  const useDarkMode = darkProp ?? isDark;
 
   return (
     <TouchableOpacity
       onPress={onPress || (() => router.back())}
       activeOpacity={0.7}
       className={`flex-row items-center self-start py-2  ${className}`}
+      accessibilityRole="button"
+      accessibilityLabel={label || "Voltar"}
+      accessibilityHint="Volta para o ecrã anterior."
+      accessibilityLanguage="pt-PT"
     >
-      <ArrowIcon variant="LEFT" dark={isDark} />
+      <ArrowIcon variant="LEFT" dark={useDarkMode} />
       {label && (
         <Text
-          className={`${isDark ? "text-white" : "text-black"} ml-2 text-2xl font-safiro`}
+          className={`${useDarkMode ? "text-white" : "text-black"} ml-2 text-2xl font-safiro`}
+          accessibilityLanguage="pt-PT"
         >
           {label}
         </Text>

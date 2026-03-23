@@ -19,12 +19,14 @@ const MainDetails = ({
   unit = "bpm",
   status = "normal",
   statusLabel,
-  statusBgColor = "#6BEF8C",
-  statusTextColor = "#052e16",
+  statusBgColor,
+  statusTextColor,
   max = 167,
   min = 70,
 }: MainDetailsProps) => {
-  const { isDark } = useTheme();
+  const { isDark, colors } = useTheme();
+  const resolvedStatusBg = statusBgColor ?? colors.semantic.success;
+  const resolvedStatusText = statusTextColor ?? (isDark ? "#001018" : "#063B1A");
 
   const badgeIcon = status === "normal" ? "smile" : status === "warning" ? "alert-circle" : "alert-triangle";
   const resolvedLabel = statusLabel ?? status;
@@ -47,10 +49,12 @@ const MainDetails = ({
 
         <View
           className="self-start px-5 py-2 rounded-full flex-row items-center gap-2"
-          style={{ backgroundColor: statusBgColor }}
+          style={{ backgroundColor: resolvedStatusBg }}
+          accessibilityRole="text"
+          accessibilityLabel={`Estado ${resolvedLabel}`}
         >
-          <Feather name={badgeIcon as any} size={24} color={statusTextColor} />
-          <Text className="text-xl font-open-sans font-medium pb-1" style={{ color: statusTextColor }}>
+          <Feather name={badgeIcon as any} size={24} color={resolvedStatusText} accessible={false} />
+          <Text className="text-xl font-open-sans font-medium pb-1" style={{ color: resolvedStatusText }}>
             {resolvedLabel}
           </Text>
         </View>
@@ -61,10 +65,10 @@ const MainDetails = ({
         {/* Max */}
         <View className="items-end gap-1">
           <View className="flex-row items-baseline">
-            <Text className="text-4xl font-bold text-[#FF5252] font-open-sans-semibold">
+            <Text className="text-4xl font-bold font-open-sans-semibold" style={{ color: colors.semantic.danger }}>
               {max}
             </Text>
-            <Text className="text-lg font-medium text-[#FF5252] ml-1">
+            <Text className="text-lg font-medium ml-1" style={{ color: colors.semantic.danger }}>
               {unit}
             </Text>
           </View>
@@ -77,10 +81,10 @@ const MainDetails = ({
         {/* Min */}
         <View className="items-end gap-1">
           <View className="flex-row items-baseline">
-            <Text className="text-4xl font-bold text-[#4ade80] font-open-sans-semibold">
+            <Text className="text-4xl font-bold font-open-sans-semibold" style={{ color: colors.semantic.success }}>
               {min}
             </Text>
-            <Text className="text-lg font-medium text-[#4ade80] ml-1">
+            <Text className="text-lg font-medium ml-1" style={{ color: colors.semantic.success }}>
               {unit}
             </Text>
           </View>

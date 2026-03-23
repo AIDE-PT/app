@@ -17,6 +17,9 @@ export const WidgetAdd = ({ label, Icon, onPress }: WidgetAddProps) => {
       className={`rounded-[20px] w-[100px] h-[100px] font-safiro items-center justify-center m-1 ${isDark ? "bg-white/10 border border-white/10" : "bg-white"}`}
       activeOpacity={0.7}
       style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+      accessibilityRole="button"
+      accessibilityLabel={`Adicionar widget ${label}`}
+      accessibilityHint="Adiciona este widget ao dashboard."
     >
       <View className="mb-2">
         <Icon size={32} color={isDark ? "#FFFFFF" : "#000746"} />

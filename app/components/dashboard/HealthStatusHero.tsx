@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { Animated, View, Text, TouchableOpacity, Easing, useWindowDimensions, StyleSheet } from "react-native";
+import { Animated, Easing, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, ViewStyle } from "react-native";
 import { BlurView } from "expo-blur";
-import { useFocusEffect } from "expo-router";
 import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
@@ -65,6 +64,7 @@ export default function HealthStatusHero({
 
   const colors = themeColors[status];
   const animation = useRef(new Animated.Value(0)).current;
+  const waveLoopRef = useRef<Animated.CompositeAnimation | null>(null);
 
   // Cross-fade opacity values for smooth status transitions
   const fadeAnim = useRef({
@@ -102,21 +102,29 @@ export default function HealthStatusHero({
     C ${waveWidth * 1.5} ${topWaveSvgHeight * 0.95}, ${waveWidth * 1.5} ${topWaveSvgHeight * 0.05}, ${waveWidth * 2} ${topWaveSvgHeight * 0.5} 
     L ${waveWidth * 2} ${topWaveSvgHeight} L 0 ${topWaveSvgHeight} Z`;
 
-  useFocusEffect(
-    useCallback(() => {
-      animation.setValue(0);
-      const loop = Animated.loop(
-        Animated.timing(animation, {
-          toValue: 1,
-          duration: 40000,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        })
-      );
-      loop.start();
-      return () => loop.stop();
-    }, [animation])
-  );
+  const stopWaveAnimation = useCallback(() => {
+    waveLoopRef.current?.stop();
+    waveLoopRef.current = null;
+  }, []);
+
+  const startWaveAnimation = useCallback(() => {
+    stopWaveAnimation();
+    animation.setValue(0);
+    waveLoopRef.current = Animated.loop(
+      Animated.timing(animation, {
+        toValue: 1,
+        duration: 40000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      })
+    );
+    waveLoopRef.current.start();
+  }, [animation, stopWaveAnimation]);
+
+  useEffect(() => {
+    startWaveAnimation();
+    return () => stopWaveAnimation();
+  }, [startWaveAnimation, stopWaveAnimation]);
 
   const translateX1 = animation.interpolate({
     inputRange: [0, 1],
@@ -136,19 +144,20 @@ export default function HealthStatusHero({
   const badgeTX = badgeShiftAnim.interpolate({ inputRange: [0, 1], outputRange: [0, BADGE_SHIFT] });
   const buttonOpacity = badgeShiftAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
   const buttonTX = badgeShiftAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 24] });
+  const absoluteFill = StyleSheet.absoluteFillObject as ViewStyle;
 
   return (
     <View style={styles.container}>
       <View style={[styles.card, { height: CARD_HEIGHT + topExtension }]}>
         {/* Stacked gradients — cross-fade on status change; fade to transparent at bottom */}
         {(["good", "warning", "critical"] as const).map((s) => (
-          <Animated.View key={s} style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim[s] }]}>
+          <Animated.View key={s} style={[absoluteFill, { opacity: fadeAnim[s] }]}>
             <LinearGradient
               colors={themeColors[s].bgGradient}
               locations={[0, 0.6, 1]}
               start={{ x: 0, y: 0 }}
               end={{ x: 0, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
+              style={absoluteFill}
             />
           </Animated.View>
         ))}
@@ -205,25 +214,33 @@ export default function HealthStatusHero({
               {/* Bottom Status / Action — badge slides left while button fades in */}
               <View style={styles.bottomRow}>
                 <Animated.View style={{ transform: [{ translateX: badgeTX }] }}>
-                  <View style={[styles.statusBadge, { backgroundColor: c.badgeBg }]}>
-                    <Feather name={s === "good" ? "shield" : badgeIconMap[s]} size={24} color={c.badgeColor} />
+                  <View
+                    style={[styles.statusBadge, { backgroundColor: c.badgeBg }]}
+                    accessibilityRole="image"
+                    accessibilityLabel={`Estado ${subtitleMap[s]}`}
+                  >
+                    <Feather name={s === "good" ? "shield" : badgeIconMap[s]} size={24} color={c.badgeColor} accessible={false} />
                   </View>
                 </Animated.View>
                 <Animated.View style={{ opacity: buttonOpacity, transform: [{ translateX: buttonTX }] }}>
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={onCheckNotifications}
+                    disabled={s === "good"}
                     style={[
                       styles.actionButton,
                       !isDark && { backgroundColor: btnBg },
                       { shadowColor: btnBg, borderWidth: 1.5, borderColor: c.btnBorder },
                     ]}
-                    pointerEvents={s === "good" ? "none" : "auto"}
+                    accessibilityRole="button"
+                    accessibilityLabel="Ver notificações"
+                    accessibilityHint="Abre a lista de notificações."
+                    accessibilityState={{ disabled: s === "good" }}
                   >
                     {isDark && (
                       <>
-                        <BlurView intensity={60} tint="dark" style={StyleSheet.absoluteFillObject} />
-                        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: "rgba(0,0,0,0.5)", borderRadius: 28 }]} />
+                        <BlurView intensity={60} tint="dark" style={absoluteFill} />
+                        <View style={[absoluteFill, { backgroundColor: "rgba(0,0,0,0.5)", borderRadius: 28 }]} />
                       </>
                     )}
                     <Text style={styles.actionButtonText}>Ver Notificações</Text>
@@ -278,7 +295,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "400",
     letterSpacing: 0.2,
-    textAlign: "2x624center",
+    textAlign: "center",
   },
   bottomRow: {
     flexDirection: 'row',

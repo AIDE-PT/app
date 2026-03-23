@@ -58,12 +58,14 @@ export const useGradientScroll = () => {
 
 interface GradientBackgroundProps {
   children?: React.ReactNode;
+  forceLight?: boolean;
 }
 
-export const GradientBackground = ({ children }: GradientBackgroundProps) => {
+export const GradientBackground = ({ children, forceLight = false }: GradientBackgroundProps) => {
   const scrollY = useSharedValue(0);
   const contentHeight = useSharedValue(0);
   const { isDark } = useTheme();
+  const useDarkMode = !forceLight && isDark;
 
   // Create context value (kept for compatibility with scroll tracking)
   const contextValue = useMemo(
@@ -78,7 +80,7 @@ export const GradientBackground = ({ children }: GradientBackgroundProps) => {
     <GradientContext.Provider value={contextValue}>
       <View style={styles.container}>
         {/* Background gradient - different for light/dark mode */}
-        {isDark ? (
+        {useDarkMode ? (
           <LinearGradient
             colors={["#000720", "#000746"]}
             start={{ x: 0, y: 0 }}
@@ -90,7 +92,7 @@ export const GradientBackground = ({ children }: GradientBackgroundProps) => {
         )}
 
         {/* Dot Pattern Overlay */}
-        <DotPattern isDark={isDark} />
+        <DotPattern isDark={useDarkMode} />
 
         {/* Content */}
         {children}

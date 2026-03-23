@@ -73,33 +73,38 @@ const NotificationItem = ({
   timestamp,
   severity,
   isDark,
+  semantic,
 }: {
   message: string;
   timestamp: string;
   severity: "high" | "medium" | "low";
   isDark: boolean;
+  semantic: { success: string; warning: string; danger: string };
 }) => {
+  const severityLabel =
+    severity === "high" ? "Alerta crítico" : severity === "medium" ? "Aviso" : "Informação";
+
   const getSeverityColors = () => {
     switch (severity) {
       case "high":
         return { 
-          bg: "bg-red-500/10", 
-          borderColor: "#EF4444", 
-          text: "text-red-500", 
+          bg: "bg-black/5", 
+          borderColor: semantic.danger,
+          iconColor: semantic.danger,
           icon: "alert-circle" 
         };
       case "medium":
         return { 
-          bg: "bg-orange-500/10", 
-          borderColor: "#F97316", 
-          text: "text-orange-500", 
+          bg: "bg-black/5", 
+          borderColor: semantic.warning,
+          iconColor: semantic.warning,
           icon: "warning" 
         };
       case "low":
         return { 
-          bg: "bg-blue-500/10", 
-          borderColor: "#3B82F6", 
-          text: "text-blue-500", 
+          bg: "bg-black/5", 
+          borderColor: semantic.success,
+          iconColor: semantic.success,
           icon: "information-circle" 
         };
     }
@@ -108,30 +113,45 @@ const NotificationItem = ({
   const colors = getSeverityColors();
   const dateObj = new Date(timestamp);
   const timeString = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const dateString = dateObj.toLocaleDateString();
+  const dateString = dateObj.toLocaleDateString("pt-PT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const spokenDate = dateObj.toLocaleDateString("pt-PT", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+  const accessibilityLabel = `${severityLabel}. ${message}. ${spokenDate}, ${timeString}.`;
 
   return (
     <View
       className={`mb-4 overflow-hidden rounded-xl border-l-4 ${
         isDark ? "bg-aide-dark-card border-white/10" : "bg-white border-gray-100"
       }`}
+      accessible
+      focusable
+      importantForAccessibility="yes"
+      accessibilityRole="text"
+      accessibilityLabel={accessibilityLabel}
       style={{ 
         boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
         borderLeftColor: colors.borderColor,
       }}
     >
-      <View className={`flex-row p-4 items-start`}>
-        <View className={`mr-3 mt-1 rounded-full p-2 ${colors.bg}`}>
-          <Ionicons name={colors.icon as any} size={24} color={isDark && severity === 'high' ? "#EF4444" : isDark && severity === 'medium' ? "#F97316" : isDark && severity === 'low' ? "#3B82F6" : undefined} className={colors.text} />
+      <View className={`flex-row p-4 items-start`} importantForAccessibility="no-hide-descendants">
+        <View className={`mr-3 mt-1 rounded-full p-2 ${colors.bg}`} accessible={false}>
+          <Ionicons name={colors.icon as any} size={24} color={colors.iconColor} />
         </View>
         <View className="flex-1">
-          <Text className={`font-bold text-base mb-1 ${isDark ? "text-white" : "text-gray-900"}`}>
-            {severity === "high" ? "Alerta Crítico" : severity === "medium" ? "Aviso" : "Informação"}
+          <Text className={`font-bold text-base mb-1 ${isDark ? "text-white" : "text-gray-900"}`} accessible={false}>
+            {severityLabel}
           </Text>
-          <Text className={`text-base mb-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}>
+          <Text className={`text-base mb-2 ${isDark ? "text-gray-300" : "text-gray-600"}`} accessible={false}>
             {message}
           </Text>
-          <Text className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}>
+          <Text className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`} accessible={false}>
             {dateString} at {timeString}
           </Text>
         </View>
@@ -141,7 +161,7 @@ const NotificationItem = ({
 };
 
 const NotificationsContent = () => {
-  const { isDark } = useTheme();
+  const { isDark, colors } = useTheme();
   const [showClearModal, setShowClearModal] = useState(false);
 
   // Fetch alerts from server
@@ -166,12 +186,12 @@ const NotificationsContent = () => {
 
   return (
     <LightBackground>
-      <View className={`flex-1 pt-10 ${isDark ? "bg-transparent" : "bg-aide-background"}`}>
+      <View className="flex-1 pt-10 bg-transparent">
         <SafeAreaView className="flex-1">
           <View className="px-4 flex-row items-center justify-between">
             <BackButton
               label="Notificações"
-              dark={isDark ? false : true}
+              dark={isDark}
               onPress={() => router.back()}
             />
             {alerts && alerts.length > 0 && (
@@ -195,12 +215,21 @@ const NotificationsContent = () => {
           >
             
             {isLoading && (
-              <ActivityIndicator size="large" color={isDark ? "#ffffff" : "#0000ff"} />
+              <ActivityIndicator
+                size="large"
+                color={isDark ? "#ffffff" : "#0000ff"}
+                accessibilityLabel="A carregar notificações"
+              />
             )}
 
             {!isLoading && (!alerts || alerts.length === 0) && (
               <View className="items-center justify-center py-20">
-                <Ionicons name="notifications-off-outline" size={64} color={isDark ? "#4B5563" : "#D1D5DB"} />
+                <Ionicons
+                  name="notifications-off-outline"
+                  size={64}
+                  color={isDark ? "#4B5563" : "#D1D5DB"}
+                  accessible={false}
+                />
                 <Text className={`mt-4 text-center text-lg ${isDark ? "text-gray-500" : "text-gray-400"}`}>
                   Nenhum alerta de saúde registado.
                 </Text>
@@ -217,6 +246,7 @@ const NotificationsContent = () => {
                 severity={alert.severity}
                 timestamp={alert.timestamp}
                 isDark={isDark}
+                semantic={colors.semantic}
               />
             ))}
 

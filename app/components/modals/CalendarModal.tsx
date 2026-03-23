@@ -51,7 +51,7 @@ export const CalendarModal = ({
   const cardBorder    = isDark ? "rgba(80, 97, 255, 0.35)" : "transparent";
   const titleColor    = isDark ? "#FFFFFF" : "#1C1C1E";
   const arrowColor    = isDark ? "#FFFFFF" : "#1C1C1E";
-  const weekLabelColor= isDark ? "rgba(255,255,255,0.45)" : "#9CA3AF";
+  const weekLabelColor= isDark ? "rgba(255,255,255,0.62)" : "#6B7280";
   const dayTextColor  = isDark ? "#FFFFFF" : "#1C1C1E";
   const todayColor    = "#3B5BDB";
   const rangeColor    = isDark ? "rgba(80, 97, 255, 0.22)" : "#E8EDFF";
@@ -59,11 +59,11 @@ export const CalendarModal = ({
   const startText     = isDark ? "#1C1C1E" : "#FFFFFF";
   const endCircle     = "#BBC8FF";
   const endText       = "#1C1C1E";
-  const hintColor     = isDark ? "rgba(255,255,255,0.5)" : "#6B7280";
+  const hintColor     = isDark ? "rgba(255,255,255,0.72)" : "#4B5563";
   const applyActiveBg = isDark ? "#FFFFFF" : "#1C1C1E";
   const applyActiveText= isDark ? "#1C1C1E" : "#FFFFFF";
-  const applyDisabledBg= isDark ? "rgba(255,255,255,0.08)" : "#F3F4F6";
-  const applyDisabledText= isDark ? "rgba(255,255,255,0.25)" : "#9CA3AF";
+  const applyDisabledBg= isDark ? "rgba(255,255,255,0.12)" : "#E5E7EB";
+  const applyDisabledText= isDark ? "rgba(255,255,255,0.52)" : "#6B7280";
   // ─────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -144,6 +144,17 @@ export const CalendarModal = ({
         style={styles.cell}
         onPress={() => handleDayPress(day)}
         activeOpacity={0.75}
+        accessibilityRole="button"
+        accessibilityLabel={format(day, "d 'de' MMMM yyyy", { locale: pt })}
+        accessibilityHint={
+          mode === "day"
+            ? "Seleciona este dia."
+            : "Seleciona esta data para o período."
+        }
+        accessibilityState={{
+          disabled: !inCurrentMonth,
+          selected: isSelectedSingle || isStart || isEnd,
+        }}
       >
         {/* Left-half bridge strip */}
         <View style={[styles.halfStrip, styles.leftStrip,  { backgroundColor: leftBridged  ? rangeColor : "transparent" }]} />
@@ -185,6 +196,9 @@ export const CalendarModal = ({
         style={styles.overlay}
         activeOpacity={1}
         onPress={onClose}
+        accessibilityRole="button"
+        accessibilityLabel="Fechar calendário"
+        accessibilityHint="Fecha a janela do calendário."
       >
         {/* ── Card ── */}
         <TouchableOpacity
@@ -194,13 +208,25 @@ export const CalendarModal = ({
         >
           {/* Month header */}
           <View style={styles.header}>
-            <TouchableOpacity onPress={prevMonth} style={styles.arrowBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+            <TouchableOpacity
+              onPress={prevMonth}
+              style={styles.arrowBtn}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="Mês anterior"
+            >
               <Text style={[styles.arrow, { color: arrowColor }]}>‹</Text>
             </TouchableOpacity>
             <Text style={[styles.monthTitle, { color: titleColor }]}>
               {format(currentMonth, "MMMM yyyy", { locale: pt })}
             </Text>
-            <TouchableOpacity onPress={nextMonth} style={styles.arrowBtn} hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}>
+            <TouchableOpacity
+              onPress={nextMonth}
+              style={styles.arrowBtn}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              accessibilityRole="button"
+              accessibilityLabel="Mês seguinte"
+            >
               <Text style={[styles.arrow, { color: arrowColor }]}>›</Text>
             </TouchableOpacity>
           </View>
@@ -241,6 +267,9 @@ export const CalendarModal = ({
               onPress={handleApply}
               disabled={!canApply}
               activeOpacity={0.85}
+              accessibilityRole="button"
+              accessibilityLabel="Aplicar período"
+              accessibilityHint="Confirma o intervalo de datas selecionado."
             >
               <Text style={[styles.applyBtnText, { color: canApply ? applyActiveText : applyDisabledText }]}>
                 Aplicar Período

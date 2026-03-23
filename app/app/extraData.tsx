@@ -12,23 +12,28 @@ import { z, ZodError } from "zod";
 import { Button } from "../components/buttons/button";
 import { Input } from "../components/input/Input";
 import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 import "../global.css";
 
 const extraDataSchema = z.object({
   idade: z.coerce
     .number()
     .min(1, "Idade deve ser maior que 0")
-    .max(120, "Idade inválida"),
+    .max(120, "Idade invalida"),
   peso: z.coerce.number().min(1, "Peso deve ser maior que 0"),
   altura: z.coerce
     .number()
     .min(0.5, "Altura deve ser maior que 0.5")
-    .max(3, "Altura inválida"),
-  genero: z.string().min(1, "Selecione um género"),
+    .max(3, "Altura invalida"),
+  genero: z.string().min(1, "Selecione um genero"),
 });
 
-const ChevronIcon = ({ isOpen, isDark }: { isOpen: boolean; isDark: boolean }) => (
+const ChevronIcon = ({
+  isOpen,
+  isDark,
+}: {
+  isOpen: boolean;
+  isDark: boolean;
+}) => (
   <Svg
     width={20}
     height={20}
@@ -38,7 +43,7 @@ const ChevronIcon = ({ isOpen, isDark }: { isOpen: boolean; isDark: boolean }) =
   >
     <Path
       d="M6 9l6 6 6-6"
-      stroke={isDark ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"}
+      stroke={isDark ? "rgba(255,255,255,0.65)" : "rgba(17,24,39,0.55)"}
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -78,16 +83,37 @@ const GenderSelector = ({
   }));
 
   return (
-    <View className="w-full rounded-[25px]" style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}>
-      <View className={isDark ? "bg-aide-dark-card rounded-[25px] overflow-hidden" : "bg-white/75 rounded-[25px] overflow-hidden"}>
+    <View
+      className="w-full rounded-[25px]"
+      style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+    >
+      <View
+        className={
+          isDark
+            ? "overflow-hidden rounded-[25px] bg-aide-dark-card"
+            : "overflow-hidden rounded-[25px] bg-white/75"
+        }
+      >
         <TouchableOpacity
           onPress={toggleDropdown}
           className="w-full flex-row items-center justify-between px-5 py-0.5"
+          accessibilityRole="button"
+          accessibilityLabel={selected || "Selecionar género"}
+          accessibilityHint={isOpen ? "Fecha a lista de géneros." : "Abre a lista de géneros disponíveis."}
+          accessibilityState={{ expanded: isOpen }}
         >
           <Text
-            className={`h-11 leading-[44px] text-base ${selected ? (isDark ? "text-white/90" : "text-black/90") : (isDark ? "text-white/40" : "text-black/40")}`}
+            className={`h-11 leading-[44px] text-base ${
+              selected
+                ? isDark
+                  ? "text-white/90"
+                  : "text-black/90"
+                : isDark
+                  ? "text-white/65"
+                  : "text-black/55"
+            }`}
           >
-            {selected || "Género"}
+            {selected || "Genero"}
           </Text>
           <ChevronIcon isOpen={isOpen} isDark={isDark} />
         </TouchableOpacity>
@@ -100,12 +126,18 @@ const GenderSelector = ({
               className={`px-5 py-3 ${
                 index < options.length - 1 ? "border-b border-[#5061FF]/10" : ""
               } ${selected === option ? "bg-[#5061FF]/10" : ""}`}
+              accessibilityRole="button"
+              accessibilityLabel={option}
+              accessibilityHint="Seleciona este género."
+              accessibilityState={{ selected: selected === option }}
             >
               <Text
                 className={`text-base ${
                   selected === option
-                    ? "text-[#5061FF] font-semibold"
-                    : (isDark ? "text-white/90" : "text-black/90")
+                    ? "font-semibold text-[#5061FF]"
+                    : isDark
+                      ? "text-white/90"
+                      : "text-black/90"
                 }`}
               >
                 {option}
@@ -120,7 +152,7 @@ const GenderSelector = ({
 
 export default function ExtraData() {
   const router = useRouter();
-  const { isDark } = useTheme();
+  const isDark = false;
   const [idade, setIdade] = useState("");
   const [peso, setPeso] = useState("");
   const [altura, setAltura] = useState("");
@@ -153,80 +185,97 @@ export default function ExtraData() {
   };
 
   return (
-    <LightBackground>
-      <View className="flex-1 px-4 pt-10 bg-transparent">
+    <LightBackground forceLight>
+      <View className="flex-1 bg-transparent px-4 pt-10">
         <SafeAreaView className="flex-1">
-        <View className="mt-12 mb-8">
-          <Text className={`font-safiro text-3xl ${isDark ? "text-white/90" : "text-black/90"}`}>
-            Só mais uma coisa...
-          </Text>
-        </View>
+          <View className="mb-8 mt-12">
+            <Text
+              className={`font-safiro text-3xl ${
+                isDark ? "text-white/90" : "text-black/90"
+              }`}
+            >
+              So mais uma coisa...
+            </Text>
+          </View>
 
-        {/* Form Inputs */}
-        <View className="gap-4">
-          <View>
+          <View className="gap-4">
             <Input
+              variant="light"
+              forceLight
+              label="Idade"
               placeholder="Idade"
               value={idade}
               onChangeText={setIdade}
               keyboardType="numeric"
+              helperText="Indique a idade em anos."
+              errorText={errors.idade}
             />
-            {errors.idade && (
-              <Text className="text-red-500 text-sm ml-2 mt-1">
-                {errors.idade}
-              </Text>
-            )}
-          </View>
 
-          <View>
             <Input
+              variant="light"
+              forceLight
+              label="Peso"
               placeholder="Peso"
               value={peso}
               onChangeText={setPeso}
               keyboardType="numeric"
               suffix="kg"
+              helperText="Introduza o peso atual."
+              errorText={errors.peso}
             />
-            {errors.peso && (
-              <Text className="text-red-500 text-sm ml-2 mt-1">
-                {errors.peso}
-              </Text>
-            )}
-          </View>
 
-          <View>
             <Input
+              variant="light"
+              forceLight
+              label="Altura"
               placeholder="Altura"
               value={altura}
               onChangeText={setAltura}
               keyboardType="numeric"
               suffix="m"
+              helperText="Introduza a altura em metros."
+              errorText={errors.altura}
             />
-            {errors.altura && (
-              <Text className="text-red-500 text-sm ml-2 mt-1">
-                {errors.altura}
+
+            <View>
+              <Text
+                className={`mb-2 ml-1 text-sm font-semibold ${
+                  isDark ? "text-white" : "text-black/80"
+                }`}
+              >
+                Genero
               </Text>
-            )}
+              <GenderSelector
+                selected={genero}
+                onSelect={setGenero}
+                isDark={isDark}
+              />
+              {errors.genero ? (
+                <View
+                  className={`mt-2 rounded-2xl px-3 py-3 ${
+                    isDark ? "bg-[#4A1D24]" : "bg-[#FFF1F2]"
+                  }`}
+                >
+                  <Text
+                    className={`text-xs ${
+                      isDark ? "text-red-100" : "text-red-700"
+                    }`}
+                  >
+                    Corrija este campo: {errors.genero}. Selecione uma opcao
+                    para continuar.
+                  </Text>
+                </View>
+              ) : null}
+            </View>
           </View>
 
-          <View>
-            <GenderSelector selected={genero} onSelect={setGenero} isDark={isDark} />
-            {errors.genero && (
-              <Text className="text-red-500 text-sm ml-2 mt-1">
-                {errors.genero}
-              </Text>
-            )}
+          <View className="flex-1" />
+
+          <View className="mb-8 items-center">
+            <Button variant="primary" forceLight label="Avancar" onPress={handleAdvance} />
           </View>
-        </View>
-
-        {/* Spacer to push button to bottom */}
-        <View className="flex-1" />
-
-        {/* Bottom Button */}
-        <View className="items-center mb-8">
-          <Button variant="primary" label="Avançar" onPress={handleAdvance} />
-        </View>
-      </SafeAreaView>
-    </View>
-  </LightBackground>
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 }

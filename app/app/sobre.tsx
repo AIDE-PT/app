@@ -51,6 +51,7 @@ const FeatureCard = ({
       className={`p-3 rounded-full ${
         isDark ? "bg-blue-500/20" : "bg-blue-50"
       }`}
+      accessible={false}
     >
       {icon}
     </View>
@@ -143,7 +144,7 @@ const SobrePage = () => {
           <BackButton
             label="Sobre"
             className="mb-4"
-            dark={!isDark}
+            dark={isDark}
             onPress={() => router.back()}
           />
 
@@ -156,7 +157,12 @@ const SobrePage = () => {
             <View className="mb-8 items-center">
               <View className="flex-row items-center mb-2">
                 <Text className={`text-3xl font-bold ${isDark ? "text-white" : "text-[#1A1A2E]"}`}>Sobre a </Text>              
-                  <AideLogo size={65} fill={isDark ? "#ffffff" : "#1A1A2E"} />           
+                  <AideLogo
+                    size={65}
+                    fill={isDark ? "#ffffff" : "#1A1A2E"}
+                    accessible
+                    accessibilityLabel="Logótipo AIDE"
+                  />
               </View>
               <Text
                 className={`text-center text-lg leading-7 ${

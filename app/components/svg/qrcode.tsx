@@ -1,11 +1,19 @@
-import Svg, { Path, G } from "react-native-svg";
+import Svg, { G, Path, SvgProps } from "react-native-svg";
 
-type Props = {
+type Props = SvgProps & {
   size?: number;
 };
 
-const QrcodeIcon = ({ size = 190 }: Props) => (
-  <Svg width={size} height={size} viewBox="0 0 190 190" fill="none">
+const QrcodeIcon = ({ size = 190, ...props }: Props) => (
+  <Svg
+    width={size}
+    height={size}
+    viewBox="0 0 190 190"
+    fill="none"
+    accessible={props.accessible ?? false}
+    focusable={false}
+    {...props}
+  >
     <G>
       <Path
         fill="#fff"

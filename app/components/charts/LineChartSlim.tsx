@@ -4,6 +4,7 @@ import { LineChart } from "react-native-chart-kit";
 import { useTheme } from "@/hooks/useTheme";
 
 const defaultWidth = Dimensions.get("window").width - 32;
+const DEFAULT_LIGHT_LABEL_COLOR = "rgba(17, 24, 39, 0.92)";
 
 interface SimpleLineChartProps {
   // Dados e Dimensões
@@ -53,7 +54,7 @@ export default function SimpleLineChart({
   gradientToOpacity = 0,
 
   backgroundGradient = "#ffffff",
-  labelColor = "rgba(124, 137, 255, 1)",
+  labelColor = DEFAULT_LIGHT_LABEL_COLOR,
   labelFontSize = 10,
   yAxisSuffix = "",
   showYLabels = true,
@@ -76,7 +77,7 @@ export default function SimpleLineChart({
   const darkGridColor = "rgba(255, 255, 255, 0.1)";
 
   const bgGradient = backgroundGradient === "#ffffff" && isDark ? darkBgGradient : backgroundGradient;
-  const lblColor = labelColor === "rgba(124, 137, 255, 1)" && isDark ? darkLabelColor : labelColor;
+  const lblColor = labelColor === DEFAULT_LIGHT_LABEL_COLOR && isDark ? darkLabelColor : labelColor;
   const grdColor = gridColor === "#E5E7EB" && isDark ? darkGridColor : gridColor;
 
   const combinedStyle = StyleSheet.flatten([

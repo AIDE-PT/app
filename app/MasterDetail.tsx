@@ -14,9 +14,9 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import LineChartSlim from "../components/charts/LineChartSlim";
-import MainDetails from "../components/details/main";
-import "../global.css";
+import LineChartSlim from "./components/charts/LineChartSlim";
+import MainDetails from "./components/details/main";
+import "./global.css";
 
 const screenWidth = Dimensions.get("window").width;
 
@@ -193,20 +193,49 @@ function buildDays(centerDate: Date): { day: number; weekday: string; month: str
 
 // ── Status badge colours ──────────────────────────────────────────────────────
 
-const STATUS_COLORS: Record<MetricStatus, { bg: string; text: string }> = {
-  normal:  { bg: "#6BEF8C", text: "#052e16" },
-  warning: { bg: "#FDE68A", text: "#78350f" },
-  alert:   { bg: "#FECACA", text: "#7f1d1d" },
-};
+const buildStatusColors = (semantic: {
+  success: string;
+  warning: string;
+  danger: string;
+}): Record<MetricStatus, { bg: string; text: string }> => ({
+  normal: { bg: semantic.success, text: "#04210F" },
+  warning: { bg: semantic.warning, text: "#2D1A00" },
+  alert: { bg: semantic.danger, text: "#2A0505" },
+});
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function MasterDetail() {
   const { type } = useLocalSearchParams<{ type: string }>();
   const resolvedType = (type && METRIC_CONFIGS[type]) ? type : DEFAULT_TYPE;
-  const config = METRIC_CONFIGS[resolvedType];
+  const baseConfig = METRIC_CONFIGS[resolvedType];
 
-  const { isDark } = useTheme();
+  const { isDark, colors } = useTheme();
+
+  const config: MetricConfig = {
+    ...baseConfig,
+    ...(resolvedType === "temp"
+      ? {
+          lineColor: colors.semantic.warning,
+          gradientColor: colors.semantic.warning,
+          accent: colors.semantic.warning,
+        }
+      : {}),
+    ...(resolvedType === "o2"
+      ? {
+          lineColor: colors.semantic.success,
+          gradientColor: colors.semantic.success,
+          accent: colors.semantic.success,
+        }
+      : {}),
+    ...(resolvedType === "glycemia"
+      ? {
+          lineColor: colors.semantic.danger,
+          gradientColor: colors.semantic.danger,
+          accent: colors.semantic.danger,
+        }
+      : {}),
+  };
 
   const today = new Date();
   const [selectedDay, setSelectedDay] = useState(today.getDate());
@@ -227,6 +256,7 @@ export default function MasterDetail() {
 
   const status = config.getStatus(displayNum);
   const statusLabel = config.statusLabel(status);
+  const STATUS_COLORS = buildStatusColors(colors.semantic);
   const statusColors = STATUS_COLORS[status];
 
   const extraCards = config.extraCards(history, stats ?? null);
@@ -245,12 +275,16 @@ export default function MasterDetail() {
         <View className="flex-1 px-4 pt-10">
           <SafeAreaView className="flex-1">
             <View className="mb-4">
-              <BackButton label={config.label} dark />
+              <BackButton label={config.label} dark={isDark} />
             </View>
 
             {isLoading ? (
               <View className="flex-1 items-center justify-center">
-                <ActivityIndicator size="large" color={config.accent} />
+                <ActivityIndicator
+                  size="large"
+                  color={config.accent}
+                  accessibilityLabel={`A carregar ${config.label}`}
+                />
               </View>
             ) : (
               <ScrollView
@@ -362,11 +396,11 @@ export default function MasterDetail() {
                 )}
 
                 {resolvedType === "stress" && (
-                  <StressGauge value={displayNum} isDark={isDark} />
+                  <StressGauge value={displayNum} isDark={isDark} semantic={colors.semantic} />
                 )}
 
                 {resolvedType === "o2" && (
-                  <O2InfoBanner isDark={isDark} />
+                  <O2InfoBanner isDark={isDark} semantic={colors.semantic} />
                 )}
 
               </ScrollView>
@@ -419,11 +453,19 @@ function StepsProgressBar({
   );
 }
 
-function StressGauge({ value, isDark }: { value: number; isDark: boolean }) {
+function StressGauge({
+  value,
+  isDark,
+  semantic,
+}: {
+  value: number;
+  isDark: boolean;
+  semantic: { success: string; warning: string; danger: string };
+}) {
   const zones = [
-    { label: "Baixo", range: "0–39", color: "#6BEF8C" },
-    { label: "Moderado", range: "40–70", color: "#FDE68A" },
-    { label: "Alto", range: "71–100", color: "#FECACA" },
+    { label: "Baixo", range: "0–39", color: semantic.success },
+    { label: "Moderado", range: "40–70", color: semantic.warning },
+    { label: "Alto", range: "71–100", color: semantic.danger },
   ];
   const cardBg = isDark ? "bg-aide-dark-card border-white/10" : "bg-white border-gray-100";
   const textPrimary = isDark ? "text-white" : "text-black";
@@ -449,14 +491,20 @@ function StressGauge({ value, isDark }: { value: number; isDark: boolean }) {
   );
 }
 
-function O2InfoBanner({ isDark }: { isDark: boolean }) {
+function O2InfoBanner({
+  isDark,
+  semantic,
+}: {
+  isDark: boolean;
+  semantic: { success: string; warning: string; danger: string };
+}) {
   const cardBg = isDark ? "bg-aide-dark-card border-white/10" : "bg-white border-gray-100";
   const textPrimary = isDark ? "text-white" : "text-black";
   const textSecondary = isDark ? "text-gray-400" : "text-gray-400";
   const rows = [
-    { label: "Normal", range: "≥ 96%", color: "#6BEF8C" },
-    { label: "Baixo", range: "94 – 95%", color: "#FDE68A" },
-    { label: "Crítico", range: "< 94%", color: "#FECACA" },
+    { label: "Normal", range: "≥ 96%", color: semantic.success },
+    { label: "Baixo", range: "94 – 95%", color: semantic.warning },
+    { label: "Crítico", range: "< 94%", color: semantic.danger },
   ];
   return (
     <View

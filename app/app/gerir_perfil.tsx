@@ -36,7 +36,7 @@ const GerirPerfil = () => {
         <SafeAreaView className="flex-1">
         {/* Header */}
         <View className="mb-4">
-          <BackButton label="Gerir Perfil" dark={isDark ? false : true} />
+          <BackButton label="Gerir Perfil" dark={isDark} />
         </View>
         <ScrollView
           contentContainerStyle={{ paddingBottom: 40 }}

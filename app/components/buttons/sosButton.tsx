@@ -40,7 +40,13 @@ const handleSOS = () => {
 
 export const SOSButton = () => {
   return (
-    <TouchableOpacity onPress={handleSOS} activeOpacity={0.85}>
+    <TouchableOpacity
+      onPress={handleSOS}
+      activeOpacity={0.85}
+      accessibilityRole="button"
+      accessibilityLabel="Ativar SOS"
+      accessibilityHint="Envia um pedido de socorro."
+    >
       <View
         className="w-64 h-12 p-2 bg-red-600 rounded-[20px] flex-row justify-center items-center gap-4"
         style={{

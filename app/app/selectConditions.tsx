@@ -6,7 +6,6 @@ import { Button } from "../components/buttons/button";
 import { ChipButton } from "../components/buttons/ChipButton";
 import { SearchBar } from "../components/input/SearchBar";
 import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 
 import "../global.css";
 
@@ -23,7 +22,7 @@ const ALL_CONDITIONS = [
 
 export default function SelectConditions() {
   const router = useRouter();
-  const { isDark } = useTheme();
+  const isDark = false;
   const [searchText, setSearchText] = useState("");
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
 
@@ -47,7 +46,7 @@ export default function SelectConditions() {
   };
 
   return (
-    <LightBackground>
+    <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10 bg-transparent">
         <SafeAreaView className="flex-1">
         <View className="mt-12 mb-6">
@@ -61,7 +60,7 @@ export default function SelectConditions() {
             placeholder="Doenças que tenha"
             value={searchText}
             onChangeText={setSearchText}
-            variant={isDark ? "dark" : "light"}
+            variant="light"
           />
         </View>
 
@@ -72,7 +71,7 @@ export default function SelectConditions() {
               label={condition}
               selected={selectedConditions.includes(condition)}
               onPress={() => toggleCondition(condition)}
-              variant={isDark ? "dark" : "light"}
+              variant="light"
             />
           ))}
         </View>
@@ -80,7 +79,7 @@ export default function SelectConditions() {
         <View className="flex-1" />
 
         <View className="items-center mb-8">
-          <Button variant="primary" label="Avançar" onPress={handleAdvance} />
+          <Button variant="primary" forceLight label="Avançar" onPress={handleAdvance} />
         </View>
       </SafeAreaView>
     </View>

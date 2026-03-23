@@ -8,6 +8,7 @@ interface IconCardButtonProps {
   onPress: () => void;
   icon?: React.ReactNode;
   variant?: "light" | "dark";
+  forceLight?: boolean;
 }
 
 export const IconCardButton = ({
@@ -16,10 +17,11 @@ export const IconCardButton = ({
   onPress,
   icon,
   variant = "light",
+  forceLight = false,
 }: IconCardButtonProps) => {
   const isDark = variant === "dark";
   const { isDark: isDarkTheme } = useTheme();
-  const isDarkMode = isDark || isDarkTheme;
+  const isDarkMode = !forceLight && (isDark || isDarkTheme);
 
   // Wrapper to modify icon color for dark mode
   const IconWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -54,7 +56,7 @@ export const IconCardButton = ({
       <View style={styles.iconContainer}>
         <IconWrapper>{icon}</IconWrapper>
       </View>
-      <Text style={[styles.label, (isDarkMode || selected) && styles.darkLabel]}>{label}</Text>
+      <Text style={[styles.label, isDarkMode && styles.darkLabel]}>{label}</Text>
     </TouchableOpacity>
   );
 };

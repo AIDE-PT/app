@@ -99,8 +99,11 @@ export function QRcode({
       className={`overflow-hidden rounded-3xl bg-white items-center justify-center ${className}`}
     >
       {!permission ? (
-        <View className="items-center justify-center h-full w-full">
-          <ActivityIndicator />
+        <View
+          className="items-center justify-center h-full w-full"
+          accessibilityLabel="A verificar permissão da câmara"
+        >
+          <ActivityIndicator accessibilityLabel="A verificar permissão da câmara" />
         </View>
       ) : !permission.granted ? (
         <View className="items-center justify-center h-full w-full px-4">
@@ -111,6 +114,9 @@ export function QRcode({
             onPress={handleRequestPermission}
             disabled={requesting}
             className="px-4 py-2 bg-[#5061FF] rounded-full"
+            accessibilityRole="button"
+            accessibilityLabel={requesting ? "A pedir permissão da câmara" : "Permitir acesso à câmara"}
+            accessibilityHint="Permite ler o QR code com a câmara."
           >
             <Text className="text-white font-semibold">
               {requesting ? "A pedir..." : "Permitir"}
@@ -122,6 +128,9 @@ export function QRcode({
           activeOpacity={0.85}
           onPress={handlePlaceholderPress}
           className="items-center justify-center h-full w-full"
+          accessibilityRole="button"
+          accessibilityLabel="Ler QR code"
+          accessibilityHint="Toque para ativar a câmara e digitalizar um QR code."
         >
           <View style={{ alignItems: "center", justifyContent: "center" }}>
             <QrcodeIcon size={placeholderSize} />
@@ -133,6 +142,8 @@ export function QRcode({
           barcodeScannerSettings={{ barcodeTypes: ["qr"] }}
           onBarcodeScanned={paused ? undefined : handleScan}
           facing="back"
+          accessibilityLabel="Leitor de QR code ativo"
+          accessibilityHint="Aponte a câmara para o QR code."
         >
           <View className="flex-1 items-center justify-center">
             <View

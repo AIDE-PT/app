@@ -15,7 +15,7 @@ const Definicoes = () => {
         <SafeAreaView className="flex-1">
           <BackButton
             label="Definições"
-            dark={!isDark}
+            dark={isDark}
             onPress={() => router.push("/testDashboard")}
           />
 

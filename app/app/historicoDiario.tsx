@@ -55,7 +55,7 @@ const HistoricoDiario = () => {
           <View className="mb-4">
             <BackButton
               label="Histórico Diário"
-              dark
+              dark={isDark}
               onPress={() => router.push("/testDashboard")}
             />
           </View>

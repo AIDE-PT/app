@@ -12,6 +12,7 @@ interface ProfileCardProps {
   isSelected: boolean;
   isOtherSelected: boolean;
   onPress: () => void;
+  forceLight?: boolean;
 }
 
 export const Profilecard = ({
@@ -22,19 +23,34 @@ export const Profilecard = ({
   isSelected,
   isOtherSelected,
   onPress,
+  forceLight = false,
 }: ProfileCardProps) => {
   const isFaded = isOtherSelected && !isSelected;
   const { isDark } = useTheme();
+  const useDarkMode = !forceLight && isDark;
+  const illustrationAltText = (() => {
+    if (title.toLowerCase() === "aider") {
+      return "Mulher jovem a segurar o telemovel";
+    }
+    if (title.toLowerCase() === "cuidado") {
+      return "Mulher idosa com um smartwatch no pulso";
+    }
+    return `Ilustracao do perfil ${title}`;
+  })();
 
   return (
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={0.9}
+      accessibilityRole="button"
+      accessibilityLabel={`${title}. ${description}`}
+      accessibilityHint="Toque para selecionar este perfil."
+      accessibilityState={{ selected: isSelected }}
       style={[
         styles.cardContainer,
         {
           opacity: isFaded ? 0.6 : 1,
-          backgroundColor: isDark ? "rgba(0, 4, 18, 0.9)" : "white",
+          backgroundColor: useDarkMode ? "rgba(0, 4, 18, 0.9)" : "white",
         },
         isSelected ? styles.selectedBorder : styles.unselectedBorder,
       ]}
@@ -42,7 +58,11 @@ export const Profilecard = ({
       <View className="flex-1 p-5">
         {/* 1. Imagem no topo: Ocupa 65% do card para não bater no texto */}
         <View style={{ height: "65%" }}>
-          <ProfileImage source={imageSource} />
+          <ProfileImage
+            source={imageSource}
+            accessibilityLabel={illustrationAltText}
+            accessible
+          />
         </View>
 
         {/* 2. Conteúdo de Texto: Ocupa os 35% inferiores */}
@@ -72,16 +92,17 @@ export const Profilecard = ({
               source={iconSource}
               className="w-6 h-6"
               resizeMode="contain"
+              accessible={false}
             />
             <Text
-              className={`font-bold text-xl ml-2 ${isSelected ? (isDark ? "text-white" : "text-black") : "text-[#6B7280]"}`}
+              className={`font-bold text-xl ml-2 ${isSelected ? (useDarkMode ? "text-white" : "text-black") : "text-[#6B7280]"}`}
             >
               {title}
             </Text>
           </View>
 
           <Text
-            className={`text-[16px] ${isDark ? "text-white/80" : "text-gray-800"}`}
+            className={`text-[16px] ${useDarkMode ? "text-white/80" : "text-gray-800"}`}
             style={{ opacity: isSelected ? 1 : 0 }}
           >
             {description}
