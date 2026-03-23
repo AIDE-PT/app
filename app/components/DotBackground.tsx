@@ -1,4 +1,5 @@
 import { LinearGradient } from "expo-linear-gradient";
+import { usePathname } from "expo-router";
 import { useEffect, useRef } from "react";
 import { Animated, Dimensions, Easing, StyleSheet, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
@@ -40,6 +41,19 @@ const DotPattern = ({ isDark }: { isDark: boolean }) => {
 
 type BgStatus = "good" | "warning" | "critical";
 
+const ONBOARDING_ROUTES = new Set([
+  "/",
+  "/index",
+  "/terms-of-service",
+  "/register",
+  "/login",
+]);
+
+const APP_BG_COLORS = {
+  dark: "#000746",
+  light: "#ECF5FF",
+} as const;
+
 const BG_COLORS = {
   good:     { dark: ["#000720", "#000746"] as const, light: ["#AECFFF", "#AECFFF"] as const },
   warning:  { dark: ["#1A1200", "#2B1F00"] as const, light: ["#FFD84D", "#FFCF33"] as const },
@@ -54,7 +68,9 @@ interface LightBackgroundProps {
 
 export const LightBackground = ({ children, status = "good", forceLight = false }: LightBackgroundProps) => {
   const { isDark } = useTheme();
+  const pathname = usePathname();
   const useDarkMode = !forceLight && isDark;
+  const isOnboardingRoute = ONBOARDING_ROUTES.has(pathname);
 
   const fadeAnim = useRef({
     good:     new Animated.Value(status === "good"     ? 1 : 0),
@@ -71,6 +87,17 @@ export const LightBackground = ({ children, status = "good", forceLight = false 
     ]).start();
     prevStatus.current = status;
   }, [status]);
+
+  if (!isOnboardingRoute) {
+    return (
+      <View
+        className="flex-1"
+        style={{ backgroundColor: useDarkMode ? APP_BG_COLORS.dark : APP_BG_COLORS.light }}
+      >
+        {children}
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1">
