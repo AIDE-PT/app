@@ -122,6 +122,7 @@ export default function Recommendations() {
                 label={metric.label}
                 icon={metric.icon}
                 selected={selectedMetrics.includes(metric.id)}
+                showSelectedCheck
                 onPress={() => toggleMetric(metric.id)}
                 variant="light"
                 forceLight

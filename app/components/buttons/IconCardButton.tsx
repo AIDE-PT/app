@@ -1,4 +1,5 @@
 import React from "react";
+import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -9,6 +10,7 @@ interface IconCardButtonProps {
   icon?: React.ReactNode;
   variant?: "light" | "dark";
   forceLight?: boolean;
+  showSelectedCheck?: boolean;
 }
 
 export const IconCardButton = ({
@@ -18,6 +20,7 @@ export const IconCardButton = ({
   icon,
   variant = "light",
   forceLight = false,
+  showSelectedCheck = false,
 }: IconCardButtonProps) => {
   const isDark = variant === "dark";
   const { isDark: isDarkTheme } = useTheme();
@@ -53,6 +56,23 @@ export const IconCardButton = ({
           : (isDarkMode ? styles.darkCard : styles.defaultCard),
       ]}
     >
+      {selected && showSelectedCheck ? (
+        <View
+          style={[
+            styles.checkBadge,
+            isDarkMode ? styles.darkCheckBadge : styles.lightCheckBadge,
+          ]}
+          pointerEvents="none"
+          accessible={false}
+        >
+          <Ionicons
+            name="checkmark"
+            size={18}
+            color={isDarkMode ? styles.darkCheckText.color : styles.lightCheckText.color}
+          />
+        </View>
+      ) : null}
+
       <View style={styles.iconContainer}>
         <IconWrapper>{icon}</IconWrapper>
       </View>
@@ -71,6 +91,7 @@ const styles = StyleSheet.create({
     minWidth: 140,
     minHeight: 100,
     borderWidth: 2,
+    position: "relative",
   },
   defaultCard: {
     backgroundColor: "#FFFFFF",
@@ -96,6 +117,31 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     marginBottom: 8,
+  },
+  checkBadge: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 2,
+  },
+  lightCheckBadge: {
+    backgroundColor: "#EEF2FF",
+    borderColor: "#0400FF",
+  },
+  darkCheckBadge: {
+    backgroundColor: "rgba(4, 0, 255, 0.24)",
+    borderColor: "#0400FF",
+  },
+  lightCheckText: {
+    color: "#0400FF",
+  },
+  darkCheckText: {
+    color: "#0400FF",
   },
   label: {
     fontFamily: "OpenSans-SemiBold",

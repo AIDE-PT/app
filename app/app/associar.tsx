@@ -9,6 +9,7 @@ import { Input } from "../components/input/Input";
 import { QRcode } from "../components/input/QRcode";
 import AssociarConfirmationModal from "../components/modals/AssociarConfirmationModal";
 import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
 
 const emailSchema = z.string().email({ message: "Email invalido" });
 
@@ -17,7 +18,7 @@ export default function AssociarPage() {
   const [error, setError] = useState("");
   const [, setLastScan] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const isDark = false;
+  const { isDark } = useTheme();
 
   const handleAvancar = () => {
     try {
@@ -50,12 +51,11 @@ export default function AssociarPage() {
   };
 
   return (
-    <LightBackground forceLight>
+    <LightBackground>
       <SafeAreaView className="flex-1 bg-transparent">
         <View className="flex-1 px-4 pt-10">
           <BackButton
             label="Adicionar um cuidado"
-            dark={false}
             onPress={() => router.back()}
           />
 
@@ -109,7 +109,6 @@ export default function AssociarPage() {
                   if (error) setError("");
                 }}
                 variant="light"
-                forceLight
                 helperText="Introduza o email associado ao perfil que quer ligar."
                 errorText={error || undefined}
               />
@@ -117,7 +116,7 @@ export default function AssociarPage() {
           </View>
 
           <View className="w-full items-center px-8 pb-12">
-            <Button variant="primary" forceLight label="Avancar" onPress={handleAvancar} />
+            <Button variant="primary" label="Avancar" onPress={handleAvancar} />
           </View>
 
           <AssociarConfirmationModal

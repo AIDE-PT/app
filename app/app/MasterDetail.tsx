@@ -60,6 +60,15 @@ interface MetricScale {
   bands: MetricBand[];
 }
 
+type PatternLevel = "low" | "medium" | "high";
+
+interface PatternIndicator {
+  level: PatternLevel;
+  label: string;
+  icon: "chevron-down" | "minus" | "chevron-up";
+  color: string;
+}
+
 const calcAvg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
 const announceEntryValue = (label: string) => {
@@ -131,6 +140,96 @@ function getZoneSummary(type: string, value: number) {
     default:
       return "";
   }
+}
+
+function getStepsPatternIndicator(
+  value: number,
+  semantic: { success: string; warning: string; danger: string },
+): PatternIndicator {
+  if (value < 7000) {
+    return {
+      level: "low",
+      label: "baixo",
+      icon: "chevron-down",
+      color: semantic.warning,
+    };
+  }
+
+  if (value <= 10000) {
+    return {
+      level: "medium",
+      label: "moderado",
+      icon: "minus",
+      color: semantic.success,
+    };
+  }
+
+  return {
+    level: "high",
+    label: "alto",
+    icon: "chevron-up",
+    color: "#60A5FA",
+  };
+}
+
+function getO2PatternIndicator(
+  value: number,
+  semantic: { success: string; warning: string; danger: string },
+): PatternIndicator {
+  if (value < 94) {
+    return {
+      level: "low",
+      label: "baixo",
+      icon: "chevron-down",
+      color: semantic.danger,
+    };
+  }
+
+  if (value < 96) {
+    return {
+      level: "medium",
+      label: "moderado",
+      icon: "minus",
+      color: semantic.warning,
+    };
+  }
+
+  return {
+    level: "high",
+    label: "alto",
+    icon: "chevron-up",
+    color: semantic.success,
+  };
+}
+
+function getHeartPatternIndicator(
+  value: number,
+  semantic: { success: string; warning: string; danger: string },
+): PatternIndicator {
+  if (value < 60) {
+    return {
+      level: "low",
+      label: "baixo",
+      icon: "chevron-down",
+      color: "#93C5FD",
+    };
+  }
+
+  if (value <= 100) {
+    return {
+      level: "medium",
+      label: "normal",
+      icon: "minus",
+      color: semantic.success,
+    };
+  }
+
+  return {
+    level: "high",
+    label: value <= 140 ? "elevado" : "critico",
+    icon: "chevron-up",
+    color: value <= 140 ? semantic.warning : semantic.danger,
+  };
 }
 
 function buildAccessibleSummary({
@@ -456,7 +555,17 @@ function HeartTripleRings({
 }
 
 // ─── O2: Semi-circle gauge with colored zones ─────────────────────────────────
-function O2RangeColumns({ history, currentValue, isDark }: { history: number[]; currentValue: number; isDark: boolean }) {
+function O2RangeColumns({
+  history,
+  currentValue,
+  isDark,
+  semantic,
+}: {
+  history: number[];
+  currentValue: number;
+  isDark: boolean;
+  semantic: { success: string; warning: string; danger: string };
+}) {
   const W = screenWidth - 80;
   const H = 220;
   const pL = 34, pR = 10, pT = 12, pB = 32;
@@ -535,9 +644,11 @@ function O2RangeColumns({ history, currentValue, isDark }: { history: number[]; 
         const yLo = toY(b.lo);
         const yHi = toY(b.hi);
         const daysAgo = bucketCount - 1 - i;
+        const midpoint = (b.lo + b.hi) / 2;
+        const indicator = getO2PatternIndicator(midpoint, semantic);
         const entryLabel = b.single
-          ? `${getRelativeDayLabel(daysAgo)}. Saturação ${Math.round(b.hi)} por cento.`
-          : `${getRelativeDayLabel(daysAgo)}. Intervalo de saturação de ${Math.round(b.lo)} a ${Math.round(b.hi)} por cento.`;
+          ? `${getRelativeDayLabel(daysAgo)}. Saturação ${Math.round(b.hi)} por cento. Indicador ${indicator.label}.`
+          : `${getRelativeDayLabel(daysAgo)}. Intervalo de saturação de ${Math.round(b.lo)} a ${Math.round(b.hi)} por cento. Indicador ${indicator.label}.`;
         const hitTop = b.single ? Math.max(0, yHi - 14) : yHi;
         const hitHeight = b.single ? 28 : Math.max(28, yLo - yHi);
         return (
@@ -563,12 +674,46 @@ function O2RangeColumns({ history, currentValue, isDark }: { history: number[]; 
           />
         );
       })}
+
+      {buckets.map((b, i) => {
+        const x = toX(i);
+        const yHi = toY(b.hi);
+        const indicator = getO2PatternIndicator((b.lo + b.hi) / 2, semantic);
+        return (
+          <View
+            key={`o2-pattern-${i}`}
+            pointerEvents="none"
+            accessible={false}
+            style={{
+              position: "absolute",
+              left: x - 8,
+              top: Math.max(2, yHi - 18),
+              width: 16,
+              height: 16,
+              borderRadius: 8,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: isDark ? "rgba(15,23,42,0.82)" : "rgba(255,255,255,0.92)",
+            }}
+          >
+            <Feather name={indicator.icon} size={10} color={indicator.color} />
+          </View>
+        );
+      })}
     </View>
   );
 }
 
 // ─── STEPS: Bar chart (14 days) + progress line overlay ──────────────────────
-function StepsBars({ data, isDark }: { data: number[]; isDark: boolean }) {
+function StepsBars({
+  data,
+  isDark,
+  semantic,
+}: {
+  data: number[];
+  isDark: boolean;
+  semantic: { success: string; warning: string; danger: string };
+}) {
   const W = screenWidth - 80;
   const H = 180;
   const pL = 10, pR = 10, pT = 16, pB = 28;
@@ -632,7 +777,8 @@ function StepsBars({ data, isDark }: { data: number[]; isDark: boolean }) {
         const bH = Math.max((v / maxVal) * cH, 2);
         const y = pT + cH - bH;
         const daysAgo = bars.length - 1 - i;
-        const entryLabel = `${getRelativeDayLabel(daysAgo)}. ${Math.round(v).toLocaleString("pt-PT")} passos.`;
+        const indicator = getStepsPatternIndicator(v, semantic);
+        const entryLabel = `${getRelativeDayLabel(daysAgo)}. ${Math.round(v).toLocaleString("pt-PT")} passos. Indicador ${indicator.label}.`;
         return (
           <Pressable
             key={`steps-hit-${i}`}
@@ -654,6 +800,33 @@ function StepsBars({ data, isDark }: { data: number[]; isDark: boolean }) {
             onPress={() => announceEntryValue(entryLabel)}
             onAccessibilityTap={() => announceEntryValue(entryLabel)}
           />
+        );
+      })}
+
+      {bars.map((v, i) => {
+        const x = pL + i * (bW + gW);
+        const bH = Math.max((v / maxVal) * cH, 2);
+        const y = pT + cH - bH;
+        const indicator = getStepsPatternIndicator(v, semantic);
+        return (
+          <View
+            key={`steps-pattern-${i}`}
+            pointerEvents="none"
+            accessible={false}
+            style={{
+              position: "absolute",
+              left: x + bW / 2 - 8,
+              top: Math.max(2, y - 18),
+              width: 16,
+              height: 16,
+              borderRadius: 8,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: isDark ? "rgba(15,23,42,0.82)" : "rgba(255,255,255,0.92)",
+            }}
+          >
+            <Feather name={indicator.icon} size={10} color={indicator.color} />
+          </View>
         );
       })}
     </View>
@@ -779,9 +952,10 @@ const trackColor = isDark ? "rgba(255,255,255,0.05)" : "#E8EAFF";
 }
 
 // ─── STRESS/HEART: EEG-style symmetric waveform bars ────────────────────────
-function StressWave({ value, history, isDark, colorFn }: {
+function StressWave({ value, history, isDark, colorFn, indicatorFn }: {
   value: number; history: number[]; isDark: boolean;
   colorFn?: (v: number) => string;
+  indicatorFn?: (v: number) => PatternIndicator;
 }) {
   const W = screenWidth - 80, H = 150;
   const bars = history.slice(0, 24).reverse();
@@ -820,7 +994,8 @@ function StressWave({ value, history, isDark, colorFn }: {
         const halfH = normalize(v) * (H * 0.43);
         const x = i * (bW + gW);
         const daysAgo = bars.length - 1 - i;
-        const entryLabel = `${getRelativeDayLabel(daysAgo)}. Valor ${Math.round(v)}.`;
+        const indicator = indicatorFn?.(v);
+        const entryLabel = `${getRelativeDayLabel(daysAgo)}. Valor ${Math.round(v)}.${indicator ? ` Indicador ${indicator.label}.` : ""}`;
         return (
           <Pressable
             key={`wave-hit-${i}`}
@@ -842,6 +1017,32 @@ function StressWave({ value, history, isDark, colorFn }: {
             onPress={() => announceEntryValue(entryLabel)}
             onAccessibilityTap={() => announceEntryValue(entryLabel)}
           />
+        );
+      })}
+
+      {indicatorFn && bars.map((v, i) => {
+        const halfH = normalize(v) * (H * 0.43);
+        const x = i * (bW + gW);
+        const indicator = indicatorFn(v);
+        return (
+          <View
+            key={`wave-pattern-${i}`}
+            pointerEvents="none"
+            accessible={false}
+            style={{
+              position: "absolute",
+              left: x + bW / 2 - 8,
+              top: Math.max(2, midY - halfH - 18),
+              width: 16,
+              height: 16,
+              borderRadius: 8,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: isDark ? "rgba(15,23,42,0.82)" : "rgba(255,255,255,0.92)",
+            }}
+          >
+            <Feather name={indicator.icon} size={10} color={indicator.color} />
+          </View>
         );
       })}
     </View>
@@ -1214,6 +1415,7 @@ export default function MasterDetail() {
                       importantForAccessibility="no"
                     >
                       <StressWave value={currentRaw} history={history} isDark={isDark}
+                        indicatorFn={(v) => getHeartPatternIndicator(v, colors.semantic)}
                         colorFn={(v) => v <= 60 ? "#93C5FD" : v <= 100 ? colors.semantic.success : v <= 140 ? colors.semantic.warning : colors.semantic.danger} />
                     </View>
                     <View className="flex-row h-2 rounded-full overflow-hidden mt-4">
@@ -1226,6 +1428,31 @@ export default function MasterDetail() {
                       {["40","60","100","140+"].map((v) => (
                         <Text key={v} className={`text-xs font-open-sans ${ts}`}>{v}</Text>
                       ))}
+                    </View>
+                    <View
+                      className="rounded-2xl p-3 mt-3"
+                      style={{ backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#F6F7FF" }}
+                      accessible
+                      accessibilityRole="text"
+                      accessibilityLabel="Indicadores do grafico cardiaco: seta para baixo indica batimento baixo, traco indica normal, seta para cima indica elevado ou critico."
+                    >
+                      <Text className={`text-xs font-open-sans mb-2 ${ts}`}>
+                        Indicadores por barra
+                      </Text>
+                      <View className="flex-row items-center justify-between">
+                        <View className="flex-row items-center gap-1.5">
+                          <Feather name="chevron-down" size={12} color="#93C5FD" />
+                          <Text className={`text-xs font-open-sans ${ts}`}>Baixo</Text>
+                        </View>
+                        <View className="flex-row items-center gap-1.5">
+                          <Feather name="minus" size={12} color={colors.semantic.success} />
+                          <Text className={`text-xs font-open-sans ${ts}`}>Normal</Text>
+                        </View>
+                        <View className="flex-row items-center gap-1.5">
+                          <Feather name="chevron-up" size={12} color={colors.semantic.warning} />
+                          <Text className={`text-xs font-open-sans ${ts}`}>Elevado</Text>
+                        </View>
+                      </View>
                     </View>
                   </View>
                 )}
@@ -1250,7 +1477,12 @@ export default function MasterDetail() {
                       accessible={false}
                       importantForAccessibility="no"
                     >
-                      <O2RangeColumns history={history} currentValue={currentRaw} isDark={isDark} />
+                      <O2RangeColumns
+                        history={history}
+                        currentValue={currentRaw}
+                        isDark={isDark}
+                        semantic={colors.semantic}
+                      />
                     </View>
                     <View className="flex-row justify-center gap-8 mt-4">
                       {O2_LEGEND.map((r) => (
@@ -1284,7 +1516,11 @@ export default function MasterDetail() {
                       accessible={false}
                       importantForAccessibility="no"
                     >
-                      <StepsBars data={history.length >= 2 ? history : [0, 0]} isDark={isDark} />
+                      <StepsBars
+                        data={history.length >= 2 ? history : [0, 0]}
+                        isDark={isDark}
+                        semantic={colors.semantic}
+                      />
                     </View>
                     <View className="mt-4">
                       <View className="flex-row justify-between mb-1">
