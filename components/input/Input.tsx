@@ -115,7 +115,6 @@ import {
   Platform,
   Text,
   TextInput,
-  View,
   TextInputProps,
   TouchableOpacity,
   View,
