@@ -109,7 +109,7 @@ export const LightBackground = ({
       }),
     ]).start();
     prevStatus.current = status;
-  }, [status]);
+  }, [fadeAnim, status]);
 
   if (!isOnboardingRoute) {
     return (

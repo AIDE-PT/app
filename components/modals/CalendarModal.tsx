@@ -73,7 +73,7 @@ export const CalendarModal = ({
       setEndDate(null);
       setCurrentMonth(initialDate);
     }
-  }, [isVisible]);
+  }, [initialDate, isVisible]);
 
   const nextMonth = () => setCurrentMonth((m) => addMonths(m, 1));
   const prevMonth = () => setCurrentMonth((m) => subMonths(m, 1));

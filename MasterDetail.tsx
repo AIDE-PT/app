@@ -2,8 +2,7 @@ import BackButton from "@/components/buttons/backButton";
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
 import { useHealthMetric, useMetricStats } from "@/hooks/useLatestMetric";
-import { useLocalSearchParams } from "expo-router";
-import { Stack } from "expo-router";
+import { useLocalSearchParams, Stack } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
@@ -199,7 +198,6 @@ const METRIC_CONFIGS: Record<string, MetricConfig> = {
 
 // Fallback for unrecognised types — default to BPM
 const DEFAULT_TYPE = "heart";
-const BRAND_BLUE = "#748FFC";
 const HIGHLIGHT_BLUE = "#7C89FF";
 
 // ── Date strip helpers ────────────────────────────────────────────────────────

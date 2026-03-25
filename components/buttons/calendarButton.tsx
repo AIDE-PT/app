@@ -27,7 +27,11 @@ export const CalendarButton = ({
       onPress();
       return;
     }
-    Platform.OS === "android" ? showMode() : setShow(true);
+    if (Platform.OS === "android") {
+      showMode();
+    } else {
+      setShow(true);
+    }
   };
 
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {

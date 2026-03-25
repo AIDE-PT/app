@@ -83,16 +83,6 @@ export default function MiniSparkline({
   // Build fill path (close the shape at the bottom)
   const fillPath = `${linePath} L ${points[points.length - 1].x} ${height} L ${points[0].x} ${height} Z`;
 
-  // Calculate Y positions for grid lines
-  const gridLineStartX = showAllLabels ? 12 : 0;
-
-  // Calculate Y positions for each label
-  const getYPosition = (labelValue: number): number => {
-    const padding = 2;
-    const availableHeight = height - padding * 2;
-    return height - padding - ((labelValue - min) / range) * availableHeight;
-  };
-
   return (
     <View style={{ width, height, position: "relative" }}>
       {yLabels && (

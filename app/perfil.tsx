@@ -1,12 +1,6 @@
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { SafeAreaView, ScrollView, Text, View } from "react-native";
 import aider from "../assets/images/aider.png";
 import cuidado from "../assets/images/cuidado.png";
 import icon_aider from "../assets/images/icon_aider.png";

@@ -81,7 +81,7 @@ const Personalizacao = () => {
   useEffect(() => {
     themeAnimations.escuro.setValue(isDark ? 1 : 0);
     themeAnimations.claro.setValue(isDark ? 0 : 1);
-  }, []);
+  }, [isDark, themeAnimations.claro, themeAnimations.escuro]);
 
   const handleThemeChange = (theme: "escuro" | "claro") => {
     // Update global theme
