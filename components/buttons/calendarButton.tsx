@@ -5,18 +5,30 @@ import DateTimePicker, {
   DateTimePickerAndroid,
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { useTheme } from "@/hooks/useTheme";
 
 interface CalendarButtonProps {
   label?: string;
   onDateChange?: (date: Date) => void;
+  onPress?: () => void;
 }
 
 export const CalendarButton = ({
   label = "Dia",
   onDateChange,
+  onPress,
 }: CalendarButtonProps) => {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
+  const { isDark } = useTheme();
+
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+      return;
+    }
+    Platform.OS === "android" ? showMode() : setShow(true);
+  };
 
   const onChange = (event: DateTimePickerEvent, selectedDate?: Date) => {
     // No Android o picker fecha-se sozinho após seleção (dismissed ou set)
@@ -39,13 +51,16 @@ export const CalendarButton = ({
 
   return (
     <>
-      <TouchableOpacity
-        onPress={Platform.OS === "android" ? showMode : () => setShow(true)}
-        style={styles.buttonShadow}
-        className="flex-row items-center bg-white px-4 py-2 rounded-full border border-gray-100 self-start ml-4"
-      >
-        <CalendarIcon />
-        <Text className="ml-2 text-xl font-semibold text-black">{label}</Text>
+    <TouchableOpacity
+      onPress={handlePress}
+      style={styles.buttonShadow}
+      className={`flex-row items-center px-4 py-2 rounded-full border self-start ml-4 ${isDark ? "bg-[#1A1A2E] border-gray-700" : "bg-white border-gray-100"}`}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityHint="Abre a seleção de data."
+    >
+      <CalendarIcon color={isDark ? "#ffffff" : "#191915"} />
+        <Text className={`ml-2 text-xl font-semibold ${isDark ? "text-white" : "text-black"}`}>{label}</Text>
       </TouchableOpacity>
 
       {show && (
@@ -62,13 +77,6 @@ export const CalendarButton = ({
 
 const styles = StyleSheet.create({
   buttonShadow: {
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
   },
 });

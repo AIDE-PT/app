@@ -1,145 +1,231 @@
-import { useFonts } from "expo-font";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Controller, useForm } from "react-hook-form";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
+import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
+import { LightBackground } from "@/components/DotBackground";
+import {
+  registerFieldCopy,
+  RegisterFormData,
+  registerSchema,
+} from "@/schemas/register";
 
-// Divider with text
-// const DividerWithText = ({ text }: { text: string }) => (
-//   <View className="flex-row items-center my-6">
-//     <View className="flex-1 h-[1px] bg-[#D1D5DB]" />
-//     <Text className="font-open-sans text-[16px] text-[#6B7280] mx-4">
-//       {text}
-//     </Text>
-//     <View className="flex-1 h-[1px] bg-[#D1D5DB]" />
-//   </View>
-// );
+const DividerWithText = ({
+  text,
+  isDark,
+}: {
+  text: string;
+  isDark: boolean;
+}) => (
+  <View className="my-6 flex-row items-center">
+    <View
+      className={`h-[1px] flex-1 ${isDark ? "bg-white/20" : "bg-[#D1D5DB]"}`}
+    />
+    <Text
+      className={`mx-4 font-open-sans text-[16px] ${
+        isDark ? "text-white/60" : "text-[#6B7280]"
+      }`}
+    >
+      {text}
+    </Text>
+    <View
+      className={`h-[1px] flex-1 ${isDark ? "bg-white/20" : "bg-[#D1D5DB]"}`}
+    />
+  </View>
+);
 
 export default function Register() {
   const router = useRouter();
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  const isDark = false;
+  const withRequiredCue = (label: string) => `${label} *`;
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, touchedFields, dirtyFields, isSubmitted },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      repeatPassword: "",
+    },
+    mode: "onChange",
+    reValidateMode: "onChange",
   });
 
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const shouldShowFieldError = (field: keyof RegisterFormData) =>
+    !!errors[field] &&
+    (isSubmitted || !!touchedFields[field] || !!dirtyFields[field]);
 
-  if (!fontsLoaded) {
-    return null;
-  }
   const handleRegister = () => {
-    // Validate passwords match
-    if (password !== confirmPassword) {
-      console.log("Passwords don't match");
-      return;
-    }
-    // Handle registration logic
-    router.push("./perfil");
+    router.push("/perfil");
   };
 
-  // const handleGoogleRegister = () => {
-  //     console.log("Register with Google");
-  // };
+  const handleGoogleRegister = () => {
+    console.log("Register with Google");
+  };
 
-  // const handleAppleRegister = () => {
-  //     console.log("Register with Apple");
-  // };
+  const handleAppleRegister = () => {
+    console.log("Register with Apple");
+  };
 
   return (
-    <View className="flex-1 px-4 pt-10 bg-aide-background">
-      <SafeAreaView className="flex-1">
-        <View className="flex-1">
-          {/* Título e Subtítulo */}
-          <View className="mt-12 mb-8">
-            <Text className="font-safiro text-[32px] text-[#1A1A2E]">
-              Registo
-            </Text>
-          </View>
-
-          {/* Input Fields */}
-          <View className="gap-4 mb-4">
-            <Input
-              variant="light"
-              type="text"
-              placeholder="Nome"
-              value={name}
-              onChangeText={setName}
-            />
-
-            <Input
-              variant="light"
-              type="email"
-              placeholder="Email/telemóvel"
-              value={email}
-              onChangeText={setEmail}
-            />
-
-            <Input
-              variant="light"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChangeText={setPassword}
-            />
-
-            <Input
-              variant="light"
-              type="password"
-              placeholder="Repetir Password"
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-            />
-          </View>
-
-          {/* Divider - Social Registration (commented for now)
-                    <DividerWithText text="Ou" />
-
-                    <View className="gap-3 mb-6">
-                        <SocialButton
-                            provider="google"
-                            onPress={handleGoogleRegister}
-                        />
-
-                        <SocialButton
-                            provider="apple"
-                            onPress={handleAppleRegister}
-                        />
-                    </View>
-                    */}
-
-          {/* Spacer */}
-          <View className="flex-1" />
-
-          {/* Bottom Section */}
-          <View className="items-center mb-10">
-            {/* Register Button */}
-            <Button
-              variant="primary"
-              label="Registar"
-              onPress={handleRegister}
-            />
-
-            {/* Login Link */}
-            <View className="flex-row mt-6">
-              <Text className="font-open-sans font-bold text-[14px] text-[#6B7280]">
-                Já tens uma conta?{" "}
-              </Text>
-              <TouchableOpacity onPress={() => router.push("/login")}>
-                <Text className="font-open-sans-semibold text-[14px] text-[#5C6CFF]">
-                  Login
+    <LightBackground forceLight>
+      <View className="flex-1 px-4 pt-10">
+        <SafeAreaView className="flex-1">
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
+          >
+            <View className="flex-1">
+              <View className="mb-8 mt-12">
+                <Text
+                  className={`font-safiro text-[32px] ${
+                    isDark ? "text-white" : "text-[#1A1A2E]"
+                  }`}
+                >
+                  Registo
                 </Text>
-              </TouchableOpacity>
+              </View>
+
+              <View className="mb-4 gap-4">
+
+                <Controller
+                  control={control}
+                  name="name"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input
+                      variant="light"
+                      forceLight
+                      type="text"
+                      label={withRequiredCue(registerFieldCopy.name.label)}
+                      placeholder={registerFieldCopy.name.placeholder}
+                      helperText={registerFieldCopy.name.helperText}
+                      errorText={
+                        shouldShowFieldError("name")
+                          ? errors.name?.message
+                          : undefined
+                      }
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input
+                      variant="light"
+                      forceLight
+                      type="email"
+                      label={withRequiredCue(registerFieldCopy.email.label)}
+                      placeholder={registerFieldCopy.email.placeholder}
+                      helperText={registerFieldCopy.email.helperText}
+                      errorText={
+                        shouldShowFieldError("email")
+                          ? errors.email?.message
+                          : undefined
+                      }
+                      validateAs="emailOrPhone"
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input
+                      variant="light"
+                      forceLight
+                      type="password"
+                      label={withRequiredCue(registerFieldCopy.password.label)}
+                      placeholder={registerFieldCopy.password.placeholder}
+                      helperText={registerFieldCopy.password.helperText}
+                      errorText={
+                        shouldShowFieldError("password")
+                          ? errors.password?.message
+                          : undefined
+                      }
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+
+                <Controller
+                  control={control}
+                  name="repeatPassword"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input
+                      variant="light"
+                      forceLight
+                      type="password"
+                      label={withRequiredCue(registerFieldCopy.repeatPassword.label)}
+                      placeholder={registerFieldCopy.repeatPassword.placeholder}
+                      helperText={registerFieldCopy.repeatPassword.helperText}
+                      errorText={
+                        shouldShowFieldError("repeatPassword")
+                          ? errors.repeatPassword?.message
+                          : undefined
+                      }
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+              </View>
+
+              <DividerWithText text="Ou" isDark={isDark} />
+
+              <View className="mb-6 gap-3">
+                <SocialButton provider="google" onPress={handleGoogleRegister} forceLight />
+                <SocialButton provider="apple" onPress={handleAppleRegister} forceLight />
+              </View>
+
+              <View className="flex-1" />
+
+              <View className="mb-10 items-center">
+                <Button
+                  variant="primary"
+                  forceLight
+                  label="Registar"
+                  onPress={handleSubmit(handleRegister)}
+                />
+
+                <View className="mt-6 flex-row">
+                  <Text
+                    className={`font-open-sans text-[14px] font-bold ${
+                      isDark ? "text-white/60" : "text-[#6B7280]"
+                    }`}
+                  >
+                    Ja tens uma conta?{" "}
+                  </Text>
+                  <TouchableOpacity onPress={() => router.push("/login")}>
+                    <Text className="font-open-sans-semibold text-[14px] text-[#5C6CFF]">
+                      Login
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             </View>
-          </View>
-        </View>
-      </SafeAreaView>
-    </View>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 }

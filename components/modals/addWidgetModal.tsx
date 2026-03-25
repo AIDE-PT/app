@@ -13,84 +13,97 @@ import {
   TempIcon,
 } from "../svg/HealthIcons";
 import BottomModal from "./BottomModal";
+import { useTheme } from "@/hooks/useTheme";
 
 interface AddWidgetModalProps {
   visible: boolean;
   onClose: () => void;
+  onAddWidget: (widgetId: string) => void;
 }
 
-export const AddWidgetModal = ({ visible, onClose }: AddWidgetModalProps) => {
+export const AddWidgetModal = ({
+  visible,
+  onClose,
+  onAddWidget,
+}: AddWidgetModalProps) => {
+  const { isDark } = useTheme();
+
+  const handleAdd = (widgetId: string) => {
+    onAddWidget(widgetId);
+    onClose();
+  };
+
   return (
     <BottomModal visible={visible} onClose={onClose}>
       <View className="pb-8 px-2">
         {/* Fitbit Section */}
         <View className="mb-6">
-          <Text className="text-lg font-bold mb-3 font-safiro text-black">
+          <Text className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}>
             Fitbit
           </Text>
           <View className="flex-row flex-wrap justify-between">
             <WidgetAdd
               label="BPM"
               Icon={BpmIcon}
-              onPress={() => console.log("Add BPM")}
+              onPress={() => handleAdd("heart")}
             />
             <WidgetAdd
               label="TEMP"
               Icon={TempIcon}
-              onPress={() => console.log("Add TEMP")}
+              onPress={() => handleAdd("temp")}
             />
             <WidgetAdd
               label="GLICOSE"
               Icon={GlicoseIcon}
-              onPress={() => console.log("Add GLICOSE")}
+              onPress={() => handleAdd("glycemia")}
             />
           </View>
         </View>
 
         {/* Health Connect Section */}
         <View className="mb-6">
-          <Text className="text-lg font-bold mb-3 font-safiro text-black">
+          <Text className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}>
             Health Connect
           </Text>
           <View className="flex-row flex-wrap justify-between">
             <WidgetAdd
               label="PASSOS"
               Icon={PassosIcon}
-              onPress={() => console.log("Add PASSOS")}
+              onPress={() => handleAdd("steps")}
             />
             <WidgetAdd
               label="SONO"
               Icon={SonoIcon}
-              onPress={() => console.log("Add SONO")}
+              onPress={() => handleAdd("sleep")}
             />
             <WidgetAdd
               label="O2"
               Icon={O2Icon}
-              onPress={() => console.log("Add O2")}
+              onPress={() => handleAdd("o2")}
             />
           </View>
         </View>
 
         {/* Garmin Section */}
         <View className="mb-6">
-          <Text className="text-lg font-bold mb-3 font-safiro text-black">
+          <Text className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}>
             Garmin
           </Text>
           <View className="flex-row flex-wrap justify-between">
             <WidgetAdd
               label="PRESSÃO"
               Icon={PressaoIcon}
-              onPress={() => console.log("Add PRESSAO")}
+              onPress={() => handleAdd("blood Pressure")}
             />
             <WidgetAdd
               label="CAL"
               Icon={CalIcon}
-              onPress={() => console.log("Add CAL")}
+              onPress={() => handleAdd("glycemia")}
             />
             <WidgetAdd
               label="STRESS"
               Icon={StressIcon}
-              onPress={() => console.log("Add STRESS")}
+              onPress={() => handleAdd("stress")}
             />
           </View>
         </View>

@@ -23,6 +23,8 @@ const AideLogo = ({
       height={height}
       viewBox="0 0 833 328"
       fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
       {...props}
     >
       <Path
