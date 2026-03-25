@@ -7,27 +7,27 @@ import { Feather } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useEffect, useRef } from "react";
 import {
-    AccessibilityInfo,
-    ActivityIndicator,
-    Dimensions,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    View,
+  AccessibilityInfo,
+  ActivityIndicator,
+  Dimensions,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, {
-    Circle,
-    ClipPath,
-    Defs,
-    G,
-    Line,
-    LinearGradient,
-    Path,
-    Rect,
-    Stop,
-    Text as SvgText,
+  Circle,
+  ClipPath,
+  Defs,
+  G,
+  Line,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+  Text as SvgText,
 } from "react-native-svg";
 import "../global.css";
 
