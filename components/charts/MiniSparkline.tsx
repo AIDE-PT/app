@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import Svg, { Path, Defs, LinearGradient, Stop } from "react-native-svg";
-import { View, Text } from "react-native";
+import { Text, View } from "react-native";
+import Svg, { Defs, LinearGradient, Path, Stop } from "react-native-svg";
 
 interface MiniSparklineProps {
   data: number[];

@@ -1,3 +1,5 @@
+import LightBackground from "@/components/DotBackground";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { SafeAreaView, ScrollView, Text, View } from "react-native";
@@ -5,10 +7,8 @@ import aider from "../assets/images/aider.png";
 import cuidado from "../assets/images/cuidado.png";
 import icon_aider from "../assets/images/icon_aider.png";
 import icon_cuidado from "../assets/images/icon_cuidado.png";
-import { Profilecard } from "../components/profilecard";
 import { Button } from "../components/buttons/button";
-import LightBackground from "@/components/DotBackground";
-import { useUserProfile } from "@/contexts/UserProfileContext";
+import { Profilecard } from "../components/profilecard";
 
 export default function PerfilScreen() {
   const router = useRouter();

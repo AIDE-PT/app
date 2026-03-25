@@ -1,16 +1,16 @@
 import BackButton from "@/components/buttons/backButton";
 import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 import { useHealthMetric, useMetricStats } from "@/hooks/useLatestMetric";
-import { useLocalSearchParams, Stack } from "expo-router";
+import { useTheme } from "@/hooks/useTheme";
+import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Dimensions,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LineChartSlim from "./components/charts/LineChartSlim";

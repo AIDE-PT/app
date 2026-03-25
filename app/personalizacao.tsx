@@ -1,16 +1,16 @@
 import BackButton from "@/components/buttons/backButton";
-import Navbar from "@/components/navBar/NavBar";
 import LightBackground from "@/components/DotBackground";
+import Navbar from "@/components/navBar/NavBar";
 import { type ColorPaletteType } from "@/contexts/ThemeContext";
-import React, { useRef, useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Image,
+    SafeAreaView,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 
 import temaClaro from "@/assets/images/tema_claro.png";

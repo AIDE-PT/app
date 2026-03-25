@@ -1,24 +1,24 @@
+import { useTheme } from "@/hooks/useTheme";
+import { Feather } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
-  Animated,
-  Easing,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-  ViewStyle,
+    Animated,
+    Easing,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useWindowDimensions,
+    View,
+    ViewStyle,
 } from "react-native";
-import { BlurView } from "expo-blur";
 import Svg, {
-  Path,
-  Defs,
-  LinearGradient as SvgLinearGradient,
-  Stop,
+    Defs,
+    Path,
+    Stop,
+    LinearGradient as SvgLinearGradient,
 } from "react-native-svg";
-import { LinearGradient } from "expo-linear-gradient";
-import { Feather } from "@expo/vector-icons";
-import { useTheme } from "@/hooks/useTheme";
 
 interface HealthStatusHeroProps {
   userName?: string;
