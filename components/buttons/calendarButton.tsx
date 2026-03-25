@@ -1,11 +1,11 @@
 import CalendarIcon from "@/components/svg/CalendarIcon";
-import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, Platform } from "react-native";
-import DateTimePicker, {
-  DateTimePickerAndroid,
-  DateTimePickerEvent,
-} from "@react-native-community/datetimepicker";
 import { useTheme } from "@/hooks/useTheme";
+import DateTimePicker, {
+    DateTimePickerAndroid,
+    DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
+import React, { useState } from "react";
+import { Platform, StyleSheet, Text, TouchableOpacity } from "react-native";
 
 interface CalendarButtonProps {
   label?: string;
