@@ -99,7 +99,11 @@ const GenderSelector = ({
           className="w-full flex-row items-center justify-between px-5 py-0.5"
           accessibilityRole="button"
           accessibilityLabel={selected || "Selecionar género"}
-          accessibilityHint={isOpen ? "Fecha a lista de géneros." : "Abre a lista de géneros disponíveis."}
+          accessibilityHint={
+            isOpen
+              ? "Fecha a lista de géneros."
+              : "Abre a lista de géneros disponíveis."
+          }
           accessibilityState={{ expanded: isOpen }}
         >
           <Text
@@ -272,7 +276,12 @@ export default function ExtraData() {
           <View className="flex-1" />
 
           <View className="mb-8 items-center">
-            <Button variant="primary" forceLight label="Avancar" onPress={handleAdvance} />
+            <Button
+              variant="primary"
+              forceLight
+              label="Avancar"
+              onPress={handleAdvance}
+            />
           </View>
         </SafeAreaView>
       </View>

@@ -49,40 +49,47 @@ export default function SelectConditions() {
     <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10 bg-transparent">
         <SafeAreaView className="flex-1">
-        <View className="mt-12 mb-6">
-          <Text className={`font-safiro text-3xl ${isDark ? "text-white/90" : "text-black/90"}`}>
-            Só mais uma coisa...
-          </Text>
-        </View>
+          <View className="mt-12 mb-6">
+            <Text
+              className={`font-safiro text-3xl ${isDark ? "text-white/90" : "text-black/90"}`}
+            >
+              Só mais uma coisa...
+            </Text>
+          </View>
 
-        <View className="mb-6">
-          <SearchBar
-            placeholder="Doenças que tenha"
-            value={searchText}
-            onChangeText={setSearchText}
-            variant="light"
-          />
-        </View>
-
-        <View className="flex-row flex-wrap gap-4">
-          {filteredConditions.map((condition) => (
-            <ChipButton
-              key={condition}
-              label={condition}
-              selected={selectedConditions.includes(condition)}
-              onPress={() => toggleCondition(condition)}
+          <View className="mb-6">
+            <SearchBar
+              placeholder="Doenças que tenha"
+              value={searchText}
+              onChangeText={setSearchText}
               variant="light"
             />
-          ))}
-        </View>
+          </View>
 
-        <View className="flex-1" />
+          <View className="flex-row flex-wrap gap-4">
+            {filteredConditions.map((condition) => (
+              <ChipButton
+                key={condition}
+                label={condition}
+                selected={selectedConditions.includes(condition)}
+                onPress={() => toggleCondition(condition)}
+                variant="light"
+              />
+            ))}
+          </View>
 
-        <View className="items-center mb-8">
-          <Button variant="primary" forceLight label="Avançar" onPress={handleAdvance} />
-        </View>
-      </SafeAreaView>
-    </View>
-  </LightBackground>
+          <View className="flex-1" />
+
+          <View className="items-center mb-8">
+            <Button
+              variant="primary"
+              forceLight
+              label="Avançar"
+              onPress={handleAdvance}
+            />
+          </View>
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 }

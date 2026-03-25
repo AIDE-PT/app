@@ -9,7 +9,13 @@ interface buttonDTO {
   forceLight?: boolean;
 }
 
-export const Button = ({ variant = "primary", label, onPress, disabled = false, forceLight = false }: buttonDTO) => {
+export const Button = ({
+  variant = "primary",
+  label,
+  onPress,
+  disabled = false,
+  forceLight = false,
+}: buttonDTO) => {
   const { isDark } = useTheme();
   const useDarkMode = !forceLight && isDark;
 

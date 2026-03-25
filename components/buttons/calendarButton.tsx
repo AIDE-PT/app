@@ -51,16 +51,20 @@ export const CalendarButton = ({
 
   return (
     <>
-    <TouchableOpacity
-      onPress={handlePress}
-      style={styles.buttonShadow}
-      className={`flex-row items-center px-4 py-2 rounded-full border self-start ml-4 ${isDark ? "bg-[#1A1A2E] border-gray-700" : "bg-white border-gray-100"}`}
-      accessibilityRole="button"
-      accessibilityLabel={label}
-      accessibilityHint="Abre a seleção de data."
-    >
-      <CalendarIcon color={isDark ? "#ffffff" : "#191915"} />
-        <Text className={`ml-2 text-xl font-semibold ${isDark ? "text-white" : "text-black"}`}>{label}</Text>
+      <TouchableOpacity
+        onPress={handlePress}
+        style={styles.buttonShadow}
+        className={`flex-row items-center px-4 py-2 rounded-full border self-start ml-4 ${isDark ? "bg-[#1A1A2E] border-gray-700" : "bg-white border-gray-100"}`}
+        accessibilityRole="button"
+        accessibilityLabel={label}
+        accessibilityHint="Abre a seleção de data."
+      >
+        <CalendarIcon color={isDark ? "#ffffff" : "#191915"} />
+        <Text
+          className={`ml-2 text-xl font-semibold ${isDark ? "text-white" : "text-black"}`}
+        >
+          {label}
+        </Text>
       </TouchableOpacity>
 
       {show && (

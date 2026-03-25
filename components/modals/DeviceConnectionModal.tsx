@@ -83,12 +83,18 @@ export default function DeviceConnectionModal({
             style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
           >
             {/* Drag handle */}
-            <View className={`w-[33px] h-[4px] rounded-full mt-4 mb-8 ${isDark ? "bg-white/30" : "bg-[#79747E]"}`} />
+            <View
+              className={`w-[33px] h-[4px] rounded-full mt-4 mb-8 ${isDark ? "bg-white/30" : "bg-[#79747E]"}`}
+            />
 
             {/* Device Info */}
             <View className="flex-row items-center self-start px-8 mb-6">
-              <View className={`w-16 h-16 rounded-full items-center justify-center border border-white mr-4 ${isDark ? "bg-white/20" : "bg-[#E9E9E9]"}`}>
-                <Text className={`font-open-sans font-bold text-[28px] ${isDark ? "text-white" : "text-black"}`}>
+              <View
+                className={`w-16 h-16 rounded-full items-center justify-center border border-white mr-4 ${isDark ? "bg-white/20" : "bg-[#E9E9E9]"}`}
+              >
+                <Text
+                  className={`font-open-sans font-bold text-[28px] ${isDark ? "text-white" : "text-black"}`}
+                >
                   {device.name.charAt(0).toUpperCase()}
                 </Text>
               </View>
@@ -103,7 +109,9 @@ export default function DeviceConnectionModal({
                     </Text>
                   ))
                 ) : (
-                  <Text className={`font-open-sans font-bold text-2xl ${isDark ? "text-white" : "text-black"}`}>
+                  <Text
+                    className={`font-open-sans font-bold text-2xl ${isDark ? "text-white" : "text-black"}`}
+                  >
                     {device.name}
                   </Text>
                 )}
@@ -119,16 +127,23 @@ export default function DeviceConnectionModal({
                     color="#7C89FF"
                     accessibilityLabel={`A conectar ${device.name}`}
                   />
-                  <Text className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}>
+                  <Text
+                    className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}
+                  >
                     A conectar via Bluetooth...
                   </Text>
                 </View>
               ) : isConnected ? (
-                <Text className="font-open-sans text-base" style={{ color: colors.semantic.success }}>
+                <Text
+                  className="font-open-sans text-base"
+                  style={{ color: colors.semantic.success }}
+                >
                   ✓ Dispositivo conectado com sucesso!
                 </Text>
               ) : (
-                <Text className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}>
+                <Text
+                  className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}
+                >
                   Pretende conectar este dispositivo via Bluetooth?
                 </Text>
               )}
@@ -142,7 +157,9 @@ export default function DeviceConnectionModal({
                   className="flex-1 py-3 rounded-[25px] items-center justify-center"
                   style={{ backgroundColor: "rgba(255, 0, 0, 0.43)" }}
                 >
-                  <Text className={`font-open-sans font-semibold text-base ${isDark ? "text-white" : "text-black"}`}>
+                  <Text
+                    className={`font-open-sans font-semibold text-base ${isDark ? "text-white" : "text-black"}`}
+                  >
                     Cancelar
                   </Text>
                 </TouchableOpacity>

@@ -23,7 +23,11 @@ const SOSSvg = () => (
 );
 
 const handleSOS = () => {
-  if (Platform.OS === "web" && typeof window !== "undefined" && "Notification" in window) {
+  if (
+    Platform.OS === "web" &&
+    typeof window !== "undefined" &&
+    "Notification" in window
+  ) {
     Notification.requestPermission().then((permission) => {
       if (permission === "granted") {
         new Notification("SOS Ativado", {
@@ -49,9 +53,11 @@ export const SOSButton = () => {
     >
       <View
         className="w-64 h-12 p-2 bg-red-600 rounded-[20px] flex-row justify-center items-center gap-4"
-        style={{
-          boxShadow: "inset 0px 0px 50px -25px rgba(255, 127, 129, 1.00)",
-        } as any}
+        style={
+          {
+            boxShadow: "inset 0px 0px 50px -25px rgba(255, 127, 129, 1.00)",
+          } as any
+        }
       >
         {/* Left antena — mirrored so arcs point outward left */}
         <View style={{ transform: [{ scaleX: -1 }] }}>

@@ -47,23 +47,23 @@ export const CalendarModal = ({
   const [endDate, setEndDate] = useState<Date | null>(null);
 
   // ── Theme-derived colours ─────────────────────────────────────────────────
-  const cardBg        = isDark ? "#080C1F" : "#FFFFFF";
-  const cardBorder    = isDark ? "rgba(80, 97, 255, 0.35)" : "transparent";
-  const titleColor    = isDark ? "#FFFFFF" : "#1C1C1E";
-  const arrowColor    = isDark ? "#FFFFFF" : "#1C1C1E";
-  const weekLabelColor= isDark ? "rgba(255,255,255,0.62)" : "#6B7280";
-  const dayTextColor  = isDark ? "#FFFFFF" : "#1C1C1E";
-  const todayColor    = "#3B5BDB";
-  const rangeColor    = isDark ? "rgba(80, 97, 255, 0.22)" : "#E8EDFF";
-  const startCircle   = isDark ? "#FFFFFF" : "#1C1C1E";
-  const startText     = isDark ? "#1C1C1E" : "#FFFFFF";
-  const endCircle     = "#BBC8FF";
-  const endText       = "#1C1C1E";
-  const hintColor     = isDark ? "rgba(255,255,255,0.72)" : "#4B5563";
+  const cardBg = isDark ? "#080C1F" : "#FFFFFF";
+  const cardBorder = isDark ? "rgba(80, 97, 255, 0.35)" : "transparent";
+  const titleColor = isDark ? "#FFFFFF" : "#1C1C1E";
+  const arrowColor = isDark ? "#FFFFFF" : "#1C1C1E";
+  const weekLabelColor = isDark ? "rgba(255,255,255,0.62)" : "#6B7280";
+  const dayTextColor = isDark ? "#FFFFFF" : "#1C1C1E";
+  const todayColor = "#3B5BDB";
+  const rangeColor = isDark ? "rgba(80, 97, 255, 0.22)" : "#E8EDFF";
+  const startCircle = isDark ? "#FFFFFF" : "#1C1C1E";
+  const startText = isDark ? "#1C1C1E" : "#FFFFFF";
+  const endCircle = "#BBC8FF";
+  const endText = "#1C1C1E";
+  const hintColor = isDark ? "rgba(255,255,255,0.72)" : "#4B5563";
   const applyActiveBg = isDark ? "#FFFFFF" : "#1C1C1E";
-  const applyActiveText= isDark ? "#1C1C1E" : "#FFFFFF";
-  const applyDisabledBg= isDark ? "rgba(255,255,255,0.12)" : "#E5E7EB";
-  const applyDisabledText= isDark ? "rgba(255,255,255,0.52)" : "#6B7280";
+  const applyActiveText = isDark ? "#1C1C1E" : "#FFFFFF";
+  const applyDisabledBg = isDark ? "rgba(255,255,255,0.12)" : "#E5E7EB";
+  const applyDisabledText = isDark ? "rgba(255,255,255,0.52)" : "#6B7280";
   // ─────────────────────────────────────────────────────────────────────────
 
   useEffect(() => {
@@ -79,10 +79,10 @@ export const CalendarModal = ({
   const prevMonth = () => setCurrentMonth((m) => subMonths(m, 1));
 
   const monthStart = startOfMonth(currentMonth);
-  const monthEnd   = endOfMonth(monthStart);
-  const calStart   = startOfWeek(monthStart, { weekStartsOn: 0 });
-  const calEnd     = endOfWeek(monthEnd,   { weekStartsOn: 0 });
-  const days       = eachDayOfInterval({ start: calStart, end: calEnd });
+  const monthEnd = endOfMonth(monthStart);
+  const calStart = startOfWeek(monthStart, { weekStartsOn: 0 });
+  const calEnd = endOfWeek(monthEnd, { weekStartsOn: 0 });
+  const days = eachDayOfInterval({ start: calStart, end: calEnd });
 
   const DIAS_SEMANA = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 
@@ -121,22 +121,26 @@ export const CalendarModal = ({
 
   const renderDay = (day: Date, index: number) => {
     const inCurrentMonth = isSameMonth(day, monthStart);
-    const isSelectedSingle = mode === "day" && !!selectedDay && isSameDay(day, selectedDay);
-    const isStart   = !!startDate && isSameDay(day, startDate);
-    const isEnd     = !!endDate   && isSameDay(day, endDate);
-    const hasRange  = !!startDate && !!endDate;
-    const isBetween = hasRange && isAfter(day, startDate!) && isBefore(day, endDate!);
+    const isSelectedSingle =
+      mode === "day" && !!selectedDay && isSameDay(day, selectedDay);
+    const isStart = !!startDate && isSameDay(day, startDate);
+    const isEnd = !!endDate && isSameDay(day, endDate);
+    const hasRange = !!startDate && !!endDate;
+    const isBetween =
+      hasRange && isAfter(day, startDate!) && isBefore(day, endDate!);
 
-    const leftBridged  = hasRange && (isEnd   || isBetween);
+    const leftBridged = hasRange && (isEnd || isBetween);
     const rightBridged = hasRange && (isStart || isBetween);
 
     const circleColor =
-      isSelectedSingle || isStart ? startCircle :
-      isEnd                       ? endCircle   : "transparent";
+      isSelectedSingle || isStart
+        ? startCircle
+        : isEnd
+          ? endCircle
+          : "transparent";
 
     const textColor =
-      isSelectedSingle || isStart ? startText :
-      isEnd                       ? endText   : dayTextColor;
+      isSelectedSingle || isStart ? startText : isEnd ? endText : dayTextColor;
 
     return (
       <TouchableOpacity
@@ -157,9 +161,21 @@ export const CalendarModal = ({
         }}
       >
         {/* Left-half bridge strip */}
-        <View style={[styles.halfStrip, styles.leftStrip,  { backgroundColor: leftBridged  ? rangeColor : "transparent" }]} />
+        <View
+          style={[
+            styles.halfStrip,
+            styles.leftStrip,
+            { backgroundColor: leftBridged ? rangeColor : "transparent" },
+          ]}
+        />
         {/* Right-half bridge strip */}
-        <View style={[styles.halfStrip, styles.rightStrip, { backgroundColor: rightBridged ? rangeColor : "transparent" }]} />
+        <View
+          style={[
+            styles.halfStrip,
+            styles.rightStrip,
+            { backgroundColor: rightBridged ? rangeColor : "transparent" },
+          ]}
+        />
         {/* Circle */}
         <View style={[styles.circle, { backgroundColor: circleColor }]}>
           <Text
@@ -167,7 +183,10 @@ export const CalendarModal = ({
               styles.dayText,
               { color: textColor, opacity: inCurrentMonth ? 1 : 0 },
               (isSelectedSingle || isStart || isEnd) && styles.dayTextBold,
-              isToday(day) && !isSelectedSingle && !isStart && !isEnd && { fontWeight: "700", color: todayColor },
+              isToday(day) &&
+                !isSelectedSingle &&
+                !isStart &&
+                !isEnd && { fontWeight: "700", color: todayColor },
             ]}
           >
             {format(day, "d")}
@@ -183,7 +202,12 @@ export const CalendarModal = ({
   const canApply = mode === "period" && !!startDate && !!endDate;
 
   return (
-    <Modal visible={isVisible} transparent animationType="fade" statusBarTranslucent>
+    <Modal
+      visible={isVisible}
+      transparent
+      animationType="fade"
+      statusBarTranslucent
+    >
       {/* ── Blurred backdrop ── */}
       <BlurView
         intensity={55}
@@ -202,7 +226,14 @@ export const CalendarModal = ({
       >
         {/* ── Card ── */}
         <TouchableOpacity
-          style={[styles.card, { backgroundColor: cardBg, borderColor: cardBorder, borderWidth: isDark ? 1 : 0 }]}
+          style={[
+            styles.card,
+            {
+              backgroundColor: cardBg,
+              borderColor: cardBorder,
+              borderWidth: isDark ? 1 : 0,
+            },
+          ]}
           activeOpacity={1}
           onPress={(e) => e.stopPropagation()}
         >
@@ -234,7 +265,12 @@ export const CalendarModal = ({
           {/* Weekday labels */}
           <View style={styles.weekRow}>
             {DIAS_SEMANA.map((d) => (
-              <Text key={d} style={[styles.weekDayLabel, { color: weekLabelColor }]}>{d}</Text>
+              <Text
+                key={d}
+                style={[styles.weekDayLabel, { color: weekLabelColor }]}
+              >
+                {d}
+              </Text>
             ))}
           </View>
 
@@ -249,12 +285,17 @@ export const CalendarModal = ({
           {mode === "period" && (
             <View style={styles.hintRow}>
               {!startDate ? (
-                <Text style={[styles.hintText, { color: hintColor }]}>Selecione a data de início</Text>
+                <Text style={[styles.hintText, { color: hintColor }]}>
+                  Selecione a data de início
+                </Text>
               ) : !endDate ? (
-                <Text style={[styles.hintText, { color: hintColor }]}>Selecione a data de fim</Text>
+                <Text style={[styles.hintText, { color: hintColor }]}>
+                  Selecione a data de fim
+                </Text>
               ) : (
                 <Text style={[styles.hintText, { color: hintColor }]}>
-                  {format(startDate, "d MMM", { locale: pt })} – {format(endDate, "d MMM yyyy", { locale: pt })}
+                  {format(startDate, "d MMM", { locale: pt })} –{" "}
+                  {format(endDate, "d MMM yyyy", { locale: pt })}
                 </Text>
               )}
             </View>
@@ -263,7 +304,10 @@ export const CalendarModal = ({
           {/* Apply button */}
           {mode === "period" && (
             <TouchableOpacity
-              style={[styles.applyBtn, { backgroundColor: canApply ? applyActiveBg : applyDisabledBg }]}
+              style={[
+                styles.applyBtn,
+                { backgroundColor: canApply ? applyActiveBg : applyDisabledBg },
+              ]}
               onPress={handleApply}
               disabled={!canApply}
               activeOpacity={0.85}
@@ -271,7 +315,12 @@ export const CalendarModal = ({
               accessibilityLabel="Aplicar período"
               accessibilityHint="Confirma o intervalo de datas selecionado."
             >
-              <Text style={[styles.applyBtnText, { color: canApply ? applyActiveText : applyDisabledText }]}>
+              <Text
+                style={[
+                  styles.applyBtnText,
+                  { color: canApply ? applyActiveText : applyDisabledText },
+                ]}
+              >
                 Aplicar Período
               </Text>
             </TouchableOpacity>
@@ -349,7 +398,7 @@ const styles = StyleSheet.create({
     bottom: BRIDGE_VERTICAL_INSET,
     width: "50%",
   },
-  leftStrip:  { left: 0 },
+  leftStrip: { left: 0 },
   rightStrip: { right: 0 },
   circle: {
     width: CELL_SIZE - 4,

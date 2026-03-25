@@ -13,12 +13,7 @@ interface SectionProps {
   isDark?: boolean;
 }
 
-const PrivacySection = ({
-  number,
-  title,
-  children,
-  isDark,
-}: SectionProps) => (
+const PrivacySection = ({ number, title, children, isDark }: SectionProps) => (
   <View className="mb-6">
     <Text
       className={`font-open-sans-semibold text-[17px] mb-3 ${
@@ -119,8 +114,8 @@ const Privacidade = () => {
                 <Text className="font-open-sans-semibold">
                   Informações Pessoais:
                 </Text>{" "}
-                Nome, data de nascimento, contactos de emergência e informações de
-                perfil.
+                Nome, data de nascimento, contactos de emergência e informações
+                de perfil.
               </BulletPoint>
               <BulletPoint isDark={isDark}>
                 <Text className="font-open-sans-semibold">Dados de Saúde:</Text>{" "}
@@ -149,16 +144,16 @@ const Privacidade = () => {
                 Monitorizar o seu bem-estar e detetar situações de emergência.
               </BulletPoint>
               <BulletPoint isDark={isDark}>
-                Enviar alertas automáticos para os seus contactos de emergência ou
-                cuidadores em caso de necessidade.
+                Enviar alertas automáticos para os seus contactos de emergência
+                ou cuidadores em caso de necessidade.
               </BulletPoint>
               <BulletPoint isDark={isDark}>
-                Personalizar a sua experiência e fornecer recomendações de saúde e
-                segurança.
+                Personalizar a sua experiência e fornecer recomendações de saúde
+                e segurança.
               </BulletPoint>
               <BulletPoint isDark={isDark}>
-                Melhorar continuamente a precisão dos nossos algoritmos de deteção e
-                a qualidade do serviço.
+                Melhorar continuamente a precisão dos nossos algoritmos de
+                deteção e a qualidade do serviço.
               </BulletPoint>
             </PrivacySection>
 
@@ -169,23 +164,29 @@ const Privacidade = () => {
               isDark={isDark}
             >
               <Paragraph isDark={isDark}>
-                Não vendemos os seus dados pessoais a terceiros. As suas informações
-                apenas são partilhadas nas seguintes circunstâncias:
+                Não vendemos os seus dados pessoais a terceiros. As suas
+                informações apenas são partilhadas nas seguintes circunstâncias:
               </Paragraph>
               <BulletPoint isDark={isDark}>
-                <Text className="font-open-sans-semibold">Cuidadores e Familiares:</Text>{" "}
-                Partilha de alertas e relatórios de saúde com as pessoas que você
-                autorizar explicitamente.
+                <Text className="font-open-sans-semibold">
+                  Cuidadores e Familiares:
+                </Text>{" "}
+                Partilha de alertas e relatórios de saúde com as pessoas que
+                você autorizar explicitamente.
               </BulletPoint>
               <BulletPoint isDark={isDark}>
-                <Text className="font-open-sans-semibold">Serviços de Emergência:</Text>{" "}
-                Em situações críticas, podemos partilhar a sua localização e dados
-                vitais com equipas de socorro.
+                <Text className="font-open-sans-semibold">
+                  Serviços de Emergência:
+                </Text>{" "}
+                Em situações críticas, podemos partilhar a sua localização e
+                dados vitais com equipas de socorro.
               </BulletPoint>
               <BulletPoint isDark={isDark}>
-                <Text className="font-open-sans-semibold">Obrigação Legal:</Text>{" "}
-                Quando exigido por lei ou para proteger os direitos e segurança dos
-                nossos utilizadores.
+                <Text className="font-open-sans-semibold">
+                  Obrigação Legal:
+                </Text>{" "}
+                Quando exigido por lei ou para proteger os direitos e segurança
+                dos nossos utilizadores.
               </BulletPoint>
             </PrivacySection>
 
@@ -197,33 +198,30 @@ const Privacidade = () => {
             >
               <Paragraph isDark={isDark}>
                 Implementamos medidas técnicas e organizacionais robustas para
-                proteger os seus dados contra acesso não autorizado, alteração ou
-                destruição. Todos os dados sensíveis são encriptados, tanto em
-                trânsito como em repouso.
+                proteger os seus dados contra acesso não autorizado, alteração
+                ou destruição. Todos os dados sensíveis são encriptados, tanto
+                em trânsito como em repouso.
               </Paragraph>
             </PrivacySection>
 
             {/* Section 5: Direitos */}
-            <PrivacySection
-              number={5}
-              title="Os Seus Direitos"
-              isDark={isDark}
-            >
+            <PrivacySection number={5} title="Os Seus Direitos" isDark={isDark}>
               <Paragraph isDark={isDark}>
                 Você tem o direito de aceder, corrigir, ou apagar os seus dados
                 pessoais a qualquer momento através das definições da aplicação.
-                Pode também revogar o consentimento para a recolha de dados, embora
-                isso possa limitar a funcionalidade dos serviços de alerta.
+                Pode também revogar o consentimento para a recolha de dados,
+                embora isso possa limitar a funcionalidade dos serviços de
+                alerta.
               </Paragraph>
             </PrivacySection>
 
             {/* Section 6: Contacto */}
             <PrivacySection number={6} title="Contacte-nos" isDark={isDark}>
               <Paragraph isDark={isDark}>
-                Se tiver dúvidas sobre esta Política de Privacidade ou sobre como
-                tratamos os seus dados, por favor entre em contacto connosco através
-                da secção de suporte da aplicação ou pelo e-mail:
-                privacidade@aide.com.
+                Se tiver dúvidas sobre esta Política de Privacidade ou sobre
+                como tratamos os seus dados, por favor entre em contacto
+                connosco através da secção de suporte da aplicação ou pelo
+                e-mail: privacidade@aide.com.
               </Paragraph>
             </PrivacySection>
 

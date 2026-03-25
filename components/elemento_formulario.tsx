@@ -24,7 +24,11 @@ const ElementoFormulario = ({
   return (
     <View className="mb-4 w-full">
       <View className="flex-row items-center mb-2 ml-1">
-        <Text className={`font-bold text-base mr-2 ${isDark ? "text-white" : "text-black"}`}>{label}</Text>
+        <Text
+          className={`font-bold text-base mr-2 ${isDark ? "text-white" : "text-black"}`}
+        >
+          {label}
+        </Text>
         <Info size={16} color={isDark ? "white" : "black"} />
       </View>
       <Input

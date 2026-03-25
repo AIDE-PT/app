@@ -95,7 +95,6 @@ export default function Register() {
               </View>
 
               <View className="mb-4 gap-4">
-
                 <Controller
                   control={control}
                   name="name"
@@ -174,7 +173,9 @@ export default function Register() {
                       variant="light"
                       forceLight
                       type="password"
-                      label={withRequiredCue(registerFieldCopy.repeatPassword.label)}
+                      label={withRequiredCue(
+                        registerFieldCopy.repeatPassword.label,
+                      )}
                       placeholder={registerFieldCopy.repeatPassword.placeholder}
                       helperText={registerFieldCopy.repeatPassword.helperText}
                       errorText={
@@ -193,8 +194,16 @@ export default function Register() {
               <DividerWithText text="Ou" isDark={isDark} />
 
               <View className="mb-6 gap-3">
-                <SocialButton provider="google" onPress={handleGoogleRegister} forceLight />
-                <SocialButton provider="apple" onPress={handleAppleRegister} forceLight />
+                <SocialButton
+                  provider="google"
+                  onPress={handleGoogleRegister}
+                  forceLight
+                />
+                <SocialButton
+                  provider="apple"
+                  onPress={handleAppleRegister}
+                  forceLight
+                />
               </View>
 
               <View className="flex-1" />

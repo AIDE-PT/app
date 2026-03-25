@@ -29,14 +29,14 @@ export const IconCardButton = ({
   // Wrapper to modify icon color for dark mode
   const IconWrapper = ({ children }: { children: React.ReactNode }) => {
     if (!children) return children;
-    
+
     // Check if it's a valid React element with props
     const child = children as React.ReactElement<any>;
     if (child && child.props) {
       // Clone the element with white color and thicker stroke
       return React.cloneElement(child, {
         color: isDarkMode ? "#FFFFFF" : child.props.color,
-        strokeWidth: isDarkMode ? 3.5 : (child.props.strokeWidth || 2.5),
+        strokeWidth: isDarkMode ? 3.5 : child.props.strokeWidth || 2.5,
       });
     }
     return children;
@@ -48,12 +48,20 @@ export const IconCardButton = ({
       activeOpacity={0.8}
       style={[
         styles.card,
-        selected 
-          ? (isDarkMode ? styles.darkSelectedBorder : styles.selectedBorder)
-          : (isDarkMode ? styles.darkUnselectedBorder : styles.defaultBorder),
-        selected 
-          ? (isDarkMode ? styles.darkCard : styles.defaultCard)
-          : (isDarkMode ? styles.darkCard : styles.defaultCard),
+        selected
+          ? isDarkMode
+            ? styles.darkSelectedBorder
+            : styles.selectedBorder
+          : isDarkMode
+            ? styles.darkUnselectedBorder
+            : styles.defaultBorder,
+        selected
+          ? isDarkMode
+            ? styles.darkCard
+            : styles.defaultCard
+          : isDarkMode
+            ? styles.darkCard
+            : styles.defaultCard,
       ]}
     >
       {selected && showSelectedCheck ? (
@@ -68,7 +76,11 @@ export const IconCardButton = ({
           <Ionicons
             name="checkmark"
             size={18}
-            color={isDarkMode ? styles.darkCheckText.color : styles.lightCheckText.color}
+            color={
+              isDarkMode
+                ? styles.darkCheckText.color
+                : styles.lightCheckText.color
+            }
           />
         </View>
       ) : null}
@@ -76,7 +88,9 @@ export const IconCardButton = ({
       <View style={styles.iconContainer}>
         <IconWrapper>{icon}</IconWrapper>
       </View>
-      <Text style={[styles.label, isDarkMode && styles.darkLabel]}>{label}</Text>
+      <Text style={[styles.label, isDarkMode && styles.darkLabel]}>
+        {label}
+      </Text>
     </TouchableOpacity>
   );
 };

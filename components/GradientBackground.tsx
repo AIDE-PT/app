@@ -61,7 +61,10 @@ interface GradientBackgroundProps {
   forceLight?: boolean;
 }
 
-export const GradientBackground = ({ children, forceLight = false }: GradientBackgroundProps) => {
+export const GradientBackground = ({
+  children,
+  forceLight = false,
+}: GradientBackgroundProps) => {
   const scrollY = useSharedValue(0);
   const contentHeight = useSharedValue(0);
   const { isDark } = useTheme();

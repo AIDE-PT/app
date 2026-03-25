@@ -43,7 +43,8 @@ export const registerFieldCopy: Record<
   email: {
     label: "Email ou telemovel",
     placeholder: "nome@email.com ou +351912345678",
-    helperText: "Use um email valido ou um telemovel com indicativo (ex.: +351912345678).",
+    helperText:
+      "Use um email valido ou um telemovel com indicativo (ex.: +351912345678).",
   },
   password: {
     label: "Password",

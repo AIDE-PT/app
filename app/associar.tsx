@@ -24,7 +24,8 @@ export default function AssociarPage() {
     try {
       const result = emailSchema.safeParse(email);
       if (!result.success) {
-        const errorMessage = result.error.issues?.[0]?.message || "Email invalido";
+        const errorMessage =
+          result.error.issues?.[0]?.message || "Email invalido";
         setError(errorMessage);
       } else {
         setError("");

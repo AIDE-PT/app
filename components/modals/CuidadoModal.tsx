@@ -35,7 +35,7 @@ export default function CuidadoModal({
     >
       <Pressable className="flex-1" onPress={onClose}>
         <View className="items-center">
-          <View 
+          <View
             className="bg-white mt-20 px-8 pb-4 pt-14 rounded-b-[30px]"
             style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
           >

@@ -38,7 +38,9 @@ export const AddWidgetModal = ({
       <View className="pb-8 px-2">
         {/* Fitbit Section */}
         <View className="mb-6">
-          <Text className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}>
+          <Text
+            className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}
+          >
             Fitbit
           </Text>
           <View className="flex-row flex-wrap justify-between">
@@ -62,7 +64,9 @@ export const AddWidgetModal = ({
 
         {/* Health Connect Section */}
         <View className="mb-6">
-          <Text className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}>
+          <Text
+            className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}
+          >
             Health Connect
           </Text>
           <View className="flex-row flex-wrap justify-between">
@@ -86,7 +90,9 @@ export const AddWidgetModal = ({
 
         {/* Garmin Section */}
         <View className="mb-6">
-          <Text className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}>
+          <Text
+            className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}
+          >
             Garmin
           </Text>
           <View className="flex-row flex-wrap justify-between">

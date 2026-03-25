@@ -116,16 +116,17 @@ function updateBPStats(data, systolic, diastolic) {
 function generateBPM(data, timestamp) {
   const lastVal =
     data.bpm.length > 0 ? data.bpm[data.bpm.length - 1].value : 75;
-  
+
   // 15% chance to generate unsafe value
   const isUnsafe = Math.random() < 0.1;
   let bpmVal;
-  
+
   if (isUnsafe) {
     // Generate unsafe BPM: either very high (>120) or very low (<50)
-    bpmVal = Math.random() < 0.5 
-      ? Math.round(121 + Math.random() * 30) // High: 121-150
-      : Math.round(35 + Math.random() * 14); // Low: 35-49
+    bpmVal =
+      Math.random() < 0.5
+        ? Math.round(121 + Math.random() * 30) // High: 121-150
+        : Math.round(35 + Math.random() * 14); // Low: 35-49
   } else {
     bpmVal = Math.round(getRealisticVariation(lastVal, 60, 100, 5));
   }
@@ -152,7 +153,7 @@ function generateBloodPressure(data, timestamp) {
   // 15% chance to generate unsafe value
   const isUnsafe = Math.random() < 0.15;
   let systolic, diastolic;
-  
+
   if (isUnsafe) {
     // Generate unsafe BP: either high (>140/90) or low (<90/60)
     if (Math.random() < 0.5) {
@@ -184,16 +185,17 @@ function generateGlycemia(data, timestamp) {
     data.glycemia.length > 0
       ? data.glycemia[data.glycemia.length - 1].value
       : 100;
-  
+
   // 15% chance to generate unsafe value
   const isUnsafe = Math.random() < 0.15;
   let glycemiaVal;
-  
+
   if (isUnsafe) {
     // Generate unsafe glycemia: either very high (>180) or very low (<70)
-    glycemiaVal = Math.random() < 0.5 
-      ? Math.round(181 + Math.random() * 50) // High: 181-230
-      : Math.round(45 + Math.random() * 24); // Low: 45-69
+    glycemiaVal =
+      Math.random() < 0.5
+        ? Math.round(181 + Math.random() * 50) // High: 181-230
+        : Math.round(45 + Math.random() * 24); // Low: 45-69
   } else {
     glycemiaVal = Math.round(getRealisticVariation(lastVal, 80, 120, 3));
   }
@@ -209,11 +211,11 @@ function generateGlycemia(data, timestamp) {
 
 function generateO2(data, timestamp) {
   const lastVal = data.o2.length > 0 ? data.o2[data.o2.length - 1].value : 98;
-  
+
   // 15% chance to generate unsafe value
   const isUnsafe = Math.random() < 0.15;
   let o2Val;
-  
+
   if (isUnsafe) {
     // Generate unsafe O2: low (<95)
     o2Val = Math.round(90 + Math.random() * 4); // 90-94
@@ -236,22 +238,23 @@ function generateTemperature(data, timestamp) {
     data.temperature.length > 0
       ? data.temperature[data.temperature.length - 1].value
       : 36.5;
-  
+
   // 15% chance to generate unsafe value
   const isUnsafe = Math.random() < 0.15;
   let tempVal;
-  
+
   if (isUnsafe) {
     // Generate unsafe temperature: either high (>38) or low (<35)
     tempVal = parseFloat(
-      (Math.random() < 0.5 
+      (Math.random() < 0.5
         ? 38.1 + Math.random() * 2 // High: 38.1-40.1
-        : 33.5 + Math.random() * 1.4 // Low: 33.5-34.9
-      ).toFixed(1)
+        : 33.5 + Math.random() * 1.4
+      ) // Low: 33.5-34.9
+        .toFixed(1),
     );
   } else {
     tempVal = parseFloat(
-      getRealisticVariation(lastVal, 36.0, 37.5, 1.0).toFixed(1)
+      getRealisticVariation(lastVal, 36.0, 37.5, 1.0).toFixed(1),
     );
   }
 
@@ -267,11 +270,11 @@ function generateTemperature(data, timestamp) {
 function generateStress(data, timestamp) {
   const lastVal =
     data.stress.length > 0 ? data.stress[data.stress.length - 1].value : 30;
-  
+
   // 15% chance to generate unsafe value
   const isUnsafe = Math.random() < 0.15;
   let stressVal;
-  
+
   if (isUnsafe) {
     // Generate unsafe stress: very high (>80)
     stressVal = Math.round(81 + Math.random() * 19); // 81-100
@@ -345,86 +348,135 @@ function maintainDataLimits(data, limit = 50) {
 // --- Alert Generation ---
 
 const ALERT_THRESHOLDS = {
-  bpm: { high: 120, low: 50, unit: 'BPM' },
-  bloodPressure: { sysHigh: 140, diaHigh: 90, sysLow: 90, diaLow: 60, unit: 'mmHg' },
-  glycemia: { high: 180, low: 70, unit: 'mg/dL' },
-  o2: { low: 95, unit: '%' },
-  temperature: { high: 38, low: 35, unit: '°C' },
-  stress: { high: 80, unit: 'pts' },
+  bpm: { high: 120, low: 50, unit: "BPM" },
+  bloodPressure: {
+    sysHigh: 140,
+    diaHigh: 90,
+    sysLow: 90,
+    diaLow: 60,
+    unit: "mmHg",
+  },
+  glycemia: { high: 180, low: 70, unit: "mg/dL" },
+  o2: { low: 95, unit: "%" },
+  temperature: { high: 38, low: 35, unit: "°C" },
+  stress: { high: 80, unit: "pts" },
 };
 
 function checkAndCreateAlert(data, type, value, timestamp) {
   let alert = null;
   const thresholds = ALERT_THRESHOLDS[type];
-  
+
   if (!thresholds) return null;
-  
+
   switch (type) {
-    case 'bpm':
+    case "bpm":
       if (value > thresholds.high) {
-        alert = { type, message: `Ritmo cardíaco alto detetado: ${value} BPM`, severity: 'high' };
+        alert = {
+          type,
+          message: `Ritmo cardíaco alto detetado: ${value} BPM`,
+          severity: "high",
+        };
       } else if (value < thresholds.low) {
-        alert = { type, message: `Ritmo cardíaco baixo detetado: ${value} BPM`, severity: 'medium' };
+        alert = {
+          type,
+          message: `Ritmo cardíaco baixo detetado: ${value} BPM`,
+          severity: "medium",
+        };
       }
       break;
-    case 'bloodPressure':
+    case "bloodPressure":
       const { systolic, diastolic } = value;
       if (systolic > thresholds.sysHigh || diastolic > thresholds.diaHigh) {
-        alert = { type, message: `Pressão arterial alta: ${systolic}/${diastolic} mmHg`, severity: 'high' };
-      } else if (systolic < thresholds.sysLow || diastolic < thresholds.diaLow) {
-        alert = { type, message: `Pressão arterial baixa: ${systolic}/${diastolic} mmHg`, severity: 'medium' };
+        alert = {
+          type,
+          message: `Pressão arterial alta: ${systolic}/${diastolic} mmHg`,
+          severity: "high",
+        };
+      } else if (
+        systolic < thresholds.sysLow ||
+        diastolic < thresholds.diaLow
+      ) {
+        alert = {
+          type,
+          message: `Pressão arterial baixa: ${systolic}/${diastolic} mmHg`,
+          severity: "medium",
+        };
       }
       break;
-    case 'glycemia':
+    case "glycemia":
       if (value > thresholds.high) {
-        alert = { type, message: `Glicemia alta: ${value} mg/dL`, severity: 'high' };
+        alert = {
+          type,
+          message: `Glicemia alta: ${value} mg/dL`,
+          severity: "high",
+        };
       } else if (value < thresholds.low) {
-        alert = { type, message: `Glicemia baixa: ${value} mg/dL`, severity: 'high' };
+        alert = {
+          type,
+          message: `Glicemia baixa: ${value} mg/dL`,
+          severity: "high",
+        };
       }
       break;
-    case 'o2':
+    case "o2":
       if (value < thresholds.low) {
-        alert = { type, message: `Saturação de oxigénio baixa: ${value}%`, severity: 'high' };
+        alert = {
+          type,
+          message: `Saturação de oxigénio baixa: ${value}%`,
+          severity: "high",
+        };
       }
       break;
-    case 'temperature':
+    case "temperature":
       if (value > thresholds.high) {
-        alert = { type, message: `Temperatura alta: ${value}°C`, severity: 'medium' };
+        alert = {
+          type,
+          message: `Temperatura alta: ${value}°C`,
+          severity: "medium",
+        };
       } else if (value < thresholds.low) {
-        alert = { type, message: `Temperatura baixa: ${value}°C`, severity: 'medium' };
+        alert = {
+          type,
+          message: `Temperatura baixa: ${value}°C`,
+          severity: "medium",
+        };
       }
       break;
-    case 'stress':
+    case "stress":
       if (value > thresholds.high) {
-        alert = { type, message: `Nível de stress alto: ${value}`, severity: 'low' };
+        alert = {
+          type,
+          message: `Nível de stress alto: ${value}`,
+          severity: "low",
+        };
       }
       break;
   }
-  
+
   if (alert) {
     // Initialize alerts array if missing
     if (!data.alerts) {
       data.alerts = [];
     }
-    
+
     const alertEntry = {
       id: generateId(),
       ...alert,
       timestamp: timestamp,
       read: false,
     };
-    
+
     data.alerts.push(alertEntry);
-    
+
     // Keep last 100 alerts
     if (data.alerts.length > 100) {
       data.alerts.shift();
     }
-    
+
     console.log(`[ALERT] ${alert.message}`);
     return alertEntry;
   }
-  
+
   return null;
 }
 
@@ -459,23 +511,23 @@ function runSimulationStep() {
   const timestamp = new Date().toISOString();
 
   const bpm = generateBPM(data, timestamp);
-  checkAndCreateAlert(data, 'bpm', bpm, timestamp);
-  
+  checkAndCreateAlert(data, "bpm", bpm, timestamp);
+
   const bp = generateBloodPressure(data, timestamp);
-  checkAndCreateAlert(data, 'bloodPressure', bp, timestamp);
-  
+  checkAndCreateAlert(data, "bloodPressure", bp, timestamp);
+
   const glycemia = generateGlycemia(data, timestamp);
-  checkAndCreateAlert(data, 'glycemia', glycemia, timestamp);
-  
+  checkAndCreateAlert(data, "glycemia", glycemia, timestamp);
+
   const o2 = generateO2(data, timestamp);
-  checkAndCreateAlert(data, 'o2', o2, timestamp);
-  
+  checkAndCreateAlert(data, "o2", o2, timestamp);
+
   const temp = generateTemperature(data, timestamp);
-  checkAndCreateAlert(data, 'temperature', temp, timestamp);
-  
+  checkAndCreateAlert(data, "temperature", temp, timestamp);
+
   const stress = generateStress(data, timestamp);
-  checkAndCreateAlert(data, 'stress', stress, timestamp);
-  
+  checkAndCreateAlert(data, "stress", stress, timestamp);
+
   const steps = generateSteps(data, timestamp);
 
   // Daily Sleep Update Logic

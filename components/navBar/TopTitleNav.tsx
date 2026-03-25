@@ -35,9 +35,19 @@ const TopTitleNav = ({
   // Determine background and text colors based on variant
   const isTransparent = variant === "transparent";
   const backgroundColor = isTransparent ? "transparent" : "bg-white";
-  const titleColor = isTransparent ? "text-white" : dark ? "text-[#1A1A2E]" : "text-white";
-  const subtitleColor = isTransparent ? "text-white/80" : dark ? "text-[#9CA3AF]" : "text-white/60";
-  const shadowStyle = isTransparent ? {} : { boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" };
+  const titleColor = isTransparent
+    ? "text-white"
+    : dark
+      ? "text-[#1A1A2E]"
+      : "text-white";
+  const subtitleColor = isTransparent
+    ? "text-white/80"
+    : dark
+      ? "text-[#9CA3AF]"
+      : "text-white/60";
+  const shadowStyle = isTransparent
+    ? {}
+    : { boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" };
 
   return (
     <View className={`px-5 pt-4 pb-3 ${backgroundColor}`} style={shadowStyle}>
@@ -52,9 +62,7 @@ const TopTitleNav = ({
         >
           <ArrowIcon variant="LEFT" dark={isTransparent ? true : dark} />
         </TouchableOpacity>
-        <Text className={`font-safiro text-[28px] ${titleColor}`}>
-          {title}
-        </Text>
+        <Text className={`font-safiro text-[28px] ${titleColor}`}>{title}</Text>
       </View>
       {subtitle && (
         <Text className={`font-open-sans text-[14px] ml-8 ${subtitleColor}`}>

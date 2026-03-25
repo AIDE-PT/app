@@ -1,7 +1,21 @@
 import React, { useCallback, useEffect, useRef } from "react";
-import { Animated, Easing, StyleSheet, Text, TouchableOpacity, useWindowDimensions, View, ViewStyle } from "react-native";
+import {
+  Animated,
+  Easing,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View,
+  ViewStyle,
+} from "react-native";
 import { BlurView } from "expo-blur";
-import Svg, { Path, Defs, LinearGradient as SvgLinearGradient, Stop } from "react-native-svg";
+import Svg, {
+  Path,
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  Stop,
+} from "react-native-svg";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
@@ -28,9 +42,15 @@ export default function HealthStatusHero({
   // Color Palettes — bgGradient includes transparent at bottom so card fades out naturally
   const themeColors = {
     good: {
-      bgGradient: isDark ? ["#0A1A3A", "#020510", "transparent"] as const : ["#BEDAFF", "#BEDAFF", "transparent"] as const,
-      waveGradientTop: isDark ? "rgba(80, 130, 255, 0.18)" : "rgba(50, 130, 255, 0.55)",
-      waveGradientBottom: isDark ? "rgba(80, 130, 255, 0.0)" : "rgba(255, 255, 255, 0.0)",
+      bgGradient: isDark
+        ? (["#0A1A3A", "#020510", "transparent"] as const)
+        : (["#BEDAFF", "#BEDAFF", "transparent"] as const),
+      waveGradientTop: isDark
+        ? "rgba(80, 130, 255, 0.18)"
+        : "rgba(50, 130, 255, 0.55)",
+      waveGradientBottom: isDark
+        ? "rgba(80, 130, 255, 0.0)"
+        : "rgba(255, 255, 255, 0.0)",
       textMain: isDark ? "#FFFFFF" : "#0A1A3A",
       textSub: isDark ? "rgba(255, 255, 255, 0.6)" : "rgba(10, 26, 58, 0.6)",
       iconBg: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.03)",
@@ -39,9 +59,15 @@ export default function HealthStatusHero({
       btnBorder: isDark ? "#60A5FA" : "#1D4ED8",
     },
     warning: {
-      bgGradient: isDark ? ["#3A3011", "#050401", "transparent"] as const : ["#FFD84D", "#FFD84D", "transparent"] as const,
-      waveGradientTop: isDark ? "rgba(224, 195, 105, 0.15)" : "rgba(180, 120, 0, 0.3)",
-      waveGradientBottom: isDark ? "rgba(224, 195, 105, 0.0)" : "rgba(255, 255, 255, 0.0)",
+      bgGradient: isDark
+        ? (["#3A3011", "#050401", "transparent"] as const)
+        : (["#FFD84D", "#FFD84D", "transparent"] as const),
+      waveGradientTop: isDark
+        ? "rgba(224, 195, 105, 0.15)"
+        : "rgba(180, 120, 0, 0.3)",
+      waveGradientBottom: isDark
+        ? "rgba(224, 195, 105, 0.0)"
+        : "rgba(255, 255, 255, 0.0)",
       textMain: isDark ? "#FFFFFF" : "#2D1F00",
       textSub: isDark ? "rgba(255, 255, 255, 0.6)" : "rgba(45, 31, 0, 0.6)",
       iconBg: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.03)",
@@ -50,16 +76,22 @@ export default function HealthStatusHero({
       btnBorder: isDark ? "#EAD288" : "#92530A",
     },
     critical: {
-      bgGradient: isDark ? ["#3A111A", "#050102", "transparent"] as const : ["#FF8FA3", "#FF8FA3", "transparent"] as const,
-      waveGradientTop: isDark ? "rgba(224, 105, 125, 0.15)" : "rgba(200, 30, 60, 0.3)",
-      waveGradientBottom: isDark ? "rgba(224, 105, 125, 0.0)" : "rgba(255, 255, 255, 0.0)",
+      bgGradient: isDark
+        ? (["#3A111A", "#050102", "transparent"] as const)
+        : (["#FF8FA3", "#FF8FA3", "transparent"] as const),
+      waveGradientTop: isDark
+        ? "rgba(224, 105, 125, 0.15)"
+        : "rgba(200, 30, 60, 0.3)",
+      waveGradientBottom: isDark
+        ? "rgba(224, 105, 125, 0.0)"
+        : "rgba(255, 255, 255, 0.0)",
       textMain: isDark ? "#FFFFFF" : "#2A0008",
       textSub: isDark ? "rgba(255, 255, 255, 0.6)" : "rgba(42, 0, 8, 0.6)",
       iconBg: isDark ? "rgba(255, 255, 255, 0.1)" : "rgba(0, 0, 0, 0.03)",
       badgeBg: isDark ? "#1E0C11" : "#FF4D6D",
       badgeColor: isDark ? "#E8889C" : "#FFFFFF",
       btnBorder: isDark ? "#E8889C" : "#C9002B",
-    }
+    },
   };
 
   const colors = themeColors[status];
@@ -75,15 +107,32 @@ export default function HealthStatusHero({
   const prevStatus = useRef(status);
 
   // 1 = good (badge centered), 0 = warning/critical (badge shifted left, button visible)
-  const badgeShiftAnim = useRef(new Animated.Value(status !== "good" ? 0 : 1)).current;
+  const badgeShiftAnim = useRef(
+    new Animated.Value(status !== "good" ? 0 : 1),
+  ).current;
 
   useEffect(() => {
     if (prevStatus.current === status) return;
     const toGood = status === "good";
     Animated.parallel([
-      Animated.timing(fadeAnim[prevStatus.current], { toValue: 0, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-      Animated.timing(fadeAnim[status], { toValue: 1, duration: 900, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-      Animated.timing(badgeShiftAnim, { toValue: toGood ? 1 : 0, duration: 700, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.timing(fadeAnim[prevStatus.current], {
+        toValue: 0,
+        duration: 900,
+        easing: Easing.inOut(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim[status], {
+        toValue: 1,
+        duration: 900,
+        easing: Easing.inOut(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(badgeShiftAnim, {
+        toValue: toGood ? 1 : 0,
+        duration: 700,
+        easing: Easing.inOut(Easing.quad),
+        useNativeDriver: true,
+      }),
     ]).start();
     prevStatus.current = status;
   }, [status]);
@@ -116,7 +165,7 @@ export default function HealthStatusHero({
         duration: 40000,
         easing: Easing.linear,
         useNativeDriver: true,
-      })
+      }),
     );
     waveLoopRef.current.start();
   }, [animation, stopWaveAnimation]);
@@ -141,9 +190,18 @@ export default function HealthStatusHero({
   // badge shift = half of (button width + gap) so badge appears centered when button is hidden
   // button (~170px) + gap (16px) = 186px → half = 93px
   const BADGE_SHIFT = 93;
-  const badgeTX = badgeShiftAnim.interpolate({ inputRange: [0, 1], outputRange: [0, BADGE_SHIFT] });
-  const buttonOpacity = badgeShiftAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] });
-  const buttonTX = badgeShiftAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 24] });
+  const badgeTX = badgeShiftAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, BADGE_SHIFT],
+  });
+  const buttonOpacity = badgeShiftAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [1, 0],
+  });
+  const buttonTX = badgeShiftAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, 24],
+  });
   const absoluteFill = StyleSheet.absoluteFillObject as ViewStyle;
 
   return (
@@ -151,7 +209,10 @@ export default function HealthStatusHero({
       <View style={[styles.card, { height: CARD_HEIGHT + topExtension }]}>
         {/* Stacked gradients — cross-fade on status change; fade to transparent at bottom */}
         {(["good", "warning", "critical"] as const).map((s) => (
-          <Animated.View key={s} style={[absoluteFill, { opacity: fadeAnim[s] }]}>
+          <Animated.View
+            key={s}
+            style={[absoluteFill, { opacity: fadeAnim[s] }]}
+          >
             <LinearGradient
               colors={themeColors[s].bgGradient}
               locations={[0, 0.6, 1]}
@@ -164,8 +225,21 @@ export default function HealthStatusHero({
 
         {/* Animated Smooth Background Waves — Top (mirrored, tall) */}
         <View style={styles.waveContainerTop}>
-          <Animated.View style={{ transform: [{ translateX: translateX1 }, { scaleY: -1 }], position: 'absolute', width: waveWidth * 2, height: topWaveSvgHeight, top: -120 }}>
-            <Svg width="100%" height="100%" viewBox={`0 0 ${waveWidth * 2} ${topWaveSvgHeight}`} preserveAspectRatio="none">
+          <Animated.View
+            style={{
+              transform: [{ translateX: translateX1 }, { scaleY: -1 }],
+              position: "absolute",
+              width: waveWidth * 2,
+              height: topWaveSvgHeight,
+              top: -120,
+            }}
+          >
+            <Svg
+              width="100%"
+              height="100%"
+              viewBox={`0 0 ${waveWidth * 2} ${topWaveSvgHeight}`}
+              preserveAspectRatio="none"
+            >
               <Defs>
                 <SvgLinearGradient id="waveGrad3" x1="0" y1="0" x2="0" y2="1">
                   <Stop offset="0" stopColor={colors.waveGradientTop} />
@@ -176,8 +250,22 @@ export default function HealthStatusHero({
             </Svg>
           </Animated.View>
 
-          <Animated.View style={{ transform: [{ translateX: translateX2 }, { scaleY: -1 }], position: 'absolute', width: waveWidth * 2, height: topWaveSvgHeight, top: -100, opacity: 0.8 }}>
-            <Svg width="100%" height="100%" viewBox={`0 0 ${waveWidth * 2} ${topWaveSvgHeight}`} preserveAspectRatio="none">
+          <Animated.View
+            style={{
+              transform: [{ translateX: translateX2 }, { scaleY: -1 }],
+              position: "absolute",
+              width: waveWidth * 2,
+              height: topWaveSvgHeight,
+              top: -100,
+              opacity: 0.8,
+            }}
+          >
+            <Svg
+              width="100%"
+              height="100%"
+              viewBox={`0 0 ${waveWidth * 2} ${topWaveSvgHeight}`}
+              preserveAspectRatio="none"
+            >
               <Defs>
                 <SvgLinearGradient id="waveGrad4" x1="0" y1="0" x2="0" y2="1">
                   <Stop offset="0" stopColor={colors.waveGradientTop} />
@@ -192,14 +280,34 @@ export default function HealthStatusHero({
         {/* Content — three layers cross-fading on status change */}
         {(["good", "warning", "critical"] as const).map((s) => {
           const c = themeColors[s];
-          const subtitleMap = { good: "Tudo estabilizado", warning: "Requer alguma atenção", critical: "Intervenção imediata" };
-          const badgeIconMap = { good: "shield", warning: "alert-circle", critical: "alert-triangle" } as const;
-          const btnBg = s === "warning" ? (isDark ? "#D97706" : "#F59E0B") : "#E11D48";
+          const subtitleMap = {
+            good: "Tudo estabilizado",
+            warning: "Requer alguma atenção",
+            critical: "Intervenção imediata",
+          };
+          const badgeIconMap = {
+            good: "shield",
+            warning: "alert-circle",
+            critical: "alert-triangle",
+          } as const;
+          const btnBg =
+            s === "warning" ? (isDark ? "#D97706" : "#F59E0B") : "#E11D48";
           return (
             <Animated.View
               key={s}
               pointerEvents={status === s ? "auto" : "none"}
-              style={[styles.content, { paddingTop: topExtension + 90, position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, opacity: fadeAnim[s] }]}
+              style={[
+                styles.content,
+                {
+                  paddingTop: topExtension + 90,
+                  position: "absolute",
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  opacity: fadeAnim[s],
+                },
+              ]}
             >
               {/* Titles */}
               <View style={styles.titleContainer}>
@@ -219,10 +327,20 @@ export default function HealthStatusHero({
                     accessibilityRole="image"
                     accessibilityLabel={`Estado ${subtitleMap[s]}`}
                   >
-                    <Feather name={s === "good" ? "shield" : badgeIconMap[s]} size={24} color={c.badgeColor} accessible={false} />
+                    <Feather
+                      name={s === "good" ? "shield" : badgeIconMap[s]}
+                      size={24}
+                      color={c.badgeColor}
+                      accessible={false}
+                    />
                   </View>
                 </Animated.View>
-                <Animated.View style={{ opacity: buttonOpacity, transform: [{ translateX: buttonTX }] }}>
+                <Animated.View
+                  style={{
+                    opacity: buttonOpacity,
+                    transform: [{ translateX: buttonTX }],
+                  }}
+                >
                   <TouchableOpacity
                     activeOpacity={0.8}
                     onPress={onCheckNotifications}
@@ -230,7 +348,11 @@ export default function HealthStatusHero({
                     style={[
                       styles.actionButton,
                       !isDark && { backgroundColor: btnBg },
-                      { shadowColor: btnBg, borderWidth: 1.5, borderColor: c.btnBorder },
+                      {
+                        shadowColor: btnBg,
+                        borderWidth: 1.5,
+                        borderColor: c.btnBorder,
+                      },
                     ]}
                     accessibilityRole="button"
                     accessibilityLabel="Ver notificações"
@@ -239,18 +361,32 @@ export default function HealthStatusHero({
                   >
                     {isDark && (
                       <>
-                        <BlurView intensity={60} tint="dark" style={absoluteFill} />
-                        <View style={[absoluteFill, { backgroundColor: "rgba(0,0,0,0.5)", borderRadius: 28 }]} />
+                        <BlurView
+                          intensity={60}
+                          tint="dark"
+                          style={absoluteFill}
+                        />
+                        <View
+                          style={[
+                            absoluteFill,
+                            {
+                              backgroundColor: "rgba(0,0,0,0.5)",
+                              borderRadius: 28,
+                            },
+                          ]}
+                        />
                       </>
                     )}
-                    <Text style={styles.actionButtonText}>Ver Notificações</Text>
+                    <Text style={styles.actionButtonText}>
+                      Ver Notificações
+                    </Text>
                   </TouchableOpacity>
                 </Animated.View>
               </View>
             </Animated.View>
           );
         })}
-        </View>
+      </View>
     </View>
   );
 }
@@ -267,7 +403,7 @@ const styles = StyleSheet.create({
     position: "relative",
   },
   waveContainerTop: {
-    position: 'absolute',
+    position: "absolute",
     top: 0,
     left: 0,
     right: 0,
@@ -298,9 +434,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   bottomRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     gap: 16,
     marginTop: 16,
   },

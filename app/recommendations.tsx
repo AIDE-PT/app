@@ -106,38 +106,47 @@ export default function Recommendations() {
     <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10 bg-transparent">
         <SafeAreaView className="flex-1">
-        <View className="mt-12 mb-8">
-          <Text className={`font-safiro text-3xl ${isDark ? "text-white/90" : "text-black/90"}`}>
-            Nós recomendamos
-          </Text>
-          <Text className={`font-open-sans text-base ${isDark ? "text-white/60" : "text-black/60"} mt-1`}>
-            Baseado nas suas escolhas
-          </Text>
-        </View>
+          <View className="mt-12 mb-8">
+            <Text
+              className={`font-safiro text-3xl ${isDark ? "text-white/90" : "text-black/90"}`}
+            >
+              Nós recomendamos
+            </Text>
+            <Text
+              className={`font-open-sans text-base ${isDark ? "text-white/60" : "text-black/60"} mt-1`}
+            >
+              Baseado nas suas escolhas
+            </Text>
+          </View>
 
-        <View className="flex-row flex-wrap gap-3">
-          {healthMetrics.map((metric) => (
-            <View key={metric.id} className="w-[48%]">
-              <IconCardButton
-                label={metric.label}
-                icon={metric.icon}
-                selected={selectedMetrics.includes(metric.id)}
-                showSelectedCheck
-                onPress={() => toggleMetric(metric.id)}
-                variant="light"
-                forceLight
-              />
-            </View>
-          ))}
-        </View>
+          <View className="flex-row flex-wrap gap-3">
+            {healthMetrics.map((metric) => (
+              <View key={metric.id} className="w-[48%]">
+                <IconCardButton
+                  label={metric.label}
+                  icon={metric.icon}
+                  selected={selectedMetrics.includes(metric.id)}
+                  showSelectedCheck
+                  onPress={() => toggleMetric(metric.id)}
+                  variant="light"
+                  forceLight
+                />
+              </View>
+            ))}
+          </View>
 
-        <View className="flex-1" />
+          <View className="flex-1" />
 
-        <View className="items-center mb-8">
-          <Button variant="primary" forceLight label="Concluir" onPress={handleConcluir} />
-        </View>
-      </SafeAreaView>
-    </View>
-  </LightBackground>
+          <View className="items-center mb-8">
+            <Button
+              variant="primary"
+              forceLight
+              label="Concluir"
+              onPress={handleConcluir}
+            />
+          </View>
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 }
