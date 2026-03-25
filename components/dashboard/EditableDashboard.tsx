@@ -23,11 +23,9 @@ import {
 } from "react-native-safe-area-context";
 
 import Navbar from "@/components/navBar/NavBar";
-import WidgetIcon from "@/components/svg/WidgetIcon";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import {
   DASHBOARD_CONFIG,
-  METRIC_STYLES,
   WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
 import TopBar from "../topBar/TopBar";
@@ -68,8 +66,6 @@ const SIZE_OPTIONS: { label: string; variant: WidgetVariant }[] = [
   { label: "3 x 2", variant: "2-3" },
 ];
 
-const DELETE_OPTION = { label: "Eliminar", variant: "delete" as const };
-
 type DashboardWidget = (typeof DASHBOARD_CONFIG)[number];
 
 type CardLayout = {
@@ -96,7 +92,7 @@ export default function EditableDashboard({
   const router = useRouter();
   const [activeWidgets, setActiveWidgets] =
     useState<DashboardWidget[]>(DASHBOARD_CONFIG);
-  const [isEditing, setIsEditing] = useState(false);
+  const [, setIsEditing] = useState(false);
   const [openSizeMenuId, setOpenSizeMenuId] = useState<string | null>(null);
   const [draggingWidgetId, setDraggingWidgetId] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });

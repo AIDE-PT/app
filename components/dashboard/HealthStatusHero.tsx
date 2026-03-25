@@ -36,7 +36,6 @@ export default function HealthStatusHero({
   topExtension = 0,
 }: HealthStatusHeroProps) {
   const { isDark } = useTheme();
-  const isGood = status === "good";
   const { width } = useWindowDimensions();
 
   // Color Palettes — bgGradient includes transparent at bottom so card fades out naturally
@@ -135,7 +134,7 @@ export default function HealthStatusHero({
       }),
     ]).start();
     prevStatus.current = status;
-  }, [status]);
+  }, [badgeShiftAnim, fadeAnim, status]);
 
   // Seamless looping wave
   const waveWidth = width * 2;

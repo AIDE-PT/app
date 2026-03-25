@@ -1,4 +1,4 @@
-﻿import BackButton from "@/components/buttons/backButton";
+import BackButton from "@/components/buttons/backButton";
 import LightBackground from "@/components/DotBackground";
 import LineChartSlim from "@/components/charts/LineChartSlim";
 import { useTheme } from "@/hooks/useTheme";
@@ -437,8 +437,6 @@ const METRIC_CONFIGS: Record<string, MetricConfig> = {
 };
 
 const DEFAULT_TYPE = "heart";
-const BRAND_BLUE = "#7C89FF";
-const HIGHLIGHT_BLUE = "#7C89FF";
 
 const hexToRgb = (hex: string) => {
   const normalized = hex.replace("#", "");
@@ -1472,64 +1470,6 @@ const styles = StyleSheet.create({
   },
 });
 
-// ─── Zone List ────────────────────────────────────────────────────────────────
-function ZoneList({
-  zones,
-  value,
-  isDark,
-}: {
-  zones: {
-    label: string;
-    range: [number, number];
-    color: string;
-    display: string;
-  }[];
-  value: number;
-  isDark: boolean;
-}) {
-  const ts = isDark ? "text-gray-300" : "text-gray-600";
-  return (
-    <>
-      {zones.map((z) => {
-        const active = value >= z.range[0] && value < z.range[1];
-        return (
-          <View
-            key={z.label}
-            className="flex-row items-center mb-2 px-3 py-2 rounded-xl"
-            style={
-              active
-                ? {
-                    borderWidth: 1,
-                    borderColor: z.color,
-                    backgroundColor: `${z.color}22`,
-                  }
-                : undefined
-            }
-          >
-            <View
-              className="w-3 h-3 rounded-full mr-3"
-              style={{ backgroundColor: z.color }}
-            />
-            <Text
-              className="text-sm font-open-sans flex-1"
-              style={{ color: BRAND_BLUE, fontWeight: active ? "700" : "400" }}
-            >
-              {z.label}
-            </Text>
-            <Text className={`text-xs font-open-sans ${ts}`}>{z.display}</Text>
-            {active && (
-              <View
-                className="ml-2 w-2 h-2 rounded-full"
-                style={{ backgroundColor: z.color }}
-              />
-            )}
-          </View>
-        );
-      })}
-    </>
-  );
-}
-
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1634,15 +1574,10 @@ export default function MasterDetail() {
     resolvedType,
     colors.semantic,
   );
-  const rangeSpan = standardizedScale.max - standardizedScale.min;
   const clampedCurrent = Math.min(
     Math.max(currentRaw, standardizedScale.min),
     standardizedScale.max,
   );
-  const markerPercent =
-    rangeSpan > 0
-      ? ((clampedCurrent - standardizedScale.min) / rangeSpan) * 100
-      : 0;
   const activeBand =
     standardizedScale.bands.find((band, index) => {
       const isLast = index === standardizedScale.bands.length - 1;
@@ -1700,37 +1635,6 @@ export default function MasterDetail() {
   const heartAvgHigh = heartHighs.length ? calcAvg(heartHighs) : null;
   const heartAvgLow = heartLows.length ? calcAvg(heartLows) : null;
 
-  const HEART_ZONES: {
-    label: string;
-    range: [number, number];
-    color: string;
-    display: string;
-  }[] = [
-    {
-      label: "Repouso",
-      range: [40, 60],
-      color: "#93C5FD",
-      display: "40 – 60 bpm",
-    },
-    {
-      label: "Normal",
-      range: [60, 100],
-      color: colors.semantic.success,
-      display: "60 – 100 bpm",
-    },
-    {
-      label: "Elevado",
-      range: [100, 140],
-      color: colors.semantic.warning,
-      display: "100 – 140 bpm",
-    },
-    {
-      label: "Máximo",
-      range: [140, 999],
-      color: colors.semantic.danger,
-      display: "≥ 140 bpm",
-    },
-  ];
   const TEMP_ZONES: {
     label: string;
     range: [number, number];
@@ -1766,11 +1670,6 @@ export default function MasterDetail() {
     { label: "Normal", desc: "≥ 96%", color: colors.semantic.success },
     { label: "Baixo", desc: "94–95%", color: colors.semantic.warning },
     { label: "Crítico", desc: "< 94%", color: colors.semantic.danger },
-  ];
-  const STRESS_LEGEND = [
-    { label: "Baixo", desc: "< 40", color: colors.semantic.success },
-    { label: "Moderado", desc: "40–70", color: colors.semantic.warning },
-    { label: "Alto", desc: "> 70", color: colors.semantic.danger },
   ];
   const getBandRangeSpeech = (band: MetricBand, index: number) => {
     const unitText = spokenUnit ? ` ${spokenUnit}` : "";

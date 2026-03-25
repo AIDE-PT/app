@@ -1,4 +1,4 @@
-﻿import React, { ReactNode, useMemo } from "react";
+import React, { ReactNode } from "react";
 import { Dimensions, Text, View, ViewStyle } from "react-native";
 import Svg, {
   Circle,
@@ -73,7 +73,7 @@ function HeartMiniChart({
   const linePath = smoothPath(pts.map((v, i) => ({ x: toX(i), y: toY(v) })));
   const fillPath =
     linePath + ` L ${toX(pts.length - 1)} ${h} L ${toX(0)} ${h} Z`;
-  const gId = useMemo(() => "hmc" + Math.random().toString(36).slice(2, 7), []);
+  const gId = "hmc";
   return (
     <Svg width={w} height={h}>
       <Defs>
@@ -255,10 +255,7 @@ function StepsMiniChart({
   const goalY = (1 - goal / dataMax) * h;
   const barColor = (v: number) =>
     v >= goal ? semantic.success : v >= goal * 0.7 ? BRAND_BLUE : "#94A3B8";
-  const gIds = useMemo(
-    () => bars.map(() => "sb" + Math.random().toString(36).slice(2, 6)),
-    [bars.length],
-  );
+  const gIds = bars.map((_, i) => `sb${i}`);
   return (
     <Svg width={w} height={h}>
       <Defs>
@@ -408,7 +405,7 @@ function TempLineMiniChart({
         : value >= 36
           ? semantic.success
           : "#60A5FA";
-  const gId = useMemo(() => "tmp" + Math.random().toString(36).slice(2, 7), []);
+  const gId = "tmp";
   // Normal range band 36–37.5
   const normalTop = toY(37.5);
   const normalBot = toY(36.0);
@@ -499,7 +496,7 @@ function O2MiniChart({
   const track = isDark ? "rgba(255,255,255,0.07)" : "#E5E7EB";
   const dotX = cx + r * Math.cos(toRad(curA));
   const dotY = cy + r * Math.sin(toRad(curA));
-  const gId = useMemo(() => "o2m" + Math.random().toString(36).slice(2, 7), []);
+  const gId = "o2m";
   return (
     <Svg width={w} height={h}>
       <Defs>
@@ -627,7 +624,7 @@ function GlycemiaMiniChart({
   const linePath = smoothPath(pts.map((v, i) => ({ x: toX(i), y: toY(v) })));
   const fillPath =
     linePath + ` L ${toX(pts.length - 1)} ${h} L ${toX(0)} ${h} Z`;
-  const gId = useMemo(() => "glc" + Math.random().toString(36).slice(2, 7), []);
+  const gId = "glc";
 
   return (
     <Svg width={w} height={h}>
@@ -695,7 +692,7 @@ function BPMiniChart({
   const linePath = smoothPath(pts.map((v, i) => ({ x: toX(i), y: toY(v) })));
   const fillPath =
     linePath + ` L ${toX(pts.length - 1)} ${h} L ${toX(0)} ${h} Z`;
-  const gId = useMemo(() => "bp" + Math.random().toString(36).slice(2, 7), []);
+  const gId = "bp";
 
   return (
     <Svg width={w} height={h}>
@@ -1084,7 +1081,6 @@ export function WidgetWrapper({
     if (metricType === "temp") {
       const tempVal = parseFloat(value) || 36.5;
       const thermW = Math.round(width * 0.28);
-      const chartW = width - thermW - 6;
       const chartH = Math.max(height - 44, 20);
       return (
         <View
