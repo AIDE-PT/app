@@ -1,4 +1,5 @@
 import { CalendarButton } from "@/components/buttons/calendarButton";
+import { CalendarModal } from "@/components/modals/CalendarModal";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -13,6 +14,8 @@ import BackButton from "../components/buttons/backButton";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DashboardMetricWidget from "../components/widgets/DashboardMetricWidget";
 import WidgetGrid from "../components/widgets/WidgetGrid";
+import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,62 +30,95 @@ export const queryClient = new QueryClient({
 const HistoricoDiario = () => {
   const router = useRouter();
   const [date, setDatetPass] = useState<string | Date>("");
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [calendarMode, setCalendarMode] = useState<"day" | "period">("day");
+  const { isDark } = useTheme();
+
+  const handleOpenCalendar = (mode: "day" | "period") => {
+    setCalendarMode(mode);
+    setIsModalVisible(true);
+  };
+
+  const handleSelectDay = (selectedDate: Date) => {
+    setDatetPass(selectedDate.toISOString().split("T")[0]);
+  };
+
+  const handleSelectPeriod = (start: Date, end: Date) => {
+    setDatetPass(
+      `${start.toISOString().split("T")[0]} - ${end.toISOString().split("T")[0]}`,
+    );
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
-      <View className="flex-1 px-4 pt-10 bg-aide-background">
-        <SafeAreaView className="flex-1">
-          <View className="mb-4">
-            <BackButton
-              label="Histórico Diário"
-              dark
-              onPress={() => router.push("/testDashboard")}
-            />
-          </View>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 40 }}
-          >
-            <View className="flex-row -mx-4">
-              <CalendarButton
-                label="Dia"
-                onDateChange={(d: Date) => setDatetPass(d)}
+      <LightBackground>
+        <View className="flex-1 px-4 pt-10">
+          <SafeAreaView className="flex-1">
+            <View className="mb-4">
+              <BackButton
+                label="Histórico Diário"
+                dark={isDark}
+                onPress={() => router.push("/testDashboard")}
               />
-              <CalendarButton
-                label="Período"
-                onDateChange={(d: Date) => setDatetPass(d)}
-              />
-              <Text>{date as string}</Text>
             </View>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 40 }}
+            >
+              <View className="flex-row -mx-4">
+                <CalendarButton
+                  label="Dia"
+                  onPress={() => handleOpenCalendar("day")}
+                />
+                <CalendarButton
+                  label="Período"
+                  onPress={() => handleOpenCalendar("period")}
+                />
+                <Text className="ml-4 mt-2 self-center font-bold text-gray-700">
+                  {date as string}
+                </Text>
+              </View>
 
-            <View className="mt-4 -mx-4">
-              <WidgetGrid>
-                <TouchableOpacity onPress={() => router.push("/MasterDetail")}>
+              <CalendarModal
+                isVisible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
+                mode={calendarMode}
+                onSelectDay={handleSelectDay}
+                onSelectPeriod={handleSelectPeriod}
+              />
+
+              <View className="mt-4 -mx-4">
+                <WidgetGrid>
+                  <TouchableOpacity
+                    onPress={() => router.push("/MasterDetail")}
+                  >
+                    <DashboardMetricWidget
+                      type="heartRate"
+                      endpoint="bpm"
+                      variant="2-3"
+                    />
+                  </TouchableOpacity>
                   <DashboardMetricWidget
-                    type="heartRate"
-                    endpoint="bpm"
+                    type="bloodPressure"
+                    endpoint="bloodPressure"
+                    variant="1-2"
+                  />
+                  <DashboardMetricWidget
+                    type="temp"
+                    endpoint="temperature"
+                    variant="1-3"
+                  />
+                  <DashboardMetricWidget
+                    type="steps"
+                    endpoint="steps"
                     variant="2-3"
                   />
-                </TouchableOpacity>
-                <DashboardMetricWidget
-                  type="bloodPressure"
-                  endpoint="bloodPressure"
-                  variant="1-2"
-                />
-                <DashboardMetricWidget
-                  type="temp"
-                  endpoint="temperature"
-                  variant="1-3"
-                />
-                <DashboardMetricWidget
-                  type="steps"
-                  endpoint="steps"
-                  variant="2-3"
-                />
-              </WidgetGrid>
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </View>
+                </WidgetGrid>
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      </LightBackground>
     </QueryClientProvider>
   );
 };

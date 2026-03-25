@@ -46,6 +46,8 @@ function readDatabase() {
     if (!data.o2) data.o2 = [];
     if (!data.temperature) data.temperature = [];
     if (!data.stress) data.stress = [];
+    if (!data.steps) data.steps = [];
+    if (!data.alerts) data.alerts = [];
 
     // Initialize sleep history if empty
     if (data.sleep.length === 0) {
@@ -114,7 +116,20 @@ function updateBPStats(data, systolic, diastolic) {
 function generateBPM(data, timestamp) {
   const lastVal =
     data.bpm.length > 0 ? data.bpm[data.bpm.length - 1].value : 75;
-  const bpmVal = Math.round(getRealisticVariation(lastVal, 60, 100, 5));
+
+  // 15% chance to generate unsafe value
+  const isUnsafe = Math.random() < 0.1;
+  let bpmVal;
+
+  if (isUnsafe) {
+    // Generate unsafe BPM: either very high (>120) or very low (<50)
+    bpmVal =
+      Math.random() < 0.5
+        ? Math.round(121 + Math.random() * 30) // High: 121-150
+        : Math.round(35 + Math.random() * 14); // Low: 35-49
+  } else {
+    bpmVal = Math.round(getRealisticVariation(lastVal, 60, 100, 5));
+  }
 
   data.bpm.push({
     id: generateId(),
@@ -135,8 +150,25 @@ function generateBloodPressure(data, timestamp) {
       ? data.bloodPressure[data.bloodPressure.length - 1].diastolic
       : 80;
 
-  const systolic = Math.round(getRealisticVariation(lastSys, 110, 130, 4));
-  const diastolic = Math.round(getRealisticVariation(lastDia, 70, 85, 3));
+  // 15% chance to generate unsafe value
+  const isUnsafe = Math.random() < 0.15;
+  let systolic, diastolic;
+
+  if (isUnsafe) {
+    // Generate unsafe BP: either high (>140/90) or low (<90/60)
+    if (Math.random() < 0.5) {
+      // High BP
+      systolic = Math.round(141 + Math.random() * 40); // 141-180
+      diastolic = Math.round(91 + Math.random() * 20); // 91-110
+    } else {
+      // Low BP
+      systolic = Math.round(70 + Math.random() * 19); // 70-89
+      diastolic = Math.round(45 + Math.random() * 14); // 45-59
+    }
+  } else {
+    systolic = Math.round(getRealisticVariation(lastSys, 110, 130, 4));
+    diastolic = Math.round(getRealisticVariation(lastDia, 70, 85, 3));
+  }
 
   data.bloodPressure.push({
     id: generateId(),
@@ -153,7 +185,20 @@ function generateGlycemia(data, timestamp) {
     data.glycemia.length > 0
       ? data.glycemia[data.glycemia.length - 1].value
       : 100;
-  const glycemiaVal = Math.round(getRealisticVariation(lastVal, 80, 120, 3));
+
+  // 15% chance to generate unsafe value
+  const isUnsafe = Math.random() < 0.15;
+  let glycemiaVal;
+
+  if (isUnsafe) {
+    // Generate unsafe glycemia: either very high (>180) or very low (<70)
+    glycemiaVal =
+      Math.random() < 0.5
+        ? Math.round(181 + Math.random() * 50) // High: 181-230
+        : Math.round(45 + Math.random() * 24); // Low: 45-69
+  } else {
+    glycemiaVal = Math.round(getRealisticVariation(lastVal, 80, 120, 3));
+  }
 
   data.glycemia.push({
     id: generateId(),
@@ -166,8 +211,18 @@ function generateGlycemia(data, timestamp) {
 
 function generateO2(data, timestamp) {
   const lastVal = data.o2.length > 0 ? data.o2[data.o2.length - 1].value : 98;
-  // O2 varies very little
-  const o2Val = Math.round(getRealisticVariation(lastVal, 98, 99, 1));
+
+  // 15% chance to generate unsafe value
+  const isUnsafe = Math.random() < 0.15;
+  let o2Val;
+
+  if (isUnsafe) {
+    // Generate unsafe O2: low (<95)
+    o2Val = Math.round(90 + Math.random() * 4); // 90-94
+  } else {
+    // O2 varies very little
+    o2Val = Math.round(getRealisticVariation(lastVal, 98, 99, 1));
+  }
 
   data.o2.push({
     id: generateId(),
@@ -183,9 +238,25 @@ function generateTemperature(data, timestamp) {
     data.temperature.length > 0
       ? data.temperature[data.temperature.length - 1].value
       : 36.5;
-  const tempVal = parseFloat(
-    getRealisticVariation(lastVal, 36.0, 37.5, 0.2).toFixed(1),
-  );
+
+  // 15% chance to generate unsafe value
+  const isUnsafe = Math.random() < 0.15;
+  let tempVal;
+
+  if (isUnsafe) {
+    // Generate unsafe temperature: either high (>38) or low (<35)
+    tempVal = parseFloat(
+      (Math.random() < 0.5
+        ? 38.1 + Math.random() * 2 // High: 38.1-40.1
+        : 33.5 + Math.random() * 1.4
+      ) // Low: 33.5-34.9
+        .toFixed(1),
+    );
+  } else {
+    tempVal = parseFloat(
+      getRealisticVariation(lastVal, 36.0, 37.5, 1.0).toFixed(1),
+    );
+  }
 
   data.temperature.push({
     id: generateId(),
@@ -199,7 +270,17 @@ function generateTemperature(data, timestamp) {
 function generateStress(data, timestamp) {
   const lastVal =
     data.stress.length > 0 ? data.stress[data.stress.length - 1].value : 30;
-  const stressVal = Math.round(getRealisticVariation(lastVal, 10, 80, 5));
+
+  // 15% chance to generate unsafe value
+  const isUnsafe = Math.random() < 0.15;
+  let stressVal;
+
+  if (isUnsafe) {
+    // Generate unsafe stress: very high (>80)
+    stressVal = Math.round(81 + Math.random() * 19); // 81-100
+  } else {
+    stressVal = Math.round(getRealisticVariation(lastVal, 10, 80, 5));
+  }
 
   data.stress.push({
     id: generateId(),
@@ -208,6 +289,21 @@ function generateStress(data, timestamp) {
   });
   updateSimpleStats(data, "stress", stressVal);
   return stressVal;
+}
+
+function generateSteps(data, timestamp) {
+  const lastVal =
+    data.steps.length > 0 ? data.steps[data.steps.length - 1].value : 8000;
+  // Steps can vary more significantly
+  const stepsVal = Math.round(getRealisticVariation(lastVal, 1000, 20000, 500));
+
+  data.steps.push({
+    id: generateId(),
+    value: stepsVal,
+    timestamp: timestamp,
+  });
+  updateSimpleStats(data, "steps", stepsVal);
+  return stepsVal;
 }
 
 function generateSleep(data, timestamp) {
@@ -249,6 +345,141 @@ function maintainDataLimits(data, limit = 50) {
   if (data.sleep.length > limit) data.sleep.shift();
 }
 
+// --- Alert Generation ---
+
+const ALERT_THRESHOLDS = {
+  bpm: { high: 120, low: 50, unit: "BPM" },
+  bloodPressure: {
+    sysHigh: 140,
+    diaHigh: 90,
+    sysLow: 90,
+    diaLow: 60,
+    unit: "mmHg",
+  },
+  glycemia: { high: 180, low: 70, unit: "mg/dL" },
+  o2: { low: 95, unit: "%" },
+  temperature: { high: 38, low: 35, unit: "°C" },
+  stress: { high: 80, unit: "pts" },
+};
+
+function checkAndCreateAlert(data, type, value, timestamp) {
+  let alert = null;
+  const thresholds = ALERT_THRESHOLDS[type];
+
+  if (!thresholds) return null;
+
+  switch (type) {
+    case "bpm":
+      if (value > thresholds.high) {
+        alert = {
+          type,
+          message: `Ritmo cardíaco alto detetado: ${value} BPM`,
+          severity: "high",
+        };
+      } else if (value < thresholds.low) {
+        alert = {
+          type,
+          message: `Ritmo cardíaco baixo detetado: ${value} BPM`,
+          severity: "medium",
+        };
+      }
+      break;
+    case "bloodPressure":
+      const { systolic, diastolic } = value;
+      if (systolic > thresholds.sysHigh || diastolic > thresholds.diaHigh) {
+        alert = {
+          type,
+          message: `Pressão arterial alta: ${systolic}/${diastolic} mmHg`,
+          severity: "high",
+        };
+      } else if (
+        systolic < thresholds.sysLow ||
+        diastolic < thresholds.diaLow
+      ) {
+        alert = {
+          type,
+          message: `Pressão arterial baixa: ${systolic}/${diastolic} mmHg`,
+          severity: "medium",
+        };
+      }
+      break;
+    case "glycemia":
+      if (value > thresholds.high) {
+        alert = {
+          type,
+          message: `Glicemia alta: ${value} mg/dL`,
+          severity: "high",
+        };
+      } else if (value < thresholds.low) {
+        alert = {
+          type,
+          message: `Glicemia baixa: ${value} mg/dL`,
+          severity: "high",
+        };
+      }
+      break;
+    case "o2":
+      if (value < thresholds.low) {
+        alert = {
+          type,
+          message: `Saturação de oxigénio baixa: ${value}%`,
+          severity: "high",
+        };
+      }
+      break;
+    case "temperature":
+      if (value > thresholds.high) {
+        alert = {
+          type,
+          message: `Temperatura alta: ${value}°C`,
+          severity: "medium",
+        };
+      } else if (value < thresholds.low) {
+        alert = {
+          type,
+          message: `Temperatura baixa: ${value}°C`,
+          severity: "medium",
+        };
+      }
+      break;
+    case "stress":
+      if (value > thresholds.high) {
+        alert = {
+          type,
+          message: `Nível de stress alto: ${value}`,
+          severity: "low",
+        };
+      }
+      break;
+  }
+
+  if (alert) {
+    // Initialize alerts array if missing
+    if (!data.alerts) {
+      data.alerts = [];
+    }
+
+    const alertEntry = {
+      id: generateId(),
+      ...alert,
+      timestamp: timestamp,
+      read: false,
+    };
+
+    data.alerts.push(alertEntry);
+
+    // Keep last 100 alerts
+    if (data.alerts.length > 100) {
+      data.alerts.shift();
+    }
+
+    console.log(`[ALERT] ${alert.message}`);
+    return alertEntry;
+  }
+
+  return null;
+}
+
 // --- Server Management ---
 
 function startJsonServer() {
@@ -280,11 +511,24 @@ function runSimulationStep() {
   const timestamp = new Date().toISOString();
 
   const bpm = generateBPM(data, timestamp);
+  checkAndCreateAlert(data, "bpm", bpm, timestamp);
+
   const bp = generateBloodPressure(data, timestamp);
+  checkAndCreateAlert(data, "bloodPressure", bp, timestamp);
+
   const glycemia = generateGlycemia(data, timestamp);
+  checkAndCreateAlert(data, "glycemia", glycemia, timestamp);
+
   const o2 = generateO2(data, timestamp);
+  checkAndCreateAlert(data, "o2", o2, timestamp);
+
   const temp = generateTemperature(data, timestamp);
+  checkAndCreateAlert(data, "temperature", temp, timestamp);
+
   const stress = generateStress(data, timestamp);
+  checkAndCreateAlert(data, "stress", stress, timestamp);
+
+  const steps = generateSteps(data, timestamp);
 
   // Daily Sleep Update Logic
   let sleepLog = "";
@@ -310,7 +554,8 @@ function runSimulationStep() {
             Glycemia: ${glycemia}
             O2: ${o2}%
             Temp: ${temp}°C
-            Stress: ${stress}${sleepLog}`,
+            Stress: ${stress}
+            Steps: ${steps}${sleepLog}`,
   );
 }
 

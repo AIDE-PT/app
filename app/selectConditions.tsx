@@ -1,4 +1,3 @@
-import { useFonts } from "expo-font";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -6,6 +5,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
 import { ChipButton } from "../components/buttons/ChipButton";
 import { SearchBar } from "../components/input/SearchBar";
+import LightBackground from "@/components/DotBackground";
 
 import "../global.css";
 
@@ -22,6 +22,7 @@ const ALL_CONDITIONS = [
 
 export default function SelectConditions() {
   const router = useRouter();
+  const isDark = false;
   const [searchText, setSearchText] = useState("");
   const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
 
@@ -37,16 +38,6 @@ export default function SelectConditions() {
     condition.toLowerCase().includes(searchText.toLowerCase()),
   );
 
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
   const handleAdvance = () => {
     router.push({
       pathname: "/recommendations" as any,
@@ -55,39 +46,50 @@ export default function SelectConditions() {
   };
 
   return (
-    <View className="flex-1 px-4 pt-10 bg-aide-background">
-      <SafeAreaView className="flex-1">
-        <View className="mt-12 mb-6">
-          <Text className="font-safiro text-3xl text-black/90">
-            Só mais uma coisa...
-          </Text>
-        </View>
+    <LightBackground forceLight>
+      <View className="flex-1 px-4 pt-10 bg-transparent">
+        <SafeAreaView className="flex-1">
+          <View className="mt-12 mb-6">
+            <Text
+              className={`font-safiro text-3xl ${isDark ? "text-white/90" : "text-black/90"}`}
+            >
+              Só mais uma coisa...
+            </Text>
+          </View>
 
-        <View className="mb-6">
-          <SearchBar
-            placeholder="Doenças que tenha"
-            value={searchText}
-            onChangeText={setSearchText}
-          />
-        </View>
-
-        <View className="flex-row flex-wrap gap-4">
-          {filteredConditions.map((condition) => (
-            <ChipButton
-              key={condition}
-              label={condition}
-              selected={selectedConditions.includes(condition)}
-              onPress={() => toggleCondition(condition)}
+          <View className="mb-6">
+            <SearchBar
+              placeholder="Doenças que tenha"
+              value={searchText}
+              onChangeText={setSearchText}
+              variant="light"
             />
-          ))}
-        </View>
+          </View>
 
-        <View className="flex-1" />
+          <View className="flex-row flex-wrap gap-4">
+            {filteredConditions.map((condition) => (
+              <ChipButton
+                key={condition}
+                label={condition}
+                selected={selectedConditions.includes(condition)}
+                onPress={() => toggleCondition(condition)}
+                variant="light"
+              />
+            ))}
+          </View>
 
-        <View className="items-center mb-8">
-          <Button variant="primary" label="Avançar" onPress={handleAdvance} />
-        </View>
-      </SafeAreaView>
-    </View>
+          <View className="flex-1" />
+
+          <View className="items-center mb-8">
+            <Button
+              variant="primary"
+              forceLight
+              label="Avançar"
+              onPress={handleAdvance}
+            />
+          </View>
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 }
