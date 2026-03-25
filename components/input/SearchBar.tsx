@@ -61,7 +61,9 @@ export const SearchBar = ({
           returnKeyType="search"
           onChangeText={handleChangeText}
           accessibilityLabel={props.accessibilityLabel ?? placeholder}
-          accessibilityHint={props.accessibilityHint ?? "Introduza um termo para pesquisar."}
+          accessibilityHint={
+            props.accessibilityHint ?? "Introduza um termo para pesquisar."
+          }
           accessibilityLanguage="pt-PT"
           {...props}
         />

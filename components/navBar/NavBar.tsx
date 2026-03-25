@@ -23,7 +23,7 @@ const Navbar = ({
   const [isModalVisible, setModalVisible] = useState(false);
   const router = useRouter();
   const { isDark } = useTheme();
-  
+
   // Use prop if provided, otherwise use global theme
   const dark = darkProp !== undefined ? darkProp : isDark;
 
@@ -39,7 +39,11 @@ const Navbar = ({
       <View className="w-200" />
       <View className="absolute bottom-6 w-full items-center">
         <LinearGradient
-          colors={dark ? ['rgba(255,255,255,0.12)', 'rgba(255,255,255,0.04)'] : ['#FFFFFF', '#D1D5DB']}
+          colors={
+            dark
+              ? ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"]
+              : ["#FFFFFF", "#D1D5DB"]
+          }
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           className="rounded-[100px] p-[1px]"
@@ -54,7 +58,11 @@ const Navbar = ({
             <View
               style={[
                 StyleSheet.absoluteFillObject,
-                { backgroundColor: dark ? "rgba(0,4,18,0.55)" : "rgba(219,237,248,0.75)" },
+                {
+                  backgroundColor: dark
+                    ? "rgba(0,4,18,0.55)"
+                    : "rgba(219,237,248,0.75)",
+                },
               ]}
             />
             <TouchableOpacity

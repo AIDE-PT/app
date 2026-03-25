@@ -159,121 +159,139 @@ export default function DispositivosPage() {
     <LightBackground>
       <View className="flex-1 px-4 pt-10">
         <SafeAreaView className="flex-1">
-        <View className="mb-4">
-          <BackButton label="Gerir Dispositivos" dark={isDark} />
-        </View>
+          <View className="mb-4">
+            <BackButton label="Gerir Dispositivos" dark={isDark} />
+          </View>
 
-        <View className="mb-8">
-          <Text className={`font-open-sans text-[18px] mb-8 leading-6 ${isDark ? "text-white/60" : "text-[#00072099]"}`}>
-            Adicione uma fonte de dados para aceder a novas metricas
-          </Text>
+          <View className="mb-8">
+            <Text
+              className={`font-open-sans text-[18px] mb-8 leading-6 ${isDark ? "text-white/60" : "text-[#00072099]"}`}
+            >
+              Adicione uma fonte de dados para aceder a novas metricas
+            </Text>
 
-          {/* Grid */}
-          <View className="flex-row flex-wrap justify-between">
-            {addedDevices.map((device) => {
-              return (
-                <TouchableOpacity
-                  key={device.id}
-                  onPress={() => handleDeviceClick(device)}
-                  accessibilityRole="button"
-                  accessibilityLabel={`${device.name}${device.isDataSharingEnabled ? ", partilha de dados ativa" : ", partilha de dados inativa"}`}
-                  accessibilityHint="Abre a gestão deste dispositivo."
-                  style={{
-                    boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
-                    borderColor: device.isDataSharingEnabled
-                      ? colors.semantic.success
-                      : undefined,
-                  }}
-                  className={`w-[48%] aspect-[1.47] border-2 rounded-[20px] items-start mb-4 ${
-                    isDark ? "bg-aide-dark-card" : "bg-white"
-                  } ${
-                    device.isDataSharingEnabled
-                      ? ""
-                      : isDark ? "border-white/10" : "border-[#E9E9E9]"
-                  }`}
-                >
-                  <View className="h-full w-full px-4 py-3">
-                    <View className="flex-row justify-end">
-                      <View
-                        className="w-10 h-10 rounded-full items-center justify-center"
-                        style={{ backgroundColor: isDark ? "rgba(255,255,255,0.09)" : "#F1F5F9" }}
-                      >
-                        <DeviceShareStatusIcon
-                          enabled={device.isDataSharingEnabled}
-                          size={22}
-                          color={device.isDataSharingEnabled ? colors.semantic.success : (isDark ? "rgba(255,255,255,0.55)" : "#94A3B8")}
-                        />
+            {/* Grid */}
+            <View className="flex-row flex-wrap justify-between">
+              {addedDevices.map((device) => {
+                return (
+                  <TouchableOpacity
+                    key={device.id}
+                    onPress={() => handleDeviceClick(device)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${device.name}${device.isDataSharingEnabled ? ", partilha de dados ativa" : ", partilha de dados inativa"}`}
+                    accessibilityHint="Abre a gestão deste dispositivo."
+                    style={{
+                      boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
+                      borderColor: device.isDataSharingEnabled
+                        ? colors.semantic.success
+                        : undefined,
+                    }}
+                    className={`w-[48%] aspect-[1.47] border-2 rounded-[20px] items-start mb-4 ${
+                      isDark ? "bg-aide-dark-card" : "bg-white"
+                    } ${
+                      device.isDataSharingEnabled
+                        ? ""
+                        : isDark
+                          ? "border-white/10"
+                          : "border-[#E9E9E9]"
+                    }`}
+                  >
+                    <View className="h-full w-full px-4 py-3">
+                      <View className="flex-row justify-end">
+                        <View
+                          className="w-10 h-10 rounded-full items-center justify-center"
+                          style={{
+                            backgroundColor: isDark
+                              ? "rgba(255,255,255,0.09)"
+                              : "#F1F5F9",
+                          }}
+                        >
+                          <DeviceShareStatusIcon
+                            enabled={device.isDataSharingEnabled}
+                            size={22}
+                            color={
+                              device.isDataSharingEnabled
+                                ? colors.semantic.success
+                                : isDark
+                                  ? "rgba(255,255,255,0.55)"
+                                  : "#94A3B8"
+                            }
+                          />
+                        </View>
                       </View>
-                    </View>
 
-                    <View className="flex-1 justify-center -mt-1">
-                      <View className="flex-row items-center gap-3 flex-1">
-                        <View className={`w-11 h-11 rounded-full items-center justify-center ${isDark ? "bg-white/20" : "bg-[#E9E9E9]"}`}>
-                          <Text className={`font-open-sans font-bold text-base ${isDark ? "text-white" : "text-black"}`}>
-                            {device.name.charAt(0).toUpperCase()}
+                      <View className="flex-1 justify-center -mt-1">
+                        <View className="flex-row items-center gap-3 flex-1">
+                          <View
+                            className={`w-11 h-11 rounded-full items-center justify-center ${isDark ? "bg-white/20" : "bg-[#E9E9E9]"}`}
+                          >
+                            <Text
+                              className={`font-open-sans font-bold text-base ${isDark ? "text-white" : "text-black"}`}
+                            >
+                              {device.name.charAt(0).toUpperCase()}
+                            </Text>
+                          </View>
+                          <Text
+                            numberOfLines={2}
+                            className={`font-open-sans font-bold text-[15px] leading-5 flex-1 ${isDark ? "text-white" : "text-black"}`}
+                          >
+                            {device.name}
                           </Text>
                         </View>
-                        <Text
-                          numberOfLines={2}
-                          className={`font-open-sans font-bold text-[15px] leading-5 flex-1 ${isDark ? "text-white" : "text-black"}`}
-                        >
-                          {device.name}
-                        </Text>
                       </View>
                     </View>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
+                  </TouchableOpacity>
+                );
+              })}
 
-            {/* Add Button */}
-            <TouchableOpacity
-              onPress={() => setAddModalVisible(true)}
-              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
-              className={`w-[48%] aspect-[1.47] rounded-[20px] items-center justify-center mb-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
-              accessibilityRole="button"
-              accessibilityLabel="Adicionar dispositivo"
-              accessibilityHint="Abre a lista de dispositivos disponíveis."
-            >
-              <View className="items-center justify-center">
-                <AddIcon size={32} color={isDark ? "#ffffff" : "#000746"} />
-              </View>
-            </TouchableOpacity>
+              {/* Add Button */}
+              <TouchableOpacity
+                onPress={() => setAddModalVisible(true)}
+                style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                className={`w-[48%] aspect-[1.47] rounded-[20px] items-center justify-center mb-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                accessibilityRole="button"
+                accessibilityLabel="Adicionar dispositivo"
+                accessibilityHint="Abre a lista de dispositivos disponíveis."
+              >
+                <View className="items-center justify-center">
+                  <AddIcon size={32} color={isDark ? "#ffffff" : "#000746"} />
+                </View>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
 
-        {/* Add Device Modal */}
-        <AddDeviceModal
-          visible={addModalVisible}
-          onClose={() => setAddModalVisible(false)}
-          availableDevices={availableDevices}
-          onSelectDevice={handleSelectDevice}
-        />
+          {/* Add Device Modal */}
+          <AddDeviceModal
+            visible={addModalVisible}
+            onClose={() => setAddModalVisible(false)}
+            availableDevices={availableDevices}
+            onSelectDevice={handleSelectDevice}
+          />
 
-        {/* Connection Confirmation Modal */}
-        <DeviceConnectionModal
-          visible={connectionModalVisible}
-          onClose={() => {
-            setConnectionModalVisible(false);
-            setPendingDevice(null);
-          }}
-          onConfirm={handleConnectionConfirm}
-          device={pendingDevice}
-        />
+          {/* Connection Confirmation Modal */}
+          <DeviceConnectionModal
+            visible={connectionModalVisible}
+            onClose={() => {
+              setConnectionModalVisible(false);
+              setPendingDevice(null);
+            }}
+            onConfirm={handleConnectionConfirm}
+            device={pendingDevice}
+          />
 
-        {/* Device Management Modal */}
-        <DeviceManagementModal
-          visible={managementModalVisible}
-          onClose={() => {
-            setManagementModalVisible(false);
-            setSelectedDevice(null);
-          }}
-          onRemove={handleRemoveDevice}
-          onToggleDataSharing={handleToggleDataSharing}
-          device={selectedDevice}
-        />
-      </SafeAreaView>
-    </View>
-  </LightBackground>
+          {/* Device Management Modal */}
+          <DeviceManagementModal
+            visible={managementModalVisible}
+            onClose={() => {
+              setManagementModalVisible(false);
+              setSelectedDevice(null);
+            }}
+            onRemove={handleRemoveDevice}
+            onToggleDataSharing={handleToggleDataSharing}
+            device={selectedDevice}
+          />
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 }

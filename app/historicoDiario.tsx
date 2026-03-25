@@ -44,7 +44,9 @@ const HistoricoDiario = () => {
   };
 
   const handleSelectPeriod = (start: Date, end: Date) => {
-    setDatetPass(`${start.toISOString().split("T")[0]} - ${end.toISOString().split("T")[0]}`);
+    setDatetPass(
+      `${start.toISOString().split("T")[0]} - ${end.toISOString().split("T")[0]}`,
+    );
   };
 
   return (
@@ -52,68 +54,72 @@ const HistoricoDiario = () => {
       <LightBackground>
         <View className="flex-1 px-4 pt-10">
           <SafeAreaView className="flex-1">
-          <View className="mb-4">
-            <BackButton
-              label="Histórico Diário"
-              dark={isDark}
-              onPress={() => router.push("/testDashboard")}
-            />
-          </View>
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 40 }}
-          >
-            <View className="flex-row -mx-4">
-              <CalendarButton
-                label="Dia"
-                onPress={() => handleOpenCalendar("day")}
+            <View className="mb-4">
+              <BackButton
+                label="Histórico Diário"
+                dark={isDark}
+                onPress={() => router.push("/testDashboard")}
               />
-              <CalendarButton
-                label="Período"
-                onPress={() => handleOpenCalendar("period")}
-              />
-              <Text className="ml-4 mt-2 self-center font-bold text-gray-700">{date as string}</Text>
             </View>
+            <ScrollView
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ paddingBottom: 40 }}
+            >
+              <View className="flex-row -mx-4">
+                <CalendarButton
+                  label="Dia"
+                  onPress={() => handleOpenCalendar("day")}
+                />
+                <CalendarButton
+                  label="Período"
+                  onPress={() => handleOpenCalendar("period")}
+                />
+                <Text className="ml-4 mt-2 self-center font-bold text-gray-700">
+                  {date as string}
+                </Text>
+              </View>
 
-            <CalendarModal
-              isVisible={isModalVisible}
-              onClose={() => setIsModalVisible(false)}
-              mode={calendarMode}
-              onSelectDay={handleSelectDay}
-              onSelectPeriod={handleSelectPeriod}
-            />
+              <CalendarModal
+                isVisible={isModalVisible}
+                onClose={() => setIsModalVisible(false)}
+                mode={calendarMode}
+                onSelectDay={handleSelectDay}
+                onSelectPeriod={handleSelectPeriod}
+              />
 
-            <View className="mt-4 -mx-4">
-              <WidgetGrid>
-                <TouchableOpacity onPress={() => router.push("/MasterDetail")}>
+              <View className="mt-4 -mx-4">
+                <WidgetGrid>
+                  <TouchableOpacity
+                    onPress={() => router.push("/MasterDetail")}
+                  >
+                    <DashboardMetricWidget
+                      type="heartRate"
+                      endpoint="bpm"
+                      variant="2-3"
+                    />
+                  </TouchableOpacity>
                   <DashboardMetricWidget
-                    type="heartRate"
-                    endpoint="bpm"
+                    type="bloodPressure"
+                    endpoint="bloodPressure"
+                    variant="1-2"
+                  />
+                  <DashboardMetricWidget
+                    type="temp"
+                    endpoint="temperature"
+                    variant="1-3"
+                  />
+                  <DashboardMetricWidget
+                    type="steps"
+                    endpoint="steps"
                     variant="2-3"
                   />
-                </TouchableOpacity>
-                <DashboardMetricWidget
-                  type="bloodPressure"
-                  endpoint="bloodPressure"
-                  variant="1-2"
-                />
-                <DashboardMetricWidget
-                  type="temp"
-                  endpoint="temperature"
-                  variant="1-3"
-                />
-                <DashboardMetricWidget
-                  type="steps"
-                  endpoint="steps"
-                  variant="2-3"
-                />
-              </WidgetGrid>
-            </View>
-          </ScrollView>
-        </SafeAreaView>
-      </View>
-    </LightBackground>
-  </QueryClientProvider>
+                </WidgetGrid>
+              </View>
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      </LightBackground>
+    </QueryClientProvider>
   );
 };
 

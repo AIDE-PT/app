@@ -115,7 +115,11 @@ export function QRcode({
             disabled={requesting}
             className="px-4 py-2 bg-[#5061FF] rounded-full"
             accessibilityRole="button"
-            accessibilityLabel={requesting ? "A pedir permissão da câmara" : "Permitir acesso à câmara"}
+            accessibilityLabel={
+              requesting
+                ? "A pedir permissão da câmara"
+                : "Permitir acesso à câmara"
+            }
             accessibilityHint="Permite ler o QR code com a câmara."
           >
             <Text className="text-white font-semibold">

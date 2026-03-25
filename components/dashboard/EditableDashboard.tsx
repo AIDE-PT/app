@@ -17,7 +17,10 @@ import {
   UIManager,
   View,
 } from "react-native";
-import { SafeAreaView, useSafeAreaInsets } from "react-native-safe-area-context";
+import {
+  SafeAreaView,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import Navbar from "@/components/navBar/NavBar";
 import WidgetIcon from "@/components/svg/WidgetIcon";
@@ -195,7 +198,9 @@ export default function EditableDashboard({
   };
 
   const addWidget = useCallback((widgetId: string) => {
-    const widgetTemplate = DASHBOARD_CONFIG.find((widget) => widget.id === widgetId);
+    const widgetTemplate = DASHBOARD_CONFIG.find(
+      (widget) => widget.id === widgetId,
+    );
     if (!widgetTemplate) return;
 
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -410,7 +415,8 @@ export default function EditableDashboard({
   const heroStatus: "good" | "warning" | "critical" = (() => {
     const unread = alerts.filter((a) => !a.read);
     if (unread.some((a) => a.severity === "high")) return "critical";
-    if (unread.some((a) => a.severity === "medium" || a.severity === "low")) return "warning";
+    if (unread.some((a) => a.severity === "medium" || a.severity === "low"))
+      return "warning";
     return "good";
   })();
 
@@ -430,7 +436,10 @@ export default function EditableDashboard({
               overflow: "visible",
             }}
           >
-            <SafeAreaView style={{ backgroundColor: 'transparent' }} edges={['top']}>
+            <SafeAreaView
+              style={{ backgroundColor: "transparent" }}
+              edges={["top"]}
+            >
               <TopBar
                 showBackground={true}
                 cuidados={cuidados}
@@ -443,8 +452,14 @@ export default function EditableDashboard({
           </View>
         )}
 
-        <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['bottom']}>
-          <ScrollView style={{ flex: 1 }} scrollEnabled={draggingWidgetId === null}>
+        <SafeAreaView
+          style={{ flex: 1, backgroundColor: "transparent" }}
+          edges={["bottom"]}
+        >
+          <ScrollView
+            style={{ flex: 1 }}
+            scrollEnabled={draggingWidgetId === null}
+          >
             {/* Hero Section — extends to top edge, content padded below TopBar */}
             <HealthStatusHero
               userName="Juliana K."
@@ -454,163 +469,182 @@ export default function EditableDashboard({
               onCheckNotifications={() => router.push("/notificacoes")}
             />
 
-          <WidgetGrid
-            contentRef={gridContentRef}
-            onContentLayout={measureGrid}
-            scrollEnabled={false}
-          >
-            {activeWidgets.map((item) => {
-              const isBeingDragged = draggingWidgetId === item.id;
-              const isSizeMenuOpen = openSizeMenuId === item.id;
+            <WidgetGrid
+              contentRef={gridContentRef}
+              onContentLayout={measureGrid}
+              scrollEnabled={false}
+            >
+              {activeWidgets.map((item) => {
+                const isBeingDragged = draggingWidgetId === item.id;
+                const isSizeMenuOpen = openSizeMenuId === item.id;
 
-              return (
-                <View
-                  key={item.id}
-                  className="relative"
-                  style={
-                    isSizeMenuOpen
-                      ? {
-                          zIndex: 2000,
-                          elevation: 2000,
-                        }
-                      : undefined
-                  }
-                  onLayout={(event) => registerCardLayout(item.id, event)}
-                >
-                  <Pressable
-                    onPress={() => handleCardPress(item.id)}
-                    onPressIn={notEditable ? undefined : measureGrid}
-                    onLongPress={
-                      notEditable
-                        ? undefined
-                        : (event) => beginDrag(item.id, event)
+                return (
+                  <View
+                    key={item.id}
+                    className="relative"
+                    style={
+                      isSizeMenuOpen
+                        ? {
+                            zIndex: 2000,
+                            elevation: 2000,
+                          }
+                        : undefined
                     }
-                    onTouchMove={
-                      notEditable
-                        ? undefined
-                        : (event) => handleDragMove(item.id, event)
-                    }
-                    onTouchEnd={
-                      notEditable ? undefined : () => finishDrag(item.id)
-                    }
-                    onTouchCancel={
-                      notEditable ? undefined : () => finishDrag(item.id)
-                    }
-                    onPressOut={
-                      notEditable ? undefined : () => finishDrag(item.id)
-                    }
-                    delayLongPress={280}
-                    style={isBeingDragged ? { opacity: 0.1 } : undefined}
+                    onLayout={(event) => registerCardLayout(item.id, event)}
                   >
-                    <DashboardMetricWidget
-                      type={item.type}
-                      endpoint={item.endpoint}
-                      variant={item.variant as WidgetVariant}
-                      iconSize={24}
-                    />
-                  </Pressable>
-
-                  {!notEditable && (
-                    <TouchableOpacity
-                      onPress={() => toggleSizeMenu(item.id)}
-                      className={`absolute top-2 right-2 h-7 w-7 rounded-full items-center justify-center z-40 ${isDark ? "bg-aide-dark-card border border-white/20" : "bg-white/90 border border-slate-200"}`}
-                      disabled={Boolean(draggingWidgetId)}
-                      accessibilityRole="button"
-                      accessibilityLabel={`Mais opções para ${item.type}`}
-                      accessibilityHint="Abre opções de tamanho e remoção do widget."
+                    <Pressable
+                      onPress={() => handleCardPress(item.id)}
+                      onPressIn={notEditable ? undefined : measureGrid}
+                      onLongPress={
+                        notEditable
+                          ? undefined
+                          : (event) => beginDrag(item.id, event)
+                      }
+                      onTouchMove={
+                        notEditable
+                          ? undefined
+                          : (event) => handleDragMove(item.id, event)
+                      }
+                      onTouchEnd={
+                        notEditable ? undefined : () => finishDrag(item.id)
+                      }
+                      onTouchCancel={
+                        notEditable ? undefined : () => finishDrag(item.id)
+                      }
+                      onPressOut={
+                        notEditable ? undefined : () => finishDrag(item.id)
+                      }
+                      delayLongPress={280}
+                      style={isBeingDragged ? { opacity: 0.1 } : undefined}
                     >
-                      <Feather name="more-vertical" size={14} color={isDark ? "#ffffff" : "#1e293b"} accessible={false} />
-                    </TouchableOpacity>
-                  )}
+                      <DashboardMetricWidget
+                        type={item.type}
+                        endpoint={item.endpoint}
+                        variant={item.variant as WidgetVariant}
+                        iconSize={24}
+                      />
+                    </Pressable>
 
-                  {!notEditable && isSizeMenuOpen && (
-                    <Animated.View
-                      style={{
-                        position: "absolute",
-                        top: 36,
-                        right: 4,
-                        opacity: menuAnimation,
-                        transform: [
-                          { translateY: menuTranslateY },
-                          { scale: menuScale },
-                        ],
-                        zIndex: 999,
-                        elevation: 12,
-                        borderRadius: 20,
-                        overflow: "hidden",
-                        backgroundColor: isDark ? "rgba(0, 4, 18, 0.95)" : "#ffffff",
-                        borderWidth: 1,
-                        borderColor: isDark ? "rgba(80, 97, 255, 0.3)" : "rgba(80, 97, 255, 0.2)",
-                        minWidth: 140,
-                        boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
-                      }}
-                    >
-                      {SIZE_OPTIONS.map((option) => {
-                        const selected = option.variant === item.variant;
-                        return (
-                          <TouchableOpacity
-                            key={option.variant}
-                            className={`px-4 py-3 flex-row items-center justify-between ${selected ? (isDark ? "bg-blue-900/50" : "bg-blue-50") : (isDark ? "bg-transparent" : "bg-white")}`}
-                            onPress={() => {
-                              setSize(item.id, option.variant);
-                              closeSizeMenu();
-                            }}
-                            accessibilityRole="button"
-                            accessibilityLabel={`Tamanho ${option.label}`}
-                            accessibilityState={{ selected }}
-                          >
-                            <Text
-                              className={`text-sm font-bold ${selected ? (isDark ? "text-blue-300" : "text-blue-700") : (isDark ? "text-slate-300" : "text-slate-600")}`}
-                            >
-                              {option.label}
-                            </Text>
-                            {selected && (
-                              <Feather name="check" size={13} color={isDark ? "#93c5fd" : "#1d4ed8"} accessible={false} />
-                            )}
-                          </TouchableOpacity>
-                        );
-                      })}
-                      {/* Delete Option */}
+                    {!notEditable && (
                       <TouchableOpacity
-                        className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"} border-t ${isDark ? "border-white/10" : "border-slate-100"}`}
-                        onPress={() => {
-                          deleteWidget(item.id);
-                        }}
+                        onPress={() => toggleSizeMenu(item.id)}
+                        className={`absolute top-2 right-2 h-7 w-7 rounded-full items-center justify-center z-40 ${isDark ? "bg-aide-dark-card border border-white/20" : "bg-white/90 border border-slate-200"}`}
+                        disabled={Boolean(draggingWidgetId)}
                         accessibilityRole="button"
-                        accessibilityLabel={`Eliminar widget ${item.type}`}
+                        accessibilityLabel={`Mais opções para ${item.type}`}
+                        accessibilityHint="Abre opções de tamanho e remoção do widget."
                       >
-                        <Text className="text-xs font-bold text-red-500">
-                          Eliminar
-                        </Text>
-                        <Feather name="trash-2" size={13} color="#ef4444" accessible={false} />
+                        <Feather
+                          name="more-vertical"
+                          size={14}
+                          color={isDark ? "#ffffff" : "#1e293b"}
+                          accessible={false}
+                        />
                       </TouchableOpacity>
-                    </Animated.View>
-                  )}
-                </View>
-              );
-            })}
+                    )}
 
-            {draggingWidget && (
-              <View
-                pointerEvents="none"
-                style={{
-                  position: "absolute",
-                  left: dragPosition.x,
-                  top: dragPosition.y,
-                  zIndex: 120,
-                  opacity: 0.96,
-                  transform: [{ scale: 1.03 }],
-                }}
-              >
-                <DashboardMetricWidget
-                  type={draggingWidget.type}
-                  endpoint={draggingWidget.endpoint}
-                  variant={draggingWidget.variant as WidgetVariant}
-                  iconSize={24}
-                />
-              </View>
-            )}
-          </WidgetGrid>
+                    {!notEditable && isSizeMenuOpen && (
+                      <Animated.View
+                        style={{
+                          position: "absolute",
+                          top: 36,
+                          right: 4,
+                          opacity: menuAnimation,
+                          transform: [
+                            { translateY: menuTranslateY },
+                            { scale: menuScale },
+                          ],
+                          zIndex: 999,
+                          elevation: 12,
+                          borderRadius: 20,
+                          overflow: "hidden",
+                          backgroundColor: isDark
+                            ? "rgba(0, 4, 18, 0.95)"
+                            : "#ffffff",
+                          borderWidth: 1,
+                          borderColor: isDark
+                            ? "rgba(80, 97, 255, 0.3)"
+                            : "rgba(80, 97, 255, 0.2)",
+                          minWidth: 140,
+                          boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
+                        }}
+                      >
+                        {SIZE_OPTIONS.map((option) => {
+                          const selected = option.variant === item.variant;
+                          return (
+                            <TouchableOpacity
+                              key={option.variant}
+                              className={`px-4 py-3 flex-row items-center justify-between ${selected ? (isDark ? "bg-blue-900/50" : "bg-blue-50") : isDark ? "bg-transparent" : "bg-white"}`}
+                              onPress={() => {
+                                setSize(item.id, option.variant);
+                                closeSizeMenu();
+                              }}
+                              accessibilityRole="button"
+                              accessibilityLabel={`Tamanho ${option.label}`}
+                              accessibilityState={{ selected }}
+                            >
+                              <Text
+                                className={`text-sm font-bold ${selected ? (isDark ? "text-blue-300" : "text-blue-700") : isDark ? "text-slate-300" : "text-slate-600"}`}
+                              >
+                                {option.label}
+                              </Text>
+                              {selected && (
+                                <Feather
+                                  name="check"
+                                  size={13}
+                                  color={isDark ? "#93c5fd" : "#1d4ed8"}
+                                  accessible={false}
+                                />
+                              )}
+                            </TouchableOpacity>
+                          );
+                        })}
+                        {/* Delete Option */}
+                        <TouchableOpacity
+                          className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"} border-t ${isDark ? "border-white/10" : "border-slate-100"}`}
+                          onPress={() => {
+                            deleteWidget(item.id);
+                          }}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Eliminar widget ${item.type}`}
+                        >
+                          <Text className="text-xs font-bold text-red-500">
+                            Eliminar
+                          </Text>
+                          <Feather
+                            name="trash-2"
+                            size={13}
+                            color="#ef4444"
+                            accessible={false}
+                          />
+                        </TouchableOpacity>
+                      </Animated.View>
+                    )}
+                  </View>
+                );
+              })}
+
+              {draggingWidget && (
+                <View
+                  pointerEvents="none"
+                  style={{
+                    position: "absolute",
+                    left: dragPosition.x,
+                    top: dragPosition.y,
+                    zIndex: 120,
+                    opacity: 0.96,
+                    transform: [{ scale: 1.03 }],
+                  }}
+                >
+                  <DashboardMetricWidget
+                    type={draggingWidget.type}
+                    endpoint={draggingWidget.endpoint}
+                    variant={draggingWidget.variant as WidgetVariant}
+                    iconSize={24}
+                  />
+                </View>
+              )}
+            </WidgetGrid>
           </ScrollView>
         </SafeAreaView>
         <Navbar notEditable onAddWidget={addWidget} />

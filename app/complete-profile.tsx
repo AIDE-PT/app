@@ -79,7 +79,12 @@ export default function CompleteProfile() {
           <View className="flex-1" />
 
           <View className="items-center pb-8">
-            <Button variant="primary" forceLight label="Avancar" onPress={handleNext} />
+            <Button
+              variant="primary"
+              forceLight
+              label="Avancar"
+              onPress={handleNext}
+            />
           </View>
         </View>
       </SafeAreaView>

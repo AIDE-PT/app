@@ -1,9 +1,5 @@
 import React, { useState } from "react";
-import {
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -63,21 +59,36 @@ export const ChoseCuidado = ({
       </View>
 
       {/* Actual expanding component */}
-      <View className="absolute top-0 left-0 right-0 z-50 rounded-[30px]" style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}>
-        <View className={`rounded-[30px] overflow-hidden ${isDark ? "bg-[#131632]" : "bg-white"}`}>
+      <View
+        className="absolute top-0 left-0 right-0 z-50 rounded-[30px]"
+        style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+      >
+        <View
+          className={`rounded-[30px] overflow-hidden ${isDark ? "bg-[#131632]" : "bg-white"}`}
+        >
           <TouchableOpacity
             onPress={toggleDropdown}
             className="w-full flex-row items-center justify-center px-6 py-3"
             activeOpacity={0.8}
             accessibilityRole="button"
             accessibilityLabel={selectedCuidado?.name ?? "Selecionar cuidado"}
-            accessibilityHint={isOpen ? "Fecha a lista de cuidados." : "Abre a lista de cuidados disponíveis."}
+            accessibilityHint={
+              isOpen
+                ? "Fecha a lista de cuidados."
+                : "Abre a lista de cuidados disponíveis."
+            }
             accessibilityState={{ expanded: isOpen }}
           >
-            <Text className={`text-xl font-semibold mr-2 ${isDark ? "text-white" : "text-[#111111]"}`}>
+            <Text
+              className={`text-xl font-semibold mr-2 ${isDark ? "text-white" : "text-[#111111]"}`}
+            >
               {selectedCuidado?.name ?? "Selecionar"}
             </Text>
-            <ArrowIcon variant={isOpen ? "UP" : "DOWN"} dark={isDark} size={20} />
+            <ArrowIcon
+              variant={isOpen ? "UP" : "DOWN"}
+              dark={isDark}
+              size={20}
+            />
           </TouchableOpacity>
 
           <Animated.View style={animatedStyle}>
@@ -90,9 +101,13 @@ export const ChoseCuidado = ({
                 accessibilityRole="button"
                 accessibilityLabel={cuidado.name}
                 accessibilityHint="Seleciona este cuidado."
-                accessibilityState={{ selected: selectedCuidado?.id === cuidado.id }}
+                accessibilityState={{
+                  selected: selectedCuidado?.id === cuidado.id,
+                }}
               >
-                <Text className={`text-lg font-medium text-center ${selectedCuidado?.id === cuidado.id ? (isDark ? "text-blue-300" : "text-[#5061FF]") : (isDark ? "text-white" : "text-[#111111]")}`}>
+                <Text
+                  className={`text-lg font-medium text-center ${selectedCuidado?.id === cuidado.id ? (isDark ? "text-blue-300" : "text-[#5061FF]") : isDark ? "text-white" : "text-[#111111]"}`}
+                >
                   {cuidado.name}
                 </Text>
               </TouchableOpacity>

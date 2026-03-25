@@ -36,60 +36,66 @@ export default function PerfilScreen() {
     <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10">
         <SafeAreaView className="flex-1">
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          showsVerticalScrollIndicator={false}
-        >
-          <View className="">
-            {/* Título e Subtítulo */}
-            <View className="mt-12 mb-8">
-              <Text className={`text-4xl font-safiro ${isDark ? "text-white" : "text-black"}`}>Registo</Text>
-              <Text className={`text-lg font-open-sans mt-2 ${isDark ? "text-white/60" : "text-gray-600"}`}>
-                Como pretende utilizar a aplicação?
-              </Text>
-            </View>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+          >
+            <View className="">
+              {/* Título e Subtítulo */}
+              <View className="mt-12 mb-8">
+                <Text
+                  className={`text-4xl font-safiro ${isDark ? "text-white" : "text-black"}`}
+                >
+                  Registo
+                </Text>
+                <Text
+                  className={`text-lg font-open-sans mt-2 ${isDark ? "text-white/60" : "text-gray-600"}`}
+                >
+                  Como pretende utilizar a aplicação?
+                </Text>
+              </View>
 
-            {/* ÁREA DOS CARDS - Aumentada a margem para evitar sobreposição no topo */}
-            <View className="flex-row" style={{ gap: 15 }}>
-              <Profilecard
-                title="Aider"
-                description="Vou monitorizar e acompanhar"
-                imageSource={aider}
-                iconSource={icon_aider}
-                isSelected={selected === "aider"}
-                isOtherSelected={selected === "cuidado"}
-                onPress={() => setSelected("aider")}
-                forceLight
-              />
-              <Profilecard
-                title="Cuidado"
-                description="Vou partilhar os meus dados de saúde."
-                imageSource={cuidado}
-                iconSource={icon_cuidado}
-                isSelected={selected === "cuidado"}
-                isOtherSelected={selected === "aider"}
-                onPress={() => setSelected("cuidado")}
-                forceLight
-              />
-            </View>
+              {/* ÁREA DOS CARDS - Aumentada a margem para evitar sobreposição no topo */}
+              <View className="flex-row" style={{ gap: 15 }}>
+                <Profilecard
+                  title="Aider"
+                  description="Vou monitorizar e acompanhar"
+                  imageSource={aider}
+                  iconSource={icon_aider}
+                  isSelected={selected === "aider"}
+                  isOtherSelected={selected === "cuidado"}
+                  onPress={() => setSelected("aider")}
+                  forceLight
+                />
+                <Profilecard
+                  title="Cuidado"
+                  description="Vou partilhar os meus dados de saúde."
+                  imageSource={cuidado}
+                  iconSource={icon_cuidado}
+                  isSelected={selected === "cuidado"}
+                  isOtherSelected={selected === "aider"}
+                  onPress={() => setSelected("cuidado")}
+                  forceLight
+                />
+              </View>
 
-            {/* Espaçador flexível */}
-            <View style={{ flex: 1 }} />
+              {/* Espaçador flexível */}
+              <View style={{ flex: 1 }} />
 
-            {/* Botão Avançar */}
-            <View className="items-center mt-10">
-              <Button
-                variant="primary"
-                forceLight
-                label="Avançar"
-                onPress={handleAvançar}
-                disabled={!selected}
-              />
+              {/* Botão Avançar */}
+              <View className="items-center mt-10">
+                <Button
+                  variant="primary"
+                  forceLight
+                  label="Avançar"
+                  onPress={handleAvançar}
+                  disabled={!selected}
+                />
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </View>
-  </LightBackground>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 }

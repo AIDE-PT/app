@@ -48,7 +48,8 @@ export const Input = ({
   const [isInputValid, setIsInputValid] = useState(true);
   const { isDark } = useTheme();
 
-  const useDarkStyling = !forceLight && (variant === "dark" || (variant === "light" && isDark));
+  const useDarkStyling =
+    !forceLight && (variant === "dark" || (variant === "light" && isDark));
   const isPassword = type === "password";
   const isDate = type === "date";
   const isEmail = type === "email";
@@ -151,7 +152,9 @@ export const Input = ({
         activeOpacity={1}
         onPress={() => isDate && setShowDatePicker(true)}
         className={`w-full flex-row items-center rounded-[20px] px-5 py-0.5 ${
-          resolvedErrorText ? "border border-red-500" : "border border-transparent"
+          resolvedErrorText
+            ? "border border-red-500"
+            : "border border-transparent"
         } ${useDarkStyling ? "bg-aide-dark-card" : "bg-white/75"}`}
         style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
       >
@@ -163,7 +166,9 @@ export const Input = ({
             useDarkStyling ? "rgba(255,255,255,0.62)" : "rgba(17,24,39,0.55)"
           }
           autoCapitalize={isEmail ? "none" : props.autoCapitalize}
-          autoCorrect={effectiveValidation !== "none" ? false : props.autoCorrect}
+          autoCorrect={
+            effectiveValidation !== "none" ? false : props.autoCorrect
+          }
           keyboardType={
             isEmail ? "email-address" : isDate ? "numeric" : props.keyboardType
           }
@@ -174,7 +179,9 @@ export const Input = ({
           editable={!isDate}
           value={isDate ? formattedDate : props.value}
           pointerEvents={isDate ? "none" : "auto"}
-          accessibilityLabel={props.accessibilityLabel ?? label ?? props.placeholder}
+          accessibilityLabel={
+            props.accessibilityLabel ?? label ?? props.placeholder
+          }
           accessibilityHint={props.accessibilityHint ?? accessibilityHint}
           accessibilityLanguage="pt-PT"
           accessibilityState={{
@@ -199,7 +206,9 @@ export const Input = ({
             onPress={() => setShowPassword(!showPassword)}
             className="ml-2"
             accessibilityRole="button"
-            accessibilityLabel={showPassword ? "Ocultar palavra-passe" : "Mostrar palavra-passe"}
+            accessibilityLabel={
+              showPassword ? "Ocultar palavra-passe" : "Mostrar palavra-passe"
+            }
             accessibilityHint="Alterna a visibilidade da palavra-passe."
             accessibilityLanguage="pt-PT"
           >
@@ -219,7 +228,11 @@ export const Input = ({
       </TouchableOpacity>
 
       {resolvedErrorText ? (
-        <View className="mt-1 ml-1 flex-row items-start" accessibilityRole="alert" accessibilityLanguage="pt-PT">
+        <View
+          className="mt-1 ml-1 flex-row items-start"
+          accessibilityRole="alert"
+          accessibilityLanguage="pt-PT"
+        >
           <AlertCircle
             size={13}
             color={useDarkStyling ? "#FCA5A5" : "#B91C1C"}

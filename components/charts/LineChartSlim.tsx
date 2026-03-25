@@ -76,9 +76,16 @@ export default function SimpleLineChart({
   const darkLabelColor = "rgba(255, 255, 255, 0.6)";
   const darkGridColor = "rgba(255, 255, 255, 0.1)";
 
-  const bgGradient = backgroundGradient === "#ffffff" && isDark ? darkBgGradient : backgroundGradient;
-  const lblColor = labelColor === DEFAULT_LIGHT_LABEL_COLOR && isDark ? darkLabelColor : labelColor;
-  const grdColor = gridColor === "#E5E7EB" && isDark ? darkGridColor : gridColor;
+  const bgGradient =
+    backgroundGradient === "#ffffff" && isDark
+      ? darkBgGradient
+      : backgroundGradient;
+  const lblColor =
+    labelColor === DEFAULT_LIGHT_LABEL_COLOR && isDark
+      ? darkLabelColor
+      : labelColor;
+  const grdColor =
+    gridColor === "#E5E7EB" && isDark ? darkGridColor : gridColor;
 
   const combinedStyle = StyleSheet.flatten([
     {

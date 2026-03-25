@@ -26,9 +26,15 @@ const MainDetails = ({
 }: MainDetailsProps) => {
   const { isDark, colors } = useTheme();
   const resolvedStatusBg = statusBgColor ?? colors.semantic.success;
-  const resolvedStatusText = statusTextColor ?? (isDark ? "#001018" : "#063B1A");
+  const resolvedStatusText =
+    statusTextColor ?? (isDark ? "#001018" : "#063B1A");
 
-  const badgeIcon = status === "normal" ? "smile" : status === "warning" ? "alert-circle" : "alert-triangle";
+  const badgeIcon =
+    status === "normal"
+      ? "smile"
+      : status === "warning"
+        ? "alert-circle"
+        : "alert-triangle";
   const resolvedLabel = statusLabel ?? status;
 
   return (
@@ -39,10 +45,14 @@ const MainDetails = ({
       {/* Left Section */}
       <View className="flex-col justify-center gap-4">
         <View className="flex-row items-baseline">
-          <Text className={`text-[96px] leading-[96px] font-bold font-open-sans tracking-tighter ${isDark ? "text-white" : "text-black"}`}>
+          <Text
+            className={`text-[96px] leading-[96px] font-bold font-open-sans tracking-tighter ${isDark ? "text-white" : "text-black"}`}
+          >
             {value}
           </Text>
-          <Text className={`text-2xl font-medium font-open-sans ml-1 ${isDark ? "text-white" : "text-black"}`}>
+          <Text
+            className={`text-2xl font-medium font-open-sans ml-1 ${isDark ? "text-white" : "text-black"}`}
+          >
             {unit}
           </Text>
         </View>
@@ -53,8 +63,16 @@ const MainDetails = ({
           accessibilityRole="text"
           accessibilityLabel={`Estado ${resolvedLabel}`}
         >
-          <Feather name={badgeIcon as any} size={24} color={resolvedStatusText} accessible={false} />
-          <Text className="text-xl font-open-sans font-medium pb-1" style={{ color: resolvedStatusText }}>
+          <Feather
+            name={badgeIcon as any}
+            size={24}
+            color={resolvedStatusText}
+            accessible={false}
+          />
+          <Text
+            className="text-xl font-open-sans font-medium pb-1"
+            style={{ color: resolvedStatusText }}
+          >
             {resolvedLabel}
           </Text>
         </View>
@@ -65,30 +83,52 @@ const MainDetails = ({
         {/* Max */}
         <View className="items-end gap-1">
           <View className="flex-row items-baseline">
-            <Text className="text-4xl font-bold font-open-sans-semibold" style={{ color: colors.semantic.danger }}>
+            <Text
+              className="text-4xl font-bold font-open-sans-semibold"
+              style={{ color: colors.semantic.danger }}
+            >
               {max}
             </Text>
-            <Text className="text-lg font-medium ml-1" style={{ color: colors.semantic.danger }}>
+            <Text
+              className="text-lg font-medium ml-1"
+              style={{ color: colors.semantic.danger }}
+            >
               {unit}
             </Text>
           </View>
-          <Text className={`text-black text-xl font-open-sans ${isDark ? "text-white/60" : "text-black"}`}>Máximo</Text>
+          <Text
+            className={`text-black text-xl font-open-sans ${isDark ? "text-white/60" : "text-black"}`}
+          >
+            Máximo
+          </Text>
         </View>
 
         {/* Divider - using a View as a line */}
-        <View className={`h-[3px] w-16 my-4 ${isDark ? "bg-gray-700" : "bg-gray-200"}`} />
+        <View
+          className={`h-[3px] w-16 my-4 ${isDark ? "bg-gray-700" : "bg-gray-200"}`}
+        />
 
         {/* Min */}
         <View className="items-end gap-1">
           <View className="flex-row items-baseline">
-            <Text className="text-4xl font-bold font-open-sans-semibold" style={{ color: colors.semantic.success }}>
+            <Text
+              className="text-4xl font-bold font-open-sans-semibold"
+              style={{ color: colors.semantic.success }}
+            >
               {min}
             </Text>
-            <Text className="text-lg font-medium ml-1" style={{ color: colors.semantic.success }}>
+            <Text
+              className="text-lg font-medium ml-1"
+              style={{ color: colors.semantic.success }}
+            >
               {unit}
             </Text>
           </View>
-          <Text className={`text-black text-xl font-open-sans ${isDark ? "text-white/60" : "text-black"}`}>Mínimo</Text>
+          <Text
+            className={`text-black text-xl font-open-sans ${isDark ? "text-white/60" : "text-black"}`}
+          >
+            Mínimo
+          </Text>
         </View>
       </View>
     </View>

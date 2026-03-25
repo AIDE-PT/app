@@ -39,20 +39,24 @@ const TopBar = ({
   const ballBg = isDark ? "bg-[#131632]" : "bg-white";
   const styleBall = `items-center w-[50px] h-[50px] rounded-[100px] justify-center ${ballBg}`;
 
-  const backgroundStyle = showBackground ? {
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
-    paddingTop: 58,
-    paddingBottom: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
-    overflow: "visible" as const,
-  } : {};
+  const backgroundStyle = showBackground
+    ? {
+        borderBottomLeftRadius: 40,
+        borderBottomRightRadius: 40,
+        paddingTop: 58,
+        paddingBottom: 16,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.12,
+        shadowRadius: 8,
+        elevation: 4,
+        overflow: "visible" as const,
+      }
+    : {};
 
-  const overlayColor = isDark ? "rgba(0, 4, 18, 0.55)" : "rgba(219, 237, 248, 0.45)";
+  const overlayColor = isDark
+    ? "rgba(0, 4, 18, 0.55)"
+    : "rgba(219, 237, 248, 0.45)";
 
   return (
     <View

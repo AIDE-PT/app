@@ -55,9 +55,18 @@ const APP_BG_COLORS = {
 } as const;
 
 const BG_COLORS = {
-  good:     { dark: ["#000720", "#000746"] as const, light: ["#AECFFF", "#AECFFF"] as const },
-  warning:  { dark: ["#1A1200", "#2B1F00"] as const, light: ["#FFD84D", "#FFCF33"] as const },
-  critical: { dark: ["#1A0007", "#2A000F"] as const, light: ["#FF8FA3", "#FF7090"] as const },
+  good: {
+    dark: ["#000720", "#000746"] as const,
+    light: ["#AECFFF", "#AECFFF"] as const,
+  },
+  warning: {
+    dark: ["#1A1200", "#2B1F00"] as const,
+    light: ["#FFD84D", "#FFCF33"] as const,
+  },
+  critical: {
+    dark: ["#1A0007", "#2A000F"] as const,
+    light: ["#FF8FA3", "#FF7090"] as const,
+  },
 };
 
 interface LightBackgroundProps {
@@ -66,15 +75,19 @@ interface LightBackgroundProps {
   forceLight?: boolean;
 }
 
-export const LightBackground = ({ children, status = "good", forceLight = false }: LightBackgroundProps) => {
+export const LightBackground = ({
+  children,
+  status = "good",
+  forceLight = false,
+}: LightBackgroundProps) => {
   const { isDark } = useTheme();
   const pathname = usePathname();
   const useDarkMode = !forceLight && isDark;
   const isOnboardingRoute = ONBOARDING_ROUTES.has(pathname);
 
   const fadeAnim = useRef({
-    good:     new Animated.Value(status === "good"     ? 1 : 0),
-    warning:  new Animated.Value(status === "warning"  ? 1 : 0),
+    good: new Animated.Value(status === "good" ? 1 : 0),
+    warning: new Animated.Value(status === "warning" ? 1 : 0),
     critical: new Animated.Value(status === "critical" ? 1 : 0),
   }).current;
   const prevStatus = useRef<BgStatus>(status);
@@ -82,8 +95,18 @@ export const LightBackground = ({ children, status = "good", forceLight = false 
   useEffect(() => {
     if (prevStatus.current === status) return;
     Animated.parallel([
-      Animated.timing(fadeAnim[prevStatus.current], { toValue: 0, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
-      Animated.timing(fadeAnim[status],             { toValue: 1, duration: 1200, easing: Easing.inOut(Easing.quad), useNativeDriver: true }),
+      Animated.timing(fadeAnim[prevStatus.current], {
+        toValue: 0,
+        duration: 1200,
+        easing: Easing.inOut(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim[status], {
+        toValue: 1,
+        duration: 1200,
+        easing: Easing.inOut(Easing.quad),
+        useNativeDriver: true,
+      }),
     ]).start();
     prevStatus.current = status;
   }, [status]);
@@ -92,7 +115,11 @@ export const LightBackground = ({ children, status = "good", forceLight = false 
     return (
       <View
         className="flex-1"
-        style={{ backgroundColor: useDarkMode ? APP_BG_COLORS.dark : APP_BG_COLORS.light }}
+        style={{
+          backgroundColor: useDarkMode
+            ? APP_BG_COLORS.dark
+            : APP_BG_COLORS.light,
+        }}
       >
         {children}
       </View>
@@ -103,7 +130,10 @@ export const LightBackground = ({ children, status = "good", forceLight = false 
     <View className="flex-1">
       {/* Cross-fading background gradients */}
       {(["good", "warning", "critical"] as const).map((s) => (
-        <Animated.View key={s} style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim[s] }]}>
+        <Animated.View
+          key={s}
+          style={[StyleSheet.absoluteFillObject, { opacity: fadeAnim[s] }]}
+        >
           <LinearGradient
             colors={BG_COLORS[s][useDarkMode ? "dark" : "light"]}
             start={{ x: 0, y: 0 }}

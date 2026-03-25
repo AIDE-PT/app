@@ -16,7 +16,10 @@ interface MiniSparklineProps {
 }
 
 // Cubic bezier smoothing for a natural curve
-function smoothPath(points: { x: number; y: number }[], tension: number = 0.4): string {
+function smoothPath(
+  points: { x: number; y: number }[],
+  tension: number = 0.4,
+): string {
   if (points.length < 2) return "";
   let path = `M ${points[0].x} ${points[0].y}`;
   for (let i = 0; i < points.length - 1; i++) {
@@ -44,7 +47,10 @@ export default function MiniSparkline({
   yMax,
 }: MiniSparklineProps) {
   // Generate unique gradient ID to avoid conflicts when multiple sparklines are rendered
-  const gradientId = useMemo(() => `grad-${Math.random().toString(36).substr(2, 9)}`, []);
+  const gradientId = useMemo(
+    () => `grad-${Math.random().toString(36).substr(2, 9)}`,
+    [],
+  );
 
   if (!data || data.length < 2) return null;
 
@@ -54,14 +60,18 @@ export default function MiniSparkline({
 
   // Generate Y-axis labels for temperature (35-40 range)
   const showAllLabels = yMin === 35 && yMax === 40;
-  const yLabels = showAllLabels ? [40, 39, 38, 37, 36, 35] : (yMin !== undefined && yMax !== undefined ? [yMax, yMin] : null);
+  const yLabels = showAllLabels
+    ? [40, 39, 38, 37, 36, 35]
+    : yMin !== undefined && yMax !== undefined
+      ? [yMax, yMin]
+      : null;
 
   // Build points with some vertical padding
   const padding = 2;
-  const labelWidth = showAllLabels ? 14 : (yMin !== undefined ? 18 : 0);
+  const labelWidth = showAllLabels ? 14 : yMin !== undefined ? 18 : 0;
   const availableHeight = height - padding * 2;
   const availableWidth = width - labelWidth;
-  
+
   const points = data.map((val, i) => {
     const x = labelWidth + (i / (data.length - 1)) * availableWidth;
     const y = height - padding - ((val - min) / range) * availableHeight;
@@ -75,7 +85,7 @@ export default function MiniSparkline({
 
   // Calculate Y positions for grid lines
   const gridLineStartX = showAllLabels ? 12 : 0;
-  
+
   // Calculate Y positions for each label
   const getYPosition = (labelValue: number): number => {
     const padding = 2;
@@ -86,23 +96,46 @@ export default function MiniSparkline({
   return (
     <View style={{ width, height, position: "relative" }}>
       {yLabels && (
-        <View style={{ position: "absolute", left: 0, top: 0, bottom: 0, justifyContent: "space-between", zIndex: 10 }}>
+        <View
+          style={{
+            position: "absolute",
+            left: 0,
+            top: 0,
+            bottom: 0,
+            justifyContent: "space-between",
+            zIndex: 10,
+          }}
+        >
           {yLabels.map((label, index) => (
-            <Text key={index} style={{ fontSize: 12, color: showAllLabels ? "#3B82F6" : "#94A3B8", fontWeight: "bold" }}>{label}</Text>
+            <Text
+              key={index}
+              style={{
+                fontSize: 12,
+                color: showAllLabels ? "#3B82F6" : "#94A3B8",
+                fontWeight: "bold",
+              }}
+            >
+              {label}
+            </Text>
           ))}
         </View>
       )}
       <Svg width={width} height={height} style={{ zIndex: 5 }}>
         <Defs>
           <LinearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0%" stopColor={gradientFrom} stopOpacity={gradientFromOpacity} />
-            <Stop offset="100%" stopColor={gradientTo} stopOpacity={gradientToOpacity} />
+            <Stop
+              offset="0%"
+              stopColor={gradientFrom}
+              stopOpacity={gradientFromOpacity}
+            />
+            <Stop
+              offset="100%"
+              stopColor={gradientTo}
+              stopOpacity={gradientToOpacity}
+            />
           </LinearGradient>
         </Defs>
-        <Path
-          d={fillPath}
-          fill={`url(#${gradientId})`}
-        />
+        <Path d={fillPath} fill={`url(#${gradientId})`} />
         <Path
           d={linePath}
           fill="none"

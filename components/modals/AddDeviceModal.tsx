@@ -53,14 +53,20 @@ export default function AddDeviceModal({
             style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
           >
             {/* Drag handle */}
-            <View className={`w-[33px] h-[4px] rounded-full mt-4 mb-4 ${isDark ? "bg-white/30" : "bg-[#79747E]"}`} />
+            <View
+              className={`w-[33px] h-[4px] rounded-full mt-4 mb-4 ${isDark ? "bg-white/30" : "bg-[#79747E]"}`}
+            />
 
             {/* Header Texts */}
             <View className="w-full px-6 mb-6">
-              <Text className={`font-safiro text-2xl mb-4 capitalize ${isDark ? "text-white" : "text-black"}`}>
+              <Text
+                className={`font-safiro text-2xl mb-4 capitalize ${isDark ? "text-white" : "text-black"}`}
+              >
                 Adicionar Dispositivos
               </Text>
-              <Text className={`font-open-sans text-lg ${isDark ? "text-white/60" : "text-[#00072099]"}`}>
+              <Text
+                className={`font-open-sans text-lg ${isDark ? "text-white/60" : "text-[#00072099]"}`}
+              >
                 Selecione uma das fontes de dados disponíveis
               </Text>
             </View>
@@ -77,8 +83,12 @@ export default function AddDeviceModal({
                   className={`w-[176px] h-[120px] rounded-[20px] flex-row items-center justify-center gap-2 px-4 ${isDark ? "bg-aide-dark-card border border-white/10" : "bg-white"}`}
                   style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
                 >
-                  <View className={`w-12 h-12 rounded-full items-center justify-center ${isDark ? "bg-white/20" : "bg-[#E9E9E9]"}`}>
-                    <Text className={`font-open-sans font-bold text-xl ${isDark ? "text-white" : "text-black"}`}>
+                  <View
+                    className={`w-12 h-12 rounded-full items-center justify-center ${isDark ? "bg-white/20" : "bg-[#E9E9E9]"}`}
+                  >
+                    <Text
+                      className={`font-open-sans font-bold text-xl ${isDark ? "text-white" : "text-black"}`}
+                    >
                       {device.name.charAt(0).toUpperCase()}
                     </Text>
                   </View>
@@ -93,7 +103,9 @@ export default function AddDeviceModal({
                         </Text>
                       ))
                     ) : (
-                      <Text className={`font-open-sans font-bold text-[20px] ${isDark ? "text-white" : "text-black"}`}>
+                      <Text
+                        className={`font-open-sans font-bold text-[20px] ${isDark ? "text-white" : "text-black"}`}
+                      >
                         {device.name}
                       </Text>
                     )}

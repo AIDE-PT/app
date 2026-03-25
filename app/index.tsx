@@ -24,9 +24,21 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 // AIDE Logo Component using the actual brand icon
-const AideLogo = ({ size = 80, isDark = false }: { size?: number; isDark?: boolean }) => {
+const AideLogo = ({
+  size = 80,
+  isDark = false,
+}: {
+  size?: number;
+  isDark?: boolean;
+}) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 324 324" accessible={false} focusable={false}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 324 324"
+      accessible={false}
+      focusable={false}
+    >
       <Path
         d="M322.334 30.9101C322.334 13.027 307.801 -1.63785 290.007 0.147512C258.574 3.30136 227.713 11.0442 198.419 23.1779C159.134 39.4505 123.438 63.3017 93.3698 93.3696C63.3018 123.438 39.4506 159.133 23.1779 198.419C11.0442 227.712 3.30136 258.574 0.147512 290.006C-1.63785 307.8 13.027 322.333 30.9102 322.333C48.7934 322.333 63.0821 307.78 65.3117 290.037C68.1919 267.116 74.1315 244.634 83.0091 223.202C96.0272 191.773 115.108 163.217 139.163 139.162C163.217 115.108 191.774 96.027 223.202 83.0089C244.635 74.1313 267.116 68.1918 290.037 65.3116C307.781 63.082 322.334 48.7933 322.334 30.9101Z"
         fill={isDark ? "#000720" : "#ffffffff"}
@@ -122,7 +134,13 @@ const ConcentricRings = ({ isDark }: { isDark: boolean }) => {
   const centerY = SCREEN_HEIGHT * 0.35;
 
   const rings = [
-    { radius: 45, color: isDark ? "#7C89FF" : "#5C7CFA", strokeWidth: 2, isDashed: false, delay: 0 },
+    {
+      radius: 45,
+      color: isDark ? "#7C89FF" : "#5C7CFA",
+      strokeWidth: 2,
+      isDashed: false,
+      delay: 0,
+    },
     {
       radius: 70,
       color: isDark ? "#9AADE8" : "#748FFC",
@@ -195,10 +213,12 @@ export default function App() {
           }}
         >
           {/* Middle glow */}
-          <View className={`absolute w-[150px] h-[150px] rounded-full ${isDark ? "bg-[#5061FF]/30" : "bg-[#A9BDFF]"} opacity-80`} />
+          <View
+            className={`absolute w-[150px] h-[150px] rounded-full ${isDark ? "bg-[#5061FF]/30" : "bg-[#A9BDFF]"} opacity-80`}
+          />
 
           {/* Inner circle with logo */}
-          <View 
+          <View
             className={`w-[100px] h-[100px] rounded-full justify-center items-center ${isDark ? "bg-[#5061FF]/50" : "bg-[#9AADE8]"}`}
             style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
             accessibilityRole="image"
@@ -211,12 +231,16 @@ export default function App() {
         {/* Content Container */}
         <View className="flex-1 justify-end px-8 pb-[60px]">
           {/* Title - Using Safiro font */}
-          <Text className={`font-safiro text-[32px] leading-[42px] text-center mb-4 ${isDark ? "text-white" : "text-[#1A1A2E]"}`}>
+          <Text
+            className={`font-safiro text-[32px] leading-[42px] text-center mb-4 ${isDark ? "text-white" : "text-[#1A1A2E]"}`}
+          >
             O futuro do cuidado{"\n"}é conectado.
           </Text>
 
           {/* Subtitle - Using Open Sans */}
-          <Text className={`font-open-sans text-base text-center leading-6 mb-10 px-4 ${isDark ? "text-white/60" : "text-[#4B5563]"}`}>
+          <Text
+            className={`font-open-sans text-base text-center leading-6 mb-10 px-4 ${isDark ? "text-white/60" : "text-[#4B5563]"}`}
+          >
             Simples. Inteligente. Humano.{"\n"}
             Gerir a saúde e bem-estar na palma da tua mão.
           </Text>

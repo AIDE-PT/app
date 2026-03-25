@@ -15,7 +15,9 @@ interface TermSectionProps {
 
 const TermSection = ({ number, title, children, isDark }: TermSectionProps) => (
   <View className="mb-5">
-    <Text className={`font-open-sans-semibold text-[17px] mb-2 ${isDark ? "text-white" : "text-[#1A1A2E]"}`}>
+    <Text
+      className={`font-open-sans-semibold text-[17px] mb-2 ${isDark ? "text-white" : "text-[#1A1A2E]"}`}
+    >
       {number ? `${number}. ${title}` : title}
     </Text>
     <View>{children}</View>
@@ -29,7 +31,9 @@ interface ParagraphProps {
 }
 
 const Paragraph = ({ children, isDark }: ParagraphProps) => (
-  <Text className={`font-open-sans text-[15px] leading-6 mb-2 ${isDark ? "text-white/80" : "text-[#4B5563]"}`}>
+  <Text
+    className={`font-open-sans text-[15px] leading-6 mb-2 ${isDark ? "text-white/80" : "text-[#4B5563]"}`}
+  >
     {children}
   </Text>
 );
@@ -42,8 +46,14 @@ interface BulletPointProps {
 
 const BulletPoint = ({ children, isDark }: BulletPointProps) => (
   <View className="flex-row mb-1 pl-2">
-    <Text className={`font-open-sans text-[15px] mr-2 ${isDark ? "text-white/80" : "text-[#4B5563]"}`}>•</Text>
-    <Text className={`font-open-sans text-[15px] leading-6 flex-1 ${isDark ? "text-white/80" : "text-[#4B5563]"}`}>
+    <Text
+      className={`font-open-sans text-[15px] mr-2 ${isDark ? "text-white/80" : "text-[#4B5563]"}`}
+    >
+      •
+    </Text>
+    <Text
+      className={`font-open-sans text-[15px] leading-6 flex-1 ${isDark ? "text-white/80" : "text-[#4B5563]"}`}
+    >
       {children}
     </Text>
   </View>
@@ -73,22 +83,27 @@ const TermsOfService = () => {
             {/* Introduction */}
             <View className="mb-6 mt-4">
               <Paragraph isDark={isDark}>
-                Bem-vindo(a) ao AIDE. Estes Termos e Condições são fornecidos apenas
-                para fins de protótipo e demonstração e não constituem um acordo
-                juridicamente vinculativo.
+                Bem-vindo(a) ao AIDE. Estes Termos e Condições são fornecidos
+                apenas para fins de protótipo e demonstração e não constituem um
+                acordo juridicamente vinculativo.
               </Paragraph>
               <Paragraph isDark={isDark}>
-                Ao acessar ou usar este protótipo, você reconhece e concorda com o
-                seguinte:
+                Ao acessar ou usar este protótipo, você reconhece e concorda com
+                o seguinte:
               </Paragraph>
             </View>
 
             {/* Section 1 */}
-            <TermSection number={1} title="Apenas para usos de prototipagem" isDark={isDark}>
+            <TermSection
+              number={1}
+              title="Apenas para usos de prototipagem"
+              isDark={isDark}
+            >
               <Paragraph isDark={isDark}>
-                AIDE é um protótipo conceitual e não comercial. Todos os recursos,
-                conteúdo e funcionalidades estão sujeitos a alterações, remoção ou
-                descontinuação a qualquer momento, sem aviso prévio.
+                AIDE é um protótipo conceitual e não comercial. Todos os
+                recursos, conteúdo e funcionalidades estão sujeitos a
+                alterações, remoção ou descontinuação a qualquer momento, sem
+                aviso prévio.
               </Paragraph>
             </TermSection>
 
@@ -100,8 +115,8 @@ const TermsOfService = () => {
             >
               <Paragraph isDark={isDark}>
                 Qualquer informação, sugestão ou resultado exibido no AIDE é
-                meramente ilustrativo e não deve ser considerado como aconselhamento
-                jurídico, médico, financeiro ou profissional.
+                meramente ilustrativo e não deve ser considerado como
+                aconselhamento jurídico, médico, financeiro ou profissional.
               </Paragraph>
             </TermSection>
 
@@ -109,7 +124,8 @@ const TermsOfService = () => {
             <TermSection number={3} title="Dados e privacidade" isDark={isDark}>
               <Paragraph isDark={isDark}>
                 Quaisquer dados inseridos neste protótipo podem ser fictícios,
-                simulados ou armazenados temporariamente para fins de demonstração.
+                simulados ou armazenados temporariamente para fins de
+                demonstração.
               </Paragraph>
               <BulletPoint isDark={isDark}>
                 Não envie informações sensíveis, confidenciais ou que permitam a
@@ -121,7 +137,11 @@ const TermsOfService = () => {
             </TermSection>
 
             {/* Section 4 */}
-            <TermSection number={4} title="Disponibilidade e precisão" isDark={isDark}>
+            <TermSection
+              number={4}
+              title="Disponibilidade e precisão"
+              isDark={isDark}
+            >
               <Paragraph isDark={isDark}>Não garantimos:</Paragraph>
               <BulletPoint isDark={isDark}>
                 Disponibilidade ou tempo de atividade do sistema
@@ -133,7 +153,11 @@ const TermsOfService = () => {
             </TermSection>
 
             {/* Section 5 */}
-            <TermSection number={5} title="Propriedade intelectual" isDark={isDark}>
+            <TermSection
+              number={5}
+              title="Propriedade intelectual"
+              isDark={isDark}
+            >
               <Paragraph isDark={isDark}>
                 Todos os nomes, logotipos, designs e conteúdo usados ​​neste
                 protótipo são provisórios, salvo indicação em contrário, e
@@ -142,20 +166,28 @@ const TermsOfService = () => {
             </TermSection>
 
             {/* Section 6 */}
-            <TermSection number={6} title="Limitação de responsabilidade" isDark={isDark}>
+            <TermSection
+              number={6}
+              title="Limitação de responsabilidade"
+              isDark={isDark}
+            >
               <Paragraph isDark={isDark}>
-                Na máxima extensão permitida pela legislação aplicável, a AIDE não
-                será responsável por quaisquer danos decorrentes do uso ou da
-                impossibilidade de uso deste protótipo.
+                Na máxima extensão permitida pela legislação aplicável, a AIDE
+                não será responsável por quaisquer danos decorrentes do uso ou
+                da impossibilidade de uso deste protótipo.
               </Paragraph>
             </TermSection>
 
             {/* Section 7 */}
-            <TermSection number={7} title="Alterações a estes termos" isDark={isDark}>
+            <TermSection
+              number={7}
+              title="Alterações a estes termos"
+              isDark={isDark}
+            >
               <Paragraph isDark={isDark}>
-                Estes Termos podem ser modificados a qualquer momento para fins de
-                teste ou iteração. O uso contínuo do protótipo constitui aceitação
-                de quaisquer termos simulados atualizados.
+                Estes Termos podem ser modificados a qualquer momento para fins
+                de teste ou iteração. O uso contínuo do protótipo constitui
+                aceitação de quaisquer termos simulados atualizados.
               </Paragraph>
             </TermSection>
 

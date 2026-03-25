@@ -35,15 +35,31 @@ const { width: screenWidth } = Dimensions.get("window");
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 type MetricStatus = "normal" | "warning" | "alert";
-interface ExtraCard { label: string; value: string; unit: string; icon: string; }
+interface ExtraCard {
+  label: string;
+  value: string;
+  unit: string;
+  icon: string;
+}
 interface MetricConfig {
-  label: string; endpoint: string; displayUnit: string;
-  lineColor: string; gradientColor: string; yAxisSuffix: string;
-  segments: number; yMin?: number; yMax?: number;
-  accent: string; accentLight: string;
+  label: string;
+  endpoint: string;
+  displayUnit: string;
+  lineColor: string;
+  gradientColor: string;
+  yAxisSuffix: string;
+  segments: number;
+  yMin?: number;
+  yMax?: number;
+  accent: string;
+  accentLight: string;
   getStatus: (v: number) => MetricStatus;
   statusLabel: (s: MetricStatus) => string;
-  extraCards: (h: number[], s: { min: number; max: number } | null, current: number) => ExtraCard[];
+  extraCards: (
+    h: number[],
+    s: { min: number; max: number } | null,
+    current: number,
+  ) => ExtraCard[];
   formatValue: (v: number) => string;
 }
 
@@ -69,7 +85,8 @@ interface PatternIndicator {
   color: string;
 }
 
-const calcAvg = (arr: number[]) => arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+const calcAvg = (arr: number[]) =>
+  arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
 
 const announceEntryValue = (label: string) => {
   AccessibilityInfo.announceForAccessibility(label);
@@ -100,7 +117,8 @@ function getTrendText({
     ? calcAvg(previousWindow)
     : history[history.length - 1];
 
-  if (previousAvg === 0) return "Tendencia: sem referencia suficiente para comparar.";
+  if (previousAvg === 0)
+    return "Tendencia: sem referencia suficiente para comparar.";
 
   const delta = current - previousAvg;
   const relativeDelta = (delta / Math.abs(previousAvg)) * 100;
@@ -249,15 +267,22 @@ function buildAccessibleSummary({
   allTimeMin: number;
   allTimeMax: number;
 }) {
-  const speechUnit = config.displayUnit === "%" ? "por cento" : config.displayUnit;
-  const toSpeechNumber = (value: string) => value
-    .replace(/\s+/g, "")
-    .replace(/[,.]/g, " virgula ")
-    .replace(/\s+/g, " ")
-    .trim();
+  const speechUnit =
+    config.displayUnit === "%" ? "por cento" : config.displayUnit;
+  const toSpeechNumber = (value: string) =>
+    value
+      .replace(/\s+/g, "")
+      .replace(/[,.]/g, " virgula ")
+      .replace(/\s+/g, " ")
+      .trim();
   const valueText = `${toSpeechNumber(config.formatValue(current))}${speechUnit ? ` ${speechUnit}` : ""}`;
   const rangeText = `${toSpeechNumber(config.formatValue(allTimeMin))}${speechUnit ? ` ${speechUnit}` : ""} ate ${toSpeechNumber(config.formatValue(allTimeMax))}${speechUnit ? ` ${speechUnit}` : ""}`;
-  const recentReadings = history.slice(0, 5).map((v) => `${toSpeechNumber(config.formatValue(v))}${speechUnit ? ` ${speechUnit}` : ""}`);
+  const recentReadings = history
+    .slice(0, 5)
+    .map(
+      (v) =>
+        `${toSpeechNumber(config.formatValue(v))}${speechUnit ? ` ${speechUnit}` : ""}`,
+    );
 
   const lines = [
     `Valor atual: ${valueText}.`,
@@ -273,70 +298,140 @@ function buildAccessibleSummary({
   return {
     title: `Resumo acessivel de ${config.label}`,
     lines,
-    accessibilityLabel: [`Resumo acessivel de ${config.label}.`, ...lines].join(" "),
+    accessibilityLabel: [`Resumo acessivel de ${config.label}.`, ...lines].join(
+      " ",
+    ),
   };
 }
 
 // ─── Metric Configurations ────────────────────────────────────────────────────
 const METRIC_CONFIGS: Record<string, MetricConfig> = {
   heart: {
-    label: "Batimentos Cardíacos", endpoint: "bpm", displayUnit: "bpm",
-    lineColor: "#7C89FF", gradientColor: "#7C89FF", yAxisSuffix: " bpm",
-    segments: 4, accent: "#7C89FF", accentLight: "#E8EAFF",
+    label: "Batimentos Cardíacos",
+    endpoint: "bpm",
+    displayUnit: "bpm",
+    lineColor: "#7C89FF",
+    gradientColor: "#7C89FF",
+    yAxisSuffix: " bpm",
+    segments: 4,
+    accent: "#7C89FF",
+    accentLight: "#E8EAFF",
     formatValue: (v) => Math.round(v).toString(),
-    getStatus: (v) => v >= 60 && v <= 100 ? "normal" : v <= 120 ? "warning" : "alert",
-    statusLabel: (s) => s === "normal" ? "Normal" : s === "warning" ? "Elevado" : "Crítico",
+    getStatus: (v) =>
+      v >= 60 && v <= 100 ? "normal" : v <= 120 ? "warning" : "alert",
+    statusLabel: (s) =>
+      s === "normal" ? "Normal" : s === "warning" ? "Elevado" : "Crítico",
     extraCards: (h) => [],
   },
   stress: {
-    label: "Nível de Stress", endpoint: "stress", displayUnit: "",
-    lineColor: "#7C89FF", gradientColor: "#7C89FF", yAxisSuffix: "",
-    segments: 4, yMin: 0, yMax: 100, accent: "#7C89FF", accentLight: "#E8EAFF",
+    label: "Nível de Stress",
+    endpoint: "stress",
+    displayUnit: "",
+    lineColor: "#7C89FF",
+    gradientColor: "#7C89FF",
+    yAxisSuffix: "",
+    segments: 4,
+    yMin: 0,
+    yMax: 100,
+    accent: "#7C89FF",
+    accentLight: "#E8EAFF",
     formatValue: (v) => Math.round(v).toString(),
-    getStatus: (v) => v < 40 ? "normal" : v <= 70 ? "warning" : "alert",
-    statusLabel: (s) => s === "normal" ? "Baixo" : s === "warning" ? "Moderado" : "Alto",
+    getStatus: (v) => (v < 40 ? "normal" : v <= 70 ? "warning" : "alert"),
+    statusLabel: (s) =>
+      s === "normal" ? "Baixo" : s === "warning" ? "Moderado" : "Alto",
     extraCards: (h) => [],
   },
   steps: {
-    label: "Passos", endpoint: "steps", displayUnit: "passos",
-    lineColor: "#7C89FF", gradientColor: "#7C89FF", yAxisSuffix: "",
-    segments: 4, accent: "#7C89FF", accentLight: "#E8EAFF",
+    label: "Passos",
+    endpoint: "steps",
+    displayUnit: "passos",
+    lineColor: "#7C89FF",
+    gradientColor: "#7C89FF",
+    yAxisSuffix: "",
+    segments: 4,
+    accent: "#7C89FF",
+    accentLight: "#E8EAFF",
     formatValue: (v) => Math.round(v).toLocaleString("pt-PT"),
     getStatus: () => "normal",
     statusLabel: () => "Ativo",
     extraCards: (h) => [],
   },
   temp: {
-    label: "Temperatura Corporal", endpoint: "temperature", displayUnit: "ºC",
-    lineColor: "#7C89FF", gradientColor: "#7C89FF", yAxisSuffix: " ºC",
-    segments: 5, yMin: 35, yMax: 40, accent: "#7C89FF", accentLight: "#E8EAFF",
+    label: "Temperatura Corporal",
+    endpoint: "temperature",
+    displayUnit: "ºC",
+    lineColor: "#7C89FF",
+    gradientColor: "#7C89FF",
+    yAxisSuffix: " ºC",
+    segments: 5,
+    yMin: 35,
+    yMax: 40,
+    accent: "#7C89FF",
+    accentLight: "#E8EAFF",
     formatValue: (v) => v.toFixed(1),
-    getStatus: (v) => v >= 36.0 && v <= 37.5 ? "normal" : v <= 38.5 ? "warning" : "alert",
-    statusLabel: (s) => s === "normal" ? "Normal" : s === "warning" ? "Febre Baixa" : "Febre Alta",
+    getStatus: (v) =>
+      v >= 36.0 && v <= 37.5 ? "normal" : v <= 38.5 ? "warning" : "alert",
+    statusLabel: (s) =>
+      s === "normal"
+        ? "Normal"
+        : s === "warning"
+          ? "Febre Baixa"
+          : "Febre Alta",
     extraCards: (h) => [
-      { label: "Média", value: calcAvg(h).toFixed(1), unit: "ºC", icon: "thermometer" },
+      {
+        label: "Média",
+        value: calcAvg(h).toFixed(1),
+        unit: "ºC",
+        icon: "thermometer",
+      },
     ],
   },
   o2: {
-    label: "Saturação de O₂", endpoint: "o2", displayUnit: "%",
-    lineColor: "#7C89FF", gradientColor: "#7C89FF", yAxisSuffix: "%",
-    segments: 4, yMin: 88, yMax: 100, accent: "#7C89FF", accentLight: "#E8EAFF",
+    label: "Saturação de O₂",
+    endpoint: "o2",
+    displayUnit: "%",
+    lineColor: "#7C89FF",
+    gradientColor: "#7C89FF",
+    yAxisSuffix: "%",
+    segments: 4,
+    yMin: 88,
+    yMax: 100,
+    accent: "#7C89FF",
+    accentLight: "#E8EAFF",
     formatValue: (v) => Math.round(v).toString(),
-    getStatus: (v) => v >= 96 ? "normal" : v >= 94 ? "warning" : "alert",
-    statusLabel: (s) => s === "normal" ? "Normal" : s === "warning" ? "Baixo" : "Crítico",
+    getStatus: (v) => (v >= 96 ? "normal" : v >= 94 ? "warning" : "alert"),
+    statusLabel: (s) =>
+      s === "normal" ? "Normal" : s === "warning" ? "Baixo" : "Crítico",
     extraCards: (h) => [],
   },
   glycemia: {
-    label: "Calorias", endpoint: "glycemia", displayUnit: "kcal",
-    lineColor: "#7C89FF", gradientColor: "#7C89FF", yAxisSuffix: "",
-    segments: 4, accent: "#7C89FF", accentLight: "#E8EAFF",
+    label: "Calorias",
+    endpoint: "glycemia",
+    displayUnit: "kcal",
+    lineColor: "#7C89FF",
+    gradientColor: "#7C89FF",
+    yAxisSuffix: "",
+    segments: 4,
+    accent: "#7C89FF",
+    accentLight: "#E8EAFF",
     formatValue: (v) => Math.round(v).toString(),
-    getStatus: (v) => v < 1500 ? "warning" : v <= 2200 ? "normal" : "alert",
-    statusLabel: (s) => s === "normal" ? "Na Meta" : s === "warning" ? "Abaixo" : "Acima",
+    getStatus: (v) => (v < 1500 ? "warning" : v <= 2200 ? "normal" : "alert"),
+    statusLabel: (s) =>
+      s === "normal" ? "Na Meta" : s === "warning" ? "Abaixo" : "Acima",
     extraCards: (h) => [
-      { label: "Queimadas", value: Math.round(calcAvg(h)).toString(), unit: "kcal", icon: "zap" },
+      {
+        label: "Queimadas",
+        value: Math.round(calcAvg(h)).toString(),
+        unit: "kcal",
+        icon: "zap",
+      },
       { label: "Meta", value: "2 000", unit: "kcal", icon: "flag" },
-      { label: "Progresso", value: `${Math.min(Math.round((calcAvg(h) / 2000) * 100), 100)}`, unit: "%", icon: "percent" },
+      {
+        label: "Progresso",
+        value: `${Math.min(Math.round((calcAvg(h) / 2000) * 100), 100)}`,
+        unit: "%",
+        icon: "percent",
+      },
     ],
   },
 };
@@ -347,9 +442,13 @@ const HIGHLIGHT_BLUE = "#7C89FF";
 
 const hexToRgb = (hex: string) => {
   const normalized = hex.replace("#", "");
-  const safeHex = normalized.length === 3
-    ? normalized.split("").map((char) => char + char).join("")
-    : normalized;
+  const safeHex =
+    normalized.length === 3
+      ? normalized
+          .split("")
+          .map((char) => char + char)
+          .join("")
+      : normalized;
 
   return {
     r: parseInt(safeHex.slice(0, 2), 16),
@@ -366,16 +465,20 @@ const toRgba = (hex: string, alpha: number) => {
 const mixHex = (source: string, target: string, weight: number) => {
   const from = hexToRgb(source);
   const to = hexToRgb(target);
-  const mix = (start: number, end: number) => Math.round(start + (end - start) * weight);
+  const mix = (start: number, end: number) =>
+    Math.round(start + (end - start) * weight);
 
   return `rgb(${mix(from.r, to.r)}, ${mix(from.g, to.g)}, ${mix(from.b, to.b)})`;
 };
 
-const buildStatusPalette = (semantic: {
-  success: string;
-  warning: string;
-  danger: string;
-}, isDark: boolean): Record<MetricStatus, { bg: string; text: string; border: string }> => ({
+const buildStatusPalette = (
+  semantic: {
+    success: string;
+    warning: string;
+    danger: string;
+  },
+  isDark: boolean,
+): Record<MetricStatus, { bg: string; text: string; border: string }> => ({
   normal: {
     bg: toRgba(semantic.success, isDark ? 0.18 : 0.12),
     text: isDark ? semantic.success : mixHex(semantic.success, "#111827", 0.62),
@@ -489,13 +592,14 @@ function HeartTripleRings({
   semantic: { success: string; warning: string; danger: string };
 }) {
   const size = 220;
-  const cx = size / 2, cy = size / 2;
+  const cx = size / 2,
+    cy = size / 2;
   const trackColor = isDark ? "rgba(255,255,255,0.07)" : "rgba(15,23,42,0.14)";
   const toRad = (deg: number) => (deg * Math.PI) / 180;
   const rings = [
-    { r: 46, min: 0,  max: 40,  color: semantic.success, label: "Baixo"    },
-    { r: 66, min: 40, max: 70,  color: semantic.warning, label: "Moderado" },
-    { r: 86, min: 70, max: 100, color: semantic.danger, label: "Alto"     },
+    { r: 46, min: 0, max: 40, color: semantic.success, label: "Baixo" },
+    { r: 66, min: 40, max: 70, color: semantic.warning, label: "Moderado" },
+    { r: 86, min: 70, max: 100, color: semantic.danger, label: "Alto" },
   ];
   const ringPct = (min: number, max: number) => {
     if (value <= min) return 0;
@@ -509,8 +613,16 @@ function HeartTripleRings({
       <Defs>
         {rings.map((ring, i) => (
           <LinearGradient key={i} id={`hg${i}`} x1="0" y1="0" x2="1" y2="0">
-            <Stop offset="0%" stopColor={ring.color} stopOpacity={isDark ? 0.5 : 0.82} />
-            <Stop offset="100%" stopColor={ring.color} stopOpacity={isDark ? 1 : 0.98} />
+            <Stop
+              offset="0%"
+              stopColor={ring.color}
+              stopOpacity={isDark ? 0.5 : 0.82}
+            />
+            <Stop
+              offset="100%"
+              stopColor={ring.color}
+              stopOpacity={isDark ? 1 : 0.98}
+            />
           </LinearGradient>
         ))}
       </Defs>
@@ -523,10 +635,22 @@ function HeartTripleRings({
         const dotY = cy + ring.r * Math.sin(toRad(dotAngle));
         return (
           <G key={ring.label}>
-            <Circle cx={cx} cy={cy} r={ring.r} fill="none" stroke={trackColor} strokeWidth={isActive ? activeStroke : inactiveStroke} />
+            <Circle
+              cx={cx}
+              cy={cy}
+              r={ring.r}
+              fill="none"
+              stroke={trackColor}
+              strokeWidth={isActive ? activeStroke : inactiveStroke}
+            />
             {pct > 0 && (
-              <Circle cx={cx} cy={cy} r={ring.r} fill="none"
-                stroke={`url(#hg${i})`} strokeWidth={isActive ? activeStroke : inactiveStroke}
+              <Circle
+                cx={cx}
+                cy={cy}
+                r={ring.r}
+                fill="none"
+                stroke={`url(#hg${i})`}
+                strokeWidth={isActive ? activeStroke : inactiveStroke}
                 strokeLinecap="round"
                 strokeDasharray={`${circ * pct} ${circ}`}
                 transform={`rotate(-90 ${cx} ${cy})`}
@@ -541,14 +665,36 @@ function HeartTripleRings({
           </G>
         );
       })}
-      <SvgText x={cx} y={cy - 10} fontSize="38" fontWeight="800"
-        fill={isDark ? "#FFF" : "#111827"} textAnchor="middle">{Math.round(value)}</SvgText>
-      <SvgText x={cx} y={cy + 14} fontSize="13"
-        fill={isDark ? "rgba(255,255,255,0.62)" : "#6B7280"} textAnchor="middle">{centerLabel}</SvgText>
+      <SvgText
+        x={cx}
+        y={cy - 10}
+        fontSize="38"
+        fontWeight="800"
+        fill={isDark ? "#FFF" : "#111827"}
+        textAnchor="middle"
+      >
+        {Math.round(value)}
+      </SvgText>
+      <SvgText
+        x={cx}
+        y={cy + 14}
+        fontSize="13"
+        fill={isDark ? "rgba(255,255,255,0.62)" : "#6B7280"}
+        textAnchor="middle"
+      >
+        {centerLabel}
+      </SvgText>
       {rings.map((ring) => (
-        <SvgText key={ring.label} x={cx + ring.r + 8} y={cy + 4}
-          fontSize="8.5" fill={isDark ? "rgba(255,255,255,0.56)" : "#6B7280"}
-          textAnchor="start">{ring.label}</SvgText>
+        <SvgText
+          key={ring.label}
+          x={cx + ring.r + 8}
+          y={cy + 4}
+          fontSize="8.5"
+          fill={isDark ? "rgba(255,255,255,0.56)" : "#6B7280"}
+          textAnchor="start"
+        >
+          {ring.label}
+        </SvgText>
       ))}
     </Svg>
   );
@@ -568,13 +714,18 @@ function O2RangeColumns({
 }) {
   const W = screenWidth - 80;
   const H = 220;
-  const pL = 34, pR = 10, pT = 12, pB = 32;
+  const pL = 34,
+    pR = 10,
+    pT = 12,
+    pB = 32;
   const cW = W - pL - pR;
   const cH = H - pT - pB;
-  const yMin = 85, yMax = 100;
+  const yMin = 85,
+    yMax = 100;
 
   // Build per-day buckets: group history into ~28 buckets
-  const raw = history.length >= 2 ? [...history].reverse() : Array(14).fill(currentValue);
+  const raw =
+    history.length >= 2 ? [...history].reverse() : Array(14).fill(currentValue);
   const bucketCount = Math.min(raw.length, 28);
   const bucketSize = Math.max(1, Math.floor(raw.length / bucketCount));
   const buckets = Array.from({ length: bucketCount }, (_, i) => {
@@ -584,7 +735,8 @@ function O2RangeColumns({
     return { lo, hi, single: lo === hi };
   });
 
-  const toY = (v: number) => pT + cH * (1 - (Math.min(Math.max(v, yMin), yMax) - yMin) / (yMax - yMin));
+  const toY = (v: number) =>
+    pT + cH * (1 - (Math.min(Math.max(v, yMin), yMax) - yMin) / (yMax - yMin));
   const toX = (i: number) => pL + (i / (bucketCount - 1)) * cW;
 
   const barW = Math.max(3, (cW / bucketCount) * 0.55);
@@ -604,9 +756,24 @@ function O2RangeColumns({
           const y = toY(t);
           return (
             <G key={t}>
-              <Line x1={pL} y1={y} x2={W - pR} y2={y}
-                stroke={gridColor} strokeWidth="1" strokeDasharray="4 4" />
-              <SvgText x={pL - 4} y={y + 4} fontSize="9" fill={textColor} textAnchor="end">{t}</SvgText>
+              <Line
+                x1={pL}
+                y1={y}
+                x2={W - pR}
+                y2={y}
+                stroke={gridColor}
+                strokeWidth="1"
+                strokeDasharray="4 4"
+              />
+              <SvgText
+                x={pL - 4}
+                y={y + 4}
+                fontSize="9"
+                fill={textColor}
+                textAnchor="end"
+              >
+                {t}
+              </SvgText>
             </G>
           );
         })}
@@ -617,13 +784,29 @@ function O2RangeColumns({
           const yHi = toY(b.hi);
           if (b.single) {
             // Single dot when lo === hi
-            return <Circle key={i} cx={x} cy={yHi} r={dotR} fill={barColor} opacity={0.85} />;
+            return (
+              <Circle
+                key={i}
+                cx={x}
+                cy={yHi}
+                r={dotR}
+                fill={barColor}
+                opacity={0.85}
+              />
+            );
           }
           return (
             <G key={i}>
               {/* Vertical bar */}
-              <Rect x={x - barW / 2} y={yHi} width={barW} height={yLo - yHi}
-                rx={barW / 2} fill={barColor} opacity={0.8} />
+              <Rect
+                x={x - barW / 2}
+                y={yHi}
+                width={barW}
+                height={yLo - yHi}
+                rx={barW / 2}
+                fill={barColor}
+                opacity={0.8}
+              />
               {/* Top dot */}
               <Circle cx={x} cy={yHi} r={dotR} fill={barColor} />
               {/* Bottom dot */}
@@ -632,11 +815,33 @@ function O2RangeColumns({
           );
         })}
         {/* X-axis baseline */}
-        <Line x1={pL} y1={H - pB} x2={W - pR} y2={H - pB}
-          stroke={gridColor} strokeWidth="1" />
+        <Line
+          x1={pL}
+          y1={H - pB}
+          x2={W - pR}
+          y2={H - pB}
+          stroke={gridColor}
+          strokeWidth="1"
+        />
         {/* X labels: first and last */}
-        <SvgText x={pL} y={H - pB + 14} fontSize="9" fill={textColor} textAnchor="start">-{bucketCount}d</SvgText>
-        <SvgText x={W - pR} y={H - pB + 14} fontSize="9" fill={textColor} textAnchor="end">hoje</SvgText>
+        <SvgText
+          x={pL}
+          y={H - pB + 14}
+          fontSize="9"
+          fill={textColor}
+          textAnchor="start"
+        >
+          -{bucketCount}d
+        </SvgText>
+        <SvgText
+          x={W - pR}
+          y={H - pB + 14}
+          fontSize="9"
+          fill={textColor}
+          textAnchor="end"
+        >
+          hoje
+        </SvgText>
       </Svg>
 
       {buckets.map((b, i) => {
@@ -693,7 +898,9 @@ function O2RangeColumns({
               borderRadius: 8,
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: isDark ? "rgba(15,23,42,0.82)" : "rgba(255,255,255,0.92)",
+              backgroundColor: isDark
+                ? "rgba(15,23,42,0.82)"
+                : "rgba(255,255,255,0.92)",
             }}
           >
             <Feather name={indicator.icon} size={10} color={indicator.color} />
@@ -716,8 +923,12 @@ function StepsBars({
 }) {
   const W = screenWidth - 80;
   const H = 180;
-  const pL = 10, pR = 10, pT = 16, pB = 28;
-  const cW = W - pL - pR, cH = H - pT - pB;
+  const pL = 10,
+    pR = 10,
+    pT = 16,
+    pB = 28;
+  const cW = W - pL - pR,
+    cH = H - pT - pB;
   const bars = data.slice(0, 14).reverse();
   const maxVal = Math.max(...bars, 1);
   const bW = (cW / bars.length) * 0.52;
@@ -729,7 +940,9 @@ function StepsBars({
     x: pL + i * (bW + gW) + bW / 2,
     y: pT + cH - (v / maxVal) * cH,
   }));
-  const linePath = pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+  const linePath = pts
+    .map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`)
+    .join(" ");
   const areaPath = `${linePath} L ${pts[pts.length - 1].x} ${pT + cH} L ${pts[0].x} ${pT + cH} Z`;
 
   return (
@@ -746,8 +959,15 @@ function StepsBars({
         </Defs>
         {/* Grid */}
         {[0, 0.5, 1].map((f, i) => (
-          <Line key={i} x1={pL} y1={pT + cH * (1 - f)} x2={pL + cW} y2={pT + cH * (1 - f)}
-            stroke={trackColor} strokeWidth="1" />
+          <Line
+            key={i}
+            x1={pL}
+            y1={pT + cH * (1 - f)}
+            x2={pL + cW}
+            y2={pT + cH * (1 - f)}
+            stroke={trackColor}
+            strokeWidth="1"
+          />
         ))}
         {/* Bars */}
         {bars.map((v, i) => {
@@ -757,19 +977,56 @@ function StepsBars({
           const today = i === bars.length - 1;
           return (
             <G key={i}>
-              <Rect x={x} y={pT} width={bW} height={cH} rx={3} fill={trackColor} />
-              <Rect x={x} y={y} width={bW} height={bH} rx={3}
-                fill={today ? "#7C89FF" : "#B8BEFF"} opacity={today ? 1 : 0.75} />
+              <Rect
+                x={x}
+                y={pT}
+                width={bW}
+                height={cH}
+                rx={3}
+                fill={trackColor}
+              />
+              <Rect
+                x={x}
+                y={y}
+                width={bW}
+                height={bH}
+                rx={3}
+                fill={today ? "#7C89FF" : "#B8BEFF"}
+                opacity={today ? 1 : 0.75}
+              />
             </G>
           );
         })}
         {/* Area + Line */}
         <Path d={areaPath} fill="url(#sbAreaGrad)" clipPath="url(#sbClip)" />
-        <Path d={linePath} fill="none" stroke="#7C89FF" strokeWidth="2"
-          strokeLinecap="round" strokeLinejoin="round" clipPath="url(#sbClip)" />
+        <Path
+          d={linePath}
+          fill="none"
+          stroke="#7C89FF"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          clipPath="url(#sbClip)"
+        />
         {/* Axis */}
-        <SvgText x={pL + cW} y={H - 6} fontSize="9" fill={textColor} textAnchor="end">hoje</SvgText>
-        <SvgText x={pL} y={H - 6} fontSize="9" fill={textColor} textAnchor="start">-14d</SvgText>
+        <SvgText
+          x={pL + cW}
+          y={H - 6}
+          fontSize="9"
+          fill={textColor}
+          textAnchor="end"
+        >
+          hoje
+        </SvgText>
+        <SvgText
+          x={pL}
+          y={H - 6}
+          fontSize="9"
+          fill={textColor}
+          textAnchor="start"
+        >
+          -14d
+        </SvgText>
       </Svg>
 
       {bars.map((v, i) => {
@@ -822,7 +1079,9 @@ function StepsBars({
               borderRadius: 8,
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor: isDark ? "rgba(15,23,42,0.82)" : "rgba(255,255,255,0.92)",
+              backgroundColor: isDark
+                ? "rgba(15,23,42,0.82)"
+                : "rgba(255,255,255,0.92)",
             }}
           >
             <Feather name={indicator.icon} size={10} color={indicator.color} />
@@ -843,16 +1102,26 @@ function Thermometer({
   isDark: boolean;
   semantic: { success: string; warning: string; danger: string };
 }) {
-  const W = 160, H = 230;
-  const tubX = 40, tubW = 18;
-  const bulbR = 15, bulbCY = H - 26;
-  const tubeTop = 18, tubeBot = bulbCY - bulbR + 4;
+  const W = 160,
+    H = 230;
+  const tubX = 40,
+    tubW = 18;
+  const bulbR = 15,
+    bulbCY = H - 26;
+  const tubeTop = 18,
+    tubeBot = bulbCY - bulbR + 4;
   const tubeH = tubeBot - tubeTop;
-  const min = 35, max = 40;
+  const min = 35,
+    max = 40;
   const pct = Math.min(Math.max((value - min) / (max - min), 0), 1);
   const fillH = tubeH * pct;
   const fillY = tubeBot - fillH;
-  const fillColor = value <= 37.5 ? semantic.success : value <= 38.5 ? semantic.warning : semantic.danger;
+  const fillColor =
+    value <= 37.5
+      ? semantic.success
+      : value <= 38.5
+        ? semantic.warning
+        : semantic.danger;
   const trackColor = isDark ? "rgba(255,255,255,0.07)" : "#E5E7EB";
   const textColor = isDark ? "rgba(255,255,255,0.65)" : "#374151";
   const outlineColor = isDark ? "rgba(255,255,255,0.13)" : "rgba(0,0,0,0.09)";
@@ -860,17 +1129,44 @@ function Thermometer({
   return (
     <Svg width={W} height={H}>
       {/* Tube track */}
-      <Rect x={tubX} y={tubeTop} width={tubW} height={tubeH} rx={tubW / 2} fill={trackColor} />
+      <Rect
+        x={tubX}
+        y={tubeTop}
+        width={tubW}
+        height={tubeH}
+        rx={tubW / 2}
+        fill={trackColor}
+      />
       {/* Fill (extends into bulb) */}
-      <Rect x={tubX} y={fillY} width={tubW} height={fillH + bulbR}
-        rx={tubW / 2} fill={fillColor} />
+      <Rect
+        x={tubX}
+        y={fillY}
+        width={tubW}
+        height={fillH + bulbR}
+        rx={tubW / 2}
+        fill={fillColor}
+      />
       {/* Tube outline */}
-      <Rect x={tubX} y={tubeTop} width={tubW} height={tubeH} rx={tubW / 2}
-        fill="none" stroke={outlineColor} strokeWidth="1.5" />
+      <Rect
+        x={tubX}
+        y={tubeTop}
+        width={tubW}
+        height={tubeH}
+        rx={tubW / 2}
+        fill="none"
+        stroke={outlineColor}
+        strokeWidth="1.5"
+      />
       {/* Bulb */}
       <Circle cx={tubX + tubW / 2} cy={bulbCY} r={bulbR} fill={fillColor} />
-      <Circle cx={tubX + tubW / 2} cy={bulbCY} r={bulbR}
-        fill="none" stroke={outlineColor} strokeWidth="1.5" />
+      <Circle
+        cx={tubX + tubW / 2}
+        cy={bulbCY}
+        r={bulbR}
+        fill="none"
+        stroke={outlineColor}
+        strokeWidth="1.5"
+      />
       {/* Ticks + labels */}
       {ticks.map((t) => {
         const tp = (t - min) / (max - min);
@@ -878,14 +1174,33 @@ function Thermometer({
         const major = Number.isInteger(t);
         return (
           <G key={t}>
-            <Line x1={tubX + tubW} y1={tY} x2={tubX + tubW + (major ? 10 : 6)} y2={tY}
-              stroke={outlineColor} strokeWidth="1.2" />
+            <Line
+              x1={tubX + tubW}
+              y1={tY}
+              x2={tubX + tubW + (major ? 10 : 6)}
+              y2={tY}
+              stroke={outlineColor}
+              strokeWidth="1.2"
+            />
             {major && (
-              <SvgText x={tubX + tubW + 14} y={tY + 4} fontSize="11" fill={textColor}>{t}°</SvgText>
+              <SvgText
+                x={tubX + tubW + 14}
+                y={tY + 4}
+                fontSize="11"
+                fill={textColor}
+              >
+                {t}°
+              </SvgText>
             )}
             {t === 37.5 && (
-              <SvgText x={tubX + tubW + 14} y={tY + 4} fontSize="9"
-                fill={isDark ? semantic.warning : "#D97706"}>37.5°</SvgText>
+              <SvgText
+                x={tubX + tubW + 14}
+                y={tY + 4}
+                fontSize="9"
+                fill={isDark ? semantic.warning : "#D97706"}
+              >
+                37.5°
+              </SvgText>
             )}
           </G>
         );
@@ -895,10 +1210,25 @@ function Thermometer({
         const arrowY = tubeBot - tubeH * pct;
         return (
           <>
-            <Line x1={tubX - 2} y1={arrowY} x2={tubX - 14} y2={arrowY}
-              stroke={fillColor} strokeWidth="2.5" strokeLinecap="round" />
-            <SvgText x={tubX - 17} y={arrowY + 4} fontSize="11" fontWeight="700"
-              fill={fillColor} textAnchor="end">{value.toFixed(1)}°</SvgText>
+            <Line
+              x1={tubX - 2}
+              y1={arrowY}
+              x2={tubX - 14}
+              y2={arrowY}
+              stroke={fillColor}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+            />
+            <SvgText
+              x={tubX - 17}
+              y={arrowY + 4}
+              fontSize="11"
+              fontWeight="700"
+              fill={fillColor}
+              textAnchor="end"
+            >
+              {value.toFixed(1)}°
+            </SvgText>
           </>
         );
       })()}
@@ -908,13 +1238,16 @@ function Thermometer({
 
 // ─── CALORIES: Radial sunburst / spoke burst ─────────────────────────────────
 function CalBurst({ value, isDark }: { value: number; isDark: boolean }) {
-  const size = 220, cx = size / 2, cy = size / 2;
+  const size = 220,
+    cx = size / 2,
+    cy = size / 2;
   const goal = 2000;
   const pct = Math.min(value / goal, 1);
   const numSpokes = 36;
-  const innerR = 42, outerR = 88;
+  const innerR = 42,
+    outerR = 88;
   const toRad = (deg: number) => (deg * Math.PI) / 180;
-const trackColor = isDark ? "rgba(255,255,255,0.05)" : "#E8EAFF";
+  const trackColor = isDark ? "rgba(255,255,255,0.05)" : "#E8EAFF";
 
   return (
     <Svg width={size} height={size}>
@@ -927,43 +1260,91 @@ const trackColor = isDark ? "rgba(255,255,255,0.05)" : "#E8EAFF";
       {Array.from({ length: numSpokes }, (_, i) => {
         const angle = (360 / numSpokes) * i - 90;
         const filled = i < Math.round(numSpokes * pct);
-        const wobble = filled ? innerR + (outerR - innerR) * (0.55 + 0.45 * Math.abs(Math.sin(toRad(i * 53)))) : innerR + (outerR - innerR) * 0.18;
+        const wobble = filled
+          ? innerR +
+            (outerR - innerR) *
+              (0.55 + 0.45 * Math.abs(Math.sin(toRad(i * 53))))
+          : innerR + (outerR - innerR) * 0.18;
         const x1 = cx + innerR * Math.cos(toRad(angle));
         const y1 = cy + innerR * Math.sin(toRad(angle));
         const x2 = cx + wobble * Math.cos(toRad(angle));
         const y2 = cy + wobble * Math.sin(toRad(angle));
         return (
-          <Line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+          <Line
+            key={i}
+            x1={x1}
+            y1={y1}
+            x2={x2}
+            y2={y2}
             stroke={filled ? "url(#cbGrad)" : trackColor}
-            strokeWidth={filled ? 4.5 : 2.5} strokeLinecap="round" />
+            strokeWidth={filled ? 4.5 : 2.5}
+            strokeLinecap="round"
+          />
         );
       })}
-      <Circle cx={cx} cy={cy} r={innerR - 3}
+      <Circle
+        cx={cx}
+        cy={cy}
+        r={innerR - 3}
         fill={isDark ? "#1C2030" : "#F5F6FF"}
-        stroke={isDark ? "rgba(255,255,255,0.07)" : "#E8EAFF"} strokeWidth="1.5" />
-      <SvgText x={cx} y={cy - 10} fontSize="30" fontWeight="800"
-        fill={isDark ? "#FFF" : "#111827"} textAnchor="middle">{Math.round(value)}</SvgText>
-      <SvgText x={cx} y={cy + 10} fontSize="10"
-        fill={isDark ? "rgba(255,255,255,0.62)" : "#6B7280"} textAnchor="middle">kcal</SvgText>
-      <SvgText x={cx} y={cy + 26} fontSize="9"
-        fill="#7C89FF" textAnchor="middle">{Math.round(pct * 100)}% meta</SvgText>
+        stroke={isDark ? "rgba(255,255,255,0.07)" : "#E8EAFF"}
+        strokeWidth="1.5"
+      />
+      <SvgText
+        x={cx}
+        y={cy - 10}
+        fontSize="30"
+        fontWeight="800"
+        fill={isDark ? "#FFF" : "#111827"}
+        textAnchor="middle"
+      >
+        {Math.round(value)}
+      </SvgText>
+      <SvgText
+        x={cx}
+        y={cy + 10}
+        fontSize="10"
+        fill={isDark ? "rgba(255,255,255,0.62)" : "#6B7280"}
+        textAnchor="middle"
+      >
+        kcal
+      </SvgText>
+      <SvgText
+        x={cx}
+        y={cy + 26}
+        fontSize="9"
+        fill="#7C89FF"
+        textAnchor="middle"
+      >
+        {Math.round(pct * 100)}% meta
+      </SvgText>
     </Svg>
   );
 }
 
 // ─── STRESS/HEART: EEG-style symmetric waveform bars ────────────────────────
-function StressWave({ value, history, isDark, colorFn, indicatorFn }: {
-  value: number; history: number[]; isDark: boolean;
+function StressWave({
+  value,
+  history,
+  isDark,
+  colorFn,
+  indicatorFn,
+}: {
+  value: number;
+  history: number[];
+  isDark: boolean;
   colorFn?: (v: number) => string;
   indicatorFn?: (v: number) => PatternIndicator;
 }) {
-  const W = screenWidth - 80, H = 150;
+  const W = screenWidth - 80,
+    H = 150;
   const bars = history.slice(0, 24).reverse();
   if (bars.length < 2) return null;
   const midY = H / 2;
   const bW = (W / bars.length) * 0.5;
   const gW = (W / bars.length) * 0.5;
-  const stressColor = (v: number) => v < 40 ? "#86EFAC" : v <= 70 ? "#FDE68A" : "#FCA5A5";
+  const stressColor = (v: number) =>
+    v < 40 ? "#86EFAC" : v <= 70 ? "#FDE68A" : "#FCA5A5";
   const getColor = colorFn ?? stressColor;
   const maxVal = Math.max(...bars, 1);
   const normalize = (v: number) => v / maxVal;
@@ -976,18 +1357,46 @@ function StressWave({ value, history, isDark, colorFn, indicatorFn }: {
           const color = getColor(v);
           return (
             <G key={i}>
-              <Rect x={x} y={midY - halfH} width={bW} height={halfH}
-                rx={bW / 2} fill={color} opacity="0.9" />
-              <Rect x={x} y={midY} width={bW} height={halfH}
-                rx={bW / 2} fill={color} opacity="0.45" />
+              <Rect
+                x={x}
+                y={midY - halfH}
+                width={bW}
+                height={halfH}
+                rx={bW / 2}
+                fill={color}
+                opacity="0.9"
+              />
+              <Rect
+                x={x}
+                y={midY}
+                width={bW}
+                height={halfH}
+                rx={bW / 2}
+                fill={color}
+                opacity="0.45"
+              />
             </G>
           );
         })}
-        <Line x1={0} y1={midY} x2={W} y2={midY}
+        <Line
+          x1={0}
+          y1={midY}
+          x2={W}
+          y2={midY}
           stroke={isDark ? "rgba(255,255,255,0.13)" : "rgba(0,0,0,0.08)"}
-          strokeWidth="1" strokeDasharray="4,4" />
-        <SvgText x={W - 4} y={14} fontSize="11" fontWeight="700"
-          fill={getColor(value)} textAnchor="end">{Math.round(value)}</SvgText>
+          strokeWidth="1"
+          strokeDasharray="4,4"
+        />
+        <SvgText
+          x={W - 4}
+          y={14}
+          fontSize="11"
+          fontWeight="700"
+          fill={getColor(value)}
+          textAnchor="end"
+        >
+          {Math.round(value)}
+        </SvgText>
       </Svg>
 
       {bars.map((v, i) => {
@@ -1020,31 +1429,38 @@ function StressWave({ value, history, isDark, colorFn, indicatorFn }: {
         );
       })}
 
-      {indicatorFn && bars.map((v, i) => {
-        const halfH = normalize(v) * (H * 0.43);
-        const x = i * (bW + gW);
-        const indicator = indicatorFn(v);
-        return (
-          <View
-            key={`wave-pattern-${i}`}
-            pointerEvents="none"
-            accessible={false}
-            style={{
-              position: "absolute",
-              left: x + bW / 2 - 8,
-              top: Math.max(2, midY - halfH - 18),
-              width: 16,
-              height: 16,
-              borderRadius: 8,
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: isDark ? "rgba(15,23,42,0.82)" : "rgba(255,255,255,0.92)",
-            }}
-          >
-            <Feather name={indicator.icon} size={10} color={indicator.color} />
-          </View>
-        );
-      })}
+      {indicatorFn &&
+        bars.map((v, i) => {
+          const halfH = normalize(v) * (H * 0.43);
+          const x = i * (bW + gW);
+          const indicator = indicatorFn(v);
+          return (
+            <View
+              key={`wave-pattern-${i}`}
+              pointerEvents="none"
+              accessible={false}
+              style={{
+                position: "absolute",
+                left: x + bW / 2 - 8,
+                top: Math.max(2, midY - halfH - 18),
+                width: 16,
+                height: 16,
+                borderRadius: 8,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: isDark
+                  ? "rgba(15,23,42,0.82)"
+                  : "rgba(255,255,255,0.92)",
+              }}
+            >
+              <Feather
+                name={indicator.icon}
+                size={10}
+                color={indicator.color}
+              />
+            </View>
+          );
+        })}
     </View>
   );
 }
@@ -1057,9 +1473,19 @@ const styles = StyleSheet.create({
 });
 
 // ─── Zone List ────────────────────────────────────────────────────────────────
-function ZoneList({ zones, value, isDark }: {
-  zones: { label: string; range: [number, number]; color: string; display: string }[];
-  value: number; isDark: boolean;
+function ZoneList({
+  zones,
+  value,
+  isDark,
+}: {
+  zones: {
+    label: string;
+    range: [number, number];
+    color: string;
+    display: string;
+  }[];
+  value: number;
+  isDark: boolean;
 }) {
   const ts = isDark ? "text-gray-300" : "text-gray-600";
   return (
@@ -1067,13 +1493,36 @@ function ZoneList({ zones, value, isDark }: {
       {zones.map((z) => {
         const active = value >= z.range[0] && value < z.range[1];
         return (
-          <View key={z.label} className="flex-row items-center mb-2 px-3 py-2 rounded-xl"
-            style={active ? { borderWidth: 1, borderColor: z.color, backgroundColor: `${z.color}22` } : undefined}>
-            <View className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: z.color }} />
-            <Text className="text-sm font-open-sans flex-1"
-              style={{ color: BRAND_BLUE, fontWeight: active ? "700" : "400" }}>{z.label}</Text>
+          <View
+            key={z.label}
+            className="flex-row items-center mb-2 px-3 py-2 rounded-xl"
+            style={
+              active
+                ? {
+                    borderWidth: 1,
+                    borderColor: z.color,
+                    backgroundColor: `${z.color}22`,
+                  }
+                : undefined
+            }
+          >
+            <View
+              className="w-3 h-3 rounded-full mr-3"
+              style={{ backgroundColor: z.color }}
+            />
+            <Text
+              className="text-sm font-open-sans flex-1"
+              style={{ color: BRAND_BLUE, fontWeight: active ? "700" : "400" }}
+            >
+              {z.label}
+            </Text>
             <Text className={`text-xs font-open-sans ${ts}`}>{z.display}</Text>
-            {active && <View className="ml-2 w-2 h-2 rounded-full" style={{ backgroundColor: z.color }} />}
+            {active && (
+              <View
+                className="ml-2 w-2 h-2 rounded-full"
+                style={{ backgroundColor: z.color }}
+              />
+            )}
           </View>
         );
       })}
@@ -1139,42 +1588,68 @@ export default function MasterDetail() {
 
   useEffect(() => {
     if (isLoading || !accessibleSummary.accessibilityLabel) return;
-    if (lastAnnouncedSummaryRef.current === accessibleSummary.accessibilityLabel) return;
+    if (
+      lastAnnouncedSummaryRef.current === accessibleSummary.accessibilityLabel
+    )
+      return;
 
     AccessibilityInfo.isScreenReaderEnabled().then((enabled) => {
       if (!enabled) return;
-      AccessibilityInfo.announceForAccessibility(accessibleSummary.accessibilityLabel);
+      AccessibilityInfo.announceForAccessibility(
+        accessibleSummary.accessibilityLabel,
+      );
       lastAnnouncedSummaryRef.current = accessibleSummary.accessibilityLabel;
     });
   }, [isLoading, accessibleSummary.accessibilityLabel]);
 
-  const cardBg = isDark ? "bg-aide-dark-card border-white/10" : "bg-white border-gray-100";
+  const cardBg = isDark
+    ? "bg-aide-dark-card border-white/10"
+    : "bg-white border-gray-100";
   const shadow = { boxShadow: "0 2px 12px 0 rgba(0,0,0,0.08)" } as any;
   const tp = isDark ? "text-white" : "text-black";
   const ts = isDark ? "text-gray-300" : "text-gray-600";
   const tu = isDark ? "text-gray-300" : "text-black";
   const tAccent = config.accent;
-  const heroTitle = resolvedType === "heart" ? "Batimentos Cardíacos" : config.label;
+  const heroTitle =
+    resolvedType === "heart" ? "Batimentos Cardíacos" : config.label;
   const heroValue = config.formatValue(currentRaw);
   const heroDigits = `${Math.abs(Math.trunc(currentRaw))}`.length;
-  const heroFontSize = resolvedType === "steps"
-    ? (heroDigits >= 6 ? 54 : heroDigits >= 5 ? 60 : 68)
-    : 68;
-  const heroLineHeight = resolvedType === "steps"
-    ? (heroDigits >= 6 ? 58 : heroDigits >= 5 ? 64 : 72)
-    : 72;
-  const standardizedScale = getStandardizedMetricScale(resolvedType, colors.semantic);
+  const heroFontSize =
+    resolvedType === "steps"
+      ? heroDigits >= 6
+        ? 54
+        : heroDigits >= 5
+          ? 60
+          : 68
+      : 68;
+  const heroLineHeight =
+    resolvedType === "steps"
+      ? heroDigits >= 6
+        ? 58
+        : heroDigits >= 5
+          ? 64
+          : 72
+      : 72;
+  const standardizedScale = getStandardizedMetricScale(
+    resolvedType,
+    colors.semantic,
+  );
   const rangeSpan = standardizedScale.max - standardizedScale.min;
-  const clampedCurrent = Math.min(Math.max(currentRaw, standardizedScale.min), standardizedScale.max);
-  const markerPercent = rangeSpan > 0
-    ? ((clampedCurrent - standardizedScale.min) / rangeSpan) * 100
-    : 0;
-  const activeBand = standardizedScale.bands.find((band, index) => {
-    const isLast = index === standardizedScale.bands.length - 1;
-    return isLast
-      ? clampedCurrent >= band.min && clampedCurrent <= band.max
-      : clampedCurrent >= band.min && clampedCurrent < band.max;
-  }) ?? standardizedScale.bands[0];
+  const clampedCurrent = Math.min(
+    Math.max(currentRaw, standardizedScale.min),
+    standardizedScale.max,
+  );
+  const markerPercent =
+    rangeSpan > 0
+      ? ((clampedCurrent - standardizedScale.min) / rangeSpan) * 100
+      : 0;
+  const activeBand =
+    standardizedScale.bands.find((band, index) => {
+      const isLast = index === standardizedScale.bands.length - 1;
+      return isLast
+        ? clampedCurrent >= band.min && clampedCurrent <= band.max
+        : clampedCurrent >= band.min && clampedCurrent < band.max;
+    }) ?? standardizedScale.bands[0];
   const formatScaleNumber = (value: number) => {
     if (resolvedType === "steps" || resolvedType === "glycemia") {
       return Math.round(value).toLocaleString("pt-PT");
@@ -1196,7 +1671,8 @@ export default function MasterDetail() {
       if (abs >= 1000) {
         const thousands = Math.floor(abs / 1000);
         const rest = abs % 1000;
-        const base = rest === 0 ? `${thousands} mil` : `${thousands} mil ${rest}`;
+        const base =
+          rest === 0 ? `${thousands} mil` : `${thousands} mil ${rest}`;
         return value < 0 ? `menos ${base}` : base;
       }
       return `${value}`;
@@ -1204,15 +1680,19 @@ export default function MasterDetail() {
     const fixed = value.toFixed(1).replace(".", " virgula ");
     return value < 0 ? `menos ${fixed.replace("-", "")}` : fixed;
   };
-  const spokenUnit = config.displayUnit === "%" ? "por cento" : config.displayUnit;
+  const spokenUnit =
+    config.displayUnit === "%" ? "por cento" : config.displayUnit;
   const spokenCurrent = `${formatNarratorNumber(currentRaw)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
   const spokenDailyAverage = `${formatNarratorNumber(Math.round(calcAvg(history)))} passos`;
   const spokenMax = `${formatNarratorNumber(allTimeMax)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
   const spokenMin = `${formatNarratorNumber(allTimeMin)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
-  const heroAccessibilityLabel = resolvedType === "steps"
-    ? `${heroTitle}. Valor atual ${spokenCurrent}. Estado ${config.statusLabel(status)}. Media diaria ${spokenDailyAverage}. Meta 10 mil passos.`
-    : `${heroTitle}. Valor atual ${spokenCurrent}. Estado ${config.statusLabel(status)}. Maximo ${spokenMax}. Minimo ${spokenMin}.`;
-  const chartLatest = chartData.length ? chartData[chartData.length - 1] : currentRaw;
+  const heroAccessibilityLabel =
+    resolvedType === "steps"
+      ? `${heroTitle}. Valor atual ${spokenCurrent}. Estado ${config.statusLabel(status)}. Media diaria ${spokenDailyAverage}. Meta 10 mil passos.`
+      : `${heroTitle}. Valor atual ${spokenCurrent}. Estado ${config.statusLabel(status)}. Maximo ${spokenMax}. Minimo ${spokenMin}.`;
+  const chartLatest = chartData.length
+    ? chartData[chartData.length - 1]
+    : currentRaw;
   const spokenChartLatest = `${formatNarratorNumber(chartLatest)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
   const heartAvg = chartData.length ? calcAvg(chartData) : null;
   const heartHighs = chartData.filter((v) => v > 100);
@@ -1220,27 +1700,77 @@ export default function MasterDetail() {
   const heartAvgHigh = heartHighs.length ? calcAvg(heartHighs) : null;
   const heartAvgLow = heartLows.length ? calcAvg(heartLows) : null;
 
-  const HEART_ZONES: { label: string; range: [number, number]; color: string; display: string }[] = [
-    { label: "Repouso",  range: [40, 60],   color: "#93C5FD", display: "40 – 60 bpm" },
-    { label: "Normal",   range: [60, 100],  color: colors.semantic.success, display: "60 – 100 bpm" },
-    { label: "Elevado",  range: [100, 140], color: colors.semantic.warning, display: "100 – 140 bpm" },
-    { label: "Máximo",   range: [140, 999], color: colors.semantic.danger, display: "≥ 140 bpm" },
+  const HEART_ZONES: {
+    label: string;
+    range: [number, number];
+    color: string;
+    display: string;
+  }[] = [
+    {
+      label: "Repouso",
+      range: [40, 60],
+      color: "#93C5FD",
+      display: "40 – 60 bpm",
+    },
+    {
+      label: "Normal",
+      range: [60, 100],
+      color: colors.semantic.success,
+      display: "60 – 100 bpm",
+    },
+    {
+      label: "Elevado",
+      range: [100, 140],
+      color: colors.semantic.warning,
+      display: "100 – 140 bpm",
+    },
+    {
+      label: "Máximo",
+      range: [140, 999],
+      color: colors.semantic.danger,
+      display: "≥ 140 bpm",
+    },
   ];
-  const TEMP_ZONES: { label: string; range: [number, number]; color: string; display: string }[] = [
-    { label: "Hipotermia",  range: [0, 36],    color: "#93C5FD", display: "< 36 ºC" },
-    { label: "Normal",      range: [36, 37.5], color: colors.semantic.success, display: "36 – 37.5 ºC" },
-    { label: "Febre Baixa", range: [37.5, 38.5], color: colors.semantic.warning, display: "37.5 – 38.5 ºC" },
-    { label: "Febre Alta",  range: [38.5, 999], color: colors.semantic.danger, display: "≥ 38.5 ºC" },
+  const TEMP_ZONES: {
+    label: string;
+    range: [number, number];
+    color: string;
+    display: string;
+  }[] = [
+    {
+      label: "Hipotermia",
+      range: [0, 36],
+      color: "#93C5FD",
+      display: "< 36 ºC",
+    },
+    {
+      label: "Normal",
+      range: [36, 37.5],
+      color: colors.semantic.success,
+      display: "36 – 37.5 ºC",
+    },
+    {
+      label: "Febre Baixa",
+      range: [37.5, 38.5],
+      color: colors.semantic.warning,
+      display: "37.5 – 38.5 ºC",
+    },
+    {
+      label: "Febre Alta",
+      range: [38.5, 999],
+      color: colors.semantic.danger,
+      display: "≥ 38.5 ºC",
+    },
   ];
   const O2_LEGEND = [
-    { label: "Normal",  desc: "≥ 96%",  color: colors.semantic.success },
-    { label: "Baixo",   desc: "94–95%", color: colors.semantic.warning },
-    { label: "Crítico", desc: "< 94%",  color: colors.semantic.danger },
+    { label: "Normal", desc: "≥ 96%", color: colors.semantic.success },
+    { label: "Baixo", desc: "94–95%", color: colors.semantic.warning },
+    { label: "Crítico", desc: "< 94%", color: colors.semantic.danger },
   ];
   const STRESS_LEGEND = [
-    { label: "Baixo",    desc: "< 40",  color: colors.semantic.success },
+    { label: "Baixo", desc: "< 40", color: colors.semantic.success },
     { label: "Moderado", desc: "40–70", color: colors.semantic.warning },
-    { label: "Alto",     desc: "> 70",  color: colors.semantic.danger },
+    { label: "Alto", desc: "> 70", color: colors.semantic.danger },
   ];
   const getBandRangeSpeech = (band: MetricBand, index: number) => {
     const unitText = spokenUnit ? ` ${spokenUnit}` : "";
@@ -1271,15 +1801,22 @@ export default function MasterDetail() {
                 />
               </View>
             ) : (
-              <ScrollView className="flex-1" showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 48 }}>
-
+              <ScrollView
+                className="flex-1"
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 48 }}
+              >
                 <View
                   accessible
                   collapsable={false}
                   importantForAccessibility="yes"
                   accessibilityLabel={accessibleSummary.accessibilityLabel}
-                  style={{ position: "absolute", width: 1, height: 1, opacity: 0 }}
+                  style={{
+                    position: "absolute",
+                    width: 1,
+                    height: 1,
+                    opacity: 0,
+                  }}
                 />
 
                 {/* ── Hero Value Card ────────────────────────────────────── */}
@@ -1294,7 +1831,10 @@ export default function MasterDetail() {
                 >
                   <View className="flex-row items-start justify-between gap-4">
                     <View className="flex-1" style={{ minWidth: 0 }}>
-                      <Text className="text-base font-safiro" style={{ color: config.accent }}>
+                      <Text
+                        className="text-base font-safiro"
+                        style={{ color: config.accent }}
+                      >
                         {heroTitle}
                       </Text>
                       <View
@@ -1305,60 +1845,185 @@ export default function MasterDetail() {
                         focusable
                         importantForAccessibility="yes"
                       >
-                        <Text style={{
-                          color: isDark ? "#FFFFFF" : "#111827",
-                          fontSize: heroFontSize,
-                          lineHeight: heroLineHeight,
-                          fontWeight: "800",
-                          letterSpacing: -2,
-                        }} className="font-open-sans" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8} accessible={false}>{heroValue}</Text>
-                        <Text className={`text-base font-medium ${tu}`} accessible={false}>{config.displayUnit}</Text>
+                        <Text
+                          style={{
+                            color: isDark ? "#FFFFFF" : "#111827",
+                            fontSize: heroFontSize,
+                            lineHeight: heroLineHeight,
+                            fontWeight: "800",
+                            letterSpacing: -2,
+                          }}
+                          className="font-open-sans"
+                          numberOfLines={1}
+                          adjustsFontSizeToFit
+                          minimumFontScale={0.8}
+                          accessible={false}
+                        >
+                          {heroValue}
+                        </Text>
+                        <Text
+                          className={`text-base font-medium ${tu}`}
+                          accessible={false}
+                        >
+                          {config.displayUnit}
+                        </Text>
                       </View>
-                      <View className="self-start flex-row items-center gap-1.5 px-4 py-1.5 rounded-full"
-                        style={{ backgroundColor: palette.bg, borderWidth: 1, borderColor: palette.border }}>
+                      <View
+                        className="self-start flex-row items-center gap-1.5 px-4 py-1.5 rounded-full"
+                        style={{
+                          backgroundColor: palette.bg,
+                          borderWidth: 1,
+                          borderColor: palette.border,
+                        }}
+                      >
                         <Feather
-                          name={status === "normal" ? "check-circle" : status === "warning" ? "alert-circle" : "alert-triangle"}
-                          size={13} color={palette.text} accessible={false} />
-                        <Text className="text-xs font-bold font-open-sans" style={{ color: palette.text }}>
+                          name={
+                            status === "normal"
+                              ? "check-circle"
+                              : status === "warning"
+                                ? "alert-circle"
+                                : "alert-triangle"
+                          }
+                          size={13}
+                          color={palette.text}
+                          accessible={false}
+                        />
+                        <Text
+                          className="text-xs font-bold font-open-sans"
+                          style={{ color: palette.text }}
+                        >
                           {config.statusLabel(status)}
                         </Text>
                       </View>
                     </View>
-                    <View className="items-end gap-3 flex-shrink-0" style={{ width: 120 }}>
+                    <View
+                      className="items-end gap-3 flex-shrink-0"
+                      style={{ width: 120 }}
+                    >
                       {resolvedType === "steps" ? (
                         <>
-                          <View className="items-end" accessible accessibilityRole="text" accessibilityLabel={`Media diaria ${spokenDailyAverage}.`}>
+                          <View
+                            className="items-end"
+                            accessible
+                            accessibilityRole="text"
+                            accessibilityLabel={`Media diaria ${spokenDailyAverage}.`}
+                          >
                             <View className="flex-row items-baseline">
-                              <Text className={`text-2xl font-bold font-open-sans ${tp}`} accessible={false}>{Math.round(calcAvg(history)).toLocaleString("pt-PT")}</Text>
-                              <Text className={`text-xs ml-1 ${tu}`} accessible={false}>passos</Text>
+                              <Text
+                                className={`text-2xl font-bold font-open-sans ${tp}`}
+                                accessible={false}
+                              >
+                                {Math.round(calcAvg(history)).toLocaleString(
+                                  "pt-PT",
+                                )}
+                              </Text>
+                              <Text
+                                className={`text-xs ml-1 ${tu}`}
+                                accessible={false}
+                              >
+                                passos
+                              </Text>
                             </View>
-                            <Text className="text-xs font-open-sans mt-0.5" style={{ color: tAccent }} accessible={false}>Média Diária</Text>
+                            <Text
+                              className="text-xs font-open-sans mt-0.5"
+                              style={{ color: tAccent }}
+                              accessible={false}
+                            >
+                              Média Diária
+                            </Text>
                           </View>
-                          <View className={`w-10 h-[2px] ${isDark ? "bg-white/15" : "bg-gray-300"}`} />
-                          <View className="items-end" accessible accessibilityRole="text" accessibilityLabel="Meta 10 mil passos.">
+                          <View
+                            className={`w-10 h-[2px] ${isDark ? "bg-white/15" : "bg-gray-300"}`}
+                          />
+                          <View
+                            className="items-end"
+                            accessible
+                            accessibilityRole="text"
+                            accessibilityLabel="Meta 10 mil passos."
+                          >
                             <View className="flex-row items-baseline">
-                              <Text className={`text-2xl font-bold font-open-sans ${tp}`} accessible={false}>10 000</Text>
-                              <Text className={`text-xs ml-1 ${tu}`} accessible={false}>passos</Text>
+                              <Text
+                                className={`text-2xl font-bold font-open-sans ${tp}`}
+                                accessible={false}
+                              >
+                                10 000
+                              </Text>
+                              <Text
+                                className={`text-xs ml-1 ${tu}`}
+                                accessible={false}
+                              >
+                                passos
+                              </Text>
                             </View>
-                            <Text className="text-xs font-open-sans mt-0.5" style={{ color: tAccent }} accessible={false}>Meta</Text>
+                            <Text
+                              className="text-xs font-open-sans mt-0.5"
+                              style={{ color: tAccent }}
+                              accessible={false}
+                            >
+                              Meta
+                            </Text>
                           </View>
                         </>
                       ) : (
                         <>
-                          <View className="items-end" accessible accessibilityRole="text" accessibilityLabel={`Maximo ${spokenMax}.`}>
+                          <View
+                            className="items-end"
+                            accessible
+                            accessibilityRole="text"
+                            accessibilityLabel={`Maximo ${spokenMax}.`}
+                          >
                             <View className="flex-row items-baseline">
-                              <Text className={`text-2xl font-bold font-open-sans ${tp}`} accessible={false}>{allTimeMax}</Text>
-                              <Text className={`text-xs ml-1 ${tu}`} accessible={false}>{config.displayUnit}</Text>
+                              <Text
+                                className={`text-2xl font-bold font-open-sans ${tp}`}
+                                accessible={false}
+                              >
+                                {allTimeMax}
+                              </Text>
+                              <Text
+                                className={`text-xs ml-1 ${tu}`}
+                                accessible={false}
+                              >
+                                {config.displayUnit}
+                              </Text>
                             </View>
-                            <Text className="text-xs font-open-sans mt-0.5" style={{ color: tAccent }} accessible={false}>Máximo</Text>
+                            <Text
+                              className="text-xs font-open-sans mt-0.5"
+                              style={{ color: tAccent }}
+                              accessible={false}
+                            >
+                              Máximo
+                            </Text>
                           </View>
-                          <View className={`w-10 h-[2px] ${isDark ? "bg-white/15" : "bg-gray-300"}`} />
-                          <View className="items-end" accessible accessibilityRole="text" accessibilityLabel={`Minimo ${spokenMin}.`}>
+                          <View
+                            className={`w-10 h-[2px] ${isDark ? "bg-white/15" : "bg-gray-300"}`}
+                          />
+                          <View
+                            className="items-end"
+                            accessible
+                            accessibilityRole="text"
+                            accessibilityLabel={`Minimo ${spokenMin}.`}
+                          >
                             <View className="flex-row items-baseline">
-                              <Text className={`text-2xl font-bold font-open-sans ${tp}`} accessible={false}>{allTimeMin}</Text>
-                              <Text className={`text-xs ml-1 ${tu}`} accessible={false}>{config.displayUnit}</Text>
+                              <Text
+                                className={`text-2xl font-bold font-open-sans ${tp}`}
+                                accessible={false}
+                              >
+                                {allTimeMin}
+                              </Text>
+                              <Text
+                                className={`text-xs ml-1 ${tu}`}
+                                accessible={false}
+                              >
+                                {config.displayUnit}
+                              </Text>
                             </View>
-                            <Text className="text-xs font-open-sans mt-0.5" style={{ color: tAccent }} accessible={false}>Mínimo</Text>
+                            <Text
+                              className="text-xs font-open-sans mt-0.5"
+                              style={{ color: tAccent }}
+                              accessible={false}
+                            >
+                              Mínimo
+                            </Text>
                           </View>
                         </>
                       )}
@@ -1388,13 +2053,23 @@ export default function MasterDetail() {
 
                 {/* ── HEART: EEG waveform ───────────────────────────────── */}
                 {resolvedType === "heart" && (
-                  <View className={`rounded-3xl p-5 border mb-5 ${cardBg}`} style={shadow}>
+                  <View
+                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                    style={shadow}
+                  >
                     <View className="flex-row items-center justify-between mb-4">
-                      <Text className="text-base font-safiro" style={{ color: config.accent }}>
+                      <Text
+                        className="text-base font-safiro"
+                        style={{ color: config.accent }}
+                      >
                         Perfil Cardíaco
                       </Text>
                       <View className="flex-row gap-4">
-                        {[{color:colors.semantic.success,label:"Normal"},{color:colors.semantic.warning,label:"Elevado"},{color:colors.semantic.danger,label:"Crítico"}].map((r) => (
+                        {[
+                          { color: colors.semantic.success, label: "Normal" },
+                          { color: colors.semantic.warning, label: "Elevado" },
+                          { color: colors.semantic.danger, label: "Crítico" },
+                        ].map((r) => (
                           <View
                             key={r.label}
                             className="items-center gap-0.5"
@@ -1402,9 +2077,22 @@ export default function MasterDetail() {
                             accessibilityRole="text"
                             accessibilityLabel={`Legenda cardíaca: ${r.label}.`}
                           >
-                            <View className="w-3 h-3 rounded-full" style={{ backgroundColor: r.color }} accessible={false} />
-                            <Text className="text-xs font-open-sans"
-                              style={{ color: isDark ? "rgba(255,255,255,0.62)" : "#6B7280" }} accessible={false}>{r.label}</Text>
+                            <View
+                              className="w-3 h-3 rounded-full"
+                              style={{ backgroundColor: r.color }}
+                              accessible={false}
+                            />
+                            <Text
+                              className="text-xs font-open-sans"
+                              style={{
+                                color: isDark
+                                  ? "rgba(255,255,255,0.62)"
+                                  : "#6B7280",
+                              }}
+                              accessible={false}
+                            >
+                              {r.label}
+                            </Text>
                           </View>
                         ))}
                       </View>
@@ -1414,24 +2102,62 @@ export default function MasterDetail() {
                       accessible={false}
                       importantForAccessibility="no"
                     >
-                      <StressWave value={currentRaw} history={history} isDark={isDark}
-                        indicatorFn={(v) => getHeartPatternIndicator(v, colors.semantic)}
-                        colorFn={(v) => v <= 60 ? "#93C5FD" : v <= 100 ? colors.semantic.success : v <= 140 ? colors.semantic.warning : colors.semantic.danger} />
+                      <StressWave
+                        value={currentRaw}
+                        history={history}
+                        isDark={isDark}
+                        indicatorFn={(v) =>
+                          getHeartPatternIndicator(v, colors.semantic)
+                        }
+                        colorFn={(v) =>
+                          v <= 60
+                            ? "#93C5FD"
+                            : v <= 100
+                              ? colors.semantic.success
+                              : v <= 140
+                                ? colors.semantic.warning
+                                : colors.semantic.danger
+                        }
+                      />
                     </View>
                     <View className="flex-row h-2 rounded-full overflow-hidden mt-4">
                       <View style={{ flex: 20, backgroundColor: "#93C5FD" }} />
-                      <View style={{ flex: 40, backgroundColor: colors.semantic.success }} />
-                      <View style={{ flex: 30, backgroundColor: colors.semantic.warning }} />
-                      <View style={{ flex: 10, backgroundColor: colors.semantic.danger }} />
+                      <View
+                        style={{
+                          flex: 40,
+                          backgroundColor: colors.semantic.success,
+                        }}
+                      />
+                      <View
+                        style={{
+                          flex: 30,
+                          backgroundColor: colors.semantic.warning,
+                        }}
+                      />
+                      <View
+                        style={{
+                          flex: 10,
+                          backgroundColor: colors.semantic.danger,
+                        }}
+                      />
                     </View>
                     <View className="flex-row justify-between mt-1">
-                      {["40","60","100","140+"].map((v) => (
-                        <Text key={v} className={`text-xs font-open-sans ${ts}`}>{v}</Text>
+                      {["40", "60", "100", "140+"].map((v) => (
+                        <Text
+                          key={v}
+                          className={`text-xs font-open-sans ${ts}`}
+                        >
+                          {v}
+                        </Text>
                       ))}
                     </View>
                     <View
                       className="rounded-2xl p-3 mt-3"
-                      style={{ backgroundColor: isDark ? "rgba(255,255,255,0.04)" : "#F6F7FF" }}
+                      style={{
+                        backgroundColor: isDark
+                          ? "rgba(255,255,255,0.04)"
+                          : "#F6F7FF",
+                      }}
                       accessible
                       accessibilityRole="text"
                       accessibilityLabel="Indicadores do grafico cardiaco: seta para baixo indica batimento baixo, traco indica normal, seta para cima indica elevado ou critico."
@@ -1441,16 +2167,34 @@ export default function MasterDetail() {
                       </Text>
                       <View className="flex-row items-center justify-between">
                         <View className="flex-row items-center gap-1.5">
-                          <Feather name="chevron-down" size={12} color="#93C5FD" />
-                          <Text className={`text-xs font-open-sans ${ts}`}>Baixo</Text>
+                          <Feather
+                            name="chevron-down"
+                            size={12}
+                            color="#93C5FD"
+                          />
+                          <Text className={`text-xs font-open-sans ${ts}`}>
+                            Baixo
+                          </Text>
                         </View>
                         <View className="flex-row items-center gap-1.5">
-                          <Feather name="minus" size={12} color={colors.semantic.success} />
-                          <Text className={`text-xs font-open-sans ${ts}`}>Normal</Text>
+                          <Feather
+                            name="minus"
+                            size={12}
+                            color={colors.semantic.success}
+                          />
+                          <Text className={`text-xs font-open-sans ${ts}`}>
+                            Normal
+                          </Text>
                         </View>
                         <View className="flex-row items-center gap-1.5">
-                          <Feather name="chevron-up" size={12} color={colors.semantic.warning} />
-                          <Text className={`text-xs font-open-sans ${ts}`}>Elevado</Text>
+                          <Feather
+                            name="chevron-up"
+                            size={12}
+                            color={colors.semantic.warning}
+                          />
+                          <Text className={`text-xs font-open-sans ${ts}`}>
+                            Elevado
+                          </Text>
                         </View>
                       </View>
                     </View>
@@ -1459,24 +2203,35 @@ export default function MasterDetail() {
 
                 {/* ── O2: Range column chart ──────────────────────────── */}
                 {resolvedType === "o2" && (
-                  <View className={`rounded-3xl p-5 border mb-5 ${cardBg}`} style={shadow}>
+                  <View
+                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                    style={shadow}
+                  >
                     <View className="flex-row items-center justify-between mb-1">
-                      <Text className="text-base font-safiro" style={{ color: config.accent }}>
+                      <Text
+                        className="text-base font-safiro"
+                        style={{ color: config.accent }}
+                      >
                         Saturação Atual
                       </Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>Intervalo diário</Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>
+                        Intervalo diário
+                      </Text>
                     </View>
                     <View className="flex-row items-baseline gap-1 mb-3">
-                      <Text style={{ color: isDark ? "#FFF" : "#111827", fontSize: 28, fontWeight: "800" }}
-                        className="font-open-sans">
+                      <Text
+                        style={{
+                          color: isDark ? "#FFF" : "#111827",
+                          fontSize: 28,
+                          fontWeight: "800",
+                        }}
+                        className="font-open-sans"
+                      >
                         {allTimeMin}–{allTimeMax}
                       </Text>
                       <Text className={`text-sm font-open-sans ${tu}`}>%</Text>
                     </View>
-                    <View
-                      accessible={false}
-                      importantForAccessibility="no"
-                    >
+                    <View accessible={false} importantForAccessibility="no">
                       <O2RangeColumns
                         history={history}
                         currentValue={currentRaw}
@@ -1493,9 +2248,24 @@ export default function MasterDetail() {
                           accessibilityRole="text"
                           accessibilityLabel={`${r.label}. ${r.desc}.`}
                         >
-                          <View className="w-8 h-3 rounded-full" style={{ backgroundColor: r.color }} accessible={false} />
-                          <Text className="text-xs font-open-sans" style={{ color: tAccent }} accessible={false}>{r.label}</Text>
-                          <Text className={`text-xs font-open-sans ${ts}`} accessible={false}>{r.desc}</Text>
+                          <View
+                            className="w-8 h-3 rounded-full"
+                            style={{ backgroundColor: r.color }}
+                            accessible={false}
+                          />
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{ color: tAccent }}
+                            accessible={false}
+                          >
+                            {r.label}
+                          </Text>
+                          <Text
+                            className={`text-xs font-open-sans ${ts}`}
+                            accessible={false}
+                          >
+                            {r.desc}
+                          </Text>
                         </View>
                       ))}
                     </View>
@@ -1504,12 +2274,20 @@ export default function MasterDetail() {
 
                 {/* ── STEPS: Bar + line chart ───────────────────────────── */}
                 {resolvedType === "steps" && (
-                  <View className={`rounded-3xl p-5 border mb-5 ${cardBg}`} style={shadow}>
+                  <View
+                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                    style={shadow}
+                  >
                     <View className="flex-row items-center justify-between mb-4">
-                      <Text className="text-base font-safiro" style={{ color: config.accent }}>
+                      <Text
+                        className="text-base font-safiro"
+                        style={{ color: config.accent }}
+                      >
                         Passos Diários
                       </Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>Últimos 14 dias</Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>
+                        Últimos 14 dias
+                      </Text>
                     </View>
                     <View
                       className="items-center"
@@ -1524,18 +2302,41 @@ export default function MasterDetail() {
                     </View>
                     <View className="mt-4">
                       <View className="flex-row justify-between mb-1">
-                        <Text className="text-xs font-open-sans" style={{ color: tAccent }}>Progresso para a meta</Text>
-                        <Text className="text-xs font-bold font-open-sans" style={{ color: config.accent }}>
-                          {Math.min(Math.round(((history[0] ?? 0) / 10000) * 100), 100)}%
+                        <Text
+                          className="text-xs font-open-sans"
+                          style={{ color: tAccent }}
+                        >
+                          Progresso para a meta
+                        </Text>
+                        <Text
+                          className="text-xs font-bold font-open-sans"
+                          style={{ color: config.accent }}
+                        >
+                          {Math.min(
+                            Math.round(((history[0] ?? 0) / 10000) * 100),
+                            100,
+                          )}
+                          %
                         </Text>
                       </View>
-                      <View className={`h-3 rounded-full overflow-hidden ${isDark ? "bg-white/15" : "bg-blue-100"}`}>
-                        <View className="h-3 rounded-full"
-                          style={{ width: `${Math.min(((history[0] ?? 0) / 10000) * 100, 100)}%`, backgroundColor: config.accent }} />
+                      <View
+                        className={`h-3 rounded-full overflow-hidden ${isDark ? "bg-white/15" : "bg-blue-100"}`}
+                      >
+                        <View
+                          className="h-3 rounded-full"
+                          style={{
+                            width: `${Math.min(((history[0] ?? 0) / 10000) * 100, 100)}%`,
+                            backgroundColor: config.accent,
+                          }}
+                        />
                       </View>
                       <View className="flex-row justify-between mt-1">
-                        <Text className={`text-xs font-open-sans ${ts}`}>0</Text>
-                        <Text className={`text-xs font-open-sans ${ts}`}>10 000</Text>
+                        <Text className={`text-xs font-open-sans ${ts}`}>
+                          0
+                        </Text>
+                        <Text className={`text-xs font-open-sans ${ts}`}>
+                          10 000
+                        </Text>
                       </View>
                     </View>
                   </View>
@@ -1543,8 +2344,14 @@ export default function MasterDetail() {
 
                 {/* ── TEMP: Thermometer ─────────────────────────────────── */}
                 {resolvedType === "temp" && (
-                  <View className={`rounded-3xl p-5 border mb-5 ${cardBg}`} style={shadow}>
-                    <Text className="text-base font-safiro mb-4" style={{ color: config.accent }}>
+                  <View
+                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                    style={shadow}
+                  >
+                    <Text
+                      className="text-base font-safiro mb-4"
+                      style={{ color: config.accent }}
+                    >
                       Temperatura Atual
                     </Text>
                     <View className="flex-row items-center">
@@ -1556,12 +2363,22 @@ export default function MasterDetail() {
                         accessibilityRole="image"
                         accessibilityLabel={`Grafico de temperatura corporal. Valor atual ${spokenCurrent}.`}
                       >
-                        <Thermometer value={currentRaw} isDark={isDark} semantic={colors.semantic} />
+                        <Thermometer
+                          value={currentRaw}
+                          isDark={isDark}
+                          semantic={colors.semantic}
+                        />
                       </View>
                       <View className="flex-1 gap-3 pl-2">
-                        <Text className="text-xs font-open-sans" style={{ color: tAccent }}>Referência</Text>
+                        <Text
+                          className="text-xs font-open-sans"
+                          style={{ color: tAccent }}
+                        >
+                          Referência
+                        </Text>
                         {TEMP_ZONES.map((z) => {
-                          const active = currentRaw >= z.range[0] && currentRaw < z.range[1];
+                          const active =
+                            currentRaw >= z.range[0] && currentRaw < z.range[1];
                           return (
                             <View
                               key={z.label}
@@ -1569,12 +2386,38 @@ export default function MasterDetail() {
                               accessible
                               accessibilityRole="text"
                               accessibilityLabel={`${z.label}. Intervalo ${z.display}.${active ? " Zona atual." : ""}`}
-                              style={active ? { backgroundColor: `${z.color}28`, borderWidth: 1, borderColor: z.color } : undefined}>
-                              <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: z.color }} accessible={false} />
+                              style={
+                                active
+                                  ? {
+                                      backgroundColor: `${z.color}28`,
+                                      borderWidth: 1,
+                                      borderColor: z.color,
+                                    }
+                                  : undefined
+                              }
+                            >
+                              <View
+                                className="w-2.5 h-2.5 rounded-full"
+                                style={{ backgroundColor: z.color }}
+                                accessible={false}
+                              />
                               <View>
-                                <Text className="text-xs font-open-sans"
-                                  style={{ color: tAccent, fontWeight: active ? "700" : "400" }} accessible={false}>{z.label}</Text>
-                                <Text className={`text-xs font-open-sans ${ts}`} accessible={false}>{z.display}</Text>
+                                <Text
+                                  className="text-xs font-open-sans"
+                                  style={{
+                                    color: tAccent,
+                                    fontWeight: active ? "700" : "400",
+                                  }}
+                                  accessible={false}
+                                >
+                                  {z.label}
+                                </Text>
+                                <Text
+                                  className={`text-xs font-open-sans ${ts}`}
+                                  accessible={false}
+                                >
+                                  {z.display}
+                                </Text>
                               </View>
                             </View>
                           );
@@ -1586,12 +2429,20 @@ export default function MasterDetail() {
 
                 {/* ── CALORIES: Sunburst ────────────────────────────────── */}
                 {resolvedType === "glycemia" && (
-                  <View className={`rounded-3xl p-5 border mb-5 ${cardBg}`} style={shadow}>
+                  <View
+                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                    style={shadow}
+                  >
                     <View className="flex-row items-center justify-between mb-2">
-                      <Text className="text-base font-safiro" style={{ color: config.accent }}>
+                      <Text
+                        className="text-base font-safiro"
+                        style={{ color: config.accent }}
+                      >
                         Calorias Queimadas
                       </Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>Meta: 2 000 kcal</Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>
+                        Meta: 2 000 kcal
+                      </Text>
                     </View>
                     <View
                       className="items-center"
@@ -1603,26 +2454,47 @@ export default function MasterDetail() {
                     >
                       <CalBurst value={currentRaw} isDark={isDark} />
                     </View>
-                    <View className={`h-2 rounded-full mt-2 ${isDark ? "bg-white/15" : "bg-orange-100"}`}>
-                      <View className="h-2 rounded-full"
-                        style={{ width: `${Math.min((currentRaw / 2000) * 100, 100)}%`, backgroundColor: config.accent }} />
+                    <View
+                      className={`h-2 rounded-full mt-2 ${isDark ? "bg-white/15" : "bg-orange-100"}`}
+                    >
+                      <View
+                        className="h-2 rounded-full"
+                        style={{
+                          width: `${Math.min((currentRaw / 2000) * 100, 100)}%`,
+                          backgroundColor: config.accent,
+                        }}
+                      />
                     </View>
                     <View className="flex-row justify-between mt-1">
-                      <Text className={`text-xs font-open-sans ${ts}`}>0 kcal</Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>2 000 kcal</Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>
+                        0 kcal
+                      </Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>
+                        2 000 kcal
+                      </Text>
                     </View>
                   </View>
                 )}
 
                 {/* ── STRESS: 3-Ring Concentric Circles ────────────────── */}
                 {resolvedType === "stress" && (
-                  <View className={`rounded-3xl p-5 border mb-5 ${cardBg}`} style={shadow}>
+                  <View
+                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                    style={shadow}
+                  >
                     <View className="flex-row items-center justify-between mb-1">
-                      <Text className="text-base font-safiro" style={{ color: config.accent }}>
+                      <Text
+                        className="text-base font-safiro"
+                        style={{ color: config.accent }}
+                      >
                         Zonas de Stress
                       </Text>
                       <View className="flex-row gap-3">
-                        {[{color:colors.semantic.success,label:"Baixo"},{color:colors.semantic.warning,label:"Moderado"},{color:colors.semantic.danger,label:"Alto"}].map((z) => (
+                        {[
+                          { color: colors.semantic.success, label: "Baixo" },
+                          { color: colors.semantic.warning, label: "Moderado" },
+                          { color: colors.semantic.danger, label: "Alto" },
+                        ].map((z) => (
                           <View
                             key={z.label}
                             className="flex-row items-center gap-1"
@@ -1630,9 +2502,22 @@ export default function MasterDetail() {
                             accessibilityRole="text"
                             accessibilityLabel={`Nivel de stress ${z.label}.`}
                           >
-                            <View className="w-2 h-2 rounded-full" style={{ backgroundColor: z.color }} accessible={false} />
-                            <Text className="text-xs font-open-sans"
-                              style={{ color: isDark ? "rgba(255,255,255,0.62)" : "#6B7280" }} accessible={false}>{z.label}</Text>
+                            <View
+                              className="w-2 h-2 rounded-full"
+                              style={{ backgroundColor: z.color }}
+                              accessible={false}
+                            />
+                            <Text
+                              className="text-xs font-open-sans"
+                              style={{
+                                color: isDark
+                                  ? "rgba(255,255,255,0.62)"
+                                  : "#6B7280",
+                              }}
+                              accessible={false}
+                            >
+                              {z.label}
+                            </Text>
                           </View>
                         ))}
                       </View>
@@ -1645,13 +2530,29 @@ export default function MasterDetail() {
                       accessibilityRole="image"
                       accessibilityLabel={`Grafico de zonas de stress. Valor atual ${spokenCurrent}.`}
                     >
-                      <HeartTripleRings value={currentRaw} isDark={isDark} centerLabel="stress" semantic={colors.semantic} />
+                      <HeartTripleRings
+                        value={currentRaw}
+                        isDark={isDark}
+                        centerLabel="stress"
+                        semantic={colors.semantic}
+                      />
                     </View>
-                    <View className="rounded-2xl p-3 mt-1"
-                      style={{ backgroundColor: isDark ? "rgba(255,255,255,0.04)" : config.accentLight }}>
-                      <Text className="text-xs font-open-sans text-center"
-                        style={{ color: isDark ? "rgba(255,255,255,0.62)" : "#4B5563" }}>
-                        Cada anel representa uma zona de stress. O ponto luminoso indica a progressão na zona atual.
+                    <View
+                      className="rounded-2xl p-3 mt-1"
+                      style={{
+                        backgroundColor: isDark
+                          ? "rgba(255,255,255,0.04)"
+                          : config.accentLight,
+                      }}
+                    >
+                      <Text
+                        className="text-xs font-open-sans text-center"
+                        style={{
+                          color: isDark ? "rgba(255,255,255,0.62)" : "#4B5563",
+                        }}
+                      >
+                        Cada anel representa uma zona de stress. O ponto
+                        luminoso indica a progressão na zona atual.
                       </Text>
                     </View>
                   </View>
@@ -1667,19 +2568,36 @@ export default function MasterDetail() {
                   accessibilityLabel={`Posicao atual da metrica. Valor atual ${spokenCurrent}. Zona atual ${activeBand.label}.`}
                 >
                   <View className="flex-row items-center justify-between mb-3">
-                    <Text className="text-base font-safiro" style={{ color: tAccent }}>
+                    <Text
+                      className="text-base font-safiro"
+                      style={{ color: tAccent }}
+                    >
                       Posição Atual da Métrica
                     </Text>
                     <View className="flex-row items-center gap-2 px-2 py-1 rounded-full">
-                      <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: activeBand.color }} />
-                      <Text className="text-xs font-open-sans" style={{ color: activeBand.color }}>{activeBand.label}</Text>
+                      <View
+                        className="w-2.5 h-2.5 rounded-full"
+                        style={{ backgroundColor: activeBand.color }}
+                      />
+                      <Text
+                        className="text-xs font-open-sans"
+                        style={{ color: activeBand.color }}
+                      >
+                        {activeBand.label}
+                      </Text>
                     </View>
                   </View>
 
                   <View className="flex-row items-baseline gap-1 mb-4">
-                    <Text className={`text-2xl font-bold font-safiro ${tp}`}>{config.formatValue(currentRaw)}</Text>
-                    <Text className={`text-sm font-open-sans ${tu}`}>{config.displayUnit}</Text>
-                    <Text className={`text-xs font-open-sans ml-1 ${ts}`}>valor atual</Text>
+                    <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                      {config.formatValue(currentRaw)}
+                    </Text>
+                    <Text className={`text-sm font-open-sans ${tu}`}>
+                      {config.displayUnit}
+                    </Text>
+                    <Text className={`text-xs font-open-sans ml-1 ${ts}`}>
+                      valor atual
+                    </Text>
                   </View>
 
                   <View className="gap-2">
@@ -1692,30 +2610,49 @@ export default function MasterDetail() {
                           accessible
                           accessibilityRole="text"
                           accessibilityLabel={`${band.label}. Intervalo ${getBandRangeSpeech(band, index)}.${isBandActive ? " Zona ativa." : ""}`}
-                          style={isBandActive
-                            ? {
-                              borderColor: band.color,
-                              backgroundColor: "transparent",
-                            }
-                            : {
-                              borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(15,23,42,0.08)",
-                              backgroundColor: "transparent",
-                            }}
+                          style={
+                            isBandActive
+                              ? {
+                                  borderColor: band.color,
+                                  backgroundColor: "transparent",
+                                }
+                              : {
+                                  borderColor: isDark
+                                    ? "rgba(255,255,255,0.08)"
+                                    : "rgba(15,23,42,0.08)",
+                                  backgroundColor: "transparent",
+                                }
+                          }
                         >
                           <View className="flex-row items-center gap-2.5">
-                            <View className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: band.color }} accessible={false} />
-                            <Text className="text-base font-open-sans" style={{ color: band.color, fontWeight: isBandActive ? "700" : "500" }} accessible={false}>
+                            <View
+                              className="w-2.5 h-2.5 rounded-full"
+                              style={{ backgroundColor: band.color }}
+                              accessible={false}
+                            />
+                            <Text
+                              className="text-base font-open-sans"
+                              style={{
+                                color: band.color,
+                                fontWeight: isBandActive ? "700" : "500",
+                              }}
+                              accessible={false}
+                            >
                               {band.label}
                             </Text>
                           </View>
                           <View className="flex-row items-center gap-2">
-                            <Text className={`text-sm font-open-sans ${ts}`} accessible={false}>{getBandRangeText(band, index)}</Text>
+                            <Text
+                              className={`text-sm font-open-sans ${ts}`}
+                              accessible={false}
+                            >
+                              {getBandRangeText(band, index)}
+                            </Text>
                           </View>
                         </View>
                       );
                     })}
                   </View>
-
                 </View>
 
                 {/* ── History Line Chart ────────────────────────────────── */}
@@ -1731,8 +2668,15 @@ export default function MasterDetail() {
                     accessibilityLabel={`Grafico de medias cardiacas. Media ${heartAvg !== null ? `${formatNarratorNumber(Math.round(heartAvg))} bpm` : "indisponivel"}. Media alta ${heartAvgHigh !== null ? `${formatNarratorNumber(Math.round(heartAvgHigh))} bpm` : "indisponivel"}. Media baixa ${heartAvgLow !== null ? `${formatNarratorNumber(Math.round(heartAvgLow))} bpm` : "indisponivel"}.`}
                   >
                     <View className="flex-row justify-between items-center mb-4">
-                      <Text className="text-base font-safiro" style={{ color: tAccent }}>Médias</Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>Análise de padrões</Text>
+                      <Text
+                        className="text-base font-safiro"
+                        style={{ color: tAccent }}
+                      >
+                        Médias
+                      </Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>
+                        Análise de padrões
+                      </Text>
                     </View>
                     {/* Average Visualization */}
                     {(() => {
@@ -1740,13 +2684,15 @@ export default function MasterDetail() {
                       if (!h.length) {
                         return (
                           <View className="items-center justify-center py-8">
-                            <Text className={`text-sm ${ts}`}>Aguardando dados...</Text>
+                            <Text className={`text-sm ${ts}`}>
+                              Aguardando dados...
+                            </Text>
                           </View>
                         );
                       }
                       const avg = calcAvg(h);
-                      const highs = h.filter(v => v > 100);
-                      const lows = h.filter(v => v < 60);
+                      const highs = h.filter((v) => v > 100);
+                      const lows = h.filter((v) => v < 60);
                       const avgHigh = highs.length ? calcAvg(highs) : null;
                       const avgLow = lows.length ? calcAvg(lows) : null;
 
@@ -1754,9 +2700,19 @@ export default function MasterDetail() {
                         <View className="flex-row items-center justify-between">
                           {/* Main Average Circle */}
                           <View className="items-center">
-                            <View className="w-24 h-24 rounded-full items-center justify-center border-4"
-                              style={{ borderColor: config.accent, backgroundColor: isDark ? "rgba(124,137,255,0.1)" : "#EEF0FF" }}>
-                              <Text className="text-3xl font-bold font-safiro" style={{ color: config.accent }}>
+                            <View
+                              className="w-24 h-24 rounded-full items-center justify-center border-4"
+                              style={{
+                                borderColor: config.accent,
+                                backgroundColor: isDark
+                                  ? "rgba(124,137,255,0.1)"
+                                  : "#EEF0FF",
+                              }}
+                            >
+                              <Text
+                                className="text-3xl font-bold font-safiro"
+                                style={{ color: config.accent }}
+                              >
                                 {Math.round(avg)}
                               </Text>
                               <Text className={`text-xs ${ts}`}>Média</Text>
@@ -1768,19 +2724,41 @@ export default function MasterDetail() {
                             {/* High */}
                             <View
                               className="rounded-xl p-3 flex-row items-center justify-between"
-                              style={{ backgroundColor: isDark ? "rgba(252,165,165,0.1)" : "#FEF2F2" }}
+                              style={{
+                                backgroundColor: isDark
+                                  ? "rgba(252,165,165,0.1)"
+                                  : "#FEF2F2",
+                              }}
                               accessible
                               accessibilityRole="text"
                               accessibilityLabel={`Media alta. ${avgHigh !== null ? `${formatNarratorNumber(Math.round(avgHigh))} bpm` : "indisponivel"}.`}
                             >
                               <View className="flex-row items-center gap-2">
-                                <View className="w-8 h-8 rounded-full items-center justify-center"
-                                  style={{ backgroundColor: colors.semantic.danger }}>
-                                  <Feather name="trending-up" size={16} color="#991B1B" accessible={false} />
+                                <View
+                                  className="w-8 h-8 rounded-full items-center justify-center"
+                                  style={{
+                                    backgroundColor: colors.semantic.danger,
+                                  }}
+                                >
+                                  <Feather
+                                    name="trending-up"
+                                    size={16}
+                                    color="#991B1B"
+                                    accessible={false}
+                                  />
                                 </View>
-                                <Text className={`text-sm font-open-sans ${ts}`} accessible={false}>Média Alta</Text>
+                                <Text
+                                  className={`text-sm font-open-sans ${ts}`}
+                                  accessible={false}
+                                >
+                                  Média Alta
+                                </Text>
                               </View>
-                              <Text className="text-lg font-bold font-safiro" style={{ color: colors.semantic.danger }} accessible={false}>
+                              <Text
+                                className="text-lg font-bold font-safiro"
+                                style={{ color: colors.semantic.danger }}
+                                accessible={false}
+                              >
                                 {avgHigh !== null ? Math.round(avgHigh) : "--"}
                               </Text>
                             </View>
@@ -1788,19 +2766,41 @@ export default function MasterDetail() {
                             {/* Low */}
                             <View
                               className="rounded-xl p-3 flex-row items-center justify-between"
-                              style={{ backgroundColor: isDark ? "rgba(134,239,172,0.1)" : "#F0FDF4" }}
+                              style={{
+                                backgroundColor: isDark
+                                  ? "rgba(134,239,172,0.1)"
+                                  : "#F0FDF4",
+                              }}
                               accessible
                               accessibilityRole="text"
                               accessibilityLabel={`Media baixa. ${avgLow !== null ? `${formatNarratorNumber(Math.round(avgLow))} bpm` : "indisponivel"}.`}
                             >
                               <View className="flex-row items-center gap-2">
-                                <View className="w-8 h-8 rounded-full items-center justify-center"
-                                  style={{ backgroundColor: colors.semantic.success }}>
-                                  <Feather name="trending-down" size={16} color="#166534" accessible={false} />
+                                <View
+                                  className="w-8 h-8 rounded-full items-center justify-center"
+                                  style={{
+                                    backgroundColor: colors.semantic.success,
+                                  }}
+                                >
+                                  <Feather
+                                    name="trending-down"
+                                    size={16}
+                                    color="#166534"
+                                    accessible={false}
+                                  />
                                 </View>
-                                <Text className={`text-sm font-open-sans ${ts}`} accessible={false}>Média Baixa</Text>
+                                <Text
+                                  className={`text-sm font-open-sans ${ts}`}
+                                  accessible={false}
+                                >
+                                  Média Baixa
+                                </Text>
                               </View>
-                              <Text className="text-lg font-bold font-safiro" style={{ color: colors.semantic.success }} accessible={false}>
+                              <Text
+                                className="text-lg font-bold font-safiro"
+                                style={{ color: colors.semantic.success }}
+                                accessible={false}
+                              >
                                 {avgLow !== null ? Math.round(avgLow) : "--"}
                               </Text>
                             </View>
@@ -1820,8 +2820,15 @@ export default function MasterDetail() {
                     accessibilityLabel={`Grafico de historico. Ultimas ${chartData.length} leituras. Valor mais recente ${spokenChartLatest}.`}
                   >
                     <View className="flex-row justify-between items-center mb-4">
-                      <Text className="text-base font-safiro" style={{ color: tAccent }}>Histórico</Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>Últimas 20 leituras</Text>
+                      <Text
+                        className="text-base font-safiro"
+                        style={{ color: tAccent }}
+                      >
+                        Histórico
+                      </Text>
+                      <Text className={`text-xs font-open-sans ${ts}`}>
+                        Últimas 20 leituras
+                      </Text>
                     </View>
                     <LineChartSlim
                       data={chartData}
@@ -1834,8 +2841,12 @@ export default function MasterDetail() {
                       gradientToOpacity={0}
                       yAxisSuffix={config.yAxisSuffix}
                       segments={config.segments}
-                      {...(config.yMin !== undefined ? { yMin: config.yMin } : {})}
-                      {...(config.yMax !== undefined ? { yMax: config.yMax } : {})}
+                      {...(config.yMin !== undefined
+                        ? { yMin: config.yMin }
+                        : {})}
+                      {...(config.yMax !== undefined
+                        ? { yMax: config.yMax }
+                        : {})}
                     />
                   </View>
                 ) : null}
@@ -1843,27 +2854,51 @@ export default function MasterDetail() {
                 {/* ── Extra Info Cards ──────────────────────────────────── */}
                 <View className="flex-row flex-wrap gap-3 mb-4">
                   {extraCards.map((card) => (
-                    <View key={card.label} className={`rounded-2xl p-4 border ${cardBg}`}
-                      style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
+                    <View
+                      key={card.label}
+                      className={`rounded-2xl p-4 border ${cardBg}`}
+                      style={[
+                        shadow,
+                        { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
+                      ]}
                       accessible
                       accessibilityRole="text"
                       accessibilityLabel={`${card.label}. ${formatNarratorNumber(Number(card.value.replace(/\s/g, "")) || 0)}${card.unit ? ` ${card.unit === "%" ? "por cento" : card.unit}` : ""}.`}
                     >
                       <View className="flex-row items-center gap-2 mb-2">
-                        <View className="w-7 h-7 rounded-lg items-center justify-center"
-                          style={{ backgroundColor: `${config.accent}20` }}>
-                          <Feather name={card.icon as any} size={14} color={config.accent} accessible={false} />
+                        <View
+                          className="w-7 h-7 rounded-lg items-center justify-center"
+                          style={{ backgroundColor: `${config.accent}20` }}
+                        >
+                          <Feather
+                            name={card.icon as any}
+                            size={14}
+                            color={config.accent}
+                            accessible={false}
+                          />
                         </View>
-                        <Text className="text-xs font-open-sans" style={{ color: tAccent }}>{card.label}</Text>
+                        <Text
+                          className="text-xs font-open-sans"
+                          style={{ color: tAccent }}
+                        >
+                          {card.label}
+                        </Text>
                       </View>
                       <View className="flex-row items-baseline">
-                        <Text className={`text-2xl font-bold font-safiro ${tp}`}>{card.value}</Text>
-                        {card.unit ? <Text className={`text-xs ml-1 ${tu}`}>{card.unit}</Text> : null}
+                        <Text
+                          className={`text-2xl font-bold font-safiro ${tp}`}
+                        >
+                          {card.value}
+                        </Text>
+                        {card.unit ? (
+                          <Text className={`text-xs ml-1 ${tu}`}>
+                            {card.unit}
+                          </Text>
+                        ) : null}
                       </View>
                     </View>
                   ))}
                 </View>
-
               </ScrollView>
             )}
           </SafeAreaView>
@@ -1872,4 +2907,3 @@ export default function MasterDetail() {
     </>
   );
 }
-

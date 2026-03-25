@@ -10,9 +10,13 @@ interface UserProfileContextType {
 
 const PROFILE_STORAGE_KEY = "@aide_profile_type";
 
-const UserProfileContext = createContext<UserProfileContextType | undefined>(undefined);
+const UserProfileContext = createContext<UserProfileContextType | undefined>(
+  undefined,
+);
 
-export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [profileType, setProfileTypeState] = useState<ProfileType>(null);
   const [isLoading, setIsLoading] = useState(true);
 

@@ -93,14 +93,27 @@ export default function Login() {
             <DividerWithText text="Ou" isDark={isDark} />
 
             <View className="mb-10 gap-3">
-              <SocialButton provider="google" onPress={handleGoogleLogin} forceLight />
-              <SocialButton provider="apple" onPress={handleAppleLogin} forceLight />
+              <SocialButton
+                provider="google"
+                onPress={handleGoogleLogin}
+                forceLight
+              />
+              <SocialButton
+                provider="apple"
+                onPress={handleAppleLogin}
+                forceLight
+              />
             </View>
 
             <View className="flex-1" />
 
             <View className="mb-10 items-center">
-              <Button variant="primary" forceLight label="Avancar" onPress={handleLogin} />
+              <Button
+                variant="primary"
+                forceLight
+                label="Avancar"
+                onPress={handleLogin}
+              />
 
               <View className="mt-6 flex-row">
                 <Text
@@ -110,7 +123,9 @@ export default function Login() {
                 >
                   Nao tem uma conta?{" "}
                 </Text>
-                <TouchableOpacity onPress={() => router.push("/register" as any)}>
+                <TouchableOpacity
+                  onPress={() => router.push("/register" as any)}
+                >
                   <Text className="font-open-sans-semibold text-[14px] text-[#5C6CFF]">
                     Regista-te
                   </Text>

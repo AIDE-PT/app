@@ -24,7 +24,9 @@ export const WidgetAdd = ({ label, Icon, onPress }: WidgetAddProps) => {
       <View className="mb-2">
         <Icon size={32} color={isDark ? "#FFFFFF" : "#000746"} />
       </View>
-      <Text className={`font-bold text-[18px] uppercase font-open-sans ${isDark ? "text-white" : "text-[#000000]"}`}>
+      <Text
+        className={`font-bold text-[18px] uppercase font-open-sans ${isDark ? "text-white" : "text-[#000000]"}`}
+      >
         {label}
       </Text>
     </TouchableOpacity>

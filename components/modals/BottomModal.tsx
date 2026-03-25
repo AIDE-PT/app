@@ -40,9 +40,13 @@ export default function BottomModal({
       >
         <Pressable className="flex-1" onPress={onClose} />
 
-        <View className={`overflow-y-auto h-[60%] pt-3 px-4 pb-6 rounded-t-[30px] ${isDark ? "bg-aide-dark-card" : "bg-[#DBEDF8]"}`}>
+        <View
+          className={`overflow-y-auto h-[60%] pt-3 px-4 pb-6 rounded-t-[30px] ${isDark ? "bg-aide-dark-card" : "bg-[#DBEDF8]"}`}
+        >
           {/* Handle */}
-          <View className={`w-10 h-1 rounded-2 self-center mb-4 ${isDark ? "bg-white/30" : "bg-[#C7C7C7]"}`} />
+          <View
+            className={`w-10 h-1 rounded-2 self-center mb-4 ${isDark ? "bg-white/30" : "bg-[#C7C7C7]"}`}
+          />
           <SafeAreaView className="flex-1">
             <ScrollView>{children}</ScrollView>
           </SafeAreaView>

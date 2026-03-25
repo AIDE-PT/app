@@ -34,106 +34,138 @@ const GerirPerfil = () => {
     <LightBackground>
       <View className="flex-1 px-4 pt-10">
         <SafeAreaView className="flex-1">
-        {/* Header */}
-        <View className="mb-4">
-          <BackButton label="Gerir Perfil" dark={isDark} />
-        </View>
-        <ScrollView
-          contentContainerStyle={{ paddingBottom: 40 }}
-          showsVerticalScrollIndicator={false}
-        >
-          {/* Foto de Perfil */}
-          <View className="items-center my-6">
-            <View 
-              className={`w-32 h-32 rounded-full items-center justify-center relative border-4 ${isDark ? "bg-[#1a1a2e] border-white/20" : "bg-[#E0E0E0] border-white"}`}
-              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
-            >
-              <Text className={`text-4xl font-medium ${isDark ? "text-white/60" : "text-[#555]"}`}>E</Text>
-              <TouchableOpacity className="absolute bottom-0 right-0 bg-black p-2 rounded-full border-2 border-white">
-                <Camera size={16} color="white" />
-              </TouchableOpacity>
-            </View>
+          {/* Header */}
+          <View className="mb-4">
+            <BackButton label="Gerir Perfil" dark={isDark} />
           </View>
-
-          {/* Título e Lápis */}
-          <View className="px-4 mb-2">
-            <Text className={`text-xs font-open-sans font-bold uppercase tracking-tighter ${isDark ? "text-white/60" : "text-black"}`}>
-              Aqui pode fazer alterações às suas informações de{"\n"}
-              identificação e de contacto.
-            </Text>
-            <View className="flex-row justify-between items-center mt-6 mb-2">
-              <Text className={`text-lg font-safiro ${isDark ? "text-white" : "text-[#111]"}`}>
-                A SUA IDENTIFICAÇÃO
-              </Text>
-              {!isEditing && (
-                <TouchableOpacity onPress={() => setIsEditing(true)}>
-                  <Pencil size={22} color={isDark ? "white" : "black"} />
+          <ScrollView
+            contentContainerStyle={{ paddingBottom: 40 }}
+            showsVerticalScrollIndicator={false}
+          >
+            {/* Foto de Perfil */}
+            <View className="items-center my-6">
+              <View
+                className={`w-32 h-32 rounded-full items-center justify-center relative border-4 ${isDark ? "bg-[#1a1a2e] border-white/20" : "bg-[#E0E0E0] border-white"}`}
+                style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              >
+                <Text
+                  className={`text-4xl font-medium ${isDark ? "text-white/60" : "text-[#555]"}`}
+                >
+                  E
+                </Text>
+                <TouchableOpacity className="absolute bottom-0 right-0 bg-black p-2 rounded-full border-2 border-white">
+                  <Camera size={16} color="white" />
                 </TouchableOpacity>
-              )}
+              </View>
             </View>
-          </View>
 
-          <GerirPerfilFormulario
-            formData={userData}
-            setFormData={setUserData}
-            isEditing={isEditing}
-          />
-
-          {/* Botão Alterar */}
-          <View className="mt-4 px-4">
-            <View className="w-full items-center">
-              <Button 
-                variant="primary" 
-                label="Alterar" 
-                onPress={handleSave} 
-              />
-            </View>
-          </View>
-
-          {/* Cards Extras */}
-          <View className="px-4 mt-10">
-            <View 
-              className={`p-6 rounded-[32px] mb-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
-              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
-            >
-              <Text className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}>Apagar Conta</Text>
-              <Text className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}>
-                Ao apagar a sua conta todos os dados vão ser perdidos no espaço
-                de 30 dias.
-              </Text>
-              <TouchableOpacity 
-                className="mt-4 py-3 rounded-xl items-center self-center"
-                onPress={() => console.log("Apagar conta")}
+            {/* Título e Lápis */}
+            <View className="px-4 mb-2">
+              <Text
+                className={`text-xs font-open-sans font-bold uppercase tracking-tighter ${isDark ? "text-white/60" : "text-black"}`}
               >
-                <View className={`py-3 px-8 rounded-xl ${isDark ? "bg-red-500/20" : "bg-red-100"}`}>
-                  <Text className={`font-medium ${isDark ? "text-red-400" : "text-red-600"}`}>Apagar</Text>
-                </View>
-              </TouchableOpacity>
+                Aqui pode fazer alterações às suas informações de{"\n"}
+                identificação e de contacto.
+              </Text>
+              <View className="flex-row justify-between items-center mt-6 mb-2">
+                <Text
+                  className={`text-lg font-safiro ${isDark ? "text-white" : "text-[#111]"}`}
+                >
+                  A SUA IDENTIFICAÇÃO
+                </Text>
+                {!isEditing && (
+                  <TouchableOpacity onPress={() => setIsEditing(true)}>
+                    <Pencil size={22} color={isDark ? "white" : "black"} />
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
 
-            <View 
-              className={`p-6 rounded-[32px] ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
-              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
-            >
-              <Text className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}>Pedir Dados</Text>
-              <Text className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}>
-                Pedir dados que a AIDE têm sobre ti, desde a sua criação de
-                conta em formato XML.
-              </Text>
-              <TouchableOpacity 
-                className="mt-4 py-3 rounded-xl items-center self-center"
-                onPress={() => console.log("Extrair dados")}
-              >
-                <View className={`py-3 px-8 rounded-xl ${isDark ? "bg-blue-500/20" : "bg-blue-100"}`}>
-                  <Text className={`font-medium ${isDark ? "text-blue-400" : "text-blue-600"}`}>Extrair</Text>
-                </View>
-              </TouchableOpacity>
+            <GerirPerfilFormulario
+              formData={userData}
+              setFormData={setUserData}
+              isEditing={isEditing}
+            />
+
+            {/* Botão Alterar */}
+            <View className="mt-4 px-4">
+              <View className="w-full items-center">
+                <Button
+                  variant="primary"
+                  label="Alterar"
+                  onPress={handleSave}
+                />
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
-    </View>
-  </LightBackground>
+
+            {/* Cards Extras */}
+            <View className="px-4 mt-10">
+              <View
+                className={`p-6 rounded-[32px] mb-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              >
+                <Text
+                  className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}
+                >
+                  Apagar Conta
+                </Text>
+                <Text
+                  className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}
+                >
+                  Ao apagar a sua conta todos os dados vão ser perdidos no
+                  espaço de 30 dias.
+                </Text>
+                <TouchableOpacity
+                  className="mt-4 py-3 rounded-xl items-center self-center"
+                  onPress={() => console.log("Apagar conta")}
+                >
+                  <View
+                    className={`py-3 px-8 rounded-xl ${isDark ? "bg-red-500/20" : "bg-red-100"}`}
+                  >
+                    <Text
+                      className={`font-medium ${isDark ? "text-red-400" : "text-red-600"}`}
+                    >
+                      Apagar
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              <View
+                className={`p-6 rounded-[32px] ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              >
+                <Text
+                  className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}
+                >
+                  Pedir Dados
+                </Text>
+                <Text
+                  className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}
+                >
+                  Pedir dados que a AIDE têm sobre ti, desde a sua criação de
+                  conta em formato XML.
+                </Text>
+                <TouchableOpacity
+                  className="mt-4 py-3 rounded-xl items-center self-center"
+                  onPress={() => console.log("Extrair dados")}
+                >
+                  <View
+                    className={`py-3 px-8 rounded-xl ${isDark ? "bg-blue-500/20" : "bg-blue-100"}`}
+                  >
+                    <Text
+                      className={`font-medium ${isDark ? "text-blue-400" : "text-blue-600"}`}
+                    >
+                      Extrair
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 };
 

@@ -106,11 +106,14 @@ const MetricCard = ({
 
   if (isLoadingLatest || isLoadingStats) {
     return (
-      <View 
+      <View
         className={`items-center justify-center h-32 p-4 mb-4 rounded-[20px] ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
         style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
       >
-        <ActivityIndicator color={color} accessibilityLabel={`A carregar ${title}`} />
+        <ActivityIndicator
+          color={color}
+          accessibilityLabel={`A carregar ${title}`}
+        />
       </View>
     );
   }
@@ -141,12 +144,16 @@ const MetricCard = ({
   }
 
   return (
-    <View 
+    <View
       className={`p-4 mb-4 rounded-[20px] ${isDark ? "bg-aide-dark-card border border-white/10" : "bg-white border border-gray-100"}`}
       style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
     >
       <View className="flex-row items-center justify-between mb-2">
-        <Text className={`text-base font-medium ${isDark ? "text-white/70" : "text-gray-500"}`}>{title}</Text>
+        <Text
+          className={`text-base font-medium ${isDark ? "text-white/70" : "text-gray-500"}`}
+        >
+          {title}
+        </Text>
         <View
           className={`w-3 h-3 rounded-full`}
           style={{ backgroundColor: color }}
@@ -154,14 +161,26 @@ const MetricCard = ({
       </View>
 
       <View className="flex-row items-end mb-2">
-        <Text className={`mr-2 text-3xl font-bold ${isDark ? "text-white" : "text-gray-800"}`}>
+        <Text
+          className={`mr-2 text-3xl font-bold ${isDark ? "text-white" : "text-gray-800"}`}
+        >
           {displayValue}
         </Text>
-        <Text className={`mb-1 font-medium ${isDark ? "text-white/70" : "text-gray-500"}`}>{unit}</Text>
+        <Text
+          className={`mb-1 font-medium ${isDark ? "text-white/70" : "text-gray-500"}`}
+        >
+          {unit}
+        </Text>
       </View>
 
-      <View className={`p-2 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-50"}`}>
-        <Text className={`text-xs ${isDark ? "text-white/60" : "text-gray-500"}`}>{displayStats}</Text>
+      <View
+        className={`p-2 rounded-lg ${isDark ? "bg-white/5" : "bg-gray-50"}`}
+      >
+        <Text
+          className={`text-xs ${isDark ? "text-white/60" : "text-gray-500"}`}
+        >
+          {displayStats}
+        </Text>
       </View>
     </View>
   );
@@ -169,80 +188,81 @@ const MetricCard = ({
 
 const HealthDataContent = () => {
   const { isDark, colors } = useTheme();
-  
+
   return (
     <LightBackground>
       <View className="flex-1 bg-transparent px-4 pt-10">
         <SafeAreaView className="flex-1">
-        <BackButton
-          label="Gerir Dados"
-          dark={isDark}
-          onPress={() => router.push("/definicoes")}
-        />
+          <BackButton
+            label="Gerir Dados"
+            dark={isDark}
+            onPress={() => router.push("/definicoes")}
+          />
 
-        <ScrollView
-          className="flex-1"
-          contentContainerStyle={{ paddingBottom: 40 }}
-        >
+          <ScrollView
+            className="flex-1"
+            contentContainerStyle={{ paddingBottom: 40 }}
+          >
+            <View className="w-full">
+              <MetricCard
+                title="Heart Rate"
+                endpoint="bpm"
+                unit="BPM"
+                color={colors.semantic.danger}
+                isDark={isDark}
+              />
+              <MetricCard
+                title="Blood Pressure"
+                endpoint="bloodPressure"
+                unit="mmHg"
+                color={colors.semantic.danger}
+                isBP
+                isDark={isDark}
+              />
+              <MetricCard
+                title="Glycemia"
+                endpoint="glycemia"
+                unit="mg/dL"
+                color={colors.semantic.warning}
+                isDark={isDark}
+              />
+              <MetricCard
+                title="Oxygen Saturation"
+                endpoint="o2"
+                unit="%"
+                color={colors.semantic.success}
+                isDark={isDark}
+              />
+              <MetricCard
+                title="Temperature"
+                endpoint="temperature"
+                unit="°C"
+                color={colors.semantic.warning}
+                isDark={isDark}
+              />
+              <MetricCard
+                title="Stress Level"
+                endpoint="stress"
+                unit="pts"
+                color={colors.semantic.warning}
+                isDark={isDark}
+              />
+              <MetricCard
+                title="Sleep Duration"
+                endpoint="sleep"
+                unit="hrs"
+                color={colors.semantic.success}
+                isDark={isDark}
+              />
+            </View>
 
-        <View className="w-full">
-          <MetricCard
-            title="Heart Rate"
-            endpoint="bpm"
-            unit="BPM"
-            color={colors.semantic.danger}
-            isDark={isDark}
-          />
-          <MetricCard
-            title="Blood Pressure"
-            endpoint="bloodPressure"
-            unit="mmHg"
-            color={colors.semantic.danger}
-            isBP
-            isDark={isDark}
-          />
-          <MetricCard
-            title="Glycemia"
-            endpoint="glycemia"
-            unit="mg/dL"
-            color={colors.semantic.warning}
-            isDark={isDark}
-          />
-          <MetricCard
-            title="Oxygen Saturation"
-            endpoint="o2"
-            unit="%"
-            color={colors.semantic.success}
-            isDark={isDark}
-          />
-          <MetricCard
-            title="Temperature"
-            endpoint="temperature"
-            unit="°C"
-            color={colors.semantic.warning}
-            isDark={isDark}
-          />
-          <MetricCard
-            title="Stress Level"
-            endpoint="stress"
-            unit="pts"
-            color={colors.semantic.warning}
-            isDark={isDark}
-          />
-          <MetricCard
-            title="Sleep Duration"
-            endpoint="sleep"
-            unit="hrs"
-            color={colors.semantic.success}
-            isDark={isDark}
-          />
-        </View>
-
-        <Text className={`pb-10 mt-4 text-center ${isDark ? "text-white/40" : "text-gray-400"}`}>
-          Data updates automatically every 10s
-        </Text>
-        </ScrollView>
-      </SafeAreaView>
+            <Text
+              className={`pb-10 mt-4 text-center ${isDark ? "text-white/40" : "text-gray-400"}`}
+            >
+              Data updates automatically every 10s
+            </Text>
+          </ScrollView>
+        </SafeAreaView>
       </View>
     </LightBackground>
   );

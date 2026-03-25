@@ -21,7 +21,9 @@ const ElementoDefinicao = ({ title, onPress }: Props) => {
           onPress={onPress}
           className={`p-3 items-start ${isDark ? "bg-transparent" : "bg-white/90"}`}
         >
-          <Text className={`font-open-sans text-[16px] mx-2 text-left ${isDark ? "text-white/90" : "text-black/90"}`}>
+          <Text
+            className={`font-open-sans text-[16px] mx-2 text-left ${isDark ? "text-white/90" : "text-black/90"}`}
+          >
             {title}
           </Text>
         </TouchableOpacity>

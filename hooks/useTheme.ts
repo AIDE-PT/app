@@ -122,12 +122,20 @@ export const useTheme = () => {
 
     // Convenience color getters
     colors: {
-      background: isDark ? themeColors.background.dark : themeColors.background.light,
+      background: isDark
+        ? themeColors.background.dark
+        : themeColors.background.light,
       card: isDark ? themeColors.card.dark : themeColors.card.light,
       text: {
-        primary: isDark ? themeColors.text.primary.dark : themeColors.text.primary.light,
-        secondary: isDark ? themeColors.text.secondary.dark : themeColors.text.secondary.light,
-        tertiary: isDark ? themeColors.text.tertiary.dark : themeColors.text.tertiary.light,
+        primary: isDark
+          ? themeColors.text.primary.dark
+          : themeColors.text.primary.light,
+        secondary: isDark
+          ? themeColors.text.secondary.dark
+          : themeColors.text.secondary.light,
+        tertiary: isDark
+          ? themeColors.text.tertiary.dark
+          : themeColors.text.tertiary.light,
         highlight: themeColors.text.highlight.light, // Same for both
       },
       navbar: isDark ? themeColors.navbar.dark : themeColors.navbar.light,
@@ -138,14 +146,22 @@ export const useTheme = () => {
     },
 
     // Utility functions for common patterns
-    getTextColor: (variant: "primary" | "secondary" | "tertiary" = "primary") => {
+    getTextColor: (
+      variant: "primary" | "secondary" | "tertiary" = "primary",
+    ) => {
       switch (variant) {
         case "secondary":
-          return isDark ? themeColors.text.secondary.dark : themeColors.text.secondary.light;
+          return isDark
+            ? themeColors.text.secondary.dark
+            : themeColors.text.secondary.light;
         case "tertiary":
-          return isDark ? themeColors.text.tertiary.dark : themeColors.text.tertiary.light;
+          return isDark
+            ? themeColors.text.tertiary.dark
+            : themeColors.text.tertiary.light;
         default:
-          return isDark ? themeColors.text.primary.dark : themeColors.text.primary.light;
+          return isDark
+            ? themeColors.text.primary.dark
+            : themeColors.text.primary.light;
       }
     },
 
@@ -156,7 +172,7 @@ export const useTheme = () => {
     getStatusColor: (status: "success" | "warning" | "danger") =>
       semantic[status],
 
-    getBackgroundGradient: () => 
+    getBackgroundGradient: () =>
       isDark ? themeColors.background.dark.gradient : null,
   };
 };

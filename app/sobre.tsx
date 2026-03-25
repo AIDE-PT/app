@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  SafeAreaView,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { SafeAreaView, ScrollView, Text, View } from "react-native";
 import BackButton from "../components/buttons/backButton";
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
@@ -14,7 +9,13 @@ import AideLogo from "../components/svg/AideLogo";
 
 // Components for the About Page
 
-const SectionTitle = ({ title, isDark }: { title: string; isDark: boolean }) => (
+const SectionTitle = ({
+  title,
+  isDark,
+}: {
+  title: string;
+  isDark: boolean;
+}) => (
   <Text
     className={`text-xl font-bold mb-3 mt-6 ${
       isDark ? "text-white" : "text-[#1A1A2E]"
@@ -48,9 +49,7 @@ const FeatureCard = ({
     }}
   >
     <View
-      className={`p-3 rounded-full ${
-        isDark ? "bg-blue-500/20" : "bg-blue-50"
-      }`}
+      className={`p-3 rounded-full ${isDark ? "bg-blue-500/20" : "bg-blue-50"}`}
       accessible={false}
     >
       {icon}
@@ -63,9 +62,7 @@ const FeatureCard = ({
       >
         {title}
       </Text>
-      <Text
-        className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}
-      >
+      <Text className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>
         {description}
       </Text>
     </View>
@@ -96,7 +93,9 @@ const ObjectiveItem = ({
     </View>
     <Text
       className={`text-base leading-6 pl-2 border-l-2 ${
-        isDark ? "text-gray-300 border-gray-700" : "text-gray-600 border-gray-200"
+        isDark
+          ? "text-gray-300 border-gray-700"
+          : "text-gray-600 border-gray-200"
       }`}
     >
       {description}
@@ -156,20 +155,25 @@ const SobrePage = () => {
             {/* Header / Intro */}
             <View className="mb-8 items-center">
               <View className="flex-row items-center mb-2">
-                <Text className={`text-3xl font-bold ${isDark ? "text-white" : "text-[#1A1A2E]"}`}>Sobre a </Text>              
-                  <AideLogo
-                    size={65}
-                    fill={isDark ? "#ffffff" : "#1A1A2E"}
-                    accessible
-                    accessibilityLabel="Logótipo AIDE"
-                  />
+                <Text
+                  className={`text-3xl font-bold ${isDark ? "text-white" : "text-[#1A1A2E]"}`}
+                >
+                  Sobre a{" "}
+                </Text>
+                <AideLogo
+                  size={65}
+                  fill={isDark ? "#ffffff" : "#1A1A2E"}
+                  accessible
+                  accessibilityLabel="Logótipo AIDE"
+                />
               </View>
               <Text
                 className={`text-center text-lg leading-7 ${
                   isDark ? "text-gray-300" : "text-gray-600"
                 }`}
               >
-                Uma solução tecnológica para dotar os cuidadores de uma gestão centralizada de segurança, rotinas e saúde.
+                Uma solução tecnológica para dotar os cuidadores de uma gestão
+                centralizada de segurança, rotinas e saúde.
               </Text>
             </View>
 
@@ -274,14 +278,15 @@ const SobrePage = () => {
                   isDark ? "text-gray-300" : "text-gray-600"
                 }`}
               >
-                Facilitar a vida dos cuidadores informais através da monitorização
-                remota e fidedigna das condições de saúde e segurança,
-                promovendo uma gestão mais eficiente e menos desgastante.
+                Facilitar a vida dos cuidadores informais através da
+                monitorização remota e fidedigna das condições de saúde e
+                segurança, promovendo uma gestão mais eficiente e menos
+                desgastante.
               </Text>
             </View>
 
             <SectionTitle title="Objetivos Específicos" isDark={isDark} />
-            
+
             <ObjectiveItem
               isDark={isDark}
               icon="-"
@@ -327,8 +332,10 @@ const SobrePage = () => {
                   <TeamMember key={member} name={member} isDark={isDark} />
                 ))}
               </View>
-              <Text className={`text-center text-xs mt-6 ${isDark ? "text-white/20" : "text-black/20"}`}>
-                  AIDE © 2026 v1.0.0
+              <Text
+                className={`text-center text-xs mt-6 ${isDark ? "text-white/20" : "text-black/20"}`}
+              >
+                AIDE © 2026 v1.0.0
               </Text>
             </View>
           </ScrollView>

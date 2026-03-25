@@ -74,12 +74,18 @@ export default function DeviceManagementModal({
             style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
           >
             {/* Drag handle */}
-            <View className={`w-[33px] h-[4px] rounded-full mt-4 mb-8 ${isDark ? "bg-white/40" : "bg-[#6E6872]"}`} />
+            <View
+              className={`w-[33px] h-[4px] rounded-full mt-4 mb-8 ${isDark ? "bg-white/40" : "bg-[#6E6872]"}`}
+            />
 
             {/* Device Info */}
             <View className="flex-row items-center self-start px-8 mb-6">
-              <View className={`w-16 h-16 rounded-full items-center justify-center border mr-4 ${isDark ? "border-white/20 bg-white/20" : "border-[#B8CFDF] bg-[#E9E9E9]"}`}>
-                <Text className={`font-open-sans font-bold text-[28px] ${isDark ? "text-white" : "text-black"}`}>
+              <View
+                className={`w-16 h-16 rounded-full items-center justify-center border mr-4 ${isDark ? "border-white/20 bg-white/20" : "border-[#B8CFDF] bg-[#E9E9E9]"}`}
+              >
+                <Text
+                  className={`font-open-sans font-bold text-[28px] ${isDark ? "text-white" : "text-black"}`}
+                >
                   {device.name.charAt(0).toUpperCase()}
                 </Text>
               </View>
@@ -94,7 +100,9 @@ export default function DeviceManagementModal({
                     </Text>
                   ))
                 ) : (
-                  <Text className={`font-open-sans font-bold text-2xl ${isDark ? "text-white" : "text-black"}`}>
+                  <Text
+                    className={`font-open-sans font-bold text-2xl ${isDark ? "text-white" : "text-black"}`}
+                  >
                     {device.name}
                   </Text>
                 )}
@@ -103,7 +111,9 @@ export default function DeviceManagementModal({
 
             {/* Data Sharing Toggle */}
             <View className="flex-row justify-between items-center w-full px-8 mb-8">
-              <Text className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}>
+              <Text
+                className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}
+              >
                 Partilhar dados
               </Text>
               <Switch

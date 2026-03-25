@@ -24,11 +24,7 @@ const COLOR_PALETTE_STORAGE_KEY = "@aide_color_palette";
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
-export const ThemeProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setThemeState] = useState<ThemeType>("light");
   const [colorPalette, setColorPaletteState] =
     useState<ColorPaletteType>("default");
