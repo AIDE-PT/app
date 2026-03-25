@@ -1,18 +1,18 @@
 import { useTheme } from "@/hooks/useTheme";
 import {
-    addMonths,
-    eachDayOfInterval,
-    endOfMonth,
-    endOfWeek,
-    format,
-    isAfter,
-    isBefore,
-    isSameDay,
-    isSameMonth,
-    isToday,
-    startOfMonth,
-    startOfWeek,
-    subMonths,
+  addMonths,
+  eachDayOfInterval,
+  endOfMonth,
+  endOfWeek,
+  format,
+  isAfter,
+  isBefore,
+  isSameDay,
+  isSameMonth,
+  isToday,
+  startOfMonth,
+  startOfWeek,
+  subMonths,
 } from "date-fns";
 import { pt } from "date-fns/locale";
 import { BlurView } from "expo-blur";

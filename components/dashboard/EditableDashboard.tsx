@@ -5,29 +5,29 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    GestureResponderEvent,
-    LayoutAnimation,
-    LayoutChangeEvent,
-    Platform,
-    Pressable,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    UIManager,
-    View,
+  Animated,
+  GestureResponderEvent,
+  LayoutAnimation,
+  LayoutChangeEvent,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  UIManager,
+  View,
 } from "react-native";
 import {
-    SafeAreaView,
-    useSafeAreaInsets,
+  SafeAreaView,
+  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 import { LightBackground } from "@/components/DotBackground";
 import Navbar from "@/components/navBar/NavBar";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import {
-    DASHBOARD_CONFIG,
-    WidgetVariant,
+  DASHBOARD_CONFIG,
+  WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
 import { useTheme } from "@/hooks/useTheme";
 import TopBar from "../topBar/TopBar";
