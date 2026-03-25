@@ -6,16 +6,15 @@ import ElementoDefinicao from "./elemento_definicao";
 const DefinicoesLista = () => {
   const router = useRouter();
 
-  const menuDefinicoes = [
-    "Gerir Aiders",
-    "Gerir Dispositivos (sensores)",
-    "Segurança e Privacidade",
-    "Temas e Cores",
-    "Gerir dados",
-    "Gerir perfil",
-    "Termos e Condições",
-    "Politica de Privacidade",
-    "Sobre",
+  const menuDefinicoes: { label: string; href?: string }[] = [
+    { label: "Gerir Aiders", href: "/associar" },
+    { label: "Gerir Dispositivos (sensores)", href: "/dispositivos" },
+    { label: "Temas e Cores", href: "/personalizacao" },
+    { label: "Gerir dados", href: "/healthData" },
+    { label: "Gerir perfil", href: "/gerir_perfil" },
+    { label: "Termos e Condições", href: "/terms-of-service" },
+    { label: "Politica de Privacidade", href: "/privacidade" },
+    { label: "Sobre", href: "/sobre" },
   ];
 
   return (
@@ -23,15 +22,13 @@ const DefinicoesLista = () => {
       {menuDefinicoes.map((item, index) => (
         <ElementoDefinicao
           key={index}
-          title={item}
+          title={item.label}
           onPress={() => {
-            if (item === "Gerir perfil") {
-              router.push("/gerir_perfil");
-            } else if (item === "Gerir Dispositivos (sensores)") {
-              router.push("/dispositivos");
-            } else {
-              console.log(item);
+            if (item.href) {
+              router.push(item.href as any);
+              return;
             }
+            console.log(item.label);
           }}
         />
       ))}

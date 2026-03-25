@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { Device } from "./AddDeviceModal";
+import { useTheme } from "@/hooks/useTheme";
 
 interface DeviceConnectionModalProps {
   visible: boolean;
@@ -25,6 +26,7 @@ export default function DeviceConnectionModal({
 }: DeviceConnectionModalProps) {
   const [isConnecting, setIsConnecting] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const { isDark, colors } = useTheme();
 
   const handleConnect = () => {
     setIsConnecting(true);
@@ -77,22 +79,16 @@ export default function DeviceConnectionModal({
 
           {/* Bottom Sheet Content */}
           <View
-            className="bg-[#DBEDF8] rounded-t-[31px] w-full items-center pb-12"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -2 },
-              shadowOpacity: 0.12,
-              shadowRadius: 8,
-              elevation: 5,
-            }}
+            className={`rounded-t-[31px] w-full items-center pb-12 ${isDark ? "bg-aide-dark-card" : "bg-[#DBEDF8]"}`}
+            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
           >
             {/* Drag handle */}
-            <View className="w-[33px] h-[4px] bg-[#79747E] rounded-full mt-4 mb-8" />
+            <View className={`w-[33px] h-[4px] rounded-full mt-4 mb-8 ${isDark ? "bg-white/30" : "bg-[#79747E]"}`} />
 
             {/* Device Info */}
             <View className="flex-row items-center self-start px-8 mb-6">
-              <View className="w-16 h-16 rounded-full bg-[#E9E9E9] items-center justify-center border border-white mr-4">
-                <Text className="font-open-sans font-bold text-[28px] text-black">
+              <View className={`w-16 h-16 rounded-full items-center justify-center border border-white mr-4 ${isDark ? "bg-white/20" : "bg-[#E9E9E9]"}`}>
+                <Text className={`font-open-sans font-bold text-[28px] ${isDark ? "text-white" : "text-black"}`}>
                   {device.name.charAt(0).toUpperCase()}
                 </Text>
               </View>
@@ -101,13 +97,13 @@ export default function DeviceConnectionModal({
                   nameWords.map((word, index) => (
                     <Text
                       key={index}
-                      className="font-open-sans font-bold text-2xl text-black leading-7"
+                      className={`font-open-sans font-bold text-2xl leading-7 ${isDark ? "text-white" : "text-black"}`}
                     >
                       {word}
                     </Text>
                   ))
                 ) : (
-                  <Text className="font-open-sans font-bold text-2xl text-black">
+                  <Text className={`font-open-sans font-bold text-2xl ${isDark ? "text-white" : "text-black"}`}>
                     {device.name}
                   </Text>
                 )}
@@ -118,17 +114,21 @@ export default function DeviceConnectionModal({
             <View className="px-8 mb-8 self-start">
               {isConnecting ? (
                 <View className="flex-row items-center gap-3">
-                  <ActivityIndicator size="small" color="#7C89FF" />
-                  <Text className="font-open-sans text-base text-black">
+                  <ActivityIndicator
+                    size="small"
+                    color="#7C89FF"
+                    accessibilityLabel={`A conectar ${device.name}`}
+                  />
+                  <Text className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}>
                     A conectar via Bluetooth...
                   </Text>
                 </View>
               ) : isConnected ? (
-                <Text className="font-open-sans text-base text-[#4cd964]">
+                <Text className="font-open-sans text-base" style={{ color: colors.semantic.success }}>
                   ✓ Dispositivo conectado com sucesso!
                 </Text>
               ) : (
-                <Text className="font-open-sans text-base text-black">
+                <Text className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}>
                   Pretende conectar este dispositivo via Bluetooth?
                 </Text>
               )}
@@ -142,7 +142,7 @@ export default function DeviceConnectionModal({
                   className="flex-1 py-3 rounded-[25px] items-center justify-center"
                   style={{ backgroundColor: "rgba(255, 0, 0, 0.43)" }}
                 >
-                  <Text className="font-open-sans font-semibold text-base text-black">
+                  <Text className={`font-open-sans font-semibold text-base ${isDark ? "text-white" : "text-black"}`}>
                     Cancelar
                   </Text>
                 </TouchableOpacity>

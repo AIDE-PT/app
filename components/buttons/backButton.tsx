@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 import ArrowIcon from "../svg/ArrowIcon";
+import { useTheme } from "@/hooks/useTheme";
 
 interface BackButtonProps {
   label?: string;
@@ -13,20 +14,28 @@ interface BackButtonProps {
 const BackButton = ({
   label = "Voltar",
   className,
-  dark,
+  dark: darkProp,
   onPress,
 }: BackButtonProps) => {
   const router = useRouter();
+  const { isDark } = useTheme();
+  const useDarkMode = darkProp ?? isDark;
+
   return (
     <TouchableOpacity
       onPress={onPress || (() => router.back())}
       activeOpacity={0.7}
       className={`flex-row items-center self-start py-2  ${className}`}
+      accessibilityRole="button"
+      accessibilityLabel={label || "Voltar"}
+      accessibilityHint="Volta para o ecrã anterior."
+      accessibilityLanguage="pt-PT"
     >
-      <ArrowIcon variant="LEFT" dark={dark} />
+      <ArrowIcon variant="LEFT" dark={useDarkMode} />
       {label && (
         <Text
-          className={`${dark ? "text-black/60" : "text-black"} ml-2 text-2xl font-medium`}
+          className={`${useDarkMode ? "text-white" : "text-black"} ml-2 text-2xl font-safiro`}
+          accessibilityLanguage="pt-PT"
         >
           {label}
         </Text>

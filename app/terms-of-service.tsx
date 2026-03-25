@@ -1,26 +1,21 @@
-import { useFonts } from "expo-font";
-import { useRouter } from "expo-router";
-import { Text, View } from "react-native";
-import Animated, { useAnimatedScrollHandler } from "react-native-reanimated";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { router, useLocalSearchParams } from "expo-router";
+import React from "react";
+import { ScrollView, SafeAreaView, Text, View } from "react-native";
+import BackButton from "../components/buttons/backButton";
 import { Button } from "../components/buttons/button";
-import {
-  GradientBackground,
-  useGradientScroll,
-} from "../components/GradientBackground";
-import TopTitleNav from "../components/navBar/TopTitleNav";
-import "../global.css";
+import LightBackground from "@/components/DotBackground";
 
 // Section component for each term section
 interface TermSectionProps {
   number?: number;
   title: string;
   children: React.ReactNode;
+  isDark?: boolean;
 }
 
-const TermSection = ({ number, title, children }: TermSectionProps) => (
+const TermSection = ({ number, title, children, isDark }: TermSectionProps) => (
   <View className="mb-5">
-    <Text className="font-open-sans-semibold text-[17px] text-[#1A1A2E] mb-2">
+    <Text className={`font-open-sans-semibold text-[17px] mb-2 ${isDark ? "text-white" : "text-[#1A1A2E]"}`}>
       {number ? `${number}. ${title}` : title}
     </Text>
     <View>{children}</View>
@@ -28,174 +23,168 @@ const TermSection = ({ number, title, children }: TermSectionProps) => (
 );
 
 // Paragraph component for consistent text styling
-const Paragraph = ({ children }: { children: React.ReactNode }) => (
-  <Text className="font-open-sans text-[15px] text-[#4B5563] leading-6 mb-2">
+interface ParagraphProps {
+  children: React.ReactNode;
+  isDark?: boolean;
+}
+
+const Paragraph = ({ children, isDark }: ParagraphProps) => (
+  <Text className={`font-open-sans text-[15px] leading-6 mb-2 ${isDark ? "text-white/80" : "text-[#4B5563]"}`}>
     {children}
   </Text>
 );
 
 // Bullet point component
-const BulletPoint = ({ children }: { children: React.ReactNode }) => (
+interface BulletPointProps {
+  children: React.ReactNode;
+  isDark?: boolean;
+}
+
+const BulletPoint = ({ children, isDark }: BulletPointProps) => (
   <View className="flex-row mb-1 pl-2">
-    <Text className="font-open-sans text-[15px] text-[#4B5563] mr-2">•</Text>
-    <Text className="font-open-sans text-[15px] text-[#4B5563] leading-6 flex-1">
+    <Text className={`font-open-sans text-[15px] mr-2 ${isDark ? "text-white/80" : "text-[#4B5563]"}`}>•</Text>
+    <Text className={`font-open-sans text-[15px] leading-6 flex-1 ${isDark ? "text-white/80" : "text-[#4B5563]"}`}>
       {children}
     </Text>
   </View>
 );
 
-// Content component that uses the gradient scroll context
-const TermsContent = () => {
-  const router = useRouter();
-  const { scrollY } = useGradientScroll();
-
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
+const TermsOfService = () => {
+  const isDark = false;
+  const searchParams = useLocalSearchParams<{ fromStart?: string }>();
+  const fromStart = searchParams.fromStart === "true";
 
   return (
-    <SafeAreaView className="flex-1">
-      {/* Header with Back Button and Title */}
-      <TopTitleNav
-        title="Termos de serviço"
-        subtitle="Última atualização a 14/12/2025"
-        href="/"
-      />
-
-      {/* Content */}
-      <Animated.ScrollView
-        className="flex-1 pt-4"
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 25, paddingBottom: 40 }}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
-      >
-        {/* Introduction */}
-        <View className="mb-6 mt-4">
-          <Paragraph>
-            Bem-vindo(a) ao AIDE. Estes Termos e Condições são fornecidos apenas
-            para fins de protótipo e demonstração e não constituem um acordo
-            juridicamente vinculativo.
-          </Paragraph>
-          <Paragraph>
-            Ao acessar ou usar este protótipo, você reconhece e concorda com o
-            seguinte:
-          </Paragraph>
-        </View>
-
-        {/* Section 1 */}
-        <TermSection number={1} title="Apenas para usos de prototipagem">
-          <Paragraph>
-            AIDE é um protótipo conceitual e não comercial. Todos os recursos,
-            conteúdo e funcionalidades estão sujeitos a alterações, remoção ou
-            descontinuação a qualquer momento, sem aviso prévio.
-          </Paragraph>
-        </TermSection>
-
-        {/* Section 2 */}
-        <TermSection
-          number={2}
-          title="Sem aconselhamento jurídico ou profissional"
-        >
-          <Paragraph>
-            Qualquer informação, sugestão ou resultado exibido no AIDE é
-            meramente ilustrativo e não deve ser considerado como aconselhamento
-            jurídico, médico, financeiro ou profissional.
-          </Paragraph>
-        </TermSection>
-
-        {/* Section 3 */}
-        <TermSection number={3} title="Dados e privacidade">
-          <Paragraph>
-            Quaisquer dados inseridos neste protótipo podem ser fictícios,
-            simulados ou armazenados temporariamente para fins de demonstração.
-          </Paragraph>
-          <BulletPoint>
-            Não envie informações sensíveis, confidenciais ou que permitam a
-            identificação pessoal.
-          </BulletPoint>
-          <BulletPoint>
-            Os dados podem ser redefinidos ou excluídos sem aviso prévio.
-          </BulletPoint>
-        </TermSection>
-
-        {/* Section 4 */}
-        <TermSection number={4} title="Disponibilidade e precisão">
-          <Paragraph>Não garantimos:</Paragraph>
-          <BulletPoint>
-            Disponibilidade ou tempo de atividade do sistema
-          </BulletPoint>
-          <BulletPoint>
-            Precisão, integridade ou confiabilidade dos resultados
-          </BulletPoint>
-          <BulletPoint>Operação sem erros</BulletPoint>
-        </TermSection>
-
-        {/* Section 5 */}
-        <TermSection number={5} title="Propriedade intelectual">
-          <Paragraph>
-            Todos os nomes, logotipos, designs e conteúdo usados ​​neste
-            protótipo são provisórios, salvo indicação em contrário, e
-            permanecem propriedade de seus respectivos proprietários.
-          </Paragraph>
-        </TermSection>
-
-        {/* Section 6 */}
-        <TermSection number={6} title="Limitação de responsabilidade">
-          <Paragraph>
-            Na máxima extensão permitida pela legislação aplicável, a AIDE não
-            será responsável por quaisquer danos decorrentes do uso ou da
-            impossibilidade de uso deste protótipo.
-          </Paragraph>
-        </TermSection>
-
-        {/* Section 7 */}
-        <TermSection number={7} title="Alterações a estes termos">
-          <Paragraph>
-            Estes Termos podem ser modificados a qualquer momento para fins de
-            teste ou iteração. O uso contínuo do protótipo constitui aceitação
-            de quaisquer termos simulados atualizados.
-          </Paragraph>
-        </TermSection>
-
-        {/* Section 8 */}
-        <TermSection number={8} title="Contacto">
-          <Paragraph>
-            Para dúvidas sobre este protótipo, entre em contato com:
-            geral@aide.pt
-          </Paragraph>
-        </TermSection>
-
-        <View className="items-center">
-          <Button
-            variant="primary"
-            label="Começa Já!"
-            onPress={() => {
-              router.push("/login");
-            }}
+    <LightBackground forceLight>
+      <View className="flex-1 px-4 pt-10">
+        <SafeAreaView className="flex-1">
+          <BackButton
+            label="Termos de Serviço"
+            dark={false}
+            onPress={() => router.push(fromStart ? "/" : "/definicoes")}
           />
-        </View>
-      </Animated.ScrollView>
-    </SafeAreaView>
+
+          {/* Content */}
+          <ScrollView
+            className="flex-1 pt-4"
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 25, paddingBottom: 40 }}
+          >
+            {/* Introduction */}
+            <View className="mb-6 mt-4">
+              <Paragraph isDark={isDark}>
+                Bem-vindo(a) ao AIDE. Estes Termos e Condições são fornecidos apenas
+                para fins de protótipo e demonstração e não constituem um acordo
+                juridicamente vinculativo.
+              </Paragraph>
+              <Paragraph isDark={isDark}>
+                Ao acessar ou usar este protótipo, você reconhece e concorda com o
+                seguinte:
+              </Paragraph>
+            </View>
+
+            {/* Section 1 */}
+            <TermSection number={1} title="Apenas para usos de prototipagem" isDark={isDark}>
+              <Paragraph isDark={isDark}>
+                AIDE é um protótipo conceitual e não comercial. Todos os recursos,
+                conteúdo e funcionalidades estão sujeitos a alterações, remoção ou
+                descontinuação a qualquer momento, sem aviso prévio.
+              </Paragraph>
+            </TermSection>
+
+            {/* Section 2 */}
+            <TermSection
+              number={2}
+              title="Sem aconselhamento jurídico ou profissional"
+              isDark={isDark}
+            >
+              <Paragraph isDark={isDark}>
+                Qualquer informação, sugestão ou resultado exibido no AIDE é
+                meramente ilustrativo e não deve ser considerado como aconselhamento
+                jurídico, médico, financeiro ou profissional.
+              </Paragraph>
+            </TermSection>
+
+            {/* Section 3 */}
+            <TermSection number={3} title="Dados e privacidade" isDark={isDark}>
+              <Paragraph isDark={isDark}>
+                Quaisquer dados inseridos neste protótipo podem ser fictícios,
+                simulados ou armazenados temporariamente para fins de demonstração.
+              </Paragraph>
+              <BulletPoint isDark={isDark}>
+                Não envie informações sensíveis, confidenciais ou que permitam a
+                identificação pessoal.
+              </BulletPoint>
+              <BulletPoint isDark={isDark}>
+                Os dados podem ser redefinidos ou excluídos sem aviso prévio.
+              </BulletPoint>
+            </TermSection>
+
+            {/* Section 4 */}
+            <TermSection number={4} title="Disponibilidade e precisão" isDark={isDark}>
+              <Paragraph isDark={isDark}>Não garantimos:</Paragraph>
+              <BulletPoint isDark={isDark}>
+                Disponibilidade ou tempo de atividade do sistema
+              </BulletPoint>
+              <BulletPoint isDark={isDark}>
+                Precisão, integridade ou confiabilidade dos resultados
+              </BulletPoint>
+              <BulletPoint isDark={isDark}>Operação sem erros</BulletPoint>
+            </TermSection>
+
+            {/* Section 5 */}
+            <TermSection number={5} title="Propriedade intelectual" isDark={isDark}>
+              <Paragraph isDark={isDark}>
+                Todos os nomes, logotipos, designs e conteúdo usados ​​neste
+                protótipo são provisórios, salvo indicação em contrário, e
+                permanecem propriedade de seus respectivos proprietários.
+              </Paragraph>
+            </TermSection>
+
+            {/* Section 6 */}
+            <TermSection number={6} title="Limitação de responsabilidade" isDark={isDark}>
+              <Paragraph isDark={isDark}>
+                Na máxima extensão permitida pela legislação aplicável, a AIDE não
+                será responsável por quaisquer danos decorrentes do uso ou da
+                impossibilidade de uso deste protótipo.
+              </Paragraph>
+            </TermSection>
+
+            {/* Section 7 */}
+            <TermSection number={7} title="Alterações a estes termos" isDark={isDark}>
+              <Paragraph isDark={isDark}>
+                Estes Termos podem ser modificados a qualquer momento para fins de
+                teste ou iteração. O uso contínuo do protótipo constitui aceitação
+                de quaisquer termos simulados atualizados.
+              </Paragraph>
+            </TermSection>
+
+            {/* Section 8 */}
+            <TermSection number={8} title="Contacto" isDark={isDark}>
+              <Paragraph isDark={isDark}>
+                Para dúvidas sobre este protótipo, entre em contato com:
+                geral@aide.pt
+              </Paragraph>
+            </TermSection>
+
+            <View className="h-10" />
+
+            {/* Register Button - Only show when coming from start page */}
+            {fromStart && (
+              <View className="items-center mb-8">
+                <Button
+                  variant="primary"
+                  forceLight
+                  label="Registar"
+                  onPress={() => router.push("/register")}
+                />
+              </View>
+            )}
+          </ScrollView>
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 };
 
-export default function TermsOfService() {
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
-  });
-
-  if (!fontsLoaded) {
-    return null;
-  }
-
-  return (
-    <GradientBackground>
-      <TermsContent />
-    </GradientBackground>
-  );
-}
+export default TermsOfService;

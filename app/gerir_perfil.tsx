@@ -1,4 +1,5 @@
 import BackButton from "@/components/buttons/backButton";
+import { Button } from "@/components/buttons/button";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -9,9 +10,12 @@ import {
   View,
 } from "react-native";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
+import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
 
 const GerirPerfil = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const { isDark } = useTheme();
 
   const [userData, setUserData] = useState({
     nome: "Emília Almeida",
@@ -27,11 +31,12 @@ const GerirPerfil = () => {
   };
 
   return (
-    <View className="flex-1 px-4 pt-10 bg-aide-background">
-      <SafeAreaView className="flex-1">
+    <LightBackground>
+      <View className="flex-1 px-4 pt-10">
+        <SafeAreaView className="flex-1">
         {/* Header */}
         <View className="mb-4">
-          <BackButton label="Gerir Perfil" dark />
+          <BackButton label="Gerir Perfil" dark={isDark} />
         </View>
         <ScrollView
           contentContainerStyle={{ paddingBottom: 40 }}
@@ -39,8 +44,11 @@ const GerirPerfil = () => {
         >
           {/* Foto de Perfil */}
           <View className="items-center my-6">
-            <View className="w-32 h-32 bg-[#E0E0E0] rounded-full items-center justify-center relative border-4 border-white shadow-sm">
-              <Text className="text-4xl font-medium text-[#555]">E</Text>
+            <View 
+              className={`w-32 h-32 rounded-full items-center justify-center relative border-4 ${isDark ? "bg-[#1a1a2e] border-white/20" : "bg-[#E0E0E0] border-white"}`}
+              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            >
+              <Text className={`text-4xl font-medium ${isDark ? "text-white/60" : "text-[#555]"}`}>E</Text>
               <TouchableOpacity className="absolute bottom-0 right-0 bg-black p-2 rounded-full border-2 border-white">
                 <Camera size={16} color="white" />
               </TouchableOpacity>
@@ -49,17 +57,17 @@ const GerirPerfil = () => {
 
           {/* Título e Lápis */}
           <View className="px-4 mb-2">
-            <Text className="text-[11px] font-open-sans font-bold uppercase tracking-tighter">
+            <Text className={`text-xs font-open-sans font-bold uppercase tracking-tighter ${isDark ? "text-white/60" : "text-black"}`}>
               Aqui pode fazer alterações às suas informações de{"\n"}
               identificação e de contacto.
             </Text>
             <View className="flex-row justify-between items-center mt-6 mb-2">
-              <Text className="text-lg font-safiro text-[#111]">
+              <Text className={`text-lg font-safiro ${isDark ? "text-white" : "text-[#111]"}`}>
                 A SUA IDENTIFICAÇÃO
               </Text>
               {!isEditing && (
                 <TouchableOpacity onPress={() => setIsEditing(true)}>
-                  <Pencil size={22} color="black" />
+                  <Pencil size={22} color={isDark ? "white" : "black"} />
                 </TouchableOpacity>
               )}
             </View>
@@ -73,44 +81,59 @@ const GerirPerfil = () => {
 
           {/* Botão Alterar */}
           <View className="mt-4 px-4">
-            <TouchableOpacity
-              onPress={handleSave}
-              disabled={!isEditing}
-              className={`py-4 rounded-full items-center ${
-                isEditing ? "bg-[#E1E9FF] shadow-md" : "bg-[#E1E9FF] opacity-40"
-              }`}
-            >
-              <Text className="text-lg font-bold text-[#111]">Alterar</Text>
-            </TouchableOpacity>
+            <View className="w-full items-center">
+              <Button 
+                variant="primary" 
+                label="Alterar" 
+                onPress={handleSave} 
+              />
+            </View>
           </View>
 
           {/* Cards Extras */}
           <View className="px-4 mt-10">
-            <View className="bg-[#E2E8F0] p-6 rounded-[32px] mb-4">
-              <Text className="text-xl font-bold">Apagar Conta</Text>
-              <Text className="text-xs font-bold text-gray-800 mt-1">
+            <View 
+              className={`p-6 rounded-[32px] mb-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            >
+              <Text className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}>Apagar Conta</Text>
+              <Text className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}>
                 Ao apagar a sua conta todos os dados vão ser perdidos no espaço
                 de 30 dias.
               </Text>
-              <TouchableOpacity className="bg-[#CBD5E1] mt-4 py-3 rounded-full items-center w-36 self-center">
-                <Text className="text-red-500 font-bold">Apagar</Text>
+              <TouchableOpacity 
+                className="mt-4 py-3 rounded-xl items-center self-center"
+                onPress={() => console.log("Apagar conta")}
+              >
+                <View className={`py-3 px-8 rounded-xl ${isDark ? "bg-red-500/20" : "bg-red-100"}`}>
+                  <Text className={`font-medium ${isDark ? "text-red-400" : "text-red-600"}`}>Apagar</Text>
+                </View>
               </TouchableOpacity>
             </View>
 
-            <View className="bg-[#E2E8F0] p-6 rounded-[32px]">
-              <Text className="text-xl font-bold">Pedir Dados</Text>
-              <Text className="text-xs font-bold text-gray-800 mt-1">
+            <View 
+              className={`p-6 rounded-[32px] ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            >
+              <Text className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}>Pedir Dados</Text>
+              <Text className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}>
                 Pedir dados que a AIDE têm sobre ti, desde a sua criação de
                 conta em formato XML.
               </Text>
-              <TouchableOpacity className="bg-[#CBD5E1] mt-4 py-3 rounded-full items-center w-36 self-center">
-                <Text className="text-white font-bold">Extrair</Text>
+              <TouchableOpacity 
+                className="mt-4 py-3 rounded-xl items-center self-center"
+                onPress={() => console.log("Extrair dados")}
+              >
+                <View className={`py-3 px-8 rounded-xl ${isDark ? "bg-blue-500/20" : "bg-blue-100"}`}>
+                  <Text className={`font-medium ${isDark ? "text-blue-400" : "text-blue-600"}`}>Extrair</Text>
+                </View>
               </TouchableOpacity>
             </View>
           </View>
         </ScrollView>
       </SafeAreaView>
     </View>
+  </LightBackground>
   );
 };
 

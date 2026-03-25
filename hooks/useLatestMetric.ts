@@ -7,6 +7,18 @@ const API_BASE = Platform.select({
   default: "http://localhost:3000",
 });
 
+export function useMetricStats(endpoint: string) {
+  return useQuery({
+    queryKey: [endpoint, "stats"],
+    enabled: !!endpoint && endpoint !== "undefined",
+    queryFn: async () => {
+      const response = await axios.get(`${API_BASE}/${endpoint}Stats`);
+      return response.data as { min: number; max: number };
+    },
+    refetchInterval: 10000,
+  });
+}
+
 export function useHealthMetric(endpoint: string, isBP: boolean = false) {
   return useQuery({
     queryKey: [endpoint, "latest"],

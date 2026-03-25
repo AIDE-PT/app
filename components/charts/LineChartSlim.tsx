@@ -1,8 +1,10 @@
 import React from "react";
 import { Dimensions, ViewStyle, StyleSheet } from "react-native";
 import { LineChart } from "react-native-chart-kit";
+import { useTheme } from "@/hooks/useTheme";
 
 const defaultWidth = Dimensions.get("window").width - 32;
+const DEFAULT_LIGHT_LABEL_COLOR = "rgba(17, 24, 39, 0.92)";
 
 interface SimpleLineChartProps {
   // Dados e Dimensões
@@ -30,6 +32,10 @@ interface SimpleLineChartProps {
   gridDashArray?: string;
   segments?: number;
 
+  // Range fixo
+  yMin?: number;
+  yMax?: number;
+
   style?: ViewStyle;
 }
 
@@ -48,7 +54,7 @@ export default function SimpleLineChart({
   gradientToOpacity = 0,
 
   backgroundGradient = "#ffffff",
-  labelColor = "rgba(124, 137, 255, 1)",
+  labelColor = DEFAULT_LIGHT_LABEL_COLOR,
   labelFontSize = 10,
   yAxisSuffix = "",
   showYLabels = true,
@@ -58,8 +64,22 @@ export default function SimpleLineChart({
   gridDashArray = "4",
   segments = 3,
 
+  yMin,
+  yMax,
+
   style,
 }: SimpleLineChartProps) {
+  const { isDark } = useTheme();
+
+  // Dark mode background colors
+  const darkBgGradient = "rgba(0, 4, 18, 0.95)";
+  const darkLabelColor = "rgba(255, 255, 255, 0.6)";
+  const darkGridColor = "rgba(255, 255, 255, 0.1)";
+
+  const bgGradient = backgroundGradient === "#ffffff" && isDark ? darkBgGradient : backgroundGradient;
+  const lblColor = labelColor === DEFAULT_LIGHT_LABEL_COLOR && isDark ? darkLabelColor : labelColor;
+  const grdColor = gridColor === "#E5E7EB" && isDark ? darkGridColor : gridColor;
+
   const combinedStyle = StyleSheet.flatten([
     {
       marginVertical: 8,
@@ -69,17 +89,30 @@ export default function SimpleLineChart({
     style,
   ]);
 
+  const datasets: any[] = [{ data }];
+
+  // Hack para forçar o range do eixo Y
+  if (yMin !== undefined && yMax !== undefined) {
+    datasets.push({
+      data: [yMin, yMax],
+      color: () => "transparent",
+      withDots: false,
+      withShadow: false, // Don't draw area shadow for the scaling dataset
+    });
+  }
+
   return (
     <LineChart
       data={{
         labels: [],
-        datasets: [{ data }],
+        datasets: datasets,
       }}
       width={width}
       height={height}
       yAxisSuffix={yAxisSuffix}
+      fromNumber={yMax}
       withDots={false}
-      withShadow={true}
+      withShadow={false}
       withInnerLines={true}
       withOuterLines={false}
       withHorizontalLabels={showYLabels}
@@ -89,22 +122,22 @@ export default function SimpleLineChart({
       segments={segments}
       bezier
       chartConfig={{
-        backgroundGradientFrom: backgroundGradient,
-        backgroundGradientTo: backgroundGradient,
+        backgroundGradientFrom: bgGradient,
+        backgroundGradientTo: bgGradient,
         decimalPlaces: 0,
-        labelColor: () => labelColor,
+        labelColor: () => lblColor,
         propsForLabels: {
           fontSize: labelFontSize,
         },
         color: () => lineColor,
         fillShadowGradient: gradientFrom,
-        fillShadowGradientOpacity: gradientFromOpacity,
+        fillShadowGradientOpacity: 0,
         fillShadowGradientTo: gradientTo,
-        fillShadowGradientToOpacity: gradientToOpacity,
+        fillShadowGradientToOpacity: 0,
         propsForBackgroundLines: {
           strokeDasharray: gridDashArray,
           strokeWidth: gridStrokeWidth,
-          stroke: gridColor,
+          stroke: grdColor,
         },
         propsForDots: {
           r: "0",

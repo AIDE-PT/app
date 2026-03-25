@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { Info } from "lucide-react-native";
-import { Input } from "./input/Input"; // Caminho para o teu ficheiro Input.tsx
+import { Input } from "./input/Input";
+import { useTheme } from "@/hooks/useTheme";
 
 interface Props {
   label: string;
@@ -18,12 +19,13 @@ const ElementoFormulario = ({
   editable,
   type = "text",
 }: Props) => {
+  const { isDark } = useTheme();
+
   return (
     <View className="mb-4 w-full">
-      {/* mb-4 = 16px de espaçamento vertical */}
       <View className="flex-row items-center mb-2 ml-1">
-        <Text className="text-black font-bold text-base mr-2">{label}</Text>
-        <Info size={16} color="black" />
+        <Text className={`font-bold text-base mr-2 ${isDark ? "text-white" : "text-black"}`}>{label}</Text>
+        <Info size={16} color={isDark ? "white" : "black"} />
       </View>
       <Input
         value={value}

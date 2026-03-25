@@ -12,22 +12,30 @@ import cuidado from "../assets/images/cuidado.png";
 import icon_aider from "../assets/images/icon_aider.png";
 import icon_cuidado from "../assets/images/icon_cuidado.png";
 import { Profilecard } from "../components/profilecard";
+import { Button } from "../components/buttons/button";
+import LightBackground from "@/components/DotBackground";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 
 export default function PerfilScreen() {
   const router = useRouter();
   const [selected, setSelected] = useState<"aider" | "cuidado" | null>(null);
+  const isDark = false;
+  const { setProfileType } = useUserProfile();
 
   const handleAvançar = () => {
+    if (!selected) return;
+    setProfileType(selected);
     if (selected === "cuidado") {
       router.push("/extraData");
     } else {
-      router.push("./associar");
+      router.push("/associar");
     }
   };
 
   return (
-    <View className="flex-1 px-4 pt-10 bg-aide-background">
-      <SafeAreaView className="flex-1">
+    <LightBackground forceLight>
+      <View className="flex-1 px-4 pt-10">
+        <SafeAreaView className="flex-1">
         <ScrollView
           contentContainerStyle={{ flexGrow: 1 }}
           showsVerticalScrollIndicator={false}
@@ -35,8 +43,8 @@ export default function PerfilScreen() {
           <View className="">
             {/* Título e Subtítulo */}
             <View className="mt-12 mb-8">
-              <Text className="text-4xl font-safiro text-black">Registo</Text>
-              <Text className="text-lg font-open-sans text-gray-600 mt-2">
+              <Text className={`text-4xl font-safiro ${isDark ? "text-white" : "text-black"}`}>Registo</Text>
+              <Text className={`text-lg font-open-sans mt-2 ${isDark ? "text-white/60" : "text-gray-600"}`}>
                 Como pretende utilizar a aplicação?
               </Text>
             </View>
@@ -51,6 +59,7 @@ export default function PerfilScreen() {
                 isSelected={selected === "aider"}
                 isOtherSelected={selected === "cuidado"}
                 onPress={() => setSelected("aider")}
+                forceLight
               />
               <Profilecard
                 title="Cuidado"
@@ -60,6 +69,7 @@ export default function PerfilScreen() {
                 isSelected={selected === "cuidado"}
                 isOtherSelected={selected === "aider"}
                 onPress={() => setSelected("cuidado")}
+                forceLight
               />
             </View>
 
@@ -68,24 +78,18 @@ export default function PerfilScreen() {
 
             {/* Botão Avançar */}
             <View className="items-center mt-10">
-              <TouchableOpacity
-                disabled={!selected}
+              <Button
+                variant="primary"
+                forceLight
+                label="Avançar"
                 onPress={handleAvançar}
-                activeOpacity={0.8}
-                className={`w-full py-5 rounded-[22px] items-center ${
-                  selected ? "bg-[#7C94FF]" : "bg-white shadow-sm"
-                }`}
-              >
-                <Text
-                  className={`text-xl font-bold ${selected ? "text-white" : "text-gray-400"}`}
-                >
-                  Avançar
-                </Text>
-              </TouchableOpacity>
+                disabled={!selected}
+              />
             </View>
           </View>
         </ScrollView>
       </SafeAreaView>
     </View>
+  </LightBackground>
   );
 }
