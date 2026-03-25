@@ -1,6 +1,13 @@
 import { LinearGradient } from "expo-linear-gradient";
-import React from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import React, { useEffect, useRef } from "react";
+import {
+  Animated,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { ProfileImage } from "./profileimage";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -25,6 +32,16 @@ export const Profilecard = ({
   onPress,
   forceLight = false,
 }: ProfileCardProps) => {
+  const scale = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    Animated.spring(scale, {
+      toValue: isSelected ? 1.02 : 1,
+      useNativeDriver: true,
+      friction: 8,
+    }).start();
+  }, [isSelected, scale]);
+
   const isFaded = isOtherSelected && !isSelected;
   const { isDark } = useTheme();
   const useDarkMode = !forceLight && isDark;
