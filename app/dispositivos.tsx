@@ -1,4 +1,3 @@
-import { useFonts } from "expo-font";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,6 +8,67 @@ import DeviceManagementModal, {
   DeviceWithStatus,
 } from "../components/modals/DeviceManagementModal";
 import AddIcon from "../components/svg/AddIcon";
+import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
+import Svg, { Circle, Path } from "react-native-svg";
+
+function DeviceShareStatusIcon({
+  enabled,
+  color,
+  size = 22,
+}: {
+  enabled: boolean;
+  color: string;
+  size?: number;
+}) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+      {enabled ? (
+        <>
+          <Path
+            d="M3 9C7 5 17 5 21 9"
+            stroke={color}
+            strokeWidth={2.4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Path
+            d="M6 12C9 9 15 9 18 12"
+            stroke={color}
+            strokeWidth={2.4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Path
+            d="M9 15C10.5 13.7 13.5 13.7 15 15"
+            stroke={color}
+            strokeWidth={2.4}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Circle cx={12} cy={18} r={1.8} fill={color} />
+        </>
+      ) : (
+        <>
+          <Path
+            d="M7 7L17 17"
+            stroke={color}
+            strokeWidth={2.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Path
+            d="M17 7L7 17"
+            stroke={color}
+            strokeWidth={2.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </>
+      )}
+    </Svg>
+  );
+}
 
 const ALL_DEVICES: Device[] = [
   { id: "apple-healthkit", name: "Apple Healthkit" },
@@ -19,12 +79,6 @@ const ALL_DEVICES: Device[] = [
 ];
 
 export default function DispositivosPage() {
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
-  });
-
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [connectionModalVisible, setConnectionModalVisible] = useState(false);
   const [managementModalVisible, setManagementModalVisible] = useState(false);
@@ -51,6 +105,8 @@ export default function DispositivosPage() {
   const availableDevices = ALL_DEVICES.filter(
     (device) => !addedDevices.find((added) => added.id === device.id),
   );
+
+  const { isDark, colors } = useTheme();
 
   // Handle device selection from AddDeviceModal
   const handleSelectDevice = (device: Device) => {
@@ -99,111 +155,143 @@ export default function DispositivosPage() {
     }
   };
 
-  if (!fontsLoaded) {
-    return null;
-  }
-
   return (
-    <View className="flex-1 px-4 pt-10 bg-aide-background">
-      <SafeAreaView className="flex-1">
-        <View className="mb-4">
-          <BackButton label="Gerir Dispositivos" dark />
-        </View>
-
-        <View className="mb-8">
-          <Text className="font-open-sans text-[18px] text-[#00072099] mb-8 leading-6">
-            Adicione uma fonte de dados para aceder a novas metricas
-          </Text>
-
-          {/* Grid */}
-          <View className="flex-row flex-wrap justify-between">
-            {addedDevices.map((device) => {
-              const nameWords = device.name.split(" ");
-              return (
-                <TouchableOpacity
-                  key={device.id}
-                  onPress={() => handleDeviceClick(device)}
-                  className={`w-[48%] aspect-[1.47] bg-white border-2 rounded-[20px] items-center justify-center shadow-sm mb-4 ${
-                    device.isDataSharingEnabled
-                      ? "border-[#4cd964]"
-                      : "border-[#E9E9E9]"
-                  }`}
-                >
-                  <View className="flex-row items-center gap-2">
-                    <View className="w-12 h-12 bg-[#E9E9E9] rounded-full items-center justify-center">
-                      <Text className="font-open-sans font-bold text-xl text-black">
-                        {device.name.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                    <View>
-                      {nameWords.length > 1 ? (
-                        nameWords.map((word, index) => (
-                          <Text
-                            key={index}
-                            className="font-open-sans font-bold text-sm text-black leading-5"
-                          >
-                            {word}
-                          </Text>
-                        ))
-                      ) : (
-                        <Text className="font-open-sans font-bold text-[18px] text-black">
-                          {device.name}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                  {!device.isDataSharingEnabled && (
-                    <View className="absolute top-2 right-2">
-                      <View className="w-3 h-3 rounded-full bg-[#E9E9E9]" />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
-
-            {/* Add Button */}
-            <TouchableOpacity
-              onPress={() => setAddModalVisible(true)}
-              className="w-[48%] aspect-[1.47] bg-white rounded-[20px] items-center justify-center shadow-sm mb-4"
-            >
-              <View className="items-center justify-center">
-                <AddIcon size={32} color="#000746" />
-              </View>
-            </TouchableOpacity>
+    <LightBackground>
+      <View className="flex-1 px-4 pt-10">
+        <SafeAreaView className="flex-1">
+          <View className="mb-4">
+            <BackButton label="Gerir Dispositivos" dark={isDark} />
           </View>
-        </View>
 
-        {/* Add Device Modal */}
-        <AddDeviceModal
-          visible={addModalVisible}
-          onClose={() => setAddModalVisible(false)}
-          availableDevices={availableDevices}
-          onSelectDevice={handleSelectDevice}
-        />
+          <View className="mb-8">
+            <Text
+              className={`font-open-sans text-[18px] mb-8 leading-6 ${isDark ? "text-white/60" : "text-[#00072099]"}`}
+            >
+              Adicione uma fonte de dados para aceder a novas metricas
+            </Text>
 
-        {/* Connection Confirmation Modal */}
-        <DeviceConnectionModal
-          visible={connectionModalVisible}
-          onClose={() => {
-            setConnectionModalVisible(false);
-            setPendingDevice(null);
-          }}
-          onConfirm={handleConnectionConfirm}
-          device={pendingDevice}
-        />
+            {/* Grid */}
+            <View className="flex-row flex-wrap justify-between">
+              {addedDevices.map((device) => {
+                return (
+                  <TouchableOpacity
+                    key={device.id}
+                    onPress={() => handleDeviceClick(device)}
+                    accessibilityRole="button"
+                    accessibilityLabel={`${device.name}${device.isDataSharingEnabled ? ", partilha de dados ativa" : ", partilha de dados inativa"}`}
+                    accessibilityHint="Abre a gestão deste dispositivo."
+                    style={{
+                      boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
+                      borderColor: device.isDataSharingEnabled
+                        ? colors.semantic.success
+                        : undefined,
+                    }}
+                    className={`w-[48%] aspect-[1.47] border-2 rounded-[20px] items-start mb-4 ${
+                      isDark ? "bg-aide-dark-card" : "bg-white"
+                    } ${
+                      device.isDataSharingEnabled
+                        ? ""
+                        : isDark
+                          ? "border-white/10"
+                          : "border-[#E9E9E9]"
+                    }`}
+                  >
+                    <View className="h-full w-full px-4 py-3">
+                      <View className="flex-row justify-end">
+                        <View
+                          className="w-10 h-10 rounded-full items-center justify-center"
+                          style={{
+                            backgroundColor: isDark
+                              ? "rgba(255,255,255,0.09)"
+                              : "#F1F5F9",
+                          }}
+                        >
+                          <DeviceShareStatusIcon
+                            enabled={device.isDataSharingEnabled}
+                            size={22}
+                            color={
+                              device.isDataSharingEnabled
+                                ? colors.semantic.success
+                                : isDark
+                                  ? "rgba(255,255,255,0.55)"
+                                  : "#94A3B8"
+                            }
+                          />
+                        </View>
+                      </View>
 
-        {/* Device Management Modal */}
-        <DeviceManagementModal
-          visible={managementModalVisible}
-          onClose={() => {
-            setManagementModalVisible(false);
-            setSelectedDevice(null);
-          }}
-          onRemove={handleRemoveDevice}
-          onToggleDataSharing={handleToggleDataSharing}
-          device={selectedDevice}
-        />
-      </SafeAreaView>
-    </View>
+                      <View className="flex-1 justify-center -mt-1">
+                        <View className="flex-row items-center gap-3 flex-1">
+                          <View
+                            className={`w-11 h-11 rounded-full items-center justify-center ${isDark ? "bg-white/20" : "bg-[#E9E9E9]"}`}
+                          >
+                            <Text
+                              className={`font-open-sans font-bold text-base ${isDark ? "text-white" : "text-black"}`}
+                            >
+                              {device.name.charAt(0).toUpperCase()}
+                            </Text>
+                          </View>
+                          <Text
+                            numberOfLines={2}
+                            className={`font-open-sans font-bold text-[15px] leading-5 flex-1 ${isDark ? "text-white" : "text-black"}`}
+                          >
+                            {device.name}
+                          </Text>
+                        </View>
+                      </View>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+
+              {/* Add Button */}
+              <TouchableOpacity
+                onPress={() => setAddModalVisible(true)}
+                style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                className={`w-[48%] aspect-[1.47] rounded-[20px] items-center justify-center mb-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                accessibilityRole="button"
+                accessibilityLabel="Adicionar dispositivo"
+                accessibilityHint="Abre a lista de dispositivos disponíveis."
+              >
+                <View className="items-center justify-center">
+                  <AddIcon size={32} color={isDark ? "#ffffff" : "#000746"} />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Add Device Modal */}
+          <AddDeviceModal
+            visible={addModalVisible}
+            onClose={() => setAddModalVisible(false)}
+            availableDevices={availableDevices}
+            onSelectDevice={handleSelectDevice}
+          />
+
+          {/* Connection Confirmation Modal */}
+          <DeviceConnectionModal
+            visible={connectionModalVisible}
+            onClose={() => {
+              setConnectionModalVisible(false);
+              setPendingDevice(null);
+            }}
+            onConfirm={handleConnectionConfirm}
+            device={pendingDevice}
+          />
+
+          {/* Device Management Modal */}
+          <DeviceManagementModal
+            visible={managementModalVisible}
+            onClose={() => {
+              setManagementModalVisible(false);
+              setSelectedDevice(null);
+            }}
+            onRemove={handleRemoveDevice}
+            onToggleDataSharing={handleToggleDataSharing}
+            device={selectedDevice}
+          />
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 }

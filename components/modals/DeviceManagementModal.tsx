@@ -9,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { Device } from "./AddDeviceModal";
+import { useTheme } from "@/hooks/useTheme";
 
 interface DeviceWithStatus extends Device {
   isDataSharingEnabled: boolean;
@@ -32,6 +33,7 @@ export default function DeviceManagementModal({
   const [shareData, setShareData] = useState(
     device?.isDataSharingEnabled ?? true,
   );
+  const { isDark } = useTheme();
 
   const handleToggle = (value: boolean) => {
     setShareData(value);
@@ -68,22 +70,22 @@ export default function DeviceManagementModal({
 
           {/* Bottom Sheet Content */}
           <View
-            className="bg-[#DBEDF8] rounded-t-[31px] w-full items-center pb-12"
-            style={{
-              shadowColor: "#000",
-              shadowOffset: { width: 0, height: -2 },
-              shadowOpacity: 0.12,
-              shadowRadius: 8,
-              elevation: 5,
-            }}
+            className={`rounded-t-[31px] w-full items-center pb-12 ${isDark ? "bg-aide-dark-card" : "bg-[#DBEDF8]"}`}
+            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
           >
             {/* Drag handle */}
-            <View className="w-[33px] h-[4px] bg-[#79747E] rounded-full mt-4 mb-8" />
+            <View
+              className={`w-[33px] h-[4px] rounded-full mt-4 mb-8 ${isDark ? "bg-white/40" : "bg-[#6E6872]"}`}
+            />
 
             {/* Device Info */}
             <View className="flex-row items-center self-start px-8 mb-6">
-              <View className="w-16 h-16 rounded-full bg-[#E9E9E9] items-center justify-center border border-white mr-4">
-                <Text className="font-open-sans font-bold text-[28px] text-black">
+              <View
+                className={`w-16 h-16 rounded-full items-center justify-center border mr-4 ${isDark ? "border-white/20 bg-white/20" : "border-[#B8CFDF] bg-[#E9E9E9]"}`}
+              >
+                <Text
+                  className={`font-open-sans font-bold text-[28px] ${isDark ? "text-white" : "text-black"}`}
+                >
                   {device.name.charAt(0).toUpperCase()}
                 </Text>
               </View>
@@ -92,13 +94,15 @@ export default function DeviceManagementModal({
                   nameWords.map((word, index) => (
                     <Text
                       key={index}
-                      className="font-open-sans font-bold text-2xl text-black leading-7"
+                      className={`font-open-sans font-bold text-2xl leading-7 ${isDark ? "text-white" : "text-black"}`}
                     >
                       {word}
                     </Text>
                   ))
                 ) : (
-                  <Text className="font-open-sans font-bold text-2xl text-black">
+                  <Text
+                    className={`font-open-sans font-bold text-2xl ${isDark ? "text-white" : "text-black"}`}
+                  >
                     {device.name}
                   </Text>
                 )}
@@ -107,20 +111,24 @@ export default function DeviceManagementModal({
 
             {/* Data Sharing Toggle */}
             <View className="flex-row justify-between items-center w-full px-8 mb-8">
-              <Text className="font-open-sans text-base text-black">
+              <Text
+                className={`font-open-sans text-base ${isDark ? "text-white" : "text-black"}`}
+              >
                 Partilhar dados
               </Text>
               <Switch
                 value={shareData}
                 onValueChange={handleToggle}
                 trackColor={{ false: "#767577", true: "#7C89FF" }}
-                thumbColor={shareData ? "#ffffff" : "#f4f3f4"}
+                thumbColor={shareData ? "#ffffff" : "#FFFFFF"}
+                accessibilityLabel={`Partilhar dados de ${device.name}`}
+                accessibilityHint="Ativa ou desativa a partilha de dados deste dispositivo."
               />
             </View>
 
             {/* Remove Button */}
             <TouchableOpacity onPress={onRemove} className="w-full px-8">
-              <View className="bg-[#FF6B6B] py-3 rounded-[25px] items-center justify-center">
+              <View className="bg-[#E45858] py-3 rounded-[25px] items-center justify-center">
                 <Text className="font-open-sans font-semibold text-base text-white">
                   Remover dispositivo
                 </Text>

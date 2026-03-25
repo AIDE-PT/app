@@ -6,9 +6,9 @@ module.exports = {
     extend: {
       // Font Families - Safiro and Open Sans
       fontFamily: {
-        safiro: ["Safiro-Medium"],
-        "open-sans": ["OpenSans-Regular"],
-        "open-sans-semibold": ["OpenSans-SemiBold"],
+        safiro: ["Safiro-Medium", "OpenSans-SemiBold", "sans-serif"],
+        "open-sans": ["OpenSans-Regular", "sans-serif"],
+        "open-sans-semibold": ["OpenSans-SemiBold", "sans-serif"],
       },
       // Color Palette
       colors: {
@@ -23,6 +23,14 @@ module.exports = {
         "aide-green": "#4CD964",
         "aide-yellow": "#FFCC00",
 
+        // Colorblind-friendly semantic alternatives (for opt-in usage)
+        "aide-cb-success": "#2D9CDB",
+        "aide-cb-warning": "#F2994A",
+        "aide-cb-danger": "#C445C2",
+        "aide-cb-success-contrast": "#0077FF",
+        "aide-cb-warning-contrast": "#FF8A00",
+        "aide-cb-danger-contrast": "#D40000",
+
         // AIDE Brand Blues
         "aide-dark-blue": "#000746",
         "aide-normal-blue": "#5061FF",
@@ -30,6 +38,15 @@ module.exports = {
 
         // Component-specific colors
         "aide-navbar": "rgba(219, 237, 248, 0.9)",
+
+        // Dark Theme Colors
+        "aide-dark-bg-start": "#000720",
+        "aide-dark-bg-end": "#000746",
+        "aide-dark-card": "rgba(0, 4, 18, 0.9)", // #000412 at 90% opacity
+        "aide-dark-text": "#FFFFFF",
+        "aide-dark-text-secondary": "rgba(255, 255, 255, 0.6)",
+        "aide-dark-text-tertiary": "rgba(255, 255, 255, 0.8)",
+        "aide-dark-navbar": "rgba(0, 4, 18, 0.5)",
       },
     },
   },

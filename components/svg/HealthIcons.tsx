@@ -7,7 +7,15 @@ export const PressaoIcon = ({
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
+      {...props}
+    >
       <Path
         d="M20 5C14.477 5 10 9.477 10 15C10 22.5 20 35 20 35C20 35 30 22.5 30 15C30 9.477 25.523 5 20 5Z"
         stroke={color}
@@ -32,7 +40,15 @@ export const GlicoseIcon = ({
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
+      {...props}
+    >
       <Path
         d="M20 5L20 8M20 8C15 14 12 18 12 23C12 28.523 15.477 33 20 33C24.523 33 28 28.523 28 23C28 18 25 14 20 8Z"
         stroke={color}
@@ -57,7 +73,15 @@ export const BpmIcon = ({
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
+      {...props}
+    >
       <Path
         d="M20 35C20 35 6 26 6 16C6 12.134 9.134 9 13 9C15.591 9 17.873 10.404 19.129 12.5C19.429 12.988 19.698 13.487 20 14C20.302 13.487 20.571 12.988 20.871 12.5C22.127 10.404 24.409 9 27 9C30.866 9 34 12.134 34 16C34 26 20 35 20 35Z"
         stroke={color}
@@ -82,7 +106,15 @@ export const CalIcon = ({
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
+      {...props}
+    >
       <Path
         d="M20 6L20 10M20 10C14 16 10 20 10 26C10 32 14.477 36 20 36C25.523 36 30 32 30 26C30 20 26 16 20 10Z"
         stroke={color}
@@ -107,7 +139,15 @@ export const PassosIcon = ({
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
+      {...props}
+    >
       <Path
         d="M12 28C12 28 8 24 8 20C8 16 10 14 14 12C18 10 16 6 16 6"
         stroke={color}
@@ -132,7 +172,15 @@ export const StressIcon = ({
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
+      {...props}
+    >
       <Path
         d="M20 8C14 8 9 12 9 17C9 22 14 24 20 24C26 24 31 22 31 17C31 12 26 8 20 8Z"
         stroke={color}
@@ -164,7 +212,15 @@ export const SonoIcon = ({
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
+      {...props}
+    >
       <Path
         d="M28 20C28 24.418 24.418 28 20 28C15.582 28 12 24.418 12 20C12 15.582 15.582 12 20 12"
         stroke={color}
@@ -189,7 +245,15 @@ export const O2Icon = ({
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
+      {...props}
+    >
       <Path
         d="M16 6L16 10M16 10C11 16 8 20 8 25C8 30.523 11.477 34 16 34C20.523 34 24 30.523 24 25C24 20 21 16 16 10Z"
         stroke={color}
@@ -220,7 +284,15 @@ export const TempIcon = ({
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
   return (
-    <Svg width={size} height={size} viewBox="0 0 40 40" fill="none" {...props}>
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 40 40"
+      fill="none"
+      accessible={props.accessible ?? false}
+      focusable={false}
+      {...props}
+    >
       <Path
         d="M20 6V24M20 6C18.343 6 17 7.343 17 9V24.535C15.191 25.592 14 27.547 14 29.773C14 33.223 16.686 36 20 36C23.314 36 26 33.223 26 29.773C26 27.547 24.809 25.592 23 24.535V9C23 7.343 21.657 6 20 6Z"
         stroke={color}

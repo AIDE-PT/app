@@ -1,4 +1,3 @@
-import { useFonts } from "expo-font";
 import { useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -59,19 +58,9 @@ const ComponentItem = ({
 );
 
 export default function Components() {
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
-  });
-
   const [modalVisible, setModalVisible] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [dateValue, setDateValue] = useState(new Date());
-
-  if (!fontsLoaded) {
-    return null;
-  }
 
   return (
     <GradientBackground>

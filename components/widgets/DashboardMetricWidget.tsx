@@ -7,12 +7,14 @@ interface Props {
   type: IconType;
   endpoint: string;
   variant: "1-1" | "1-2" | "1-3" | "2-3";
+  iconSize?: number;
 }
 
 export default function DashboardMetricWidget({
   type,
   endpoint,
   variant,
+  iconSize = 20,
 }: Props) {
   const isBP = type === "bloodPressure";
   const { data, isLoading } = useHealthMetric(endpoint, isBP);
@@ -24,13 +26,14 @@ export default function DashboardMetricWidget({
     return (
       <WidgetWrapper
         title={styles.title}
-        icon={<WidgetIcon variant={type} />}
+        icon={<WidgetIcon variant={type} size={iconSize} />}
         variant={variant}
         value="--"
         unit={styles.unit}
         feedback="loading"
         feedbackColor="#E5E7EB"
         history={[]}
+        color={styles.color}
       />
     );
   }
@@ -40,22 +43,39 @@ export default function DashboardMetricWidget({
     return (
       <WidgetWrapper
         title={styles.title}
-        icon={<WidgetIcon variant={type} />}
+        icon={<WidgetIcon variant={type} size={iconSize} />}
         variant={variant}
         value="--"
         unit={styles.unit}
         feedback="offline"
         feedbackColor="#FCA5A5"
         history={[]}
+        color={styles.color}
       />
     );
   }
 
   // 3. RENDERIZAÇÃO FINAL (Ligado às variáveis reais)
+  // Calculate sparkline height based on type and variant
+  const getSparklineHeight = () => {
+    if (type === "temp") {
+      return variant === "2-3" ? 160 : 80; // Double height for 2-3 variant
+    }
+    return 24;
+  };
+
+  // Calculate value offset based on type and variant
+  const getValueOffset = () => {
+    if (type === "temp") {
+      return variant === "2-3" ? 150 : 40; // More offset for 2-3 variant
+    }
+    return 10;
+  };
+
   return (
     <WidgetWrapper
       title={styles.title}
-      icon={<WidgetIcon variant={type} />}
+      icon={<WidgetIcon variant={type} size={iconSize} />}
       variant={variant}
       // USAR displayValue (que já trata BP e valores normais)
       value={data.displayValue}
@@ -64,6 +84,13 @@ export default function DashboardMetricWidget({
       feedbackColor={styles.feedbackColor}
       // USAR o history processado (array de números)
       history={data.history}
+      metricType={type}
+      color={styles.color}
+      yMin={type === "temp" ? 35 : undefined}
+      yMax={type === "temp" ? 40 : undefined}
+      segments={type === "temp" ? 5 : 3}
+      sparklineHeight={getSparklineHeight()}
+      valueOffsetBottom={getValueOffset()}
     />
   );
 }

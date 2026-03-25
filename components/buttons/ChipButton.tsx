@@ -19,8 +19,9 @@ export const ChipButton = ({
     <TouchableOpacity
       onPress={onPress}
       activeOpacity={1}
-      className={`flex-row items-center px-4 py-2 rounded-full border border-[#5061FF]/20 shadow
+      className={`flex-row items-center px-4 py-2 rounded-full border border-[#5061FF]/20
                   ${isDarkVariant ? "bg-black/60" : "bg-white/90"}`}
+      style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
     >
       <View
         className={`w-4 h-4 rounded-full border-2 mr-2 items-center justify-center

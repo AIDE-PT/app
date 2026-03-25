@@ -1,32 +1,28 @@
-import { useFonts } from "expo-font";
 import { router } from "expo-router";
 import React from "react";
 import { SafeAreaView, View } from "react-native";
 import BackButton from "../components/buttons/backButton";
 import DefinicoesLista from "../components/definicoes_lista";
+import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
 
 const Definicoes = () => {
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
-  });
+  const { isDark } = useTheme();
 
-  if (!fontsLoaded) {
-    return null;
-  }
   return (
-    <View className="flex-1 px-4 pt-10 bg-aide-background">
-      <SafeAreaView className="flex-1">
-        <BackButton
-          label="Histórico Diário"
-          dark
-          onPress={() => router.push("/testDashboard")}
-        />
+    <LightBackground>
+      <View className="flex-1 px-4 pt-10">
+        <SafeAreaView className="flex-1">
+          <BackButton
+            label="Definições"
+            dark={isDark}
+            onPress={() => router.push("/testDashboard")}
+          />
 
-        <DefinicoesLista />
-      </SafeAreaView>
-    </View>
+          <DefinicoesLista />
+        </SafeAreaView>
+      </View>
+    </LightBackground>
   );
 };
 
