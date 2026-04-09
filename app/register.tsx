@@ -1,8 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useState } from "react";
 import { Button } from "../components/buttons/button";
 import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
@@ -13,6 +14,7 @@ import {
   RegisterFormData,
   registerSchema,
 } from "@/schemas/register";
+import { supabase } from "@/utils/supabase/client";
 
 const DividerWithText = ({
   text,
@@ -41,6 +43,7 @@ const DividerWithText = ({
 export default function Register() {
   const router = useRouter();
   const isDark = false;
+  const [isLoading, setIsLoading] = useState(false);
   const withRequiredCue = (label: string) => `${label} *`;
   const {
     control,
@@ -62,10 +65,34 @@ export default function Register() {
     !!errors[field] &&
     (isSubmitted || !!touchedFields[field] || !!dirtyFields[field]);
 
-  const handleRegister = () => {
-    router.push("/perfil");
-  };
+  const handleRegister = async (data: RegisterFormData) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: { name: data.name },
+        },
+      });
 
+      if (error) {
+        const messages: Record<string, string> = {
+          "User already registered": "Este email já está registado.",
+          "Too many requests": "Demasiadas tentativas. Aguarda alguns minutos.",
+          "Failed to fetch": "Sem ligação à internet. Verifica a tua rede.",
+        };
+
+        const msg = messages[error.message] ?? error.message;
+
+        Alert.alert("Erro no Registo", msg, [{ text: "OK" }]);
+      } else {
+        router.push("/perfil");
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleGoogleRegister = () => {
     console.log("Register with Google");
   };
@@ -214,6 +241,7 @@ export default function Register() {
                   forceLight
                   label="Registar"
                   onPress={handleSubmit(handleRegister)}
+                  loading={isLoading}
                 />
 
                 <View className="mt-6 flex-row">
