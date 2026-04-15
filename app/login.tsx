@@ -1,6 +1,9 @@
+import { LightBackground } from "@/components/DotBackground";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useGlobalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,8 +12,6 @@ import { Button } from "../components/buttons/button";
 import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
-import { LightBackground } from "@/components/DotBackground";
-import { supabase } from "@/utils/supabase/client";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email obrigatório").email("Email inválido"),
@@ -31,8 +32,9 @@ const DividerWithText = ({
       className={`h-[1px] flex-1 ${isDark ? "bg-white/20" : "bg-[#D1D5DB]"}`}
     />
     <Text
-      className={`mx-4 font-open-sans text-[16px] ${isDark ? "text-white/60" : "text-[#6B7280]"
-        }`}
+      className={`mx-4 font-open-sans text-[16px] ${
+        isDark ? "text-white/60" : "text-[#6B7280]"
+      }`}
     >
       {text}
     </Text>
@@ -44,8 +46,18 @@ const DividerWithText = ({
 
 export default function Login() {
   const router = useRouter();
+  const params = useGlobalSearchParams<{ next?: string }>();
+  const { session, isLoading: authLoading } = useAuth();
+  const nextRoute =
+    typeof params.next === "string" ? params.next : "/testDashboard";
   const isDark = false;
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && session) {
+      router.replace(nextRoute as any);
+    }
+  }, [authLoading, nextRoute, router, session]);
 
   const {
     control,
@@ -87,7 +99,7 @@ export default function Login() {
         const msg = messages[error.message] ?? error.message;
         Alert.alert("Erro no Login", msg, [{ text: "OK" }]);
       } else {
-        router.push("/testDashboard" as any);
+        router.replace(nextRoute as any);
       }
     } finally {
       setIsLoading(false);
@@ -109,8 +121,9 @@ export default function Login() {
           <View className="flex-1">
             <View className="mb-8 mt-12">
               <Text
-                className={`font-safiro text-[32px] ${isDark ? "text-white" : "text-[#1A1A2E]"
-                  }`}
+                className={`font-safiro text-[32px] ${
+                  isDark ? "text-white" : "text-[#1A1A2E]"
+                }`}
               >
                 Login
               </Text>
@@ -193,8 +206,9 @@ export default function Login() {
 
               <View className="mt-6 flex-row">
                 <Text
-                  className={`font-open-sans-semibold text-[14px] ${isDark ? "text-white/60" : "text-[#6B7280]"
-                    }`}
+                  className={`font-open-sans-semibold text-[14px] ${
+                    isDark ? "text-white/60" : "text-[#6B7280]"
+                  }`}
                 >
                   Nao tem uma conta?{" "}
                 </Text>
@@ -209,8 +223,9 @@ export default function Login() {
 
               <View className="mt-3 flex-row">
                 <Text
-                  className={`font-open-sans-semibold text-[14px] ${isDark ? "text-white/60" : "text-[#6B7280]"
-                    }`}
+                  className={`font-open-sans-semibold text-[14px] ${
+                    isDark ? "text-white/60" : "text-[#6B7280]"
+                  }`}
                 >
                   Nao te lembras da tua password?{" "}
                 </Text>
