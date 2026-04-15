@@ -111,7 +111,10 @@ function getNativeMethod<K extends keyof NativeHealthConnectModule>(
   return method as NonNullable<NativeHealthConnectModule[K]>;
 }
 
-function toHealthConnectError(error: unknown, fallbackCode: string): HealthConnectError {
+function toHealthConnectError(
+  error: unknown,
+  fallbackCode: string,
+): HealthConnectError {
   if (typeof error === "object" && error !== null) {
     const nativeError = error as { code?: string; message?: string };
     return new HealthConnectError(
@@ -129,10 +132,15 @@ function toHealthConnectError(error: unknown, fallbackCode: string): HealthConne
 
 export async function getHealthConnectStatus(): Promise<HealthConnectStatus> {
   try {
-    console.log("[HealthConnect] getHealthConnectStatus -> calling native bridge");
+    console.log(
+      "[HealthConnect] getHealthConnectStatus -> calling native bridge",
+    );
     const getStatus = getNativeMethod("getHealthConnectStatus");
     const status = await getStatus();
-    console.log("[HealthConnect] getHealthConnectStatus <- native result", status);
+    console.log(
+      "[HealthConnect] getHealthConnectStatus <- native result",
+      status,
+    );
     return {
       ...status,
       permissionsGranted: Boolean(status.permissionsGranted),
@@ -178,10 +186,15 @@ export async function readSteps(
 
 export async function requestHealthConnectPermissions(): Promise<HealthConnectPermissionResult> {
   try {
-    console.log("[HealthConnect] requestHealthConnectPermissions -> calling native bridge");
+    console.log(
+      "[HealthConnect] requestHealthConnectPermissions -> calling native bridge",
+    );
     const requestPermissions = getNativeMethod("requestPermissions");
     const result = await requestPermissions();
-    console.log("[HealthConnect] requestHealthConnectPermissions <- native result", result);
+    console.log(
+      "[HealthConnect] requestHealthConnectPermissions <- native result",
+      result,
+    );
 
     if (typeof result === "boolean") {
       return {

@@ -3,22 +3,22 @@ import { Button } from "@/components/buttons/button";
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
 import {
-    getHealthConnectStatus,
-    HEALTH_CONNECT_SDK_AVAILABLE,
-    requestHealthConnectPermissions,
-    type HealthConnectError,
-    type HealthConnectStatus,
+  getHealthConnectStatus,
+  HEALTH_CONNECT_SDK_AVAILABLE,
+  requestHealthConnectPermissions,
+  type HealthConnectError,
+  type HealthConnectStatus,
 } from "@/src/services/healthConnect";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    AppState,
-    SafeAreaView,
-    ScrollView,
-    Text,
-    View,
-    type AppStateStatus,
+  ActivityIndicator,
+  AppState,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  View,
+  type AppStateStatus,
 } from "react-native";
 
 type RequestState = "idle" | "pending" | "success" | "denied" | "error";
@@ -30,7 +30,8 @@ const HealthConnectScreen = () => {
   const [isRequesting, setIsRequesting] = useState(false);
   const [requestState, setRequestState] = useState<RequestState>("idle");
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
-  const [isAwaitingSettingsReturn, setIsAwaitingSettingsReturn] = useState(false);
+  const [isAwaitingSettingsReturn, setIsAwaitingSettingsReturn] =
+    useState(false);
 
   const loadStatus = async (options?: { preserveFeedback?: boolean }) => {
     console.log("[HealthConnectScreen] loadStatus:start", options);
@@ -114,7 +115,10 @@ const HealthConnectScreen = () => {
       }
       await loadStatus({ preserveFeedback: true });
     } catch (error) {
-      console.log("[HealthConnectScreen] handleRequestPermissions:error", error);
+      console.log(
+        "[HealthConnectScreen] handleRequestPermissions:error",
+        error,
+      );
       const nativeError = error as HealthConnectError;
       if (nativeError?.code === "PERMISSION_DENIED") {
         setRequestState("denied");
@@ -242,9 +246,9 @@ const HealthConnectScreen = () => {
                         ? "E necessario atualizar a app Health Connect antes de continuar."
                         : hasGrantedPermissions
                           ? "As permissoes necessarias ja estao ativas neste dispositivo."
-                        : isAvailable
-                          ? "O dispositivo esta pronto para pedir permissoes."
-                          : "O Health Connect nao esta disponivel neste dispositivo neste momento."}
+                          : isAvailable
+                            ? "O dispositivo esta pronto para pedir permissoes."
+                            : "O Health Connect nao esta disponivel neste dispositivo neste momento."}
                     </Text>
                   </View>
 
@@ -259,7 +263,8 @@ const HealthConnectScreen = () => {
                     <Text
                       className={`mt-2 text-sm font-open-sans ${isDark ? "text-white" : "text-black"}`}
                     >
-                      Leitura de passos, frequencia cardiaca, tensao arterial, oxigenio, temperatura, sono, calorias e stress.
+                      Leitura de passos, frequencia cardiaca, tensao arterial,
+                      oxigenio, temperatura, sono, calorias e stress.
                     </Text>
                     <Text
                       className={`mt-2 text-xs font-open-sans ${isDark ? "text-white/60" : "text-black/50"}`}
@@ -278,8 +283,8 @@ const HealthConnectScreen = () => {
                   hasGrantedPermissions
                     ? "Permissoes ativas"
                     : isAvailable
-                    ? "Pedir permissoes"
-                    : "Verificar disponibilidade"
+                      ? "Pedir permissoes"
+                      : "Verificar disponibilidade"
                 }
                 onPress={
                   hasGrantedPermissions
@@ -303,7 +308,8 @@ const HealthConnectScreen = () => {
                     name={
                       requestState === "success"
                         ? "checkmark-circle"
-                        : requestState === "denied" || requestState === "pending"
+                        : requestState === "denied" ||
+                            requestState === "pending"
                           ? "alert-circle"
                           : "close-circle"
                     }
@@ -317,9 +323,9 @@ const HealthConnectScreen = () => {
                       ? "Ligacao concluida"
                       : requestState === "pending"
                         ? "A aguardar confirmacao"
-                      : requestState === "denied"
-                        ? "Permissao recusada"
-                        : "Nao foi possivel concluir"}
+                        : requestState === "denied"
+                          ? "Permissao recusada"
+                          : "Nao foi possivel concluir"}
                   </Text>
                 </View>
                 <Text
