@@ -1,4 +1,4 @@
-import { Text, TouchableOpacity } from "react-native";
+import { Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
 
 interface buttonDTO {
@@ -7,6 +7,7 @@ interface buttonDTO {
   onPress: () => void;
   disabled?: boolean;
   forceLight?: boolean;
+  loading?: boolean;
 }
 
 export const Button = ({
@@ -15,6 +16,7 @@ export const Button = ({
   onPress,
   disabled = false,
   forceLight = false,
+  loading = false,
 }: buttonDTO) => {
   const { isDark } = useTheme();
   const useDarkMode = !forceLight && isDark;
@@ -36,19 +38,26 @@ export const Button = ({
   return (
     <TouchableOpacity
       onPress={onPress}
-      disabled={disabled}
-      className={`p-3 rounded-[20px] border border-[#5061FF]/20 ${disabled ? "opacity-50" : ""}
+      disabled={disabled || loading}
+      className={`p-3 rounded-[20px] border border-[#5061FF]/20 ${disabled || loading ? "opacity-50" : ""}
                  ${containerVariants[variant]}`}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityLanguage="pt-PT"
     >
-      <Text
-        className={`text-center mx-auto ${textVariants[variant]}`}
-        accessibilityLanguage="pt-PT"
-      >
-        {label}
-      </Text>
+      {loading ? (
+        <ActivityIndicator
+          size="small"
+          color={useDarkMode ? "white" : "black"}
+        />
+      ) : (
+        <Text
+          className={`text-center mx-auto ${textVariants[variant]}`}
+          accessibilityLanguage="pt-PT"
+        >
+          {label}
+        </Text>
+      )}
     </TouchableOpacity>
   );
 };
