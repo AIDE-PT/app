@@ -9,11 +9,11 @@ import { router } from "expo-router";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
 
@@ -163,22 +163,23 @@ const GerirPerfil = () => {
                       ? "O Health Connect ja esta ligado e pronto para ler passos, frequencia cardiaca e outros dados de saude."
                       : "Ligue a sua conta ao Health Connect para gerir permissoes de passos, frequencia cardiaca e outros dados de saude."}
                 </Text>
-                {!isLoadingHealthConnect && healthConnectStatus?.permissionsGranted && (
-                  <View
-                    className={`mt-4 self-start px-4 py-2 rounded-full flex-row items-center ${isDark ? "bg-emerald-500/15" : "bg-emerald-100"}`}
-                  >
-                    <Ionicons
-                      name="checkmark-circle"
-                      size={16}
-                      color={isDark ? "#86efac" : "#15803d"}
-                    />
-                    <Text
-                      className={`ml-2 text-xs font-bold ${isDark ? "text-emerald-300" : "text-emerald-700"}`}
+                {!isLoadingHealthConnect &&
+                  healthConnectStatus?.permissionsGranted && (
+                    <View
+                      className={`mt-4 self-start px-4 py-2 rounded-full flex-row items-center ${isDark ? "bg-emerald-500/15" : "bg-emerald-100"}`}
                     >
-                      Ligacao ativa
-                    </Text>
-                  </View>
-                )}
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={16}
+                        color={isDark ? "#86efac" : "#15803d"}
+                      />
+                      <Text
+                        className={`ml-2 text-xs font-bold ${isDark ? "text-emerald-300" : "text-emerald-700"}`}
+                      >
+                        Ligacao ativa
+                      </Text>
+                    </View>
+                  )}
                 <TouchableOpacity
                   className="mt-4 py-3 rounded-xl items-center self-center"
                   onPress={() => router.push("/health-connect")}
