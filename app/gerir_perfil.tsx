@@ -1,5 +1,8 @@
 import BackButton from "@/components/buttons/backButton";
 import { Button } from "@/components/buttons/button";
+import LightBackground from "@/components/DotBackground";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/hooks/useTheme";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -10,12 +13,11 @@ import {
   View,
 } from "react-native";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
-import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 
 const GerirPerfil = () => {
   const [isEditing, setIsEditing] = useState(false);
   const { isDark } = useTheme();
+  const { signOut } = useAuth();
 
   const [userData, setUserData] = useState({
     nome: "Emília Almeida",
@@ -157,6 +159,23 @@ const GerirPerfil = () => {
                       className={`font-medium ${isDark ? "text-blue-400" : "text-blue-600"}`}
                     >
                       Extrair
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              <View className="mt-6">
+                <TouchableOpacity
+                  className="w-full items-center"
+                  onPress={signOut}
+                >
+                  <View
+                    className={`py-3 px-8 rounded-xl ${isDark ? "bg-red-500/20" : "bg-red-100"}`}
+                  >
+                    <Text
+                      className={`font-medium ${isDark ? "text-red-400" : "text-red-600"}`}
+                    >
+                      Logout
                     </Text>
                   </View>
                 </TouchableOpacity>

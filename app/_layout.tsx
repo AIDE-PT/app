@@ -1,11 +1,12 @@
-import { Stack } from "expo-router";
-import { useFonts } from "expo-font";
-import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
-import "../global.css";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useFonts } from "expo-font";
+import { Stack } from "expo-router";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect } from "react";
+import "../global.css";
 
 const queryClient = new QueryClient();
 
@@ -35,11 +36,13 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <UserProfileProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-          </Stack>
-        </UserProfileProvider>
+        <AuthProvider>
+          <UserProfileProvider>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+            </Stack>
+          </UserProfileProvider>
+        </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>
   );

@@ -1,18 +1,21 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useRouter } from "expo-router";
-import { Controller, useForm } from "react-hook-form";
-import { ScrollView, Text, TouchableOpacity, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Button } from "../components/buttons/button";
-import { SocialButton } from "../components/buttons/socialButton";
-import { Input } from "../components/input/Input";
-import "../global.css";
 import { LightBackground } from "@/components/DotBackground";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   registerFieldCopy,
   RegisterFormData,
   registerSchema,
 } from "@/schemas/register";
+import { supabase } from "@/utils/supabase/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Button } from "../components/buttons/button";
+import { SocialButton } from "../components/buttons/socialButton";
+import { Input } from "../components/input/Input";
+import "../global.css";
 
 const DividerWithText = ({
   text,
@@ -40,7 +43,16 @@ const DividerWithText = ({
 
 export default function Register() {
   const router = useRouter();
+  const { session, isLoading: authLoading } = useAuth();
   const isDark = false;
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!authLoading && session) {
+      router.replace("/testDashboard" as any);
+    }
+  }, [authLoading, router, session]);
+
   const withRequiredCue = (label: string) => `${label} *`;
   const {
     control,
@@ -62,10 +74,34 @@ export default function Register() {
     !!errors[field] &&
     (isSubmitted || !!touchedFields[field] || !!dirtyFields[field]);
 
-  const handleRegister = () => {
-    router.push("/perfil");
-  };
+  const handleRegister = async (data: RegisterFormData) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+        options: {
+          data: { name: data.name },
+        },
+      });
 
+      if (error) {
+        const messages: Record<string, string> = {
+          "User already registered": "Este email já está registado.",
+          "Too many requests": "Demasiadas tentativas. Aguarda alguns minutos.",
+          "Failed to fetch": "Sem ligação à internet. Verifica a tua rede.",
+        };
+
+        const msg = messages[error.message] ?? error.message;
+
+        Alert.alert("Erro no Registo", msg, [{ text: "OK" }]);
+      } else {
+        router.push("/terms-of-service?fromStart=true" as any);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
   const handleGoogleRegister = () => {
     console.log("Register with Google");
   };
@@ -214,6 +250,7 @@ export default function Register() {
                   forceLight
                   label="Registar"
                   onPress={handleSubmit(handleRegister)}
+                  loading={isLoading}
                 />
 
                 <View className="mt-6 flex-row">
