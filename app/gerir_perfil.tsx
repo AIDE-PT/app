@@ -6,11 +6,11 @@ import { useTheme } from "@/hooks/useTheme";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useState } from "react";
 import {
-    SafeAreaView,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
 

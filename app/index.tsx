@@ -4,13 +4,13 @@ import { useEffect } from "react";
 import { Dimensions, Text, View } from "react-native";
 import "react-native-gesture-handler";
 import Animated, {
-    Easing,
-    interpolate,
-    useAnimatedProps,
-    useSharedValue,
-    withDelay,
-    withRepeat,
-    withTiming,
+  Easing,
+  interpolate,
+  useAnimatedProps,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
