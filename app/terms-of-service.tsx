@@ -1,9 +1,10 @@
+import LightBackground from "@/components/DotBackground";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { ScrollView, SafeAreaView, Text, View } from "react-native";
+import { SafeAreaView, ScrollView, Text, View } from "react-native";
 import BackButton from "../components/buttons/backButton";
 import { Button } from "../components/buttons/button";
-import LightBackground from "@/components/DotBackground";
 
 // Section component for each term section
 interface TermSectionProps {
@@ -65,7 +66,8 @@ const TermsOfService = () => {
   const fromStart = searchParams.fromStart === "true";
 
   return (
-    <LightBackground forceLight>
+    <ProtectedRoute>
+      <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10">
         <SafeAreaView className="flex-1">
           <BackButton
@@ -201,21 +203,19 @@ const TermsOfService = () => {
 
             <View className="h-10" />
 
-            {/* Register Button - Only show when coming from start page */}
-            {fromStart && (
-              <View className="items-center mb-8">
-                <Button
-                  variant="primary"
-                  forceLight
-                  label="Registar"
-                  onPress={() => router.push("/register")}
-                />
-              </View>
-            )}
+            <View className="items-center mb-8">
+              <Button
+                variant="primary"
+                forceLight
+                label="Aceitar e continuar"
+                onPress={() => router.push("/perfil" as any)}
+              />
+            </View>
           </ScrollView>
         </SafeAreaView>
       </View>
     </LightBackground>
+  </ProtectedRoute>
   );
 };
 
