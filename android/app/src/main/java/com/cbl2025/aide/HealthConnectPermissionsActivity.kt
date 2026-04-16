@@ -16,7 +16,7 @@ class HealthConnectPermissionsActivity : AppCompatActivity() {
     AlertDialog.Builder(this)
       .setTitle("Health Connect permissions")
       .setMessage(
-        "This app reads steps, heart rate, blood pressure, oxygen, temperature, sleep, calories and stress data from Health Connect. " +
+        "This app reads steps, falls, heart rate, blood pressure, oxygen, temperature, sleep, calories and stress data from Health Connect. " +
           "All health data stays under the user's Health Connect consent controls."
       )
       .setPositiveButton("Open privacy policy") { _, _ ->
