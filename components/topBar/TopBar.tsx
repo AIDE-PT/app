@@ -1,6 +1,5 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { BlurView } from "expo-blur";
 import ChoseCuidado from "../buttons/choseCuidado";
 import SOSButton from "../buttons/sosButton";
 import NotificationBell from "../svg/NotificationBell";
@@ -43,36 +42,25 @@ const TopBar = ({
     ? {
         borderBottomLeftRadius: 40,
         borderBottomRightRadius: 40,
-        paddingTop: 58,
-        paddingBottom: 16,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.12,
         shadowRadius: 8,
-        elevation: 4,
         overflow: "visible" as const,
       }
     : {};
 
   const overlayColor = isDark
     ? "rgba(0, 4, 18, 0.55)"
-    : "rgba(219, 237, 248, 0.45)";
+    : "rgba(219, 237, 248, 1)";
 
   return (
     <View
-      className={`flex-row z-50 px-4 py-2 ${profileType === "cuidado" ? "items-center justify-between" : "items-start justify-between"} ${className}`}
+      className={`flex-row z-50 px-4 py-5 ${profileType === "cuidado" ? "items-center justify-between" : "items-start justify-between"} ${className}`}
       style={backgroundStyle}
     >
       {showBackground && (
         <>
-          <BlurView
-            intensity={60}
-            tint={isDark ? "dark" : "light"}
-            style={[
-              StyleSheet.absoluteFillObject,
-              { borderBottomLeftRadius: 40, borderBottomRightRadius: 40 },
-            ]}
-          />
           <View
             style={[
               StyleSheet.absoluteFillObject,
