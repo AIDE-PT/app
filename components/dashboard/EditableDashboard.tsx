@@ -436,7 +436,15 @@ export default function EditableDashboard({
             }}
           >
             <SafeAreaView
-              style={{ backgroundColor: "transparent" }}
+              style={{
+                borderBottomLeftRadius: 40,
+                borderBottomRightRadius: 40,
+                overflow: "hidden",
+                backgroundColor: isDark
+                  ? "rgba(0, 4, 18, 1)"
+                  : "rgba(219, 237, 248, 1)",
+                elevation: 4,
+              }}
               edges={["top"]}
             >
               <TopBar
