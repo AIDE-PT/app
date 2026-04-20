@@ -2,7 +2,10 @@ import BackButton from "@/components/buttons/backButton";
 import { Button } from "@/components/buttons/button";
 import LightBackground from "@/components/DotBackground";
 import { useAuth } from "@/contexts/AuthContext";
+import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
+import { Ionicons } from "@expo/vector-icons";
+import { router } from "expo-router";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useState } from "react";
 import {
@@ -18,6 +21,8 @@ const GerirPerfil = () => {
   const [isEditing, setIsEditing] = useState(false);
   const { isDark } = useTheme();
   const { signOut } = useAuth();
+  const { status: healthConnectStatus, isLoading: isLoadingHealthConnect } =
+    useHealthConnectStatus();
 
   const [userData, setUserData] = useState({
     nome: "Emília Almeida",
@@ -135,6 +140,66 @@ const GerirPerfil = () => {
 
               <View
                 className={`p-6 rounded-[32px] ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              >
+                <View className="flex-row items-center justify-between">
+                  <Text
+                    className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}
+                  >
+                    Health Connect
+                  </Text>
+                  <Ionicons
+                    name="heart-circle-outline"
+                    size={26}
+                    color={isDark ? "#FF7A7A" : "#D64550"}
+                  />
+                </View>
+                <Text
+                  className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}
+                >
+                  {isLoadingHealthConnect
+                    ? "A verificar a ligacao ao Health Connect."
+                    : healthConnectStatus?.permissionsGranted
+                      ? "O Health Connect ja esta ligado e pronto para ler passos, frequencia cardiaca e outros dados de saude."
+                      : "Ligue a sua conta ao Health Connect para gerir permissoes de passos, frequencia cardiaca e outros dados de saude."}
+                </Text>
+                {!isLoadingHealthConnect &&
+                  healthConnectStatus?.permissionsGranted && (
+                    <View
+                      className={`mt-4 self-start px-4 py-2 rounded-full flex-row items-center ${isDark ? "bg-emerald-500/15" : "bg-emerald-100"}`}
+                    >
+                      <Ionicons
+                        name="checkmark-circle"
+                        size={16}
+                        color={isDark ? "#86efac" : "#15803d"}
+                      />
+                      <Text
+                        className={`ml-2 text-xs font-bold ${isDark ? "text-emerald-300" : "text-emerald-700"}`}
+                      >
+                        Ligacao ativa
+                      </Text>
+                    </View>
+                  )}
+                <TouchableOpacity
+                  className="mt-4 py-3 rounded-xl items-center self-center"
+                  onPress={() => router.push("/health-connect")}
+                >
+                  <View
+                    className={`py-3 px-8 rounded-xl ${isDark ? "bg-[#D64550]/20" : "bg-rose-100"}`}
+                  >
+                    <Text
+                      className={`font-medium ${isDark ? "text-rose-300" : "text-rose-600"}`}
+                    >
+                      {healthConnectStatus?.permissionsGranted
+                        ? "Gerir ligacao"
+                        : "Abrir Health Connect"}
+                    </Text>
+                  </View>
+                </TouchableOpacity>
+              </View>
+
+              <View
+                className={`p-6 rounded-[32px] mt-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
                 style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
               >
                 <Text

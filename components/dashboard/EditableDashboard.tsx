@@ -29,6 +29,7 @@ import {
   DASHBOARD_CONFIG,
   WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
+import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
 import TopBar from "../topBar/TopBar";
 import DashboardMetricWidget from "../widgets/DashboardMetricWidget";
@@ -398,6 +399,8 @@ export default function EditableDashboard({
   });
 
   const { isDark } = useTheme();
+  const { status: healthConnectStatus, isLoading: isLoadingHealthConnect } =
+    useHealthConnectStatus();
   const insets = useSafeAreaInsets();
   const TOP_BAR_HEIGHT = 30;
   const heroTopExtension = notEditable ? 0 : insets.top + TOP_BAR_HEIGHT;
@@ -433,7 +436,15 @@ export default function EditableDashboard({
             }}
           >
             <SafeAreaView
-              style={{ backgroundColor: "transparent" }}
+              style={{
+                borderBottomLeftRadius: 40,
+                borderBottomRightRadius: 40,
+                overflow: "hidden",
+                backgroundColor: isDark
+                  ? "rgba(0, 4, 18, 1)"
+                  : "rgba(219, 237, 248, 1)",
+                elevation: 4,
+              }}
               edges={["top"]}
             >
               <TopBar
@@ -464,6 +475,57 @@ export default function EditableDashboard({
               topExtension={heroTopExtension}
               onCheckNotifications={() => router.push("/notificacoes")}
             />
+
+            {!isLoadingHealthConnect &&
+              healthConnectStatus &&
+              !healthConnectStatus.permissionsGranted && (
+                <View className="px-4 mb-2">
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => router.push("/health-connect")}
+                    className={`rounded-[28px] p-5 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                    style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Abrir Health Connect"
+                    accessibilityHint="Abre a pagina do Health Connect para concluir a ligacao."
+                  >
+                    <View className="flex-row items-center">
+                      <View
+                        className="w-12 h-12 rounded-full items-center justify-center"
+                        style={{
+                          backgroundColor: isDark
+                            ? "rgba(214, 69, 80, 0.18)"
+                            : "rgba(214, 69, 80, 0.1)",
+                        }}
+                      >
+                        <Feather
+                          name="heart"
+                          size={20}
+                          color={isDark ? "#fda4af" : "#be123c"}
+                        />
+                      </View>
+                      <View className="flex-1 ml-4">
+                        <Text
+                          className={`text-base font-bold ${isDark ? "text-white" : "text-black"}`}
+                        >
+                          Ligar ao Health Connect
+                        </Text>
+                        <Text
+                          className={`mt-1 text-xs ${isDark ? "text-white/60" : "text-slate-600"}`}
+                        >
+                          Ative o acesso a passos, frequencia cardiaca e outros
+                          dados de saude para completar a ligacao de saude.
+                        </Text>
+                      </View>
+                      <Feather
+                        name="chevron-right"
+                        size={20}
+                        color={isDark ? "#ffffff" : "#0f172a"}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              )}
 
             <WidgetGrid
               contentRef={gridContentRef}
