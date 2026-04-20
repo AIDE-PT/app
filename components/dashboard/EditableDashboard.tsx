@@ -34,6 +34,7 @@ import { useTheme } from "@/hooks/useTheme";
 import TopBar from "../topBar/TopBar";
 import DashboardMetricWidget from "../widgets/DashboardMetricWidget";
 import HealthStatusHero from "./HealthStatusHero";
+// import HealthDashboard from "@/app/HealthDashboard";
 
 if (
   Platform.OS === "android" &&
@@ -526,6 +527,8 @@ export default function EditableDashboard({
                   </TouchableOpacity>
                 </View>
               )}
+
+            {/* <HealthDashboard /> */}
 
             <WidgetGrid
               contentRef={gridContentRef}
