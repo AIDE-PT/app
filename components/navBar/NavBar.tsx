@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { TouchableOpacity, View, StyleSheet } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { BlurView } from "expo-blur";
 import { AddWidgetModal } from "../modals/addWidgetModal";
 import AddIcon from "../svg/AdicionarIcon";
@@ -38,74 +37,62 @@ const Navbar = ({
     <>
       <View className="w-200" />
       <View className="absolute bottom-6 w-full items-center">
-        <LinearGradient
-          colors={
-            dark
-              ? ["rgba(255,255,255,0.12)", "rgba(255,255,255,0.04)"]
-              : ["#FFFFFF", "#D1D5DB"]
-          }
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          className="rounded-[100px] p-[1px]"
-          style={{ boxShadow: "0 2px 12px 0 rgba(0,0,0,0.08)" }}
-        >
-          <View style={styles.pill}>
-            <BlurView
-              intensity={60}
-              tint={dark ? "dark" : "light"}
-              style={StyleSheet.absoluteFillObject}
-            />
-            <View
-              style={[
-                StyleSheet.absoluteFillObject,
-                {
-                  backgroundColor: dark
-                    ? "rgba(0,4,18,0.55)"
-                    : "rgba(219,237,248,0.75)",
-                },
-              ]}
-            />
-            <TouchableOpacity
-              className={`${styleBall} ${buttonBg}`}
-              onPress={notEditable ? () => setModalVisible(true) : () => {}}
-              accessibilityRole="button"
-              accessibilityLabel="Adicionar"
-              accessibilityHint="Abre a lista de widgets disponíveis."
-            >
-              <AddIcon color={iconColor} />
-            </TouchableOpacity>
+        <View style={styles.pill}>
+          <BlurView
+            intensity={60}
+            tint={dark ? "dark" : "light"}
+            style={StyleSheet.absoluteFillObject}
+          />
+          <View
+            style={[
+              StyleSheet.absoluteFillObject,
+              {
+                backgroundColor: dark
+                  ? "rgba(0,4,18,0.55)"
+                  : "rgba(219,237,248,0.75)",
+              },
+            ]}
+          />
+          <TouchableOpacity
+            className={`${styleBall} ${buttonBg}`}
+            onPress={notEditable ? () => setModalVisible(true) : () => {}}
+            accessibilityRole="button"
+            accessibilityLabel="Adicionar"
+            accessibilityHint="Abre a lista de widgets disponíveis."
+          >
+            <AddIcon color={iconColor} />
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              className={`${styleBall} ${buttonBg}`}
-              onPress={() => router.push("/historicoDiario")}
-              accessibilityRole="button"
-              accessibilityLabel="Historico"
-              accessibilityHint="Abre o histórico diário."
-            >
-              <CalendarIcon color={iconColor} />
-            </TouchableOpacity>
+          <TouchableOpacity
+            className={`${styleBall} ${buttonBg}`}
+            onPress={() => router.push("/historicoDiario")}
+            accessibilityRole="button"
+            accessibilityLabel="Historico"
+            accessibilityHint="Abre o histórico diário."
+          >
+            <CalendarIcon color={iconColor} />
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              className={`${styleBall} ${buttonBg}`}
-              onPress={() => router.push("/testDashboard")}
-              accessibilityRole="button"
-              accessibilityLabel="Inicio"
-              accessibilityHint="Abre o dashboard principal."
-            >
-              <HomeIcon color={iconColor} />
-            </TouchableOpacity>
+          <TouchableOpacity
+            className={`${styleBall} ${buttonBg}`}
+            onPress={() => router.push("/testDashboard")}
+            accessibilityRole="button"
+            accessibilityLabel="Inicio"
+            accessibilityHint="Abre o dashboard principal."
+          >
+            <HomeIcon color={iconColor} />
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              className={`${styleBall} ${buttonBg}`}
-              onPress={() => router.push("/definicoes")}
-              accessibilityRole="button"
-              accessibilityLabel="Perfil"
-              accessibilityHint="Abre o perfil e definições."
-            >
-              <ProfileIcon color={iconColor} />
-            </TouchableOpacity>
-          </View>
-        </LinearGradient>
+          <TouchableOpacity
+            className={`${styleBall} ${buttonBg}`}
+            onPress={() => router.push("/definicoes")}
+            accessibilityRole="button"
+            accessibilityLabel="Perfil"
+            accessibilityHint="Abre o perfil e definições."
+          >
+            <ProfileIcon color={iconColor} />
+          </TouchableOpacity>
+        </View>
       </View>
       {notEditable && (
         <AddWidgetModal
