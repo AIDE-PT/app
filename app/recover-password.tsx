@@ -1,3 +1,4 @@
+import LightBackground from "@/components/DotBackground";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -5,7 +6,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
 import { Button } from "../components/buttons/button";
 import { Input } from "../components/input/Input";
-import LightBackground from "@/components/DotBackground";
 
 export default function RecoverPassword() {
   const router = useRouter();
@@ -20,7 +20,10 @@ export default function RecoverPassword() {
           </View>
 
           <View className="mb-8 mt-6">
-            <Text className="mb-2 font-safiro text-[32px] text-[#1A1A2E]">
+            <Text
+              className="mb-2 font-safiro text-[32px] text-[#1A1A2E]"
+              accessibilityRole="header"
+            >
               Recuperar acesso
             </Text>
             <Text className="font-open-sans text-[15px] leading-6 text-[#4B5563]">

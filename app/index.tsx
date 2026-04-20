@@ -233,6 +233,7 @@ export default function App() {
           {/* Title - Using Safiro font */}
           <Text
             className={`font-safiro text-[32px] leading-[42px] text-center mb-4 ${isDark ? "text-white" : "text-[#1A1A2E]"}`}
+            accessibilityRole="header"
           >
             O futuro do cuidado{"\n"}é conectado.
           </Text>

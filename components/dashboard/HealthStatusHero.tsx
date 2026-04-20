@@ -4,20 +4,20 @@ import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useCallback, useEffect, useRef } from "react";
 import {
-  Animated,
-  Easing,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  useWindowDimensions,
-  View,
-  ViewStyle,
+    Animated,
+    Easing,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    useWindowDimensions,
+    View,
+    ViewStyle,
 } from "react-native";
 import Svg, {
-  Defs,
-  Path,
-  Stop,
-  LinearGradient as SvgLinearGradient,
+    Defs,
+    Path,
+    Stop,
+    LinearGradient as SvgLinearGradient,
 } from "react-native-svg";
 
 interface HealthStatusHeroProps {
@@ -310,7 +310,10 @@ export default function HealthStatusHero({
             >
               {/* Titles */}
               <View style={styles.titleContainer}>
-                <Text style={[styles.cuidadoNameText, { color: c.textMain }]}>
+                <Text
+                  style={[styles.cuidadoNameText, { color: c.textMain }]}
+                  accessibilityRole="header"
+                >
                   {cuidadoName}
                 </Text>
                 <Text style={[styles.subtitleText, { color: c.textSub }]}>

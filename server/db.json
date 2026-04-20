@@ -1,156 +1,6 @@
 {
   "bpm": [
     {
-      "id": "ddf886c0-0926-4832-b606-8d35f5bc6581",
-      "value": 60,
-      "timestamp": "2026-03-23T18:18:00.593Z"
-    },
-    {
-      "id": "35f85d34-562f-4329-875b-f6eff10628d6",
-      "value": 66,
-      "timestamp": "2026-03-23T18:18:10.595Z"
-    },
-    {
-      "id": "dd5818d7-3276-49ae-85d8-798d9006da36",
-      "value": 64,
-      "timestamp": "2026-03-23T18:18:20.609Z"
-    },
-    {
-      "id": "1df08af8-6b46-4f53-95c8-84a40cf7d8a6",
-      "value": 70,
-      "timestamp": "2026-03-23T18:18:30.609Z"
-    },
-    {
-      "id": "97142e5c-4274-47f8-8d68-124fcd715104",
-      "value": 72,
-      "timestamp": "2026-03-23T18:18:40.619Z"
-    },
-    {
-      "id": "8c8982ae-a10c-4642-8f49-69c54b6cf1bf",
-      "value": 74,
-      "timestamp": "2026-03-23T18:18:50.631Z"
-    },
-    {
-      "id": "d71ef520-83ca-4817-85e2-04ab8142f075",
-      "value": 127,
-      "timestamp": "2026-03-23T18:19:00.637Z"
-    },
-    {
-      "id": "815c3b8a-12f8-4555-b810-8a922b4c45ac",
-      "value": 100,
-      "timestamp": "2026-03-23T18:19:10.641Z"
-    },
-    {
-      "id": "dc4229c0-c29d-40dc-8115-8cf2aad44c0a",
-      "value": 96,
-      "timestamp": "2026-03-23T18:19:20.653Z"
-    },
-    {
-      "id": "514f0443-0757-4d65-8d9a-7dc7d7f7de49",
-      "value": 42,
-      "timestamp": "2026-03-23T18:19:30.665Z"
-    },
-    {
-      "id": "da7e7362-8bed-40f9-a828-eda7afa0d41a",
-      "value": 60,
-      "timestamp": "2026-03-23T18:19:40.675Z"
-    },
-    {
-      "id": "c35164e1-a521-426c-ad55-70f42e4b5dd6",
-      "value": 66,
-      "timestamp": "2026-03-23T18:19:50.681Z"
-    },
-    {
-      "id": "4d8a61d7-13cb-40ff-8f79-848a5258e4eb",
-      "value": 69,
-      "timestamp": "2026-03-23T18:20:00.681Z"
-    },
-    {
-      "id": "caad698d-04ba-4cf9-8f7a-4fb06123fd53",
-      "value": 68,
-      "timestamp": "2026-03-23T18:20:10.681Z"
-    },
-    {
-      "id": "c9e1986f-51cb-4a94-ba4c-c5fe73fb0369",
-      "value": 70,
-      "timestamp": "2026-03-23T18:20:20.687Z"
-    },
-    {
-      "id": "a394e0e1-f3a7-49cc-a9ce-e76ef857be32",
-      "value": 67,
-      "timestamp": "2026-03-23T18:20:30.694Z"
-    },
-    {
-      "id": "042bf467-ebd1-4e0b-95ab-06c088e74622",
-      "value": 70,
-      "timestamp": "2026-03-23T18:20:40.697Z"
-    },
-    {
-      "id": "06edb0d9-79f3-4250-9348-11fef1eb40eb",
-      "value": 73,
-      "timestamp": "2026-03-23T18:20:50.709Z"
-    },
-    {
-      "id": "eadb0f4c-f111-4f09-87c0-7530a78b26bf",
-      "value": 71,
-      "timestamp": "2026-03-23T18:21:00.709Z"
-    },
-    {
-      "id": "7c4f951c-1862-420b-a8e3-d7845d774055",
-      "value": 69,
-      "timestamp": "2026-03-23T18:21:10.717Z"
-    },
-    {
-      "id": "7356578b-8f2f-4efb-8cfe-5c2f5342f617",
-      "value": 70,
-      "timestamp": "2026-03-23T18:21:20.727Z"
-    },
-    {
-      "id": "cddf34df-2fcc-468f-affd-f11d223f832b",
-      "value": 144,
-      "timestamp": "2026-03-23T18:21:30.728Z"
-    },
-    {
-      "id": "19d676f1-07ee-47c1-84cc-e78ff9354527",
-      "value": 141,
-      "timestamp": "2026-03-23T18:21:40.741Z"
-    },
-    {
-      "id": "3a5fa641-80ba-4baa-922c-2a339e21ad59",
-      "value": 100,
-      "timestamp": "2026-03-23T18:21:50.753Z"
-    },
-    {
-      "id": "38fc0ec9-a854-4444-a14f-41124201a889",
-      "value": 100,
-      "timestamp": "2026-03-23T18:22:00.761Z"
-    },
-    {
-      "id": "1028a86a-bb63-44b7-923a-110a0480a519",
-      "value": 100,
-      "timestamp": "2026-03-23T18:22:10.772Z"
-    },
-    {
-      "id": "630181c6-e815-459b-8c76-4878fa2ff183",
-      "value": 45,
-      "timestamp": "2026-03-23T18:22:20.775Z"
-    },
-    {
-      "id": "6180abb2-2af2-4e8c-8f4f-9bb2151d0e4d",
-      "value": 60,
-      "timestamp": "2026-03-23T18:22:30.785Z"
-    },
-    {
-      "id": "934ed1f7-b5df-4ce2-814b-f57456f50d94",
-      "value": 146,
-      "timestamp": "2026-03-23T18:22:40.806Z"
-    },
-    {
-      "id": "3fdb7979-0459-4ec9-a669-2b04ca3d6ba6",
-      "value": 100,
-      "timestamp": "2026-03-23T18:22:50.818Z"
-    },
-    {
       "id": "79667710-79cc-4061-8791-fdecf6dc0723",
       "value": 100,
       "timestamp": "2026-03-23T18:23:00.826Z"
@@ -249,189 +99,159 @@
       "id": "e58e2fe9-479d-4441-a28e-2bb23db2d135",
       "value": 129,
       "timestamp": "2026-03-25T11:13:55.447Z"
+    },
+    {
+      "id": "20d63b74-15c8-4e4f-af0e-c44b10538f64",
+      "value": 100,
+      "timestamp": "2026-04-01T13:16:41.019Z"
+    },
+    {
+      "id": "0286662e-0baa-4868-8b31-3a204cc08853",
+      "value": 130,
+      "timestamp": "2026-04-01T13:16:51.048Z"
+    },
+    {
+      "id": "f4f860af-ca28-4d0e-a2e8-b850bd6a2db0",
+      "value": 100,
+      "timestamp": "2026-04-01T13:17:01.055Z"
+    },
+    {
+      "id": "458e5a55-5b8e-4c6a-abe4-d9689b80c74f",
+      "value": 97,
+      "timestamp": "2026-04-01T13:17:11.054Z"
+    },
+    {
+      "id": "88ca8760-c303-4722-bafa-00798d5f3653",
+      "value": 93,
+      "timestamp": "2026-04-01T13:17:21.055Z"
+    },
+    {
+      "id": "ae9c3759-2878-49d4-a4eb-f64f8657f941",
+      "value": 94,
+      "timestamp": "2026-04-01T13:17:31.056Z"
+    },
+    {
+      "id": "1a43b085-0135-4a96-9e6b-bc8f7e1dc162",
+      "value": 90,
+      "timestamp": "2026-04-01T13:17:41.064Z"
+    },
+    {
+      "id": "13e572ae-8bf5-4c1b-81b0-1f9b0ac73c8c",
+      "value": 93,
+      "timestamp": "2026-04-01T13:17:51.078Z"
+    },
+    {
+      "id": "d839ce51-2f9d-44bd-b449-1a4c1616772d",
+      "value": 91,
+      "timestamp": "2026-04-01T13:18:01.083Z"
+    },
+    {
+      "id": "96f3aab2-5c36-4ea8-aa04-c79e52a8e627",
+      "value": 91,
+      "timestamp": "2026-04-01T13:18:11.092Z"
+    },
+    {
+      "id": "cc0d3542-c593-4834-8797-d0dfdd22afbd",
+      "value": 90,
+      "timestamp": "2026-04-01T13:18:21.101Z"
+    },
+    {
+      "id": "832a1235-61bf-441f-b0a3-58f7b3b99e19",
+      "value": 91,
+      "timestamp": "2026-04-01T13:18:31.109Z"
+    },
+    {
+      "id": "66ab612b-ee2c-488d-a92b-4e379ff8dee3",
+      "value": 86,
+      "timestamp": "2026-04-01T13:18:41.121Z"
+    },
+    {
+      "id": "102ba5cc-9443-4530-bd23-028b702840e0",
+      "value": 88,
+      "timestamp": "2026-04-01T13:18:51.133Z"
+    },
+    {
+      "id": "6fd361b8-cd14-48d8-a8c5-dd26e69fc1dc",
+      "value": 84,
+      "timestamp": "2026-04-01T13:19:01.137Z"
+    },
+    {
+      "id": "1e4f7168-4a71-49c9-8520-181beaaa71e5",
+      "value": 85,
+      "timestamp": "2026-04-01T13:19:11.148Z"
+    },
+    {
+      "id": "dbe9f8af-086a-475b-a102-57ce4a1c4988",
+      "value": 88,
+      "timestamp": "2026-04-01T13:19:21.161Z"
+    },
+    {
+      "id": "9e37900c-3ccc-414a-931d-d540ca4f862f",
+      "value": 90,
+      "timestamp": "2026-04-01T13:19:31.161Z"
+    },
+    {
+      "id": "abbbc689-1ea5-4603-8d45-be21eb1a05da",
+      "value": 85,
+      "timestamp": "2026-04-01T13:19:41.170Z"
+    },
+    {
+      "id": "a889824b-17a3-4fdc-a5e6-057bb37dec71",
+      "value": 81,
+      "timestamp": "2026-04-01T13:19:51.173Z"
+    },
+    {
+      "id": "4ae78ccd-7a83-450b-bd5a-40f6cd4992c2",
+      "value": 80,
+      "timestamp": "2026-04-01T13:20:01.181Z"
+    },
+    {
+      "id": "b42af12b-0cbb-48a8-a45e-ce79890c6daf",
+      "value": 82,
+      "timestamp": "2026-04-01T13:20:11.188Z"
+    },
+    {
+      "id": "7adc0cfa-a8c0-4e16-b8c1-9a99592f9a68",
+      "value": 78,
+      "timestamp": "2026-04-01T13:20:21.203Z"
+    },
+    {
+      "id": "eec3d9ed-86ec-4af6-a945-ea6c0df87cb1",
+      "value": 77,
+      "timestamp": "2026-04-01T13:20:31.214Z"
+    },
+    {
+      "id": "b31e819c-5a96-4acd-bb13-0bcbc680cdf8",
+      "value": 42,
+      "timestamp": "2026-04-01T13:20:41.214Z"
+    },
+    {
+      "id": "d960efe2-281b-44e4-abe6-4d2e79b58c32",
+      "value": 60,
+      "timestamp": "2026-04-01T13:20:51.228Z"
+    },
+    {
+      "id": "b515bfac-750b-4217-b849-bd6bd3c7855a",
+      "value": 60,
+      "timestamp": "2026-04-01T13:21:01.233Z"
+    },
+    {
+      "id": "c3125aa9-ee66-4bee-8434-c8fae4f487d6",
+      "value": 60,
+      "timestamp": "2026-04-01T13:21:11.240Z"
+    },
+    {
+      "id": "b4d48786-df20-4c07-bd10-7f27fd533303",
+      "value": 61,
+      "timestamp": "2026-04-01T13:21:21.255Z"
+    },
+    {
+      "id": "26d1ae4d-3f8c-4395-8cf7-f0159207d548",
+      "value": 60,
+      "timestamp": "2026-04-01T13:21:31.262Z"
     }
   ],
   "bloodPressure": [
-    {
-      "id": "d5916598-4734-4979-b5b4-9a7c63e0967d",
-      "systolic": 110,
-      "diastolic": 73,
-      "timestamp": "2026-03-23T18:18:00.593Z"
-    },
-    {
-      "id": "94b991d5-161e-41b6-a362-9f9c9be5d5c2",
-      "systolic": 70,
-      "diastolic": 48,
-      "timestamp": "2026-03-23T18:18:10.595Z"
-    },
-    {
-      "id": "20513d3f-06d3-4b06-8f45-2886adb7b0dc",
-      "systolic": 110,
-      "diastolic": 70,
-      "timestamp": "2026-03-23T18:18:20.609Z"
-    },
-    {
-      "id": "24110252-f58d-4cf7-bad0-ca8c08cc1699",
-      "systolic": 159,
-      "diastolic": 103,
-      "timestamp": "2026-03-23T18:18:30.609Z"
-    },
-    {
-      "id": "77a14dc6-b59a-49ce-88f8-3a2ba905be51",
-      "systolic": 130,
-      "diastolic": 85,
-      "timestamp": "2026-03-23T18:18:40.619Z"
-    },
-    {
-      "id": "b64b3cb7-328c-4da3-952c-f244cae09360",
-      "systolic": 128,
-      "diastolic": 82,
-      "timestamp": "2026-03-23T18:18:50.631Z"
-    },
-    {
-      "id": "f0735591-0c17-4967-9537-fe72a68c89b1",
-      "systolic": 151,
-      "diastolic": 96,
-      "timestamp": "2026-03-23T18:19:00.637Z"
-    },
-    {
-      "id": "8af0f809-1554-4b5a-8730-12595fa6d024",
-      "systolic": 130,
-      "diastolic": 85,
-      "timestamp": "2026-03-23T18:19:10.641Z"
-    },
-    {
-      "id": "3762a67c-7999-4a41-b18b-4946d1fb7cbf",
-      "systolic": 126,
-      "diastolic": 85,
-      "timestamp": "2026-03-23T18:19:20.653Z"
-    },
-    {
-      "id": "010bf1de-ce07-473b-956d-bb5388e658a9",
-      "systolic": 128,
-      "diastolic": 83,
-      "timestamp": "2026-03-23T18:19:30.665Z"
-    },
-    {
-      "id": "0b507ea2-715d-44bc-b580-e11089ae486b",
-      "systolic": 159,
-      "diastolic": 110,
-      "timestamp": "2026-03-23T18:19:40.675Z"
-    },
-    {
-      "id": "c323ab4f-f4ff-4c97-936f-7ec224fed9e8",
-      "systolic": 130,
-      "diastolic": 85,
-      "timestamp": "2026-03-23T18:19:50.681Z"
-    },
-    {
-      "id": "218dd60c-7ded-47ff-a620-9cd4c11c8ac5",
-      "systolic": 130,
-      "diastolic": 84,
-      "timestamp": "2026-03-23T18:20:00.681Z"
-    },
-    {
-      "id": "1bb80b1a-017a-4cea-8fbb-8c9d15be61bd",
-      "systolic": 128,
-      "diastolic": 83,
-      "timestamp": "2026-03-23T18:20:10.681Z"
-    },
-    {
-      "id": "2f19e4c8-9769-445b-a562-618b8ec223df",
-      "systolic": 127,
-      "diastolic": 80,
-      "timestamp": "2026-03-23T18:20:20.687Z"
-    },
-    {
-      "id": "2088f48a-22ca-43cb-a9c2-4a087d414423",
-      "systolic": 127,
-      "diastolic": 77,
-      "timestamp": "2026-03-23T18:20:30.694Z"
-    },
-    {
-      "id": "829fe6e9-4f74-4860-aa20-8c712c6e8739",
-      "systolic": 127,
-      "diastolic": 75,
-      "timestamp": "2026-03-23T18:20:40.697Z"
-    },
-    {
-      "id": "c55b0fa9-2c07-4b9e-bf68-7f69cd097d2d",
-      "systolic": 123,
-      "diastolic": 74,
-      "timestamp": "2026-03-23T18:20:50.709Z"
-    },
-    {
-      "id": "be3cc5c9-5327-40ad-8c8b-4e074e2e1306",
-      "systolic": 121,
-      "diastolic": 74,
-      "timestamp": "2026-03-23T18:21:00.709Z"
-    },
-    {
-      "id": "d4c9ba0c-0ed1-4754-93bd-3bae3291d568",
-      "systolic": 120,
-      "diastolic": 75,
-      "timestamp": "2026-03-23T18:21:10.717Z"
-    },
-    {
-      "id": "d886a3fe-7f25-457e-865f-27d8f8c8b7dd",
-      "systolic": 116,
-      "diastolic": 78,
-      "timestamp": "2026-03-23T18:21:20.727Z"
-    },
-    {
-      "id": "693c533f-5a6b-48d1-9b60-f004312ccb5a",
-      "systolic": 119,
-      "diastolic": 78,
-      "timestamp": "2026-03-23T18:21:30.728Z"
-    },
-    {
-      "id": "14eebd35-34e5-4dd2-b1ec-447255d153e1",
-      "systolic": 121,
-      "diastolic": 77,
-      "timestamp": "2026-03-23T18:21:40.741Z"
-    },
-    {
-      "id": "cd3955cf-b534-4057-ab38-81a1d0fdaa5a",
-      "systolic": 119,
-      "diastolic": 78,
-      "timestamp": "2026-03-23T18:21:50.753Z"
-    },
-    {
-      "id": "b74670fd-a2f3-4387-a1cd-0df4ee8cfb88",
-      "systolic": 118,
-      "diastolic": 80,
-      "timestamp": "2026-03-23T18:22:00.761Z"
-    },
-    {
-      "id": "d85490d6-a6a9-4612-81f2-f68edbe0b0db",
-      "systolic": 119,
-      "diastolic": 80,
-      "timestamp": "2026-03-23T18:22:10.772Z"
-    },
-    {
-      "id": "ee614e3b-0679-4e2b-bc23-3052bd686fc4",
-      "systolic": 120,
-      "diastolic": 82,
-      "timestamp": "2026-03-23T18:22:20.775Z"
-    },
-    {
-      "id": "e9788d57-49ee-4406-9fef-767ffea8ae9b",
-      "systolic": 121,
-      "diastolic": 80,
-      "timestamp": "2026-03-23T18:22:30.785Z"
-    },
-    {
-      "id": "6e0a0846-934f-47fd-a7ee-84563fdd97ca",
-      "systolic": 121,
-      "diastolic": 80,
-      "timestamp": "2026-03-23T18:22:40.806Z"
-    },
-    {
-      "id": "93f27ce0-b75d-4600-ab21-73f3af0c7e72",
-      "systolic": 174,
-      "diastolic": 107,
-      "timestamp": "2026-03-23T18:22:50.818Z"
-    },
     {
       "id": "35fb60e2-af81-4760-88b2-5c31fa34d035",
       "systolic": 174,
@@ -551,159 +371,189 @@
       "systolic": 112,
       "diastolic": 73,
       "timestamp": "2026-03-25T11:13:55.447Z"
+    },
+    {
+      "id": "a83365c8-41ff-4ef9-bc7a-298119fe9b9e",
+      "systolic": 115,
+      "diastolic": 72,
+      "timestamp": "2026-04-01T13:16:41.019Z"
+    },
+    {
+      "id": "582be586-bab2-45f1-a5ca-134f5a8c5979",
+      "systolic": 74,
+      "diastolic": 48,
+      "timestamp": "2026-04-01T13:16:51.048Z"
+    },
+    {
+      "id": "edcf76f1-2a73-483b-aa14-668628f5a71d",
+      "systolic": 110,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:17:01.055Z"
+    },
+    {
+      "id": "7055cc90-7cdd-40a2-9016-c475eb243c42",
+      "systolic": 111,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:17:11.054Z"
+    },
+    {
+      "id": "2a021070-bb7c-4188-8f8b-62f6467be544",
+      "systolic": 114,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:17:21.055Z"
+    },
+    {
+      "id": "c8488ed9-8132-4e34-97ba-d26c8dcec8df",
+      "systolic": 113,
+      "diastolic": 72,
+      "timestamp": "2026-04-01T13:17:31.056Z"
+    },
+    {
+      "id": "ebd28995-d2c3-4be2-8f2e-ed9c6f09e9ef",
+      "systolic": 114,
+      "diastolic": 72,
+      "timestamp": "2026-04-01T13:17:41.064Z"
+    },
+    {
+      "id": "229bbb3a-4b03-4735-adba-8b43b1c88839",
+      "systolic": 112,
+      "diastolic": 75,
+      "timestamp": "2026-04-01T13:17:51.078Z"
+    },
+    {
+      "id": "a4b2cbc4-42af-4f30-874f-64da0698298b",
+      "systolic": 114,
+      "diastolic": 75,
+      "timestamp": "2026-04-01T13:18:01.083Z"
+    },
+    {
+      "id": "f95f056e-e37f-4acf-9168-58fe3fc3afff",
+      "systolic": 111,
+      "diastolic": 73,
+      "timestamp": "2026-04-01T13:18:11.092Z"
+    },
+    {
+      "id": "8291d8ce-bdb9-4261-909b-afe0d0ebc436",
+      "systolic": 114,
+      "diastolic": 71,
+      "timestamp": "2026-04-01T13:18:21.101Z"
+    },
+    {
+      "id": "a43853e7-5bac-4335-9c66-29f0a157c6f9",
+      "systolic": 115,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:18:31.109Z"
+    },
+    {
+      "id": "7976c526-a7d4-43ee-9e64-dd0e4ead7233",
+      "systolic": 113,
+      "diastolic": 72,
+      "timestamp": "2026-04-01T13:18:41.121Z"
+    },
+    {
+      "id": "8c6b55ea-4c3e-444b-925d-d95b1ba4891f",
+      "systolic": 76,
+      "diastolic": 47,
+      "timestamp": "2026-04-01T13:18:51.133Z"
+    },
+    {
+      "id": "717d542f-f0c6-4ed9-af22-ce7859673fc5",
+      "systolic": 110,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:19:01.137Z"
+    },
+    {
+      "id": "d377d4e1-9035-487d-acbf-dfd0e4404ed9",
+      "systolic": 112,
+      "diastolic": 73,
+      "timestamp": "2026-04-01T13:19:11.148Z"
+    },
+    {
+      "id": "a10a9b46-c372-4655-b3ac-ffbe68d674d2",
+      "systolic": 86,
+      "diastolic": 53,
+      "timestamp": "2026-04-01T13:19:21.161Z"
+    },
+    {
+      "id": "6c98b17e-7070-47cb-9c3f-86ebce273439",
+      "systolic": 110,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:19:31.161Z"
+    },
+    {
+      "id": "f0dbd4ec-3eff-4179-8c40-95c7d4e47b60",
+      "systolic": 112,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:19:41.170Z"
+    },
+    {
+      "id": "c0c90631-76d9-4718-910c-a1f372513a0b",
+      "systolic": 116,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:19:51.173Z"
+    },
+    {
+      "id": "563b0067-c44b-4b6a-881a-8db5ad8bd16d",
+      "systolic": 87,
+      "diastolic": 47,
+      "timestamp": "2026-04-01T13:20:01.181Z"
+    },
+    {
+      "id": "278577ac-8908-4d13-99c0-cee123362e9b",
+      "systolic": 110,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:20:11.188Z"
+    },
+    {
+      "id": "3d0433d3-8e78-4f8f-a203-7b17642dce82",
+      "systolic": 110,
+      "diastolic": 70,
+      "timestamp": "2026-04-01T13:20:21.203Z"
+    },
+    {
+      "id": "3b449df3-7ccf-433c-9ed1-4532c7342776",
+      "systolic": 84,
+      "diastolic": 52,
+      "timestamp": "2026-04-01T13:20:31.214Z"
+    },
+    {
+      "id": "5f5f9a30-aa79-40e4-a0be-88da8aed4c8d",
+      "systolic": 153,
+      "diastolic": 92,
+      "timestamp": "2026-04-01T13:20:41.214Z"
+    },
+    {
+      "id": "3ac1b500-c541-4980-ab60-bb275fb0f679",
+      "systolic": 130,
+      "diastolic": 85,
+      "timestamp": "2026-04-01T13:20:51.228Z"
+    },
+    {
+      "id": "8909c1e9-f0be-4ebb-a123-39208d4c75ea",
+      "systolic": 129,
+      "diastolic": 83,
+      "timestamp": "2026-04-01T13:21:01.233Z"
+    },
+    {
+      "id": "774659ce-6dd3-423f-9276-4703da367590",
+      "systolic": 130,
+      "diastolic": 85,
+      "timestamp": "2026-04-01T13:21:11.240Z"
+    },
+    {
+      "id": "699065ef-ad6e-44cc-8bdc-28b1bb43c142",
+      "systolic": 128,
+      "diastolic": 84,
+      "timestamp": "2026-04-01T13:21:21.255Z"
+    },
+    {
+      "id": "b6ce14a2-9729-420b-9610-f3ff428464b7",
+      "systolic": 125,
+      "diastolic": 82,
+      "timestamp": "2026-04-01T13:21:31.262Z"
     }
   ],
   "glycemia": [
-    {
-      "id": "c68495b7-973a-495e-8df0-3ff87bf51e3c",
-      "value": 99,
-      "timestamp": "2026-03-23T18:18:00.593Z"
-    },
-    {
-      "id": "71bb7078-872b-4835-881a-103171730aae",
-      "value": 45,
-      "timestamp": "2026-03-23T18:18:10.595Z"
-    },
-    {
-      "id": "81a41be8-b9ca-44f2-b81c-6d092f13be81",
-      "value": 80,
-      "timestamp": "2026-03-23T18:18:20.609Z"
-    },
-    {
-      "id": "76ba4cdc-da5d-4143-8333-7727f5435419",
-      "value": 81,
-      "timestamp": "2026-03-23T18:18:30.609Z"
-    },
-    {
-      "id": "933e7a1f-019c-4dfa-aeb0-aa9221080675",
-      "value": 84,
-      "timestamp": "2026-03-23T18:18:40.619Z"
-    },
-    {
-      "id": "7bd257e2-7770-4504-a2b5-97a3dbcd6bf5",
-      "value": 85,
-      "timestamp": "2026-03-23T18:18:50.631Z"
-    },
-    {
-      "id": "ea819b12-e368-4215-b4a8-b99702b256b4",
-      "value": 85,
-      "timestamp": "2026-03-23T18:19:00.637Z"
-    },
-    {
-      "id": "de924a22-8793-45e5-9939-df4982ba3236",
-      "value": 88,
-      "timestamp": "2026-03-23T18:19:10.641Z"
-    },
-    {
-      "id": "cfeb657a-40e4-4b74-8bca-87676c1c4254",
-      "value": 91,
-      "timestamp": "2026-03-23T18:19:20.653Z"
-    },
-    {
-      "id": "49ad48d8-8315-4023-aacd-c42b25ed946d",
-      "value": 94,
-      "timestamp": "2026-03-23T18:19:30.665Z"
-    },
-    {
-      "id": "d7dc8de0-cfc2-4564-addc-086718ddb87a",
-      "value": 96,
-      "timestamp": "2026-03-23T18:19:40.675Z"
-    },
-    {
-      "id": "9c15ef8a-9349-43ed-8ca2-ff70ff893050",
-      "value": 98,
-      "timestamp": "2026-03-23T18:19:50.681Z"
-    },
-    {
-      "id": "9a950baa-4e12-42ee-a145-e61b2050e22f",
-      "value": 96,
-      "timestamp": "2026-03-23T18:20:00.681Z"
-    },
-    {
-      "id": "5df74573-9804-44ac-81a6-c8c947132205",
-      "value": 95,
-      "timestamp": "2026-03-23T18:20:10.681Z"
-    },
-    {
-      "id": "258748ac-d5a3-436e-9594-33930882efc7",
-      "value": 97,
-      "timestamp": "2026-03-23T18:20:20.687Z"
-    },
-    {
-      "id": "c981fc76-e234-4bc6-9e73-853cd730e4a0",
-      "value": 98,
-      "timestamp": "2026-03-23T18:20:30.694Z"
-    },
-    {
-      "id": "d8554a97-b319-42da-ac74-1f399402159f",
-      "value": 207,
-      "timestamp": "2026-03-23T18:20:40.697Z"
-    },
-    {
-      "id": "c3d65ddf-5e14-45f5-a3b0-0d29064d5e45",
-      "value": 120,
-      "timestamp": "2026-03-23T18:20:50.709Z"
-    },
-    {
-      "id": "e640d2a4-0d38-47ec-94b7-962272f4128d",
-      "value": 117,
-      "timestamp": "2026-03-23T18:21:00.709Z"
-    },
-    {
-      "id": "971b3923-0d1d-465a-8dbd-94868e87b652",
-      "value": 117,
-      "timestamp": "2026-03-23T18:21:10.717Z"
-    },
-    {
-      "id": "4bcc3286-fa51-4c54-a0e6-a7211d88765e",
-      "value": 116,
-      "timestamp": "2026-03-23T18:21:20.727Z"
-    },
-    {
-      "id": "842318a6-2330-4764-8661-1f7812bcb07a",
-      "value": 112,
-      "timestamp": "2026-03-23T18:21:30.728Z"
-    },
-    {
-      "id": "600f5545-8edf-4f68-a6b2-f70211ad1cdf",
-      "value": 113,
-      "timestamp": "2026-03-23T18:21:40.741Z"
-    },
-    {
-      "id": "1111ab07-6f0b-4d08-8617-a49277cb92e0",
-      "value": 113,
-      "timestamp": "2026-03-23T18:21:50.753Z"
-    },
-    {
-      "id": "d8dcf448-4fd5-4729-8d97-f8315b3e5779",
-      "value": 109,
-      "timestamp": "2026-03-23T18:22:00.761Z"
-    },
-    {
-      "id": "15ce2e7e-15bf-45b8-bccc-c5f5dbdb99ba",
-      "value": 106,
-      "timestamp": "2026-03-23T18:22:10.772Z"
-    },
-    {
-      "id": "49171980-7f75-4274-af1e-04cf1f9f14de",
-      "value": 103,
-      "timestamp": "2026-03-23T18:22:20.775Z"
-    },
-    {
-      "id": "071ad98e-f51a-4d39-a515-af6bc9af612c",
-      "value": 105,
-      "timestamp": "2026-03-23T18:22:30.785Z"
-    },
-    {
-      "id": "fe08cbd3-1e7c-4e87-9e52-f956044fb2e4",
-      "value": 201,
-      "timestamp": "2026-03-23T18:22:40.806Z"
-    },
-    {
-      "id": "56107a2b-5e1e-4a29-8e7e-d35c1ed65160",
-      "value": 120,
-      "timestamp": "2026-03-23T18:22:50.818Z"
-    },
     {
       "id": "e33a61de-52d7-44b3-b2ac-dcd8e2e9c0d8",
       "value": 120,
@@ -803,159 +653,159 @@
       "id": "87f1f819-3d93-4207-98a1-8ecc67177b0f",
       "value": 80,
       "timestamp": "2026-03-25T11:13:55.447Z"
+    },
+    {
+      "id": "82a8b981-966f-45b0-8218-808becd1d3f4",
+      "value": 81,
+      "timestamp": "2026-04-01T13:16:41.019Z"
+    },
+    {
+      "id": "d6c5d5be-0ebf-4aff-91f1-f22914fda347",
+      "value": 195,
+      "timestamp": "2026-04-01T13:16:51.048Z"
+    },
+    {
+      "id": "9086028b-5806-4490-b9e9-d1170dc8025b",
+      "value": 120,
+      "timestamp": "2026-04-01T13:17:01.055Z"
+    },
+    {
+      "id": "862e0d51-3bad-48d1-85c5-9692748ead3a",
+      "value": 120,
+      "timestamp": "2026-04-01T13:17:11.054Z"
+    },
+    {
+      "id": "fe44d43b-469c-4d44-b29e-6c22b7841a6c",
+      "value": 118,
+      "timestamp": "2026-04-01T13:17:21.055Z"
+    },
+    {
+      "id": "b02f1af0-1c1b-4684-ab57-e909145a26e3",
+      "value": 117,
+      "timestamp": "2026-04-01T13:17:31.056Z"
+    },
+    {
+      "id": "a7c98bd1-3c6f-4920-8127-ccdc2ae65f33",
+      "value": 118,
+      "timestamp": "2026-04-01T13:17:41.064Z"
+    },
+    {
+      "id": "d65c7051-ad8c-45ae-a296-f751dab7447d",
+      "value": 118,
+      "timestamp": "2026-04-01T13:17:51.078Z"
+    },
+    {
+      "id": "1e91d096-b26e-4820-869a-df63b28c7a63",
+      "value": 114,
+      "timestamp": "2026-04-01T13:18:01.083Z"
+    },
+    {
+      "id": "0bdebe81-545b-46e4-a83f-04940f8b6f10",
+      "value": 115,
+      "timestamp": "2026-04-01T13:18:11.092Z"
+    },
+    {
+      "id": "6352d85b-c57b-469e-9e7d-7dbf8f7c5584",
+      "value": 115,
+      "timestamp": "2026-04-01T13:18:21.101Z"
+    },
+    {
+      "id": "ce9b542f-3437-4b0a-b17b-a0ee5fa1b249",
+      "value": 116,
+      "timestamp": "2026-04-01T13:18:31.109Z"
+    },
+    {
+      "id": "e8bae927-27a8-4faf-81ba-353f3b02d49e",
+      "value": 116,
+      "timestamp": "2026-04-01T13:18:41.121Z"
+    },
+    {
+      "id": "59c97183-fceb-4ff6-a7cd-8117b59e7bb7",
+      "value": 47,
+      "timestamp": "2026-04-01T13:18:51.133Z"
+    },
+    {
+      "id": "447de2f8-a000-4f2b-8036-4e11ea2eb295",
+      "value": 80,
+      "timestamp": "2026-04-01T13:19:01.137Z"
+    },
+    {
+      "id": "249dd381-92d3-4c19-bc5d-eca000d10eb8",
+      "value": 84,
+      "timestamp": "2026-04-01T13:19:11.148Z"
+    },
+    {
+      "id": "8cde7500-c460-4322-9b0e-2dc6f1db99ff",
+      "value": 181,
+      "timestamp": "2026-04-01T13:19:21.161Z"
+    },
+    {
+      "id": "0748e8ee-8526-4f26-bd89-bb00c49dd4ac",
+      "value": 120,
+      "timestamp": "2026-04-01T13:19:31.161Z"
+    },
+    {
+      "id": "fa6e7439-e7f4-4ef2-ad4f-55962bdcc1c3",
+      "value": 116,
+      "timestamp": "2026-04-01T13:19:41.170Z"
+    },
+    {
+      "id": "41d35189-c025-4639-83b9-1d1ddcf38f8c",
+      "value": 116,
+      "timestamp": "2026-04-01T13:19:51.173Z"
+    },
+    {
+      "id": "d6449df4-d069-43d8-8656-3b005a37c7c5",
+      "value": 115,
+      "timestamp": "2026-04-01T13:20:01.181Z"
+    },
+    {
+      "id": "5b931bb0-53ef-4524-a4ef-122c77c72416",
+      "value": 114,
+      "timestamp": "2026-04-01T13:20:11.188Z"
+    },
+    {
+      "id": "853faef4-4ab0-42d6-bb6e-9873d49cf807",
+      "value": 112,
+      "timestamp": "2026-04-01T13:20:21.203Z"
+    },
+    {
+      "id": "4de56380-b604-41c0-a71f-03d2413bbf20",
+      "value": 111,
+      "timestamp": "2026-04-01T13:20:31.214Z"
+    },
+    {
+      "id": "aabf1aad-17bf-4784-afe6-d8a832f33c0e",
+      "value": 112,
+      "timestamp": "2026-04-01T13:20:41.214Z"
+    },
+    {
+      "id": "aded94c9-8f58-42ff-913e-20fe02092b62",
+      "value": 112,
+      "timestamp": "2026-04-01T13:20:51.228Z"
+    },
+    {
+      "id": "b7eadacf-99f5-404d-994c-380151e3711c",
+      "value": 61,
+      "timestamp": "2026-04-01T13:21:01.233Z"
+    },
+    {
+      "id": "4f8e880c-d4bf-4860-adde-1a506f1af8e2",
+      "value": 80,
+      "timestamp": "2026-04-01T13:21:11.240Z"
+    },
+    {
+      "id": "a5a2a4af-b0e0-40f7-850d-a967887aa55c",
+      "value": 62,
+      "timestamp": "2026-04-01T13:21:21.255Z"
+    },
+    {
+      "id": "07999d8f-219b-4544-b4f8-313ed60c5ba5",
+      "value": 80,
+      "timestamp": "2026-04-01T13:21:31.262Z"
     }
   ],
   "temperature": [
-    {
-      "id": "ea957536-7102-446c-a06f-58ce4adb6193",
-      "value": 36.1,
-      "timestamp": "2026-03-23T18:18:00.593Z"
-    },
-    {
-      "id": "b09ec0db-6b35-467b-8e38-01b90e71cd1f",
-      "value": 34.8,
-      "timestamp": "2026-03-23T18:18:10.595Z"
-    },
-    {
-      "id": "5818e50f-42b7-4564-bc37-569b7778b94f",
-      "value": 36,
-      "timestamp": "2026-03-23T18:18:20.609Z"
-    },
-    {
-      "id": "1b88df5b-c431-4ba8-911b-a0dc5600ed8d",
-      "value": 36,
-      "timestamp": "2026-03-23T18:18:30.609Z"
-    },
-    {
-      "id": "6f0acc90-aa38-45de-a00e-6f96cc627e32",
-      "value": 36,
-      "timestamp": "2026-03-23T18:18:40.619Z"
-    },
-    {
-      "id": "8296b918-7954-4154-b380-be5d6d603f95",
-      "value": 34.4,
-      "timestamp": "2026-03-23T18:18:50.631Z"
-    },
-    {
-      "id": "7182080e-b0be-4a16-aea4-8fa643369bcd",
-      "value": 36,
-      "timestamp": "2026-03-23T18:19:00.637Z"
-    },
-    {
-      "id": "4fc4346e-dba2-4590-b8f8-c9f0ddb652bf",
-      "value": 36,
-      "timestamp": "2026-03-23T18:19:10.641Z"
-    },
-    {
-      "id": "3369f7ec-9e8e-4cbc-906b-0a470eb8d61c",
-      "value": 34,
-      "timestamp": "2026-03-23T18:19:20.653Z"
-    },
-    {
-      "id": "791b57f6-3c56-4671-afad-8fdf48f4a7bf",
-      "value": 36,
-      "timestamp": "2026-03-23T18:19:30.665Z"
-    },
-    {
-      "id": "c2cffe44-e688-479f-a66c-dab369e3ae5d",
-      "value": 36,
-      "timestamp": "2026-03-23T18:19:40.675Z"
-    },
-    {
-      "id": "9dede521-0a84-4e40-a9b3-d0ee037c5770",
-      "value": 36.8,
-      "timestamp": "2026-03-23T18:19:50.681Z"
-    },
-    {
-      "id": "17dae3b4-bda3-4fb1-bd23-cf22c2c2b84e",
-      "value": 33.7,
-      "timestamp": "2026-03-23T18:20:00.681Z"
-    },
-    {
-      "id": "5496ea52-782e-4fc9-9260-f76b90ccbd11",
-      "value": 36,
-      "timestamp": "2026-03-23T18:20:10.681Z"
-    },
-    {
-      "id": "8b01122b-8592-40f8-bcf7-a6b885f3dcb2",
-      "value": 34.4,
-      "timestamp": "2026-03-23T18:20:20.687Z"
-    },
-    {
-      "id": "1f591e59-3ffa-43d6-967a-891900338105",
-      "value": 36,
-      "timestamp": "2026-03-23T18:20:30.694Z"
-    },
-    {
-      "id": "44f66107-3834-4f72-bfdb-9ec5c8724782",
-      "value": 34.3,
-      "timestamp": "2026-03-23T18:20:40.697Z"
-    },
-    {
-      "id": "05e09d3f-083d-4617-b341-651210453a51",
-      "value": 36,
-      "timestamp": "2026-03-23T18:20:50.709Z"
-    },
-    {
-      "id": "2bb64895-939a-4c6a-ad45-2d1b1439c593",
-      "value": 36.5,
-      "timestamp": "2026-03-23T18:21:00.709Z"
-    },
-    {
-      "id": "85ab94f5-8b26-4745-b570-ea14959382f5",
-      "value": 37,
-      "timestamp": "2026-03-23T18:21:10.717Z"
-    },
-    {
-      "id": "bf264d56-e007-4f00-9ab3-9055bcc6cc33",
-      "value": 36.5,
-      "timestamp": "2026-03-23T18:21:20.727Z"
-    },
-    {
-      "id": "da234b59-a424-4cce-8142-b80d3f65dda7",
-      "value": 36.8,
-      "timestamp": "2026-03-23T18:21:30.728Z"
-    },
-    {
-      "id": "57855242-40a5-49e9-94f7-d31e87a723b0",
-      "value": 36,
-      "timestamp": "2026-03-23T18:21:40.741Z"
-    },
-    {
-      "id": "f3240d49-f8ba-4e8c-9817-d98158990fb6",
-      "value": 34.5,
-      "timestamp": "2026-03-23T18:21:50.753Z"
-    },
-    {
-      "id": "8d63794c-31af-49b7-97bd-3d96da1dda39",
-      "value": 36,
-      "timestamp": "2026-03-23T18:22:00.761Z"
-    },
-    {
-      "id": "43639cee-f793-40ef-a447-05d94970513f",
-      "value": 36,
-      "timestamp": "2026-03-23T18:22:10.772Z"
-    },
-    {
-      "id": "64836ce7-5c5c-45f7-b87b-e67b93d8235f",
-      "value": 36.4,
-      "timestamp": "2026-03-23T18:22:20.775Z"
-    },
-    {
-      "id": "11210403-0a93-4679-8ab4-90f034077d7f",
-      "value": 36.3,
-      "timestamp": "2026-03-23T18:22:30.785Z"
-    },
-    {
-      "id": "a8b3e2d3-d3bd-43bc-8aaa-c581d763b8a4",
-      "value": 36,
-      "timestamp": "2026-03-23T18:22:40.806Z"
-    },
-    {
-      "id": "8cbc122e-73da-4762-b131-cbad15537ced",
-      "value": 36.8,
-      "timestamp": "2026-03-23T18:22:50.818Z"
-    },
     {
       "id": "989c7520-1e9f-4b02-9252-6054289f7b48",
       "value": 37.4,
@@ -1055,159 +905,159 @@
       "id": "1a2bdceb-70fa-44cf-8bbd-76fff0d7aa53",
       "value": 37.5,
       "timestamp": "2026-03-25T11:13:55.447Z"
+    },
+    {
+      "id": "750ebd56-3c85-466f-ad69-af3f4a495cbe",
+      "value": 37.5,
+      "timestamp": "2026-04-01T13:16:41.019Z"
+    },
+    {
+      "id": "b87bade4-1b1d-4ca0-93ae-4c8b6fa188c5",
+      "value": 37.4,
+      "timestamp": "2026-04-01T13:16:51.048Z"
+    },
+    {
+      "id": "886eb744-62b1-4707-a1fd-253708c3e8c6",
+      "value": 37.1,
+      "timestamp": "2026-04-01T13:17:01.055Z"
+    },
+    {
+      "id": "5ddc585a-2931-4c76-8b64-8140c8c16381",
+      "value": 37.1,
+      "timestamp": "2026-04-01T13:17:11.054Z"
+    },
+    {
+      "id": "4542bf8d-2440-4778-b569-0036430369b7",
+      "value": 37.2,
+      "timestamp": "2026-04-01T13:17:21.055Z"
+    },
+    {
+      "id": "b7b5d89c-8a06-4f4a-9603-c40e0599921b",
+      "value": 36.9,
+      "timestamp": "2026-04-01T13:17:31.056Z"
+    },
+    {
+      "id": "b7c5bbff-3ed5-40e9-9eff-74a612566b39",
+      "value": 39.1,
+      "timestamp": "2026-04-01T13:17:41.064Z"
+    },
+    {
+      "id": "263d9f40-6b9d-4047-b44a-11b05abe794f",
+      "value": 37.5,
+      "timestamp": "2026-04-01T13:17:51.078Z"
+    },
+    {
+      "id": "767768f4-d03f-4fa3-8c4a-28cd2470c622",
+      "value": 37.4,
+      "timestamp": "2026-04-01T13:18:01.083Z"
+    },
+    {
+      "id": "9aa11665-1f92-4cac-aa50-a87627e4319c",
+      "value": 36.6,
+      "timestamp": "2026-04-01T13:18:11.092Z"
+    },
+    {
+      "id": "b534bdd8-648e-4374-a361-2abf094bb415",
+      "value": 36.8,
+      "timestamp": "2026-04-01T13:18:21.101Z"
+    },
+    {
+      "id": "e172e762-2ca4-4d4a-b9ba-3b132aea6d23",
+      "value": 37.5,
+      "timestamp": "2026-04-01T13:18:31.109Z"
+    },
+    {
+      "id": "55cea470-cc22-438c-b308-4549ac16c8e1",
+      "value": 37.5,
+      "timestamp": "2026-04-01T13:18:41.121Z"
+    },
+    {
+      "id": "20225b7b-9bfd-4118-b368-c79de81d0cf7",
+      "value": 37.5,
+      "timestamp": "2026-04-01T13:18:51.133Z"
+    },
+    {
+      "id": "a32677fa-7ef3-41cf-ad4f-775a79134c3e",
+      "value": 36.7,
+      "timestamp": "2026-04-01T13:19:01.137Z"
+    },
+    {
+      "id": "5ec81407-9b66-4d26-8170-a21d1c360fa7",
+      "value": 33.8,
+      "timestamp": "2026-04-01T13:19:11.148Z"
+    },
+    {
+      "id": "231193fb-6b5a-42d4-bf71-3f5155e54928",
+      "value": 36,
+      "timestamp": "2026-04-01T13:19:21.161Z"
+    },
+    {
+      "id": "40304e62-7bf4-48ce-a5f6-1e9b5637e907",
+      "value": 36,
+      "timestamp": "2026-04-01T13:19:31.161Z"
+    },
+    {
+      "id": "9d128a91-2b23-485e-b25b-c18a00c1822f",
+      "value": 36.7,
+      "timestamp": "2026-04-01T13:19:41.170Z"
+    },
+    {
+      "id": "cfd4ef33-b1d6-47ee-b8f3-fd1b85e92f09",
+      "value": 36.8,
+      "timestamp": "2026-04-01T13:19:51.173Z"
+    },
+    {
+      "id": "9b7d3c37-4234-47da-9402-ee204dbd4950",
+      "value": 37.5,
+      "timestamp": "2026-04-01T13:20:01.181Z"
+    },
+    {
+      "id": "8791e2be-3532-4c43-ad10-44358c5400c2",
+      "value": 37.5,
+      "timestamp": "2026-04-01T13:20:11.188Z"
+    },
+    {
+      "id": "17a9187c-2c26-4fad-ba97-1b13b613da97",
+      "value": 37.5,
+      "timestamp": "2026-04-01T13:20:21.203Z"
+    },
+    {
+      "id": "0327fc42-9101-4e15-aa00-28582c05e17d",
+      "value": 37.3,
+      "timestamp": "2026-04-01T13:20:31.214Z"
+    },
+    {
+      "id": "cea52cae-8ee5-4b70-bd75-56b2485d2ac3",
+      "value": 36.4,
+      "timestamp": "2026-04-01T13:20:41.214Z"
+    },
+    {
+      "id": "edaea88a-d50e-4c2f-a847-5d22e5c1fc6c",
+      "value": 36.9,
+      "timestamp": "2026-04-01T13:20:51.228Z"
+    },
+    {
+      "id": "38f8303e-1a87-48e4-bd3b-cf7fca7e8270",
+      "value": 36.9,
+      "timestamp": "2026-04-01T13:21:01.233Z"
+    },
+    {
+      "id": "5ac38352-3b67-4918-a965-6737ecfc61e0",
+      "value": 37.4,
+      "timestamp": "2026-04-01T13:21:11.240Z"
+    },
+    {
+      "id": "14ee7fcd-2285-46b7-8556-431ad34cd843",
+      "value": 37.2,
+      "timestamp": "2026-04-01T13:21:21.255Z"
+    },
+    {
+      "id": "43f216ff-7b7e-4699-841a-3d022f1bf2f5",
+      "value": 36.8,
+      "timestamp": "2026-04-01T13:21:31.262Z"
     }
   ],
   "stress": [
-    {
-      "id": "58826f07-d440-45b2-9163-3523bab60d24",
-      "value": 80,
-      "timestamp": "2026-03-23T18:18:00.593Z"
-    },
-    {
-      "id": "c8137882-e573-4b14-98ad-75338a71cf4e",
-      "value": 73,
-      "timestamp": "2026-03-23T18:18:10.595Z"
-    },
-    {
-      "id": "015763bc-62cb-44bc-9d02-69ee82e25b60",
-      "value": 69,
-      "timestamp": "2026-03-23T18:18:20.609Z"
-    },
-    {
-      "id": "e8f4a420-4e6b-41a8-ab0e-178cf6354954",
-      "value": 98,
-      "timestamp": "2026-03-23T18:18:30.609Z"
-    },
-    {
-      "id": "19a4ef99-acf2-4724-ac9d-b1fa37c67bd2",
-      "value": 80,
-      "timestamp": "2026-03-23T18:18:40.619Z"
-    },
-    {
-      "id": "bf65a3f5-8f48-4536-af22-722587a67778",
-      "value": 76,
-      "timestamp": "2026-03-23T18:18:50.631Z"
-    },
-    {
-      "id": "ceb585ce-ae3f-4a02-9bc5-37e362883b0d",
-      "value": 76,
-      "timestamp": "2026-03-23T18:19:00.637Z"
-    },
-    {
-      "id": "f01c002c-e504-4f36-99d6-79029fe07aec",
-      "value": 70,
-      "timestamp": "2026-03-23T18:19:10.641Z"
-    },
-    {
-      "id": "c819afc2-879c-4466-ba23-ad1285ba2227",
-      "value": 63,
-      "timestamp": "2026-03-23T18:19:20.653Z"
-    },
-    {
-      "id": "454259d5-fbd0-4edd-b63d-254f1bff7720",
-      "value": 60,
-      "timestamp": "2026-03-23T18:19:30.665Z"
-    },
-    {
-      "id": "f9933279-1a8b-4978-bdb5-d7c722d70a64",
-      "value": 58,
-      "timestamp": "2026-03-23T18:19:40.675Z"
-    },
-    {
-      "id": "a339614f-6873-43b9-9833-873bfc9bca35",
-      "value": 84,
-      "timestamp": "2026-03-23T18:19:50.681Z"
-    },
-    {
-      "id": "442fb338-0ac5-40d5-899c-587064105418",
-      "value": 76,
-      "timestamp": "2026-03-23T18:20:00.681Z"
-    },
-    {
-      "id": "c6e7c93a-fbc6-496f-9869-c5e9a21eb3ff",
-      "value": 76,
-      "timestamp": "2026-03-23T18:20:10.681Z"
-    },
-    {
-      "id": "782402f0-7544-447d-aa93-a0bafb168eb3",
-      "value": 70,
-      "timestamp": "2026-03-23T18:20:20.687Z"
-    },
-    {
-      "id": "be2a8c8b-2978-41e3-9948-8fa680a7a872",
-      "value": 88,
-      "timestamp": "2026-03-23T18:20:30.694Z"
-    },
-    {
-      "id": "04d14006-87bc-4c99-a773-2eeea6329b81",
-      "value": 80,
-      "timestamp": "2026-03-23T18:20:40.697Z"
-    },
-    {
-      "id": "7a4dd890-8418-4756-9562-8902d9e2a106",
-      "value": 79,
-      "timestamp": "2026-03-23T18:20:50.709Z"
-    },
-    {
-      "id": "5776fec1-f615-4e4e-954d-77eeab4fb773",
-      "value": 76,
-      "timestamp": "2026-03-23T18:21:00.709Z"
-    },
-    {
-      "id": "e91fb798-9291-4b7c-9a57-2607a40492e9",
-      "value": 77,
-      "timestamp": "2026-03-23T18:21:10.717Z"
-    },
-    {
-      "id": "5c282600-9a67-499a-86fd-5986a0020c25",
-      "value": 91,
-      "timestamp": "2026-03-23T18:21:20.727Z"
-    },
-    {
-      "id": "3b3ac7c6-2f22-458c-9758-6804a73537fc",
-      "value": 80,
-      "timestamp": "2026-03-23T18:21:30.728Z"
-    },
-    {
-      "id": "d39578ca-c30f-4e3e-9fea-0fc8f183c750",
-      "value": 83,
-      "timestamp": "2026-03-23T18:21:40.741Z"
-    },
-    {
-      "id": "14073a63-1cdc-4e4f-99fb-7a298e410fcb",
-      "value": 98,
-      "timestamp": "2026-03-23T18:21:50.753Z"
-    },
-    {
-      "id": "4c44a788-c62a-467b-afa0-c54fc01af055",
-      "value": 80,
-      "timestamp": "2026-03-23T18:22:00.761Z"
-    },
-    {
-      "id": "667494b6-8e6c-4674-809b-226f16d075e8",
-      "value": 77,
-      "timestamp": "2026-03-23T18:22:10.772Z"
-    },
-    {
-      "id": "604fcb9b-0ccc-4d20-8e75-d6d8be2d70e2",
-      "value": 72,
-      "timestamp": "2026-03-23T18:22:20.775Z"
-    },
-    {
-      "id": "0a6ec903-d944-4288-aefc-f27cc1f1b91b",
-      "value": 68,
-      "timestamp": "2026-03-23T18:22:30.785Z"
-    },
-    {
-      "id": "4a97d401-9064-4bf9-9bd1-42c3db0fce75",
-      "value": 96,
-      "timestamp": "2026-03-23T18:22:40.806Z"
-    },
-    {
-      "id": "d24973ea-7b9f-4627-8ff4-f63959833b58",
-      "value": 80,
-      "timestamp": "2026-03-23T18:22:50.818Z"
-    },
     {
       "id": "0597d5f9-47bd-48cb-9652-eae4c1e23819",
       "value": 72,
@@ -1307,6 +1157,156 @@
       "id": "8ee8eec2-5455-4c43-927c-68f343a5a70c",
       "value": 84,
       "timestamp": "2026-03-25T11:13:55.447Z"
+    },
+    {
+      "id": "0a67ef1a-af56-400f-82db-43f36e24adca",
+      "value": 80,
+      "timestamp": "2026-04-01T13:16:41.019Z"
+    },
+    {
+      "id": "89ca8911-5548-4638-b470-ca4ab937e9b5",
+      "value": 78,
+      "timestamp": "2026-04-01T13:16:51.048Z"
+    },
+    {
+      "id": "2a575480-70b5-4808-add2-516fff48ef72",
+      "value": 77,
+      "timestamp": "2026-04-01T13:17:01.055Z"
+    },
+    {
+      "id": "f2d09a2a-706d-4a2f-821d-42b452bd400e",
+      "value": 72,
+      "timestamp": "2026-04-01T13:17:11.054Z"
+    },
+    {
+      "id": "1058500a-6912-49b1-9a52-3a3ba5e1c2f2",
+      "value": 73,
+      "timestamp": "2026-04-01T13:17:21.055Z"
+    },
+    {
+      "id": "53e1569a-5004-4d3e-aaa6-f5fd93de40c8",
+      "value": 70,
+      "timestamp": "2026-04-01T13:17:31.056Z"
+    },
+    {
+      "id": "a3d9c533-960d-443c-8c52-e6175b88df85",
+      "value": 82,
+      "timestamp": "2026-04-01T13:17:41.064Z"
+    },
+    {
+      "id": "b33d50ae-fd7d-4211-a732-8d0e374251fa",
+      "value": 80,
+      "timestamp": "2026-04-01T13:17:51.078Z"
+    },
+    {
+      "id": "18525aac-be2b-434a-803a-bb9e3e9e3f48",
+      "value": 87,
+      "timestamp": "2026-04-01T13:18:01.083Z"
+    },
+    {
+      "id": "cd5f6af0-895c-4786-81e6-85a672cf7054",
+      "value": 80,
+      "timestamp": "2026-04-01T13:18:11.092Z"
+    },
+    {
+      "id": "75a7db19-aa7b-4a90-8839-742a05a091f0",
+      "value": 79,
+      "timestamp": "2026-04-01T13:18:21.101Z"
+    },
+    {
+      "id": "e1adf4be-b090-4b5e-ac5a-525b719cc100",
+      "value": 78,
+      "timestamp": "2026-04-01T13:18:31.109Z"
+    },
+    {
+      "id": "3e5e5bc8-0db8-416f-9641-5d76b6551dfe",
+      "value": 87,
+      "timestamp": "2026-04-01T13:18:41.121Z"
+    },
+    {
+      "id": "e3423b28-91ce-43c4-91b9-757f5379dfa7",
+      "value": 80,
+      "timestamp": "2026-04-01T13:18:51.133Z"
+    },
+    {
+      "id": "3b5e349c-3dff-484e-95b1-c846b2db6056",
+      "value": 80,
+      "timestamp": "2026-04-01T13:19:01.137Z"
+    },
+    {
+      "id": "9f175422-63a6-462d-b73a-b682d4745ae9",
+      "value": 76,
+      "timestamp": "2026-04-01T13:19:11.148Z"
+    },
+    {
+      "id": "068e5b12-bdac-4927-8739-14078790bec4",
+      "value": 70,
+      "timestamp": "2026-04-01T13:19:21.161Z"
+    },
+    {
+      "id": "b9454036-ef39-4e17-a258-9adda140e4f3",
+      "value": 70,
+      "timestamp": "2026-04-01T13:19:31.161Z"
+    },
+    {
+      "id": "d3eb2482-923f-464c-9a8a-d4a7a159be2f",
+      "value": 66,
+      "timestamp": "2026-04-01T13:19:41.170Z"
+    },
+    {
+      "id": "34de0b51-3e8a-4205-a072-75d9814e8c51",
+      "value": 68,
+      "timestamp": "2026-04-01T13:19:51.173Z"
+    },
+    {
+      "id": "c53722cc-7601-4615-afdb-d50c58ae5c61",
+      "value": 63,
+      "timestamp": "2026-04-01T13:20:01.181Z"
+    },
+    {
+      "id": "07b60395-3b8f-46b5-8646-531b93b6ad6a",
+      "value": 83,
+      "timestamp": "2026-04-01T13:20:11.188Z"
+    },
+    {
+      "id": "33a71b8d-2155-4421-b27e-2586c80fb93c",
+      "value": 80,
+      "timestamp": "2026-04-01T13:20:21.203Z"
+    },
+    {
+      "id": "5cd4e058-f2e3-48f7-9ac2-4243e4566da9",
+      "value": 78,
+      "timestamp": "2026-04-01T13:20:31.214Z"
+    },
+    {
+      "id": "9c5b60e4-bb26-4f6c-b92b-9659e429b961",
+      "value": 72,
+      "timestamp": "2026-04-01T13:20:41.214Z"
+    },
+    {
+      "id": "700fa2ae-5bf4-4b77-bd19-1ffb4e4aec53",
+      "value": 66,
+      "timestamp": "2026-04-01T13:20:51.228Z"
+    },
+    {
+      "id": "733ab107-ce24-4aa1-81bb-1e5cb1aeaa2e",
+      "value": 64,
+      "timestamp": "2026-04-01T13:21:01.233Z"
+    },
+    {
+      "id": "4c4cc11d-3f0e-4f67-b05c-c70e824a4a1c",
+      "value": 62,
+      "timestamp": "2026-04-01T13:21:11.240Z"
+    },
+    {
+      "id": "c48909a5-8a57-4136-a0d3-34c536f5dbc5",
+      "value": 84,
+      "timestamp": "2026-04-01T13:21:21.255Z"
+    },
+    {
+      "id": "4f791380-ddaa-466f-8cfa-a8f3b2e77011",
+      "value": 79,
+      "timestamp": "2026-04-01T13:21:31.262Z"
     }
   ],
   "sleepStats": {
@@ -1439,159 +1439,14 @@
       "id": "19f19273-9d27-4632-9aa2-492c7a636a13",
       "value": 5.2,
       "timestamp": "2026-03-25T11:13:25.401Z"
+    },
+    {
+      "id": "76cf3636-a5a3-4e7a-9947-d1628cf07e17",
+      "value": 6.2,
+      "timestamp": "2026-04-01T13:16:41.019Z"
     }
   ],
   "o2": [
-    {
-      "id": "86eaa3b1-3d08-4f98-b8b8-57c4ea1d4466",
-      "value": 98,
-      "timestamp": "2026-03-23T18:18:00.593Z"
-    },
-    {
-      "id": "cd76b59e-eb0e-4e84-9518-463e1a77e2ab",
-      "value": 98,
-      "timestamp": "2026-03-23T18:18:10.595Z"
-    },
-    {
-      "id": "c9fece6f-ea01-4a4b-9618-bf7dc240267f",
-      "value": 98,
-      "timestamp": "2026-03-23T18:18:20.609Z"
-    },
-    {
-      "id": "2cb1c0a8-1571-46e1-9c20-d46f0a4e6139",
-      "value": 98,
-      "timestamp": "2026-03-23T18:18:30.609Z"
-    },
-    {
-      "id": "b01c8b83-4ed0-47d9-91f1-353507553542",
-      "value": 98,
-      "timestamp": "2026-03-23T18:18:40.619Z"
-    },
-    {
-      "id": "d8ca952a-f6c2-47f2-9b52-9043dd79f3f3",
-      "value": 99,
-      "timestamp": "2026-03-23T18:18:50.631Z"
-    },
-    {
-      "id": "eca475d0-948e-41c0-8c34-92ab7dfea0b2",
-      "value": 99,
-      "timestamp": "2026-03-23T18:19:00.637Z"
-    },
-    {
-      "id": "2017e091-f355-433b-aa9e-096980e45b7d",
-      "value": 99,
-      "timestamp": "2026-03-23T18:19:10.641Z"
-    },
-    {
-      "id": "3fb13df5-847d-471d-b2b7-2b7219e0dd62",
-      "value": 99,
-      "timestamp": "2026-03-23T18:19:20.653Z"
-    },
-    {
-      "id": "8c6e8ccc-42f6-4acc-b7e3-9f4a8e5b5245",
-      "value": 91,
-      "timestamp": "2026-03-23T18:19:30.665Z"
-    },
-    {
-      "id": "2de8b375-9752-4a1e-bf23-d0036a225dc4",
-      "value": 98,
-      "timestamp": "2026-03-23T18:19:40.675Z"
-    },
-    {
-      "id": "eab62616-5bbf-4902-8cf9-4c683e12b698",
-      "value": 98,
-      "timestamp": "2026-03-23T18:19:50.681Z"
-    },
-    {
-      "id": "1397a8b8-27b6-4fa5-8516-7ae0d21580f3",
-      "value": 99,
-      "timestamp": "2026-03-23T18:20:00.681Z"
-    },
-    {
-      "id": "e4de15d8-b37b-49e7-b04f-31a933b96254",
-      "value": 90,
-      "timestamp": "2026-03-23T18:20:10.681Z"
-    },
-    {
-      "id": "c378657a-207c-4f1a-84b5-35caf2f64768",
-      "value": 98,
-      "timestamp": "2026-03-23T18:20:20.687Z"
-    },
-    {
-      "id": "e0eec799-f6a0-4983-b05f-3a1e3365bfa6",
-      "value": 90,
-      "timestamp": "2026-03-23T18:20:30.694Z"
-    },
-    {
-      "id": "89dbd667-0050-45d9-8b7d-39e8a39be3b2",
-      "value": 98,
-      "timestamp": "2026-03-23T18:20:40.697Z"
-    },
-    {
-      "id": "7169bd0e-9036-41a3-a2fd-ec8e6d29b8f2",
-      "value": 99,
-      "timestamp": "2026-03-23T18:20:50.709Z"
-    },
-    {
-      "id": "06dc386a-e844-4a35-a47b-ae9d73d079f9",
-      "value": 99,
-      "timestamp": "2026-03-23T18:21:00.709Z"
-    },
-    {
-      "id": "0d41445e-6c95-4802-b036-c3f74f6406e7",
-      "value": 93,
-      "timestamp": "2026-03-23T18:21:10.717Z"
-    },
-    {
-      "id": "9bc501b7-92f4-4c46-9afe-650c35c03cba",
-      "value": 93,
-      "timestamp": "2026-03-23T18:21:20.727Z"
-    },
-    {
-      "id": "ff884f84-8d8e-47c5-ad4f-3a2412099503",
-      "value": 98,
-      "timestamp": "2026-03-23T18:21:30.728Z"
-    },
-    {
-      "id": "b7a57931-fc78-4769-a1c1-83838b081ba4",
-      "value": 98,
-      "timestamp": "2026-03-23T18:21:40.741Z"
-    },
-    {
-      "id": "4779d11c-fe7f-462d-9ca9-8c7ce6a7fafe",
-      "value": 98,
-      "timestamp": "2026-03-23T18:21:50.753Z"
-    },
-    {
-      "id": "b31233fa-e503-47a3-ae67-9caa8779574d",
-      "value": 99,
-      "timestamp": "2026-03-23T18:22:00.761Z"
-    },
-    {
-      "id": "bc3ec976-e3cd-4527-ab8d-b308677faaf7",
-      "value": 99,
-      "timestamp": "2026-03-23T18:22:10.772Z"
-    },
-    {
-      "id": "d926cd8b-dff9-4f0e-af12-919e0030e66e",
-      "value": 99,
-      "timestamp": "2026-03-23T18:22:20.775Z"
-    },
-    {
-      "id": "0de2eda5-4390-48bb-8a9e-beab0b41b848",
-      "value": 99,
-      "timestamp": "2026-03-23T18:22:30.785Z"
-    },
-    {
-      "id": "23fd3cb5-850d-40bd-a54a-71db5cc7b3eb",
-      "value": 98,
-      "timestamp": "2026-03-23T18:22:40.806Z"
-    },
-    {
-      "id": "34233b6e-71b0-46d4-a5a4-1d1d4ac1a95a",
-      "value": 98,
-      "timestamp": "2026-03-23T18:22:50.818Z"
-    },
     {
       "id": "c8238674-d9e2-487b-a669-ebb355c0f7d3",
       "value": 94,
@@ -1691,6 +1546,156 @@
       "id": "18eef1fd-639f-46fc-a757-5f018bc7135b",
       "value": 94,
       "timestamp": "2026-03-25T11:13:55.447Z"
+    },
+    {
+      "id": "a05cf2ac-f61a-4d52-a885-4089e3bb5f26",
+      "value": 93,
+      "timestamp": "2026-04-01T13:16:41.019Z"
+    },
+    {
+      "id": "b3476528-face-4d78-a124-d42800bd652d",
+      "value": 98,
+      "timestamp": "2026-04-01T13:16:51.048Z"
+    },
+    {
+      "id": "c0a2bdb7-4b96-4f91-a14d-1c6e21c07a4a",
+      "value": 98,
+      "timestamp": "2026-04-01T13:17:01.055Z"
+    },
+    {
+      "id": "3973cc15-108e-46fb-a11b-6710e69c1f1b",
+      "value": 98,
+      "timestamp": "2026-04-01T13:17:11.054Z"
+    },
+    {
+      "id": "c94c342b-266a-4170-9694-deb35f9ce869",
+      "value": 92,
+      "timestamp": "2026-04-01T13:17:21.055Z"
+    },
+    {
+      "id": "27616ba6-8ad8-43ba-9607-2f27206904e0",
+      "value": 98,
+      "timestamp": "2026-04-01T13:17:31.056Z"
+    },
+    {
+      "id": "0dbaeeb9-2c97-475b-aab0-1f3fb568280f",
+      "value": 98,
+      "timestamp": "2026-04-01T13:17:41.064Z"
+    },
+    {
+      "id": "7262f42b-b709-4e4a-96a1-ec8369aa08f6",
+      "value": 99,
+      "timestamp": "2026-04-01T13:17:51.078Z"
+    },
+    {
+      "id": "ded1d7fd-ec72-46e4-93d2-577f6d8b22cd",
+      "value": 99,
+      "timestamp": "2026-04-01T13:18:01.083Z"
+    },
+    {
+      "id": "fe61bc5f-7747-4631-b2b7-7d4eaf11787b",
+      "value": 99,
+      "timestamp": "2026-04-01T13:18:11.092Z"
+    },
+    {
+      "id": "74dcf5d6-5836-4cfb-841a-878bcce0dd39",
+      "value": 99,
+      "timestamp": "2026-04-01T13:18:21.101Z"
+    },
+    {
+      "id": "57484d97-0ed0-4509-9f7c-aa8b66b04a9a",
+      "value": 99,
+      "timestamp": "2026-04-01T13:18:31.109Z"
+    },
+    {
+      "id": "8f1a095c-4933-4712-965d-423e69afc5c8",
+      "value": 93,
+      "timestamp": "2026-04-01T13:18:41.121Z"
+    },
+    {
+      "id": "4783493f-0c87-46cd-9ef7-dd232e8cbc6b",
+      "value": 98,
+      "timestamp": "2026-04-01T13:18:51.133Z"
+    },
+    {
+      "id": "390d5c36-c33c-4133-8747-e141327e7d57",
+      "value": 98,
+      "timestamp": "2026-04-01T13:19:01.137Z"
+    },
+    {
+      "id": "1741fa22-0bec-4762-bf5c-6074c8020791",
+      "value": 98,
+      "timestamp": "2026-04-01T13:19:11.148Z"
+    },
+    {
+      "id": "d1de3438-be6b-4d88-8b85-71a5fddd3ac0",
+      "value": 98,
+      "timestamp": "2026-04-01T13:19:21.161Z"
+    },
+    {
+      "id": "55a79e7c-ae4b-4ba0-b286-e7d2c9bfd13b",
+      "value": 98,
+      "timestamp": "2026-04-01T13:19:31.161Z"
+    },
+    {
+      "id": "8cccb673-7fff-42e7-9d59-485a8d88e674",
+      "value": 98,
+      "timestamp": "2026-04-01T13:19:41.170Z"
+    },
+    {
+      "id": "6d2b7596-5d66-47e5-85bd-f5d8ee4d2558",
+      "value": 93,
+      "timestamp": "2026-04-01T13:19:51.173Z"
+    },
+    {
+      "id": "4f599550-319b-46a1-b177-fc7b9bcb8d40",
+      "value": 92,
+      "timestamp": "2026-04-01T13:20:01.181Z"
+    },
+    {
+      "id": "817d94d5-ada6-4157-9d1c-f87911dc3c69",
+      "value": 98,
+      "timestamp": "2026-04-01T13:20:11.188Z"
+    },
+    {
+      "id": "8d463dc9-2542-4a62-8449-9e0fb54cac61",
+      "value": 98,
+      "timestamp": "2026-04-01T13:20:21.203Z"
+    },
+    {
+      "id": "3cf9dc9e-0623-482b-b6e9-5dfb62197f8e",
+      "value": 98,
+      "timestamp": "2026-04-01T13:20:31.214Z"
+    },
+    {
+      "id": "f087e39b-78f8-4585-a2f2-fb766b385406",
+      "value": 98,
+      "timestamp": "2026-04-01T13:20:41.214Z"
+    },
+    {
+      "id": "94e2fbb4-3428-40c6-8ccb-88c554e5d4af",
+      "value": 98,
+      "timestamp": "2026-04-01T13:20:51.228Z"
+    },
+    {
+      "id": "7fd6c706-71f6-4425-bf58-d173ee28d90b",
+      "value": 99,
+      "timestamp": "2026-04-01T13:21:01.233Z"
+    },
+    {
+      "id": "d9e3072f-5658-4672-afa6-2706469ea75c",
+      "value": 99,
+      "timestamp": "2026-04-01T13:21:11.240Z"
+    },
+    {
+      "id": "27ca8fe4-bb16-4e7a-ad52-73b3d5bd3e5c",
+      "value": 98,
+      "timestamp": "2026-04-01T13:21:21.255Z"
+    },
+    {
+      "id": "049df5d1-8fe0-4eec-b2fd-7a6413210afa",
+      "value": 98,
+      "timestamp": "2026-04-01T13:21:31.262Z"
     }
   ],
   "steps": [
@@ -61113,6 +61118,156 @@
       "id": "62d8c05c-64fe-45a7-80b1-1d8689dbf130",
       "value": 10894,
       "timestamp": "2026-03-25T11:13:55.447Z"
+    },
+    {
+      "id": "2a849548-cd58-49c1-ab35-62259fdc9224",
+      "value": 10630,
+      "timestamp": "2026-04-01T13:16:41.019Z"
+    },
+    {
+      "id": "a6f6f4df-67b1-4e27-ba63-d6f79c4bb23c",
+      "value": 10366,
+      "timestamp": "2026-04-01T13:16:51.048Z"
+    },
+    {
+      "id": "18583925-1cf3-472f-9fa8-73e143eed4a3",
+      "value": 10803,
+      "timestamp": "2026-04-01T13:17:01.055Z"
+    },
+    {
+      "id": "14d3b779-527f-4beb-a876-c06a787629e4",
+      "value": 10416,
+      "timestamp": "2026-04-01T13:17:11.054Z"
+    },
+    {
+      "id": "e81f5db8-187c-4958-903f-c7eb7bd2ec33",
+      "value": 10394,
+      "timestamp": "2026-04-01T13:17:21.055Z"
+    },
+    {
+      "id": "0edbbea5-feba-401f-9ccc-7fe8211052a4",
+      "value": 10595,
+      "timestamp": "2026-04-01T13:17:31.056Z"
+    },
+    {
+      "id": "19b9691d-47e6-41e1-a544-913a3a5848f7",
+      "value": 10393,
+      "timestamp": "2026-04-01T13:17:41.064Z"
+    },
+    {
+      "id": "c3393b52-8db8-4653-a4b3-da926eb4bc42",
+      "value": 10827,
+      "timestamp": "2026-04-01T13:17:51.078Z"
+    },
+    {
+      "id": "657071b0-2027-4320-a9d0-df23027212bf",
+      "value": 10950,
+      "timestamp": "2026-04-01T13:18:01.083Z"
+    },
+    {
+      "id": "b735f9de-6597-41d6-b4bd-9b1f8a8b4076",
+      "value": 11263,
+      "timestamp": "2026-04-01T13:18:11.092Z"
+    },
+    {
+      "id": "34da4e74-0e83-41f2-9bef-281bdb19764e",
+      "value": 11093,
+      "timestamp": "2026-04-01T13:18:21.101Z"
+    },
+    {
+      "id": "6dd87d5e-1c59-48af-ac84-feec301501d6",
+      "value": 10726,
+      "timestamp": "2026-04-01T13:18:31.109Z"
+    },
+    {
+      "id": "55efab59-d853-4ee4-a1df-4a7efef600ca",
+      "value": 11138,
+      "timestamp": "2026-04-01T13:18:41.121Z"
+    },
+    {
+      "id": "0c71d8d4-1b2d-4912-89db-b17b4d8db3ea",
+      "value": 10871,
+      "timestamp": "2026-04-01T13:18:51.133Z"
+    },
+    {
+      "id": "6dbe9b4c-c0a6-42b1-8462-48f7d3d5b6ba",
+      "value": 11208,
+      "timestamp": "2026-04-01T13:19:01.137Z"
+    },
+    {
+      "id": "edbb80f1-0983-40c1-a054-80fdab95e230",
+      "value": 11486,
+      "timestamp": "2026-04-01T13:19:11.148Z"
+    },
+    {
+      "id": "54c8b564-811f-45c1-9464-ed4ec93d82dd",
+      "value": 11618,
+      "timestamp": "2026-04-01T13:19:21.161Z"
+    },
+    {
+      "id": "1ee9f1c5-2835-4974-afd4-857ae5b4b8a9",
+      "value": 11676,
+      "timestamp": "2026-04-01T13:19:31.161Z"
+    },
+    {
+      "id": "65b6eedb-9c18-4d21-80df-2baed6d534e0",
+      "value": 11723,
+      "timestamp": "2026-04-01T13:19:41.170Z"
+    },
+    {
+      "id": "ab664bcd-6104-4edf-bf20-6354fd2dcd90",
+      "value": 12029,
+      "timestamp": "2026-04-01T13:19:51.173Z"
+    },
+    {
+      "id": "5a5064ce-a20d-4458-8a6e-deb58b58483d",
+      "value": 11946,
+      "timestamp": "2026-04-01T13:20:01.181Z"
+    },
+    {
+      "id": "6690af26-42d3-4b66-a3da-0816cf451b81",
+      "value": 12035,
+      "timestamp": "2026-04-01T13:20:11.188Z"
+    },
+    {
+      "id": "549bd9bf-77ed-4ce4-a9fc-e4ab7b4ab3e9",
+      "value": 11520,
+      "timestamp": "2026-04-01T13:20:21.203Z"
+    },
+    {
+      "id": "0434ff77-4ecf-478f-8b5c-0afbb0c2437e",
+      "value": 11405,
+      "timestamp": "2026-04-01T13:20:31.214Z"
+    },
+    {
+      "id": "2232cd1b-8511-4d58-b4a7-864257d6c553",
+      "value": 11357,
+      "timestamp": "2026-04-01T13:20:41.214Z"
+    },
+    {
+      "id": "9c2f363f-28a7-4f53-bd42-adc1bffe57dc",
+      "value": 11342,
+      "timestamp": "2026-04-01T13:20:51.228Z"
+    },
+    {
+      "id": "c057fed7-7a63-4004-a3ac-1436aaecd7e5",
+      "value": 11165,
+      "timestamp": "2026-04-01T13:21:01.233Z"
+    },
+    {
+      "id": "34b060e2-c748-428d-969a-eff76e0a5599",
+      "value": 10863,
+      "timestamp": "2026-04-01T13:21:11.240Z"
+    },
+    {
+      "id": "508d2826-3c08-4789-b5ab-3a2c316b8ffe",
+      "value": 10944,
+      "timestamp": "2026-04-01T13:21:21.255Z"
+    },
+    {
+      "id": "a8a897ba-ad6c-4cd2-a6d8-1c3d6c029f1c",
+      "value": 11025,
+      "timestamp": "2026-04-01T13:21:31.262Z"
     }
   ],
   "stepsStats": {
@@ -61121,803 +61276,163 @@
   },
   "alerts": [
     {
-      "id": "bc0df30f-4e8f-4f1c-b4ba-9df5eb7b456a",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 71/50 mmHg",
+      "id": "37380961-3828-4055-a5c9-87ee05710d92",
+      "type": "temperature",
+      "message": "Temperatura alta: 39.1°C",
       "severity": "medium",
-      "timestamp": "2026-03-23T17:57:49.076Z",
+      "timestamp": "2026-04-01T13:17:41.064Z",
       "read": false
     },
     {
-      "id": "2b58a4f1-6ea7-4d60-892c-3072cdb133bd",
+      "id": "4e360838-9db0-4522-bd24-3d48ba606eab",
+      "type": "stress",
+      "message": "Nível de stress alto: 82",
+      "severity": "low",
+      "timestamp": "2026-04-01T13:17:41.064Z",
+      "read": false
+    },
+    {
+      "id": "6f71dde9-de0f-4f78-a1d7-6b45450b954e",
+      "type": "stress",
+      "message": "Nível de stress alto: 87",
+      "severity": "low",
+      "timestamp": "2026-04-01T13:18:01.083Z",
+      "read": false
+    },
+    {
+      "id": "ec0b2019-7d24-4199-bbc8-95556e56c4e4",
+      "type": "o2",
+      "message": "Saturação de oxigénio baixa: 93%",
+      "severity": "high",
+      "timestamp": "2026-04-01T13:18:41.121Z",
+      "read": false
+    },
+    {
+      "id": "6a32fc5f-1b2a-4801-9d22-c8cd3b1c541c",
+      "type": "stress",
+      "message": "Nível de stress alto: 87",
+      "severity": "low",
+      "timestamp": "2026-04-01T13:18:41.121Z",
+      "read": false
+    },
+    {
+      "id": "b179be3b-a141-4483-bbad-efeff92709ea",
+      "type": "bloodPressure",
+      "message": "Pressão arterial baixa: 76/47 mmHg",
+      "severity": "medium",
+      "timestamp": "2026-04-01T13:18:51.133Z",
+      "read": false
+    },
+    {
+      "id": "67f66343-c36e-430a-ad02-284675a6d3c0",
+      "type": "glycemia",
+      "message": "Glicemia baixa: 47 mg/dL",
+      "severity": "high",
+      "timestamp": "2026-04-01T13:18:51.133Z",
+      "read": false
+    },
+    {
+      "id": "49a5340c-444a-4e3d-bd91-88286d5c22dc",
       "type": "temperature",
       "message": "Temperatura baixa: 33.8°C",
       "severity": "medium",
-      "timestamp": "2026-03-23T17:58:09.103Z",
+      "timestamp": "2026-04-01T13:19:11.148Z",
       "read": false
     },
     {
-      "id": "d7fe452c-edd8-4a0c-9c02-4f24c9e04f4b",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 91%",
+      "id": "806fad42-e143-49e6-843a-ebcde0781ddc",
+      "type": "bloodPressure",
+      "message": "Pressão arterial baixa: 86/53 mmHg",
+      "severity": "medium",
+      "timestamp": "2026-04-01T13:19:21.161Z",
+      "read": false
+    },
+    {
+      "id": "d960b474-62fa-4d3b-b431-08d382a81973",
+      "type": "glycemia",
+      "message": "Glicemia alta: 181 mg/dL",
       "severity": "high",
-      "timestamp": "2026-03-23T17:58:39.125Z",
+      "timestamp": "2026-04-01T13:19:21.161Z",
       "read": false
     },
     {
-      "id": "9000ea1a-c3c0-4e97-8072-2e1226029a2d",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 71/48 mmHg",
-      "severity": "medium",
-      "timestamp": "2026-03-23T17:59:19.148Z",
-      "read": false
-    },
-    {
-      "id": "d65b5ae1-0850-43eb-9936-6874372d24be",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.5°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T17:59:29.162Z",
-      "read": false
-    },
-    {
-      "id": "5c24e2dd-05d1-4df5-9226-668cef836768",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 76/53 mmHg",
-      "severity": "medium",
-      "timestamp": "2026-03-23T17:59:49.176Z",
-      "read": false
-    },
-    {
-      "id": "6b8392c8-103a-4671-8c50-931e0ae4b4e9",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 90%",
-      "severity": "high",
-      "timestamp": "2026-03-23T17:59:49.176Z",
-      "read": false
-    },
-    {
-      "id": "d998bf55-7ae0-42ac-9441-97b2e058e08b",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 81/47 mmHg",
-      "severity": "medium",
-      "timestamp": "2026-03-23T17:59:59.179Z",
-      "read": false
-    },
-    {
-      "id": "491b520c-bfd0-4f28-becc-1585b3122049",
-      "type": "stress",
-      "message": "Nível de stress alto: 99",
-      "severity": "low",
-      "timestamp": "2026-03-23T17:59:59.179Z",
-      "read": false
-    },
-    {
-      "id": "5506b970-d4b3-4c69-9047-094405ab783e",
-      "type": "temperature",
-      "message": "Temperatura alta: 38.6°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:00:09.184Z",
-      "read": false
-    },
-    {
-      "id": "9ff7bc0f-8306-4700-b2ae-5131bc8e78a5",
-      "type": "bloodPressure",
-      "message": "Pressão arterial alta: 160/111 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:00:19.185Z",
-      "read": false
-    },
-    {
-      "id": "70f889c1-d404-4058-996c-b59a38f4779a",
-      "type": "stress",
-      "message": "Nível de stress alto: 86",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:00:39.206Z",
-      "read": false
-    },
-    {
-      "id": "eecc03be-ffef-4aa2-a93e-c75c71966971",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.1°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:00:49.219Z",
-      "read": false
-    },
-    {
-      "id": "6c08534e-acda-4616-ad1d-4b4c44ea73b6",
-      "type": "bloodPressure",
-      "message": "Pressão arterial alta: 164/94 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:00:59.219Z",
-      "read": false
-    },
-    {
-      "id": "878ef35e-a142-4537-928f-0dd5ddb00334",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.5°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:01:09.231Z",
-      "read": false
-    },
-    {
-      "id": "d0fb1b77-7d19-4e1b-b4cc-4088f49aa996",
-      "type": "bpm",
-      "message": "Ritmo cardíaco baixo detetado: 37 BPM",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:01:19.237Z",
-      "read": false
-    },
-    {
-      "id": "7d6dcd68-c72f-46cc-b72e-339346bcb023",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 75/52 mmHg",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:02:09.273Z",
-      "read": false
-    },
-    {
-      "id": "89bde081-44c7-4287-852c-5aac938cf319",
+      "id": "05ad0991-4f0b-405f-b66e-3e8632ee49fd",
       "type": "o2",
       "message": "Saturação de oxigénio baixa: 93%",
       "severity": "high",
-      "timestamp": "2026-03-23T18:02:19.281Z",
+      "timestamp": "2026-04-01T13:19:51.173Z",
       "read": false
     },
     {
-      "id": "e41474bc-98bd-46f8-a84e-155a41719156",
-      "type": "stress",
-      "message": "Nível de stress alto: 92",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:02:19.281Z",
-      "read": false
-    },
-    {
-      "id": "fc415c8e-bf3e-4d11-b48f-8db86a9c97ee",
-      "type": "glycemia",
-      "message": "Glicemia alta: 229 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:02:29.288Z",
-      "read": false
-    },
-    {
-      "id": "7f0c25ae-68b2-4186-9b97-76783d500e3e",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 93%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:02:49.312Z",
-      "read": false
-    },
-    {
-      "id": "90078657-39cb-4c59-b3f8-7dbce93c10e8",
+      "id": "99b222ce-4c46-499d-8a70-87c1eeb62f97",
       "type": "bloodPressure",
-      "message": "Pressão arterial alta: 155/96 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:02:59.314Z",
-      "read": false
-    },
-    {
-      "id": "a0dea841-262f-4afe-a46c-8848cf5815fe",
-      "type": "temperature",
-      "message": "Temperatura alta: 38.9°C",
+      "message": "Pressão arterial baixa: 87/47 mmHg",
       "severity": "medium",
-      "timestamp": "2026-03-23T18:02:59.314Z",
+      "timestamp": "2026-04-01T13:20:01.181Z",
       "read": false
     },
     {
-      "id": "93afc7ba-b8e0-4cc5-8067-1f7149d7ae11",
-      "type": "stress",
-      "message": "Nível de stress alto: 88",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:02:59.314Z",
-      "read": false
-    },
-    {
-      "id": "3f8887a1-4727-4d22-babc-d261736c4eec",
-      "type": "bpm",
-      "message": "Ritmo cardíaco baixo detetado: 35 BPM",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:03:09.321Z",
-      "read": false
-    },
-    {
-      "id": "4f04b64d-1b3e-4f4d-aaf3-7d20e81f1760",
-      "type": "bloodPressure",
-      "message": "Pressão arterial alta: 175/95 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:03:09.321Z",
-      "read": false
-    },
-    {
-      "id": "bf47af21-5eca-48c7-bd32-2649d7258d13",
-      "type": "glycemia",
-      "message": "Glicemia alta: 210 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:03:09.321Z",
-      "read": false
-    },
-    {
-      "id": "3210a114-7d0f-442d-bf7e-68b3bbd189d9",
-      "type": "glycemia",
-      "message": "Glicemia baixa: 62 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:03:19.326Z",
-      "read": false
-    },
-    {
-      "id": "f2b2bb12-f482-4827-be5f-d43a72ada1de",
-      "type": "glycemia",
-      "message": "Glicemia alta: 219 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:03:29.331Z",
-      "read": false
-    },
-    {
-      "id": "1dbffaa9-b4c6-4f54-af9b-8bad635dc814",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 73/46 mmHg",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:03:39.339Z",
-      "read": false
-    },
-    {
-      "id": "f3f95e98-f5f4-421c-8256-5fd0f602f183",
-      "type": "bpm",
-      "message": "Ritmo cardíaco baixo detetado: 38 BPM",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:04:19.354Z",
-      "read": false
-    },
-    {
-      "id": "a57e35ad-42f5-47b5-9f3d-53fab0f3d2d3",
-      "type": "bpm",
-      "message": "Ritmo cardíaco alto detetado: 122 BPM",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:04:29.354Z",
-      "read": false
-    },
-    {
-      "id": "dad856dd-c569-4417-9e00-fcee69e0b067",
+      "id": "8456f5a4-4eca-4232-9dc9-10a9550d3144",
       "type": "o2",
       "message": "Saturação de oxigénio baixa: 92%",
       "severity": "high",
-      "timestamp": "2026-03-23T18:04:29.354Z",
+      "timestamp": "2026-04-01T13:20:01.181Z",
       "read": false
     },
     {
-      "id": "adcaef3c-acb4-41f5-940a-c56e342c845a",
-      "type": "glycemia",
-      "message": "Glicemia alta: 216 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:04:39.359Z",
-      "read": false
-    },
-    {
-      "id": "232b87f0-1740-4f68-ba7e-3bb0c4f83102",
-      "type": "glycemia",
-      "message": "Glicemia alta: 209 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:05:09.382Z",
-      "read": false
-    },
-    {
-      "id": "e7ccee3f-816a-484b-84a7-cbf630e9ca25",
-      "type": "bloodPressure",
-      "message": "Pressão arterial alta: 175/109 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:05:29.398Z",
-      "read": false
-    },
-    {
-      "id": "15c3dcda-7d38-4c6f-9c3f-42eceda6143d",
-      "type": "glycemia",
-      "message": "Glicemia alta: 216 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:05:49.411Z",
-      "read": false
-    },
-    {
-      "id": "b7c8cb73-0615-4bc3-bb64-fc1a89d418da",
+      "id": "44fb1ca5-6ad7-4982-af7d-128589a8356b",
       "type": "stress",
-      "message": "Nível de stress alto: 91",
+      "message": "Nível de stress alto: 83",
       "severity": "low",
-      "timestamp": "2026-03-23T18:05:49.411Z",
+      "timestamp": "2026-04-01T13:20:11.188Z",
       "read": false
     },
     {
-      "id": "fa3a7de2-2577-4c66-b313-b13b118f8e0f",
-      "type": "glycemia",
-      "message": "Glicemia baixa: 62 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:05:59.414Z",
-      "read": false
-    },
-    {
-      "id": "4b90c9eb-b8e3-4b77-8346-46292196cd21",
-      "type": "temperature",
-      "message": "Temperatura alta: 39°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:06:09.427Z",
-      "read": false
-    },
-    {
-      "id": "1952830d-e360-44b1-b9dd-4f44f8aaf1a4",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 92%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:06:19.442Z",
-      "read": false
-    },
-    {
-      "id": "1e71eab2-a9c7-4f3b-850d-fa8361929e77",
-      "type": "stress",
-      "message": "Nível de stress alto: 85",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:06:29.453Z",
-      "read": false
-    },
-    {
-      "id": "9a422089-b15b-4b51-90e8-0d50a7c3e0cf",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 93%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:17:10.557Z",
-      "read": false
-    },
-    {
-      "id": "8b482e4a-fa53-4928-89eb-4f49f6d9e0ed",
-      "type": "stress",
-      "message": "Nível de stress alto: 93",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:17:10.557Z",
-      "read": false
-    },
-    {
-      "id": "710677a8-585e-4906-b8b6-62bc44f52901",
-      "type": "bpm",
-      "message": "Ritmo cardíaco baixo detetado: 47 BPM",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:17:20.560Z",
-      "read": false
-    },
-    {
-      "id": "48ab2a17-700e-486f-ad94-e72b1cdd41ee",
+      "id": "39af3eb4-2dba-4d61-83be-e1ba897d5332",
       "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 89/57 mmHg",
+      "message": "Pressão arterial baixa: 84/52 mmHg",
       "severity": "medium",
-      "timestamp": "2026-03-23T18:17:20.560Z",
+      "timestamp": "2026-04-01T13:20:31.214Z",
       "read": false
     },
     {
-      "id": "85ae8283-5beb-49d5-8552-55a58c5662d3",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.7°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:17:20.560Z",
-      "read": false
-    },
-    {
-      "id": "862d0e5d-e9a8-49bd-bbab-a5547a9648ac",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 77/59 mmHg",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:17:40.579Z",
-      "read": false
-    },
-    {
-      "id": "a897ad96-5d7e-42f4-8956-84690e8a7a80",
-      "type": "stress",
-      "message": "Nível de stress alto: 88",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:17:40.579Z",
-      "read": false
-    },
-    {
-      "id": "3e1d71fc-4b53-481d-bdf9-b5ec5421a9c1",
-      "type": "bpm",
-      "message": "Ritmo cardíaco baixo detetado: 43 BPM",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:17:50.589Z",
-      "read": false
-    },
-    {
-      "id": "b008cb73-11c8-4841-83ed-f6fc16e22bec",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 94%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:17:50.589Z",
-      "read": false
-    },
-    {
-      "id": "1ee7b476-90fd-4ccd-a5b3-4a6d248205b9",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 70/48 mmHg",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:18:10.595Z",
-      "read": false
-    },
-    {
-      "id": "4a9dcfba-65e1-47f4-8c45-2a97e753c4fc",
-      "type": "glycemia",
-      "message": "Glicemia baixa: 45 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:18:10.595Z",
-      "read": false
-    },
-    {
-      "id": "94d39568-8151-4318-b659-9e985c491e26",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.8°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:18:10.595Z",
-      "read": false
-    },
-    {
-      "id": "fa332ec4-1a41-43ea-b567-e6ed6eba63f5",
-      "type": "bloodPressure",
-      "message": "Pressão arterial alta: 159/103 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:18:30.609Z",
-      "read": false
-    },
-    {
-      "id": "842ad7f4-b88b-46a2-a715-5a370c8e213b",
-      "type": "stress",
-      "message": "Nível de stress alto: 98",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:18:30.609Z",
-      "read": false
-    },
-    {
-      "id": "f26e5659-a9a5-47cf-bc1b-d40bb9c202f9",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.4°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:18:50.631Z",
-      "read": false
-    },
-    {
-      "id": "d577c310-af77-409b-aae9-acc2967a1fa3",
-      "type": "bpm",
-      "message": "Ritmo cardíaco alto detetado: 127 BPM",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:19:00.637Z",
-      "read": false
-    },
-    {
-      "id": "205cde68-b9ad-439d-ade5-33d0245397e7",
-      "type": "bloodPressure",
-      "message": "Pressão arterial alta: 151/96 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:19:00.637Z",
-      "read": false
-    },
-    {
-      "id": "bc761e41-77a7-402a-8f66-16f82b0d0bdc",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:19:20.653Z",
-      "read": false
-    },
-    {
-      "id": "5041c7bf-7364-4baf-82d6-118955c0fd1c",
+      "id": "78f8389c-e629-4fa6-bfd4-c5e9c909cb3c",
       "type": "bpm",
       "message": "Ritmo cardíaco baixo detetado: 42 BPM",
       "severity": "medium",
-      "timestamp": "2026-03-23T18:19:30.665Z",
+      "timestamp": "2026-04-01T13:20:41.214Z",
       "read": false
     },
     {
-      "id": "277e80ad-d462-4c71-a203-75e72a9f22cd",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 91%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:19:30.665Z",
-      "read": false
-    },
-    {
-      "id": "5d0ef41d-0ed0-48c1-a0ef-b4e78d5324eb",
+      "id": "aaef002b-453b-4829-b99f-8414787fb88d",
       "type": "bloodPressure",
-      "message": "Pressão arterial alta: 159/110 mmHg",
+      "message": "Pressão arterial alta: 153/92 mmHg",
       "severity": "high",
-      "timestamp": "2026-03-23T18:19:40.675Z",
+      "timestamp": "2026-04-01T13:20:41.214Z",
       "read": false
     },
     {
-      "id": "9fac8e70-641c-4d49-8d6e-681c9c73b9aa",
+      "id": "ff209bd2-fa17-4963-ad61-c8f3f5626c9d",
+      "type": "glycemia",
+      "message": "Glicemia baixa: 61 mg/dL",
+      "severity": "high",
+      "timestamp": "2026-04-01T13:21:01.233Z",
+      "read": false
+    },
+    {
+      "id": "f89b1ecf-0271-4ad4-b843-a5c23595145b",
+      "type": "glycemia",
+      "message": "Glicemia baixa: 62 mg/dL",
+      "severity": "high",
+      "timestamp": "2026-04-01T13:21:21.255Z",
+      "read": false
+    },
+    {
+      "id": "d9c075be-350b-4ffc-8852-69c3edce4332",
       "type": "stress",
       "message": "Nível de stress alto: 84",
       "severity": "low",
-      "timestamp": "2026-03-23T18:19:50.681Z",
-      "read": false
-    },
-    {
-      "id": "c1c6cce3-05cc-407a-9f62-199286ab5239",
-      "type": "temperature",
-      "message": "Temperatura baixa: 33.7°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:20:00.681Z",
-      "read": false
-    },
-    {
-      "id": "c9299402-aaac-4362-9fb1-b0f154b64777",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 90%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:20:10.681Z",
-      "read": false
-    },
-    {
-      "id": "22c48fda-1482-470a-9b52-9f9c171358a2",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.4°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:20:20.687Z",
-      "read": false
-    },
-    {
-      "id": "04dc834e-1d34-4f5d-9ff8-76e165156439",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 90%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:20:30.694Z",
-      "read": false
-    },
-    {
-      "id": "01af0673-dc9e-4d95-b9c6-12a83fd242df",
-      "type": "stress",
-      "message": "Nível de stress alto: 88",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:20:30.694Z",
-      "read": false
-    },
-    {
-      "id": "88bdc637-567b-4a33-866f-9fcccac28ad3",
-      "type": "glycemia",
-      "message": "Glicemia alta: 207 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:20:40.697Z",
-      "read": false
-    },
-    {
-      "id": "b1f2567b-8e15-4b01-bcc9-48e68844a9dd",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.3°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:20:40.697Z",
-      "read": false
-    },
-    {
-      "id": "699ad88d-a65a-42cd-8093-b5f45db8fb54",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 93%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:21:10.717Z",
-      "read": false
-    },
-    {
-      "id": "1067311b-8da1-4fa8-90bb-68247166a443",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 93%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:21:20.727Z",
-      "read": false
-    },
-    {
-      "id": "ad003b7c-f72f-4b50-8bea-341c64462778",
-      "type": "stress",
-      "message": "Nível de stress alto: 91",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:21:20.727Z",
-      "read": false
-    },
-    {
-      "id": "8ba20562-5ede-4fb3-b261-6638e6c6ba6a",
-      "type": "bpm",
-      "message": "Ritmo cardíaco alto detetado: 144 BPM",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:21:30.728Z",
-      "read": false
-    },
-    {
-      "id": "210f2f5a-e81a-4e30-b237-c03c876798bb",
-      "type": "bpm",
-      "message": "Ritmo cardíaco alto detetado: 141 BPM",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:21:40.741Z",
-      "read": false
-    },
-    {
-      "id": "feb1a6e7-1a8b-4a2b-93a7-57b9754c8d01",
-      "type": "stress",
-      "message": "Nível de stress alto: 83",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:21:40.741Z",
-      "read": false
-    },
-    {
-      "id": "08dac80d-221f-41f9-96bf-fd82c059c1de",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.5°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:21:50.753Z",
-      "read": false
-    },
-    {
-      "id": "6e9988fd-b68b-4931-a714-8f2cc21d5e68",
-      "type": "stress",
-      "message": "Nível de stress alto: 98",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:21:50.753Z",
-      "read": false
-    },
-    {
-      "id": "fae58cf4-5c53-43be-9a12-d45c0e9509a2",
-      "type": "bpm",
-      "message": "Ritmo cardíaco baixo detetado: 45 BPM",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:22:20.775Z",
-      "read": false
-    },
-    {
-      "id": "4579fd76-17c7-410f-8878-92d509633b96",
-      "type": "bpm",
-      "message": "Ritmo cardíaco alto detetado: 146 BPM",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:22:40.806Z",
-      "read": false
-    },
-    {
-      "id": "e26961be-7115-4f18-ac82-4c66a15704d2",
-      "type": "glycemia",
-      "message": "Glicemia alta: 201 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:22:40.806Z",
-      "read": false
-    },
-    {
-      "id": "3c2bd4f1-7369-4432-810e-b2619acec704",
-      "type": "stress",
-      "message": "Nível de stress alto: 96",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:22:40.806Z",
-      "read": false
-    },
-    {
-      "id": "be8b0978-8e82-4d1c-9d55-9887a57b0ac6",
-      "type": "bloodPressure",
-      "message": "Pressão arterial alta: 174/107 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:22:50.818Z",
-      "read": false
-    },
-    {
-      "id": "c0f29c36-f438-4262-96b1-10de8ecc2cff",
-      "type": "bloodPressure",
-      "message": "Pressão arterial alta: 174/106 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:23:00.826Z",
-      "read": false
-    },
-    {
-      "id": "3345fcf2-e28f-4a7c-969c-a84d7c8a3a47",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 94%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:23:00.826Z",
-      "read": false
-    },
-    {
-      "id": "fe777793-5c55-41b4-bf23-ea83b79a5902",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 80/54 mmHg",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:23:30.854Z",
-      "read": false
-    },
-    {
-      "id": "b89235fe-d87c-4820-9678-965ae3a41e72",
-      "type": "stress",
-      "message": "Nível de stress alto: 83",
-      "severity": "low",
-      "timestamp": "2026-03-23T18:24:20.906Z",
-      "read": false
-    },
-    {
-      "id": "795cd622-c6a6-4c3e-9f82-745404708e14",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 91%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:24:30.915Z",
-      "read": false
-    },
-    {
-      "id": "2fc6d1d6-e584-42d7-8cf2-cd404fd757a7",
-      "type": "bloodPressure",
-      "message": "Pressão arterial alta: 156/106 mmHg",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:24:40.921Z",
-      "read": false
-    },
-    {
-      "id": "acc5ebfa-39d7-4799-9033-f4c90bab2c09",
-      "type": "bloodPressure",
-      "message": "Pressão arterial baixa: 88/53 mmHg",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:24:50.923Z",
-      "read": false
-    },
-    {
-      "id": "7085a821-c4cc-4db4-925b-70118398aae2",
-      "type": "temperature",
-      "message": "Temperatura baixa: 34.2°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:24:50.923Z",
-      "read": false
-    },
-    {
-      "id": "e22a4b1e-1f23-4cfb-8cd8-25398508f64b",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 91%",
-      "severity": "high",
-      "timestamp": "2026-03-23T18:25:20.938Z",
-      "read": false
-    },
-    {
-      "id": "22707e0a-c536-4c12-bb1b-808656397043",
-      "type": "temperature",
-      "message": "Temperatura alta: 38.7°C",
-      "severity": "medium",
-      "timestamp": "2026-03-23T18:25:30.941Z",
-      "read": false
-    },
-    {
-      "id": "18c8181c-9ba7-4cec-8b99-a84b21a5f6f4",
-      "type": "temperature",
-      "message": "Temperatura alta: 39.4°C",
-      "severity": "medium",
-      "timestamp": "2026-03-25T11:13:25.401Z",
-      "read": false
-    },
-    {
-      "id": "4d85f32e-7d6a-4631-b398-bb23b30b374b",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 92%",
-      "severity": "high",
-      "timestamp": "2026-03-25T11:13:35.433Z",
-      "read": false
-    },
-    {
-      "id": "d9fc8a73-feff-45fc-9872-c77661ad082b",
-      "type": "glycemia",
-      "message": "Glicemia baixa: 63 mg/dL",
-      "severity": "high",
-      "timestamp": "2026-03-25T11:13:45.432Z",
-      "read": false
-    },
-    {
-      "id": "73178dee-c132-4d03-b877-0013b79ad78f",
-      "type": "bpm",
-      "message": "Ritmo cardíaco alto detetado: 129 BPM",
-      "severity": "high",
-      "timestamp": "2026-03-25T11:13:55.447Z",
-      "read": false
-    },
-    {
-      "id": "87923178-ea9d-4574-b44e-289845698257",
-      "type": "o2",
-      "message": "Saturação de oxigénio baixa: 94%",
-      "severity": "high",
-      "timestamp": "2026-03-25T11:13:55.447Z",
-      "read": false
-    },
-    {
-      "id": "2a1a13e7-90ef-4d6b-a270-e5909dc7ff1d",
-      "type": "stress",
-      "message": "Nível de stress alto: 84",
-      "severity": "low",
-      "timestamp": "2026-03-25T11:13:55.447Z",
+      "timestamp": "2026-04-01T13:21:21.255Z",
       "read": false
     }
   ]

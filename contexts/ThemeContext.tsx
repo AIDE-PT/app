@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as React from "react";
+import { Appearance } from "react-native";
 import { createContext, useContext, useEffect, useState } from "react";
 
 type ThemeType = "light" | "dark";
@@ -41,6 +42,12 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (savedTheme === "dark" || savedTheme === "light") {
           setThemeState(savedTheme);
+        } else {
+          const systemScheme = Appearance.getColorScheme();
+          const initialTheme: ThemeType =
+            systemScheme === "dark" ? "dark" : "light";
+          setThemeState(initialTheme);
+          await AsyncStorage.setItem(THEME_STORAGE_KEY, initialTheme);
         }
 
         if (

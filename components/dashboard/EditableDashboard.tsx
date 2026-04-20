@@ -5,29 +5,29 @@ import axios from "axios";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Animated,
-  GestureResponderEvent,
-  LayoutAnimation,
-  LayoutChangeEvent,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  UIManager,
-  View,
+    Animated,
+    GestureResponderEvent,
+    LayoutAnimation,
+    LayoutChangeEvent,
+    Platform,
+    Pressable,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    UIManager,
+    View,
 } from "react-native";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+    SafeAreaView,
+    useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 import { LightBackground } from "@/components/DotBackground";
 import Navbar from "@/components/navBar/NavBar";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import {
-  DASHBOARD_CONFIG,
-  WidgetVariant,
+    DASHBOARD_CONFIG,
+    WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
 import { useTheme } from "@/hooks/useTheme";
 import TopBar from "../topBar/TopBar";
@@ -189,6 +189,26 @@ export default function EditableDashboard({
   const deleteWidget = (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setActiveWidgets((prev) => prev.filter((w) => w.id !== id));
+    setIsEditing(true);
+    closeSizeMenu();
+  };
+
+  const moveWidget = (id: string, direction: "up" | "down") => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+
+    setActiveWidgets((prev) => {
+      const fromIndex = prev.findIndex((widget) => widget.id === id);
+      if (fromIndex < 0) return prev;
+
+      const toIndex = direction === "up" ? fromIndex - 1 : fromIndex + 1;
+      if (toIndex < 0 || toIndex >= prev.length) return prev;
+
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+
     setIsEditing(true);
     closeSizeMenu();
   };
@@ -473,6 +493,11 @@ export default function EditableDashboard({
               {activeWidgets.map((item) => {
                 const isBeingDragged = draggingWidgetId === item.id;
                 const isSizeMenuOpen = openSizeMenuId === item.id;
+                const currentIndex = activeWidgets.findIndex(
+                  (widget) => widget.id === item.id,
+                );
+                const canMoveUp = currentIndex > 0;
+                const canMoveDown = currentIndex < activeWidgets.length - 1;
 
                 return (
                   <View
@@ -565,6 +590,70 @@ export default function EditableDashboard({
                           boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
                         }}
                       >
+                        <TouchableOpacity
+                          className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"}`}
+                          onPress={() => moveWidget(item.id, "up")}
+                          disabled={!canMoveUp}
+                          accessibilityRole="button"
+                          accessibilityLabel="Mover widget para cima"
+                          accessibilityHint="Move este widget uma posição para cima sem usar arrastar e largar."
+                          accessibilityState={{ disabled: !canMoveUp }}
+                        >
+                          <Text
+                            className={`text-sm font-bold ${canMoveUp ? (isDark ? "text-slate-300" : "text-slate-600") : isDark ? "text-slate-500" : "text-slate-400"}`}
+                          >
+                            Mover para cima
+                          </Text>
+                          <Feather
+                            name="arrow-up"
+                            size={13}
+                            color={
+                              canMoveUp
+                                ? isDark
+                                  ? "#cbd5e1"
+                                  : "#475569"
+                                : isDark
+                                  ? "#64748b"
+                                  : "#94a3b8"
+                            }
+                            accessible={false}
+                          />
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                          className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"} border-t ${isDark ? "border-white/10" : "border-slate-100"}`}
+                          onPress={() => moveWidget(item.id, "down")}
+                          disabled={!canMoveDown}
+                          accessibilityRole="button"
+                          accessibilityLabel="Mover widget para baixo"
+                          accessibilityHint="Move este widget uma posição para baixo sem usar arrastar e largar."
+                          accessibilityState={{ disabled: !canMoveDown }}
+                        >
+                          <Text
+                            className={`text-sm font-bold ${canMoveDown ? (isDark ? "text-slate-300" : "text-slate-600") : isDark ? "text-slate-500" : "text-slate-400"}`}
+                          >
+                            Mover para baixo
+                          </Text>
+                          <Feather
+                            name="arrow-down"
+                            size={13}
+                            color={
+                              canMoveDown
+                                ? isDark
+                                  ? "#cbd5e1"
+                                  : "#475569"
+                                : isDark
+                                  ? "#64748b"
+                                  : "#94a3b8"
+                            }
+                            accessible={false}
+                          />
+                        </TouchableOpacity>
+
+                        <View
+                          className={`h-px ${isDark ? "bg-white/10" : "bg-slate-100"}`}
+                        />
+
                         {SIZE_OPTIONS.map((option) => {
                           const selected = option.variant === item.variant;
                           return (

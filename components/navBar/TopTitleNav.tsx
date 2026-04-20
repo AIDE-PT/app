@@ -62,7 +62,13 @@ const TopTitleNav = ({
         >
           <ArrowIcon variant="LEFT" dark={isTransparent ? true : dark} />
         </TouchableOpacity>
-        <Text className={`font-safiro text-[28px] ${titleColor}`}>{title}</Text>
+        <Text
+          className={`font-safiro text-[28px] ${titleColor}`}
+          accessibilityRole="header"
+          accessibilityLabel={title}
+        >
+          {title}
+        </Text>
       </View>
       {subtitle && (
         <Text className={`font-open-sans text-[14px] ml-8 ${subtitleColor}`}>

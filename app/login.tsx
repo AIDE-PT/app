@@ -1,3 +1,4 @@
+import { LightBackground } from "@/components/DotBackground";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
@@ -6,7 +7,6 @@ import { Button } from "../components/buttons/button";
 import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
-import { LightBackground } from "@/components/DotBackground";
 
 const DividerWithText = ({
   text,
@@ -60,6 +60,7 @@ export default function Login() {
                 className={`font-safiro text-[32px] ${
                   isDark ? "text-white" : "text-[#1A1A2E]"
                 }`}
+                accessibilityRole="header"
               >
                 Login
               </Text>

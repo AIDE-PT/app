@@ -1,9 +1,12 @@
-import React, { useState } from "react";
+import { useTheme } from "@/hooks/useTheme";
 import DateTimePicker, {
   DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
+import { Audio } from "expo-av";
 import { AlertCircle, Info } from "lucide-react-native";
+import React, { useEffect, useRef, useState } from "react";
 import {
+  AccessibilityInfo,
   Platform,
   Text,
   TextInput,
@@ -11,7 +14,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useTheme } from "@/hooks/useTheme";
 import CalendarIcon from "../svg/CalendarIcon";
 import EyeIcon from "../svg/EyeIcon";
 
@@ -46,6 +48,8 @@ export const Input = ({
   const [showHelper, setShowHelper] = useState(false);
   const [currentDate, setCurrentDate] = useState(dateValue || new Date());
   const [isInputValid, setIsInputValid] = useState(true);
+  const errorSoundRef = useRef<Audio.Sound | null>(null);
+  const previousErrorRef = useRef<string | undefined>(undefined);
   const { isDark } = useTheme();
 
   const useDarkStyling =
@@ -94,6 +98,64 @@ export const Input = ({
     ? "Toque no icone de informacao ao lado do titulo para ver ajuda."
     : undefined;
   const accessibilityHint = resolvedErrorText || helperText || helperHint;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadErrorSound = async () => {
+      try {
+        const { sound } = await Audio.Sound.createAsync(
+          require("../../assets/audio/error_feedback.mp3"),
+          { shouldPlay: false },
+        );
+
+        if (isMounted) {
+          errorSoundRef.current = sound;
+        } else {
+          await sound.unloadAsync();
+        }
+      } catch {
+        errorSoundRef.current = null;
+      }
+    };
+
+    loadErrorSound();
+
+    return () => {
+      isMounted = false;
+      if (errorSoundRef.current) {
+        void errorSoundRef.current.unloadAsync();
+        errorSoundRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    const announceAndPlayError = async () => {
+      if (!resolvedErrorText || resolvedErrorText === previousErrorRef.current) {
+        previousErrorRef.current = resolvedErrorText;
+        return;
+      }
+
+      AccessibilityInfo.announceForAccessibility(resolvedErrorText);
+
+      if (!errorSoundRef.current) {
+        previousErrorRef.current = resolvedErrorText;
+        return;
+      }
+
+      try {
+        await errorSoundRef.current.setPositionAsync(0);
+        await errorSoundRef.current.playAsync();
+      } catch {
+        // Keep form validation accessible even when audio playback fails.
+      }
+
+      previousErrorRef.current = resolvedErrorText;
+    };
+
+    void announceAndPlayError();
+  }, [resolvedErrorText]);
 
   return (
     <View className="w-full">
@@ -231,6 +293,7 @@ export const Input = ({
         <View
           className="mt-1 ml-1 flex-row items-start"
           accessibilityRole="alert"
+          accessibilityLiveRegion="assertive"
           accessibilityLanguage="pt-PT"
         >
           <AlertCircle
@@ -242,6 +305,7 @@ export const Input = ({
             className={`ml-1.5 flex-1 text-xs ${
               useDarkStyling ? "text-red-200" : "text-red-600"
             }`}
+            accessibilityLiveRegion="assertive"
             accessibilityLanguage="pt-PT"
           >
             {resolvedErrorText}

@@ -1,3 +1,9 @@
+import { LightBackground } from "@/components/DotBackground";
+import {
+  registerFieldCopy,
+  RegisterFormData,
+  registerSchema,
+} from "@/schemas/register";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { Controller, useForm } from "react-hook-form";
@@ -7,12 +13,6 @@ import { Button } from "../components/buttons/button";
 import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
-import { LightBackground } from "@/components/DotBackground";
-import {
-  registerFieldCopy,
-  RegisterFormData,
-  registerSchema,
-} from "@/schemas/register";
 
 const DividerWithText = ({
   text,
@@ -89,6 +89,7 @@ export default function Register() {
                   className={`font-safiro text-[32px] ${
                     isDark ? "text-white" : "text-[#1A1A2E]"
                   }`}
+                  accessibilityRole="header"
                 >
                   Registo
                 </Text>

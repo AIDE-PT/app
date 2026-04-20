@@ -23,7 +23,10 @@ export default function CompleteProfile() {
     <GradientBackground forceLight>
       <SafeAreaView className="flex-1">
         <View className="flex-1 px-6 pt-10">
-          <Text className="mb-10 font-safiro text-[32px] text-[#1A1A2E]">
+          <Text
+            className="mb-10 font-safiro text-[32px] text-[#1A1A2E]"
+            accessibilityRole="header"
+          >
             So mais uma coisa...
           </Text>
 
