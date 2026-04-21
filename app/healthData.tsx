@@ -1,22 +1,22 @@
+import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
 import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
+    QueryClient,
+    QueryClientProvider,
+    useQuery,
 } from "@tanstack/react-query";
 import axios from "axios";
 import { router } from "expo-router";
 import React from "react";
 import {
-  ActivityIndicator,
-  Platform,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  View,
+    ActivityIndicator,
+    Platform,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
-import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 
 // API Configuration
 
@@ -193,11 +193,13 @@ const HealthDataContent = () => {
     <LightBackground>
       <View className="flex-1 bg-transparent px-4 pt-10">
         <SafeAreaView className="flex-1">
-          <BackButton
-            label="Gerir Dados"
-            dark={isDark}
-            onPress={() => router.push("/definicoes")}
-          />
+          <View className="mb-4">
+            <BackButton
+              label="Gerir Dados"
+              dark={isDark}
+              onPress={() => router.push("/definicoes")}
+            />
+          </View>
 
           <ScrollView
             className="flex-1"

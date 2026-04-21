@@ -3,19 +3,19 @@ import { CalendarModal } from "@/components/modals/CalendarModal";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
 
+import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import DashboardMetricWidget from "../components/widgets/DashboardMetricWidget";
 import WidgetGrid from "../components/widgets/WidgetGrid";
-import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
 
 export const queryClient = new QueryClient({
   defaultOptions: {

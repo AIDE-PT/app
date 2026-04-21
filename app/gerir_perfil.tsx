@@ -2,39 +2,156 @@ import BackButton from "@/components/buttons/backButton";
 import { Button } from "@/components/buttons/button";
 import LightBackground from "@/components/DotBackground";
 import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
+import { supabase } from "@/utils/supabase/client";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Camera, Pencil } from "lucide-react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  SafeAreaView,
+  Alert,
   ScrollView,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
+
+type UserFormData = {
+  nome: string;
+  email: string;
+  contacto: string;
+  nif: string;
+  password: string;
+};
+
+const EMPTY_FORM: UserFormData = {
+  nome: "",
+  email: "",
+  contacto: "",
+  nif: "",
+  password: "",
+};
 
 const GerirPerfil = () => {
   const [isEditing, setIsEditing] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const { isDark } = useTheme();
-  const { signOut } = useAuth();
+  const { signOut, user } = useAuth();
+  const { profileType } = useUserProfile();
   const { status: healthConnectStatus, isLoading: isLoadingHealthConnect } =
     useHealthConnectStatus();
 
-  const [userData, setUserData] = useState({
-    nome: "Emília Almeida",
-    email: "almeida.emilia@gmail.com",
-    contacto: "+351 983 987 657",
-    nif: "231432256",
-    password: "password123",
-  });
+  const accountTypeLabel =
+    profileType === "aider"
+      ? "Aider"
+      : profileType === "cuidado"
+        ? "Cuidado"
+        : "Nao definido";
 
-  const handleSave = () => {
-    setIsEditing(false);
-    console.log("Alterações salvas localmente:", userData);
+  const [userData, setUserData] = useState<UserFormData>(EMPTY_FORM);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      if (!user?.id) {
+        setUserData(EMPTY_FORM);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase
+          .from("users")
+          .select("name, email, phone_number, nif")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          throw new Error(error.message);
+        }
+
+        setUserData((previous) => ({
+          ...previous,
+          nome:
+            typeof data?.name === "string"
+              ? data.name
+              : typeof user.user_metadata?.name === "string"
+                ? user.user_metadata.name
+                : "",
+          email:
+            typeof data?.email === "string"
+              ? data.email
+              : (user.email ?? ""),
+          contacto:
+            typeof data?.phone_number === "string" ? data.phone_number : "",
+          nif: typeof data?.nif === "string" ? data.nif : "",
+        }));
+      } catch (error) {
+        console.error("Erro ao carregar perfil:", error);
+        setUserData((previous) => ({
+          ...previous,
+          nome:
+            typeof user.user_metadata?.name === "string"
+              ? user.user_metadata.name
+              : "",
+          email: user.email ?? "",
+          contacto: "",
+          nif: "",
+        }));
+      }
+    };
+
+    loadProfile();
+  }, [user?.id]);
+
+  const handleSave = async () => {
+    if (!user?.id) {
+      Alert.alert("Erro", "Sessao invalida. Inicie sessao novamente.");
+      return;
+    }
+
+    try {
+      setIsSavingProfile(true);
+      const { error } = await supabase
+        .from("users")
+        .update({
+          name: userData.nome.trim() || null,
+          phone_number: userData.contacto.trim() || null,
+          nif: userData.nif.trim() || null,
+        })
+        .eq("id", user.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      setIsEditing(false);
+      Alert.alert("Sucesso", "Dados atualizados com sucesso.");
+    } catch (error) {
+      console.error("Erro ao guardar perfil:", error);
+      Alert.alert("Erro", "Nao foi possivel guardar os dados do perfil.");
+    } finally {
+      setIsSavingProfile(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    if (isSigningOut) return;
+
+    try {
+      setIsSigningOut(true);
+      await signOut();
+    } catch {
+      Alert.alert(
+        "Erro",
+        "Nao foi possivel terminar a sessao. Tente novamente.",
+      );
+    } finally {
+      setIsSigningOut(false);
+    }
   };
 
   return (
@@ -58,11 +175,24 @@ const GerirPerfil = () => {
                 <Text
                   className={`text-4xl font-medium ${isDark ? "text-white/60" : "text-[#555]"}`}
                 >
-                  E
+                  {(userData.nome || user?.email || "U")
+                    .trim()
+                    .charAt(0)
+                    .toUpperCase()}
                 </Text>
                 <TouchableOpacity className="absolute bottom-0 right-0 bg-black p-2 rounded-full border-2 border-white">
                   <Camera size={16} color="white" />
                 </TouchableOpacity>
+              </View>
+
+              <View
+                className={`mt-4 px-4 py-2 rounded-full ${isDark ? "bg-[#5061FF]/25" : "bg-[#5061FF]/12"}`}
+              >
+                <Text
+                  className={`text-xs font-bold uppercase tracking-wide ${isDark ? "text-[#C9D0FF]" : "text-[#3342CC]"}`}
+                >
+                  Tipo de conta: {accountTypeLabel}
+                </Text>
               </View>
             </View>
 
@@ -99,8 +229,9 @@ const GerirPerfil = () => {
               <View className="w-full items-center">
                 <Button
                   variant="primary"
-                  label="Alterar"
+                  label={isSavingProfile ? "A guardar..." : "Alterar"}
                   onPress={handleSave}
+                  loading={isSavingProfile}
                 />
               </View>
             </View>
@@ -232,15 +363,16 @@ const GerirPerfil = () => {
               <View className="mt-6">
                 <TouchableOpacity
                   className="w-full items-center"
-                  onPress={signOut}
+                  onPress={handleLogout}
+                  disabled={isSigningOut}
                 >
                   <View
-                    className={`py-3 px-8 rounded-xl ${isDark ? "bg-red-500/20" : "bg-red-100"}`}
+                    className={`py-3 px-8 rounded-xl ${isDark ? "bg-red-500/20" : "bg-red-100"} ${isSigningOut ? "opacity-70" : ""}`}
                   >
                     <Text
                       className={`font-medium ${isDark ? "text-red-400" : "text-red-600"}`}
                     >
-                      Logout
+                      {isSigningOut ? "A terminar sessao..." : "Logout"}
                     </Text>
                   </View>
                 </TouchableOpacity>

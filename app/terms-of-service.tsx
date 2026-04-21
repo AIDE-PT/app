@@ -2,7 +2,8 @@ import LightBackground from "@/components/DotBackground";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { router, useLocalSearchParams } from "expo-router";
 import React from "react";
-import { SafeAreaView, ScrollView, Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
 import { Button } from "../components/buttons/button";
 
@@ -70,11 +71,13 @@ const TermsOfService = () => {
       <LightBackground forceLight>
         <View className="flex-1 px-4 pt-10">
           <SafeAreaView className="flex-1">
-            <BackButton
-              label="Termos de Serviço"
-              dark={false}
-              onPress={() => router.push(fromStart ? "/" : "/definicoes")}
-            />
+            <View className="mb-4">
+              <BackButton
+                label="Termos de Serviço"
+                dark={false}
+                onPress={() => router.push(fromStart ? "/" : "/definicoes")}
+              />
+            </View>
 
             {/* Content */}
             <ScrollView
