@@ -5,12 +5,12 @@ import { useTheme } from "@/hooks/useTheme";
 import { Stack, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import {
-  ActivityIndicator,
-  Dimensions,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LineChartSlim from "./components/charts/LineChartSlim";
@@ -106,7 +106,9 @@ const METRIC_CONFIGS: Record<string, MetricConfig> = {
     getStatus: () => "normal",
     statusLabel: () => "Ativo",
     extraCards: (history) => {
-      const latest = history.length ? history[0] : 0;
+      const latest = history.length
+        ? history.reduce((sum, value) => sum + value, 0)
+        : 0;
       return [
         { label: "Hoje", value: `${latest.toLocaleString()}`, unit: "passos" },
         { label: "Meta", value: "10 000", unit: "passos" },

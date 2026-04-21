@@ -3,15 +3,15 @@ import { Feather } from "@expo/vector-icons";
 import React, { ReactNode } from "react";
 import { Dimensions, Text, View, ViewStyle } from "react-native";
 import Svg, {
-  Circle,
-  Defs,
-  G,
-  Line,
-  LinearGradient,
-  Path,
-  Rect,
-  Stop,
-  Text as SvgText,
+    Circle,
+    Defs,
+    G,
+    Line,
+    LinearGradient,
+    Path,
+    Rect,
+    Stop,
+    Text as SvgText,
 } from "react-native-svg";
 import { IconType } from "../svg/WidgetIcon";
 
@@ -233,63 +233,134 @@ function StressMiniChart({
 
 //  3. Steps  vertical bar chart with goal line
 function StepsMiniChart({
-  data,
+  currentSteps,
+  goal = 10000,
   w,
   h,
   isDark,
   semantic = DEFAULT_SEMANTIC,
 }: {
-  data: number[];
+  currentSteps: number;
+  goal?: number;
   w: number;
   h: number;
   isDark: boolean;
   semantic?: { success: string; warning: string; danger: string };
 }) {
-  const goal = 10000;
-  const bars = data.slice(-10).reverse();
-  if (!bars.length) return null;
-  const dataMax = Math.max(...bars, goal);
-  const gap = 2;
-  const barW = Math.max(Math.floor(w / bars.length) - gap, 2);
-  const toH = (v: number) => (v / dataMax) * h;
-  const goalY = (1 - goal / dataMax) * h;
-  const barColor = (v: number) =>
-    v >= goal ? semantic.success : v >= goal * 0.7 ? BRAND_BLUE : "#94A3B8";
-  const gIds = bars.map((_, i) => `sb${i}`);
+  const safeGoal = Math.max(goal, 1);
+  const progressPct = Math.min(Math.max(currentSteps / safeGoal, 0), 1);
+  const milestones = [0.25, 0.5];
+
+  const padX = 6;
+  const trackH = Math.min(Math.max(Math.round(h * 0.24), 10), 16);
+  const trackY = Math.round((h - trackH) / 2);
+  const trackW = Math.max(w - padX * 2, 10);
+  const fillW = Math.max(trackW * progressPct, 0);
+  const trackColor = isDark ? "rgba(255,255,255,0.14)" : "#E2E8F0";
+
   return (
     <Svg width={w} height={h}>
       <Defs>
-        {bars.map((v, i) => (
-          <LinearGradient key={i} id={gIds[i]} x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0%" stopColor={barColor(v)} stopOpacity="1" />
-            <Stop offset="100%" stopColor={barColor(v)} stopOpacity="0.5" />
-          </LinearGradient>
-        ))}
+        <LinearGradient id="stepsProgressFill" x1="0" y1="0" x2="1" y2="0">
+          <Stop offset="0%" stopColor={BRAND_BLUE} stopOpacity="0.95" />
+          <Stop offset="100%" stopColor={semantic.success} stopOpacity="0.95" />
+        </LinearGradient>
       </Defs>
-      {bars.map((v, i) => {
-        const bh = toH(v);
-        const x = i * (barW + gap);
+
+      <Rect
+        x={padX}
+        y={trackY}
+        width={trackW}
+        height={trackH}
+        rx={trackH / 2}
+        fill={trackColor}
+      />
+
+      {fillW > 0 && (
+        <Rect
+          x={padX}
+          y={trackY}
+          width={fillW}
+          height={trackH}
+          rx={trackH / 2}
+          fill="url(#stepsProgressFill)"
+        />
+      )}
+
+      {milestones.map((milestone) => {
+        const x = padX + trackW * milestone;
+        const reached = progressPct >= milestone;
+        const markerRadius = 7;
+        const markerFill = reached
+          ? semantic.success
+          : isDark
+            ? "rgba(255,255,255,0.26)"
+            : "#CBD5E1";
+
         return (
-          <Rect
-            key={i}
-            x={x}
-            y={h - bh}
-            width={barW}
-            height={bh}
-            rx={2}
-            fill={`url(#${gIds[i]})`}
-          />
+          <G key={milestone}>
+            <Circle
+              cx={x}
+              cy={trackY + trackH / 2}
+              r={markerRadius}
+              fill={markerFill}
+            />
+
+            {reached ? (
+              <>
+                <Line
+                  x1={x - 3}
+                  y1={trackY + trackH / 2}
+                  x2={x - 1}
+                  y2={trackY + trackH / 2 + 2.5}
+                  stroke="#ffffff"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+                <Line
+                  x1={x - 1}
+                  y1={trackY + trackH / 2 + 2.5}
+                  x2={x + 3.5}
+                  y2={trackY + trackH / 2 - 2.5}
+                  stroke="#ffffff"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </>
+            ) : (
+              <Circle
+                cx={x}
+                cy={trackY + trackH / 2}
+                r={2}
+                fill={isDark ? "#0f172a" : "#ffffff"}
+                opacity={0.5}
+              />
+            )}
+
+            <SvgText
+              x={x}
+              y={trackY - 4}
+              fontSize="8"
+              fontWeight="700"
+              fill={isDark ? "rgba(255,255,255,0.7)" : "#64748B"}
+              textAnchor="middle"
+            >
+              {`${Math.round(milestone * 100)}%`}
+            </SvgText>
+          </G>
         );
       })}
-      <Line
-        x1={0}
-        y1={goalY}
-        x2={w}
-        y2={goalY}
-        stroke={semantic.success}
-        strokeWidth="1"
-        strokeDasharray="3,3"
-      />
+
+      <SvgText
+        x={padX + trackW}
+        y={trackY + trackH + 12}
+        fontSize="8"
+        fontWeight="700"
+        fill={isDark ? "rgba(255,255,255,0.7)" : "#64748B"}
+        textAnchor="end"
+      >
+        {`${Math.round(progressPct * 100)}%`}
+      </SvgText>
     </Svg>
   );
 }
@@ -1025,7 +1096,8 @@ export function WidgetWrapper({
       case "steps":
         return (
           <StepsMiniChart
-            data={history}
+            currentSteps={parseFloat(value) || 0}
+            goal={10000}
             w={cw}
             h={ch}
             isDark={isDark}
@@ -1331,7 +1403,7 @@ export function WidgetWrapper({
             alignItems: "center",
             justifyContent: "center",
             paddingRight: metricType === "stress" ? 2 : 0,
-            paddingTop: metricType === "steps" ? 26 : 0,
+            paddingTop: metricType === "steps" ? 0 : 0,
           }}
         >
           {chart}

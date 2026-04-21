@@ -1,7 +1,7 @@
-import React from "react";
-import { WidgetWrapper, METRIC_STYLES } from "./WidgetWrapper";
-import WidgetIcon, { IconType } from "../svg/WidgetIcon";
 import { useHealthMetric } from "@/hooks/useLatestMetric";
+import React, { useEffect } from "react";
+import WidgetIcon, { IconType } from "../svg/WidgetIcon";
+import { METRIC_STYLES, WidgetWrapper } from "./WidgetWrapper";
 
 interface Props {
   type: IconType;
@@ -18,8 +18,29 @@ export default function DashboardMetricWidget({
 }: Props) {
   const isBP = type === "bloodPressure";
   const { data, isLoading } = useHealthMetric(endpoint, isBP);
+  const isStepsWidget = type === "steps";
 
   const styles = METRIC_STYLES[type];
+
+  useEffect(() => {
+    if (!isStepsWidget) return;
+
+    console.log("[StepsWidget] state", {
+      endpoint,
+      variant,
+      isLoading,
+      hasData: Boolean(data),
+    });
+
+    if (!data) return;
+
+    console.log("[StepsWidget] payload", {
+      displayValue: data.displayValue,
+      historyLength: data.history.length,
+      latest: data.latest,
+      latestBucketsPreview: data.history.slice(0, 6),
+    });
+  }, [data, endpoint, isLoading, isStepsWidget, variant]);
 
   // 1. Enquanto carrega
   if (isLoading) {
