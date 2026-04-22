@@ -1,19 +1,19 @@
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
 import {
-    QueryClient,
-    QueryClientProvider,
-    useQuery,
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
 } from "@tanstack/react-query";
 import axios from "axios";
 import { router } from "expo-router";
 import React from "react";
 import {
-    ActivityIndicator,
-    Platform,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Platform,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";

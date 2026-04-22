@@ -4,12 +4,12 @@ import Navbar from "@/components/navBar/NavBar";
 import { type ColorPaletteType } from "@/contexts/ThemeContext";
 import React, { useEffect, useRef, useState } from "react";
 import {
-    Animated,
-    Image,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
+  Animated,
+  Image,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 

@@ -1,7 +1,13 @@
 import { useTheme } from "@/hooks/useTheme";
 import { BlurView } from "expo-blur";
 import React from "react";
-import { Modal, Pressable, ScrollView, useWindowDimensions, View } from "react-native";
+import {
+  Modal,
+  Pressable,
+  ScrollView,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 interface BottomModalProps {

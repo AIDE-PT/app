@@ -176,7 +176,10 @@ export default function EditableDashboard({
 
       setCuidados(mappedCuidados);
       setSelectedCuidado((previous) => {
-        if (previous && mappedCuidados.some((cuidado) => cuidado.id === previous.id)) {
+        if (
+          previous &&
+          mappedCuidados.some((cuidado) => cuidado.id === previous.id)
+        ) {
           return previous;
         }
         return mappedCuidados[0];
@@ -188,7 +191,9 @@ export default function EditableDashboard({
 
   const repairWidgets = (list: DashboardWidget[]) =>
     (list || []).map((widget) => {
-      const original = DASHBOARD_CONFIG.find((config) => config.id === widget.id);
+      const original = DASHBOARD_CONFIG.find(
+        (config) => config.id === widget.id,
+      );
       return {
         ...widget,
         endpoint: widget.endpoint || original?.endpoint || "",

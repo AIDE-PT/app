@@ -2,23 +2,23 @@ import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import {
-    QueryClient,
-    QueryClientProvider,
-    useMutation,
-    useQuery,
+  QueryClient,
+  QueryClientProvider,
+  useMutation,
+  useQuery,
 } from "@tanstack/react-query";
 import axios from "axios";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
-    ActivityIndicator,
-    Modal,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Modal,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";

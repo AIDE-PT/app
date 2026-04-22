@@ -3,15 +3,15 @@ import React from "react";
 import { Text, View, useWindowDimensions } from "react-native";
 import { WidgetAdd } from "../buttons/widgetAdd";
 import {
-    BpmIcon,
-    CalIcon,
-    GlicoseIcon,
-    O2Icon,
-    PassosIcon,
-    PressaoIcon,
-    SonoIcon,
-    StressIcon,
-    TempIcon,
+  BpmIcon,
+  CalIcon,
+  GlicoseIcon,
+  O2Icon,
+  PassosIcon,
+  PressaoIcon,
+  SonoIcon,
+  StressIcon,
+  TempIcon,
 } from "../svg/HealthIcons";
 import BottomModal from "./BottomModal";
 
@@ -48,7 +48,10 @@ export const AddWidgetModal = ({
 
   return (
     <BottomModal visible={visible} onClose={onClose}>
-      <View className="pb-8" style={{ width: contentWidth, alignSelf: "center" }}>
+      <View
+        className="pb-8"
+        style={{ width: contentWidth, alignSelf: "center" }}
+      >
         {/* Fitbit Section */}
         <View className="mb-7">
           <Text
