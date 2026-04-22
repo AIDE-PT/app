@@ -1,6 +1,6 @@
 import {
-    getHealthConnectStatus,
-    type HealthConnectStatus,
+  getHealthConnectStatus,
+  type HealthConnectStatus,
 } from "@/src/services/healthConnect";
 import { useCallback, useEffect, useState } from "react";
 import { AppState, type AppStateStatus } from "react-native";

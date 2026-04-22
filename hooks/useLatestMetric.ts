@@ -1,7 +1,7 @@
 import {
-    getHealthConnectStatus,
-    readSteps,
-    type StepRecord,
+  getHealthConnectStatus,
+  readSteps,
+  type StepRecord,
 } from "@/src/services/healthConnect";
 import { useQuery } from "@tanstack/react-query";
 import axios from "axios";
@@ -169,7 +169,8 @@ async function fetchMetricFromApi(
 
   const sorted = [...data].sort(
     (a, b) =>
-      new Date(b.timestamp ?? 0).getTime() - new Date(a.timestamp ?? 0).getTime(),
+      new Date(b.timestamp ?? 0).getTime() -
+      new Date(a.timestamp ?? 0).getTime(),
   );
 
   const latest = sorted[0];
@@ -197,10 +198,13 @@ async function fetchHealthConnectStepsDaily(): Promise<MetricQueryData | null> {
   try {
     const status = await getHealthConnectStatus();
     if (!status.available || !status.permissionsGranted) {
-      console.log("[StepsWidget] health connect unavailable or permission missing", {
-        available: status.available,
-        permissionsGranted: status.permissionsGranted,
-      });
+      console.log(
+        "[StepsWidget] health connect unavailable or permission missing",
+        {
+          available: status.available,
+          permissionsGranted: status.permissionsGranted,
+        },
+      );
       return null;
     }
 
@@ -217,7 +221,10 @@ async function fetchHealthConnectStepsDaily(): Promise<MetricQueryData | null> {
     }
 
     if (!records.length) {
-      const fallbackRecords = await readStepsWithLibraryFallback(startMs, endMs);
+      const fallbackRecords = await readStepsWithLibraryFallback(
+        startMs,
+        endMs,
+      );
       if (fallbackRecords?.length) {
         records = fallbackRecords;
       }
@@ -247,7 +254,10 @@ async function fetchHealthConnectStepsDaily(): Promise<MetricQueryData | null> {
       },
     };
   } catch (error) {
-    console.log("[StepsWidget] fetchHealthConnectStepsDaily fatal error", error);
+    console.log(
+      "[StepsWidget] fetchHealthConnectStepsDaily fatal error",
+      error,
+    );
     return null;
   }
 }

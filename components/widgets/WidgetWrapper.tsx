@@ -3,15 +3,15 @@ import { Feather } from "@expo/vector-icons";
 import React, { ReactNode } from "react";
 import { Dimensions, Text, View, ViewStyle } from "react-native";
 import Svg, {
-    Circle,
-    Defs,
-    G,
-    Line,
-    LinearGradient,
-    Path,
-    Rect,
-    Stop,
-    Text as SvgText,
+  Circle,
+  Defs,
+  G,
+  Line,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+  Text as SvgText,
 } from "react-native-svg";
 import { IconType } from "../svg/WidgetIcon";
 
