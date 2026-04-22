@@ -2,12 +2,7 @@ import { CalendarButton } from "@/components/buttons/calendarButton";
 import { CalendarModal } from "@/components/modals/CalendarModal";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import {
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
 

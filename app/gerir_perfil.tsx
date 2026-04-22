@@ -10,13 +10,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
 
@@ -82,9 +76,7 @@ const GerirPerfil = () => {
                 ? user.user_metadata.name
                 : "",
           email:
-            typeof data?.email === "string"
-              ? data.email
-              : (user.email ?? ""),
+            typeof data?.email === "string" ? data.email : (user.email ?? ""),
           contacto:
             typeof data?.phone_number === "string" ? data.phone_number : "",
           nif: typeof data?.nif === "string" ? data.nif : "",

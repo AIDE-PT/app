@@ -3,11 +3,11 @@ import { supabase } from "@/utils/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "expo-router";
 import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
 import { Platform } from "react-native";
 

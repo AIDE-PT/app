@@ -17,14 +17,17 @@ async function ensureAndroidChannel() {
 
 async function ensureNotificationPermission() {
   const current = await Notifications.getPermissionsAsync();
-  if (current.granted || current.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL) {
+  if (
+    current.granted ||
+    current.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL
+  ) {
     return true;
   }
 
   const requested = await Notifications.requestPermissionsAsync();
   return Boolean(
     requested.granted ||
-      requested.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL,
+    requested.ios?.status === Notifications.IosAuthorizationStatus.PROVISIONAL,
   );
 }
 
