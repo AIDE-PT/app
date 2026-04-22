@@ -1,10 +1,11 @@
-import React from "react";
-import { SafeAreaView, ScrollView, Text, View } from "react-native";
-import BackButton from "../components/buttons/backButton";
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
+import React from "react";
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import BackButton from "../components/buttons/backButton";
 import AideLogo from "../components/svg/AideLogo";
 
 // Components for the About Page
