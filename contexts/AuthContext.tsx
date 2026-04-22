@@ -17,6 +17,7 @@ const PROTECTED_ROUTES = [
   "/testDashboard",
   "/perfil",
   "/definicoes",
+  "/gerir_perfil",
   "/historicoDiario",
   "/recommendations",
   "/terms-of-service",
@@ -165,9 +166,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [router]);
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    handleSession(null);
-    router.replace(buildLoginPath(currentPath()) as any);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw new Error(error.message);
+      }
+      handleSession(null);
+      // Explicit logout should not preserve a "next" redirect.
+      router.replace("/login" as any);
+    } catch (error) {
+      console.error("Error signing out:", error);
+      throw error;
+    }
   };
 
   const getCurrentAccessToken = async () => {
