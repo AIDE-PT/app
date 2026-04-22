@@ -106,7 +106,9 @@ const METRIC_CONFIGS: Record<string, MetricConfig> = {
     getStatus: () => "normal",
     statusLabel: () => "Ativo",
     extraCards: (history) => {
-      const latest = history.length ? history[0] : 0;
+      const latest = history.length
+        ? history.reduce((sum, value) => sum + value, 0)
+        : 0;
       return [
         { label: "Hoje", value: `${latest.toLocaleString()}`, unit: "passos" },
         { label: "Meta", value: "10 000", unit: "passos" },
