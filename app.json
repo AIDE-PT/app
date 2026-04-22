@@ -45,7 +45,8 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "react-native-health-connect"
     ],
     "locales": {
       "pt-PT": "./locales/pt-PT.json"
