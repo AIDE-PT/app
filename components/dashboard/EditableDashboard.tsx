@@ -1,8 +1,8 @@
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { useRouter } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
@@ -112,6 +112,7 @@ export default function EditableDashboard({
   const lastSwapTargetRef = useRef<string | null>(null);
   const suppressNextPressRef = useRef(false);
   const hasLoadedLayoutRef = useRef(false);
+  const queryClient = useQueryClient();
 
   const cuidados = [
     { id: "1", name: "Emilia Almeida" },
@@ -399,8 +400,11 @@ export default function EditableDashboard({
   });
 
   const { isDark } = useTheme();
-  const { status: healthConnectStatus, isLoading: isLoadingHealthConnect } =
-    useHealthConnectStatus();
+  const {
+    status: healthConnectStatus,
+    isLoading: isLoadingHealthConnect,
+    refresh: refreshHealthConnectStatus,
+  } = useHealthConnectStatus();
   const insets = useSafeAreaInsets();
   const TOP_BAR_HEIGHT = 30;
   const heroTopExtension = notEditable ? 0 : insets.top + TOP_BAR_HEIGHT;
@@ -418,6 +422,29 @@ export default function EditableDashboard({
       return "warning";
     return "good";
   })();
+
+  const refetchStepsMetrics = useCallback(() => {
+    queryClient.refetchQueries({ queryKey: ["steps", "latest"], exact: true });
+    queryClient.refetchQueries({ queryKey: ["steps", "stats"], exact: true });
+  }, [queryClient]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+
+      const syncStepsAfterPermissionRefresh = async () => {
+        await refreshHealthConnectStatus();
+        if (!isMounted) return;
+        refetchStepsMetrics();
+      };
+
+      void syncStepsAfterPermissionRefresh();
+
+      return () => {
+        isMounted = false;
+      };
+    }, [refetchStepsMetrics, refreshHealthConnectStatus]),
+  );
 
   return (
     <LightBackground status={heroStatus}>
@@ -526,6 +553,8 @@ export default function EditableDashboard({
                   </TouchableOpacity>
                 </View>
               )}
+
+            {/* // <HealthDashboard /> } */}
 
             <WidgetGrid
               contentRef={gridContentRef}
