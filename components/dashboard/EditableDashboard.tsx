@@ -34,6 +34,8 @@ import { useTheme } from "@/hooks/useTheme";
 import TopBar from "../topBar/TopBar";
 import DashboardMetricWidget from "../widgets/DashboardMetricWidget";
 import HealthStatusHero from "./HealthStatusHero";
+import { runSyncNow } from "@/src/tasks/healthBackgroundSync";
+import { Button } from "../buttons/button";
 
 if (
   Platform.OS === "android" &&
@@ -555,7 +557,11 @@ export default function EditableDashboard({
               )}
 
             {/* // <HealthDashboard /> } */}
-
+            <Button
+              variant="primary"
+              label="Forçar Sync"
+              onPress={() => void runSyncNow()}
+            />
             <WidgetGrid
               contentRef={gridContentRef}
               onContentLayout={measureGrid}
