@@ -13,7 +13,9 @@
       "icon": "./assets/icon/colorBackground.png",
       "infoPlist": {
         "CFBundleDevelopmentRegion": "pt",
-        "CFBundleLocalizations": ["pt-PT"]
+        "CFBundleLocalizations": [
+          "pt-PT"
+        ]
       }
     },
     "android": {
@@ -22,6 +24,14 @@
         "backgroundImage": "./assets/icon/colorBackground.png",
         "monochromeImage": "./assets/icon/monochromeBackground.png"
       },
+      "permissions": [
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.POST_NOTIFICATIONS"
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.cbl2025.aide"
