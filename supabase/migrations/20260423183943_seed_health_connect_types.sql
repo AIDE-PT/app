@@ -8,6 +8,7 @@ INSERT INTO biometric_data_types (name, unit, description)
 SELECT v.name, v.unit, v.description FROM (VALUES
   ('heart_rate',            'bpm',   'Heart rate from Health Connect'),
   ('steps',                 'steps', 'Step count from Health Connect'),
+  ('sleep',                 'hours', 'Sleep duration from Health Connect'),
   ('blood_pressure',        'mmHg',  'Blood pressure from Health Connect'),
   ('body_temperature',      '°C',    'Body temperature from Health Connect'),
   ('oxygen_saturation',     '%',     'Oxygen saturation from Health Connect'),

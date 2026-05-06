@@ -904,12 +904,12 @@ export const DASHBOARD_CONFIG: DASHBOARD_CONFIGProps[] = [
     endpoint: "o2",
   },
   {
-    id: "glycemia",
+    id: "cal",
     type: "cal",
     variant: "1-2",
     value: "450",
     feedback: "meta",
-    endpoint: "glycemia",
+    endpoint: "cal",
   },
   {
     id: "stress",

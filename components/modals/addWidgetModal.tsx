@@ -104,7 +104,7 @@ export const AddWidgetModal = ({
             <WidgetAdd
               label="CAL"
               Icon={CalIcon}
-              onPress={() => handleAdd("glycemia")}
+              onPress={() => handleAdd("cal")}
             />
             <WidgetAdd
               label="STRESS"
