@@ -1,8 +1,11 @@
+import LightBackground from "@/components/DotBackground";
+import { useTheme } from "@/hooks/useTheme";
+import { Ionicons } from "@expo/vector-icons";
 import {
   QueryClient,
   QueryClientProvider,
-  useQuery,
   useMutation,
+  useQuery,
 } from "@tanstack/react-query";
 import axios from "axios";
 import { router } from "expo-router";
@@ -13,15 +16,12 @@ import {
   Platform,
   Pressable,
   RefreshControl,
-  SafeAreaView,
   ScrollView,
   Text,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
-import LightBackground from "@/components/DotBackground";
-import { useTheme } from "@/hooks/useTheme";
-import { Ionicons } from "@expo/vector-icons";
 
 // API Configuration
 const queryClient = new QueryClient();
@@ -221,7 +221,7 @@ const NotificationsContent = () => {
     <LightBackground>
       <View className="flex-1 pt-10 bg-transparent">
         <SafeAreaView className="flex-1">
-          <View className="px-4 flex-row items-center justify-between">
+          <View className="px-4 mb-4 flex-row items-center justify-between">
             <BackButton
               label="Notificações"
               dark={isDark}
@@ -242,7 +242,7 @@ const NotificationsContent = () => {
           </View>
 
           <ScrollView
-            className="flex-1 px-4 mt-4"
+            className="flex-1 px-4"
             contentContainerStyle={{ paddingBottom: 40 }}
             refreshControl={
               <RefreshControl

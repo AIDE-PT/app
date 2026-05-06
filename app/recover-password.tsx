@@ -1,3 +1,4 @@
+import LightBackground from "@/components/DotBackground";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Text, View } from "react-native";
@@ -5,7 +6,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
 import { Button } from "../components/buttons/button";
 import { Input } from "../components/input/Input";
-import LightBackground from "@/components/DotBackground";
 
 export default function RecoverPassword() {
   const router = useRouter();
@@ -15,7 +15,7 @@ export default function RecoverPassword() {
     <LightBackground forceLight>
       <View className="flex-1 bg-transparent px-4 pt-10">
         <SafeAreaView className="flex-1">
-          <View className="mb-8">
+          <View className="mb-4">
             <BackButton label="Recuperar Password" dark={false} />
           </View>
 
