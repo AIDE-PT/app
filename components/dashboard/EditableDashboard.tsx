@@ -29,8 +29,11 @@ import {
   DASHBOARD_CONFIG,
   WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
+import { supabase } from "@/utils/supabase/client";
 import TopBar from "../topBar/TopBar";
 import DashboardMetricWidget from "../widgets/DashboardMetricWidget";
 import HealthStatusHero from "./HealthStatusHero";
@@ -39,6 +42,8 @@ import { Button } from "../buttons/button";
 
 if (
   Platform.OS === "android" &&
+  !(Platform.constants as { isNewArchEnabled?: boolean } | undefined)
+    ?.isNewArchEnabled &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -87,22 +92,27 @@ type DragEventLike = {
   };
 };
 
+type CuidadoOption = {
+  id: string;
+  name: string;
+};
+
 export default function EditableDashboard({
   notEditable = false,
 }: {
   notEditable?: boolean;
 }) {
   const router = useRouter();
+  const { user, isLoading: authLoading } = useAuth();
+  const { profileType } = useUserProfile();
   const [activeWidgets, setActiveWidgets] =
     useState<DashboardWidget[]>(DASHBOARD_CONFIG);
   const [, setIsEditing] = useState(false);
   const [openSizeMenuId, setOpenSizeMenuId] = useState<string | null>(null);
   const [draggingWidgetId, setDraggingWidgetId] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
-  const [selectedCuidado, setSelectedCuidado] = useState({
-    id: "1",
-    name: "Emilia Almeida",
-  });
+  const [cuidados, setCuidados] = useState<CuidadoOption[]>([]);
+  const [selectedCuidado, setSelectedCuidado] = useState<CuidadoOption>();
 
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const gridContentRef = useRef<View | null>(null);
@@ -116,27 +126,136 @@ export default function EditableDashboard({
   const hasLoadedLayoutRef = useRef(false);
   const queryClient = useQueryClient();
 
-  const cuidados = [
-    { id: "1", name: "Emilia Almeida" },
-    { id: "2", name: "Joao Silva" },
-  ];
+  const loadAssociatedCuidados = useCallback(async () => {
+    if (!user?.id || profileType !== "aider") {
+      setCuidados([]);
+      setSelectedCuidado(undefined);
+      return;
+    }
+
+    try {
+      const { data: relations, error: relationsError } = await supabase
+        .from("care_relations")
+        .select("user_id_pacient")
+        .eq("user_id_aider", user.id);
+
+      if (relationsError) {
+        console.log(
+          "Erro ao carregar associacoes do aider",
+          relationsError.message,
+        );
+        return;
+      }
+
+      const patientIds = (relations ?? [])
+        .map((relation) => relation.user_id_pacient)
+        .filter((id): id is string => Boolean(id));
+
+      if (patientIds.length === 0) {
+        setCuidados([]);
+        setSelectedCuidado(undefined);
+        return;
+      }
+
+      const { data: patients, error: patientsError } = await supabase
+        .from("users")
+        .select("id, name, email")
+        .in("id", patientIds);
+
+      if (patientsError) {
+        console.log(
+          "Erro ao carregar dados dos cuidados associados",
+          patientsError.message,
+        );
+        return;
+      }
+
+      const mappedCuidados: CuidadoOption[] = (patients ?? []).map(
+        (patient) => ({
+          id: patient.id,
+          name: patient.name?.trim() || patient.email || "Cuidado",
+        }),
+      );
+
+      setCuidados(mappedCuidados);
+      setSelectedCuidado((previous) => {
+        if (
+          previous &&
+          mappedCuidados.some((cuidado) => cuidado.id === previous.id)
+        ) {
+          return previous;
+        }
+        return mappedCuidados[0];
+      });
+    } catch (error) {
+      console.log("Erro ao carregar cuidados associados", error);
+    }
+  }, [profileType, user?.id]);
+
+  const repairWidgets = (list: DashboardWidget[]) =>
+    (list || []).map((widget) => {
+      const original = DASHBOARD_CONFIG.find(
+        (config) => config.id === widget.id,
+      );
+      return {
+        ...widget,
+        endpoint: widget.endpoint || original?.endpoint || "",
+      };
+    });
+
+  const getSavedWidgets = (raw: unknown): DashboardWidget[] | null => {
+    if (Array.isArray(raw)) return raw as DashboardWidget[];
+
+    if (
+      raw &&
+      typeof raw === "object" &&
+      Array.isArray((raw as { activeWidgets?: unknown }).activeWidgets)
+    ) {
+      return (raw as { activeWidgets: DashboardWidget[] }).activeWidgets;
+    }
+
+    return null;
+  };
 
   const loadDashboard = async () => {
-    try {
+    const applyFallbackFromLocal = async () => {
       const saved = await AsyncStorage.getItem(STORAGE_KEY);
       if (!saved) return;
 
       const parsed = JSON.parse(saved);
-      const repair = (list: DashboardWidget[]) =>
-        (list || []).map((w) => {
-          const original = DASHBOARD_CONFIG.find((c) => c.id === w.id);
-          return {
-            ...w,
-            endpoint: w.endpoint || original?.endpoint || "",
-          };
-        });
+      const savedWidgets = getSavedWidgets(parsed);
+      if (savedWidgets) {
+        setActiveWidgets(repairWidgets(savedWidgets));
+      }
+    };
 
-      setActiveWidgets(repair(parsed.activeWidgets || []));
+    try {
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("widgets")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.log("Erro ao carregar widgets no Supabase", error.message);
+          await applyFallbackFromLocal();
+          return;
+        }
+
+        const remoteWidgets = getSavedWidgets(data?.widgets);
+        if (remoteWidgets) {
+          const repaired = repairWidgets(remoteWidgets);
+          setActiveWidgets(repaired);
+          await AsyncStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ activeWidgets: repaired }),
+          );
+          return;
+        }
+      }
+
+      await applyFallbackFromLocal();
     } catch (e) {
       console.log("Erro ao carregar dashboard", e);
     } finally {
@@ -151,8 +270,14 @@ export default function EditableDashboard({
   };
 
   useEffect(() => {
+    if (authLoading) return;
     loadDashboard();
-  }, []);
+  }, [authLoading, user?.id]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    loadAssociatedCuidados();
+  }, [authLoading, loadAssociatedCuidados]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -167,10 +292,21 @@ export default function EditableDashboard({
         STORAGE_KEY,
         JSON.stringify({ activeWidgets }),
       );
+
+      if (user?.id) {
+        const { error } = await supabase
+          .from("users")
+          .update({ widgets: { activeWidgets } })
+          .eq("id", user.id);
+
+        if (error) {
+          console.log("Erro ao guardar widgets no Supabase", error.message);
+        }
+      }
     } catch (e) {
       console.log("Erro ao guardar dashboard", e);
     }
-  }, [activeWidgets]);
+  }, [activeWidgets, user?.id]);
 
   useEffect(() => {
     if (!hasLoadedLayoutRef.current) return;
@@ -459,8 +595,8 @@ export default function EditableDashboard({
               top: 0,
               left: 0,
               right: 0,
-              zIndex: 20,
-              elevation: 20,
+              zIndex: 2000,
+              elevation: 2000,
               overflow: "visible",
             }}
           >
@@ -468,7 +604,7 @@ export default function EditableDashboard({
               style={{
                 borderBottomLeftRadius: 40,
                 borderBottomRightRadius: 40,
-                overflow: "hidden",
+                overflow: "visible",
                 backgroundColor: isDark
                   ? "rgba(0, 4, 18, 1)"
                   : "rgba(219, 237, 248, 1)",
@@ -480,7 +616,7 @@ export default function EditableDashboard({
                 showBackground={true}
                 cuidados={cuidados}
                 selectedCuidado={selectedCuidado}
-                onSelectCuidado={setSelectedCuidado}
+                onSelectCuidado={(cuidado) => setSelectedCuidado(cuidado)}
                 onNotificationPress={() => router.push("/notificacoes")}
                 onSettingsPress={() => router.push("/definicoes")}
               />
@@ -499,7 +635,7 @@ export default function EditableDashboard({
             {/* Hero Section — extends to top edge, content padded below TopBar */}
             <HealthStatusHero
               userName="Juliana K."
-              cuidadoName={selectedCuidado.name}
+              cuidadoName={selectedCuidado?.name ?? "Sem cuidado associado"}
               status={heroStatus}
               topExtension={heroTopExtension}
               onCheckNotifications={() => router.push("/notificacoes")}

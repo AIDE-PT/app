@@ -1,11 +1,11 @@
+import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useTheme } from "@/hooks/useTheme";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import ChoseCuidado from "../buttons/choseCuidado";
 import SOSButton from "../buttons/sosButton";
 import NotificationBell from "../svg/NotificationBell";
 import SettingsIcon from "../svg/Settings";
-import { useTheme } from "@/hooks/useTheme";
-import { useUserProfile } from "@/contexts/UserProfileContext";
 
 interface Cuidado {
   id: string;
@@ -50,6 +50,12 @@ const TopBar = ({
       }
     : {};
 
+  const topBarLayerStyle = {
+    overflow: "visible" as const,
+    zIndex: 60,
+    elevation: 60,
+  };
+
   const overlayColor = isDark
     ? "rgba(0, 4, 18, 0.55)"
     : "rgba(219, 237, 248, 1)";
@@ -57,7 +63,7 @@ const TopBar = ({
   return (
     <View
       className={`flex-row z-50 px-4 py-5 ${profileType === "cuidado" ? "items-center justify-between" : "items-start justify-between"} ${className}`}
-      style={backgroundStyle}
+      style={[backgroundStyle, topBarLayerStyle]}
     >
       {showBackground && (
         <>
@@ -101,7 +107,10 @@ const TopBar = ({
         </>
       ) : (
         <>
-          <View className="flex-1 mr-4">
+          <View
+            className="flex-1 mr-4"
+            style={{ overflow: "visible", zIndex: 2000, elevation: 2000 }}
+          >
             <ChoseCuidado
               cuidados={cuidados}
               selectedCuidado={selectedCuidado}
