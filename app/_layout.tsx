@@ -33,30 +33,20 @@ export default function RootLayout() {
   }, [fontsLoaded]);
 
   const { status: healthConnectStatus, isLoading } = useHealthConnectStatus();
-  // Antes — corre sempre que isLoading ou permissionsGranted mudam
+  const hasStartedHealthSync = useRef(false);
+
+  // Regista a task e faz 1 sync imediato quando as permissões ficam prontas.
   useEffect(() => {
-    if (!isLoading && healthConnectStatus?.permissionsGranted) {
-      void registerHealthBackgroundSync();
-      void runSyncNow();
-    }
+    if (isLoading) return;
+    if (!healthConnectStatus?.permissionsGranted) return;
+    if (hasStartedHealthSync.current) return;
+
+    hasStartedHealthSync.current = true;
+    void registerHealthBackgroundSync();
+    void runSyncNow();
   }, [isLoading, healthConnectStatus?.permissionsGranted]);
 
-  // Depois — corre só uma vez quando as permissões ficam prontas
-  const hasRegistered = useRef(false);
-
-  useEffect(() => {
-    if (
-      !isLoading &&
-      healthConnectStatus?.permissionsGranted &&
-      !hasRegistered.current
-    ) {
-      hasRegistered.current = true;
-      void registerHealthBackgroundSync();
-    }
-  }, [isLoading, healthConnectStatus?.permissionsGranted]);
-  if (!fontsLoaded) {
-    return null;
-  }
+  if (!fontsLoaded) return null;
 
   return (
     <QueryClientProvider client={queryClient}>

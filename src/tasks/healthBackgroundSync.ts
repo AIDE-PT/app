@@ -1,4 +1,4 @@
-﻿/**
+/**
  * healthBackgroundSync.ts
  * Localização recomendada: src/tasks/healthBackgroundSync.ts
  *
@@ -22,6 +22,7 @@ import {
   type RecordResult,
 } from "react-native-health-connect";
 import { supabase } from "@/utils/supabase/client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
@@ -49,6 +50,8 @@ type HealthRecordType =
   | "BloodPressure"
   | "BodyTemperature"
   | "OxygenSaturation"
+  | "TotalCaloriesBurned"
+  | "SleepSession"
   | "TotalCaloriesBurned";
 
 type BiometricDataInsert = {
@@ -73,6 +76,7 @@ type HealthSnapshot = {
   temperature: { average: number; count: number } | null;
   oxygen: { average: number; count: number } | null;
   calories: { total: number; days: number } | null;
+  sleep: { duration: number; count: number } | null;
 };
 
 // Mapeamento dos tipos do Health Connect para os nomes na BD.
@@ -84,6 +88,7 @@ const BIOMETRIC_TYPE_NAMES: Record<HealthRecordType, string> = {
   BodyTemperature: "body_temperature",
   OxygenSaturation: "oxygen_saturation",
   TotalCaloriesBurned: "total_calories_burned",
+  SleepSession: "sleep",
 };
 
 // Permissões necessárias — usadas para verificação passiva (sem diálogo)
@@ -97,6 +102,7 @@ const REQUIRED_PERMISSIONS: {
   { accessType: "read", recordType: "BodyTemperature" },
   { accessType: "read", recordType: "OxygenSaturation" },
   { accessType: "read", recordType: "TotalCaloriesBurned" },
+  { accessType: "read", recordType: "SleepSession" },
 ];
 
 // ─── Utilitários ───────────────────────────────────────────────────────────────
@@ -231,6 +237,22 @@ async function readHealthRecords(
         return { average: Math.round(avg), count: rates.length };
       }
 
+      case "SleepSession": {
+        console.log(
+          "[HealthSync] SleepSession records[0]:",
+          JSON.stringify(records[0], null, 2),
+        );
+        const total = records.reduce((sum, r) => {
+          const s = r as RecordResult<"SleepSession">;
+          console.log("[HealthSync] sleep record:", JSON.stringify(s, null, 2));
+          const start = new Date(s.startTime).getTime();
+          const end = new Date(s.endTime).getTime();
+          return sum + (end - start) / (1000 * 60 * 60);
+        }, 0);
+        return total > 0
+          ? { duration: Math.round(total * 10) / 10, count: records.length }
+          : null;
+      }
       case "Steps": {
         const total = records.reduce(
           (sum, r) => sum + ((r as RecordResult<"Steps">).count || 0),
@@ -241,11 +263,11 @@ async function readHealthRecords(
 
       case "BloodPressure": {
         const sys = records
-          .map((r) => (r as any).systolic)
-          .filter((v) => v != null) as number[];
+          .map((r) => (r as any).systolic?.inMillimetersOfMercury)
+          .filter((v) => v != null && Number.isFinite(v)) as number[];
         const dia = records
-          .map((r) => (r as any).diastolic)
-          .filter((v) => v != null) as number[];
+          .map((r) => (r as any).diastolic?.inMillimetersOfMercury)
+          .filter((v) => v != null && Number.isFinite(v)) as number[];
         if (sys.length === 0 || dia.length === 0) return null;
         return {
           systolic: Math.round(sys.reduce((a, b) => a + b, 0) / sys.length),
@@ -256,8 +278,8 @@ async function readHealthRecords(
 
       case "BodyTemperature": {
         const temps = records
-          .map((r) => (r as any).temperature)
-          .filter((v) => v != null) as number[];
+          .map((r) => (r as any).temperature?.inCelsius)
+          .filter((v) => v != null && Number.isFinite(v)) as number[];
         if (temps.length === 0) return null;
         const avg = temps.reduce((a, b) => a + b, 0) / temps.length;
         return { average: Math.round(avg * 10) / 10, count: temps.length };
@@ -302,15 +324,23 @@ async function collectHealthSnapshot(
   const startCopy = new Date(start);
   const endCopy = new Date(end);
 
-  const [heartRate, steps, bloodPressure, temperature, oxygen, calories] =
-    await Promise.all([
-      readHealthRecords("HeartRate", startCopy, endCopy),
-      readHealthRecords("Steps", startCopy, endCopy),
-      readHealthRecords("BloodPressure", startCopy, endCopy),
-      readHealthRecords("BodyTemperature", startCopy, endCopy),
-      readHealthRecords("OxygenSaturation", startCopy, endCopy),
-      readHealthRecords("TotalCaloriesBurned", startCopy, endCopy),
-    ]);
+  const [
+    heartRate,
+    steps,
+    bloodPressure,
+    temperature,
+    oxygen,
+    calories,
+    sleepData,
+  ] = await Promise.all([
+    readHealthRecords("HeartRate", startCopy, endCopy),
+    readHealthRecords("Steps", startCopy, endCopy),
+    readHealthRecords("BloodPressure", startCopy, endCopy),
+    readHealthRecords("BodyTemperature", startCopy, endCopy),
+    readHealthRecords("OxygenSaturation", startCopy, endCopy),
+    readHealthRecords("TotalCaloriesBurned", startCopy, endCopy),
+    readHealthRecords("SleepSession", startCopy, endCopy),
+  ]);
 
   return {
     timestamp: new Date().toISOString(),
@@ -321,6 +351,7 @@ async function collectHealthSnapshot(
     temperature: temperature as HealthSnapshot["temperature"],
     oxygen: oxygen as HealthSnapshot["oxygen"],
     calories: calories as HealthSnapshot["calories"],
+    sleep: sleepData as HealthSnapshot["sleep"],
   };
 }
 
@@ -381,7 +412,10 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
     });
   }
 
-  if (snapshot.bloodPressure) {
+  if (
+    snapshot.bloodPressure?.systolic != null &&
+    snapshot.bloodPressure?.diastolic != null
+  ) {
     await pushRow("BloodPressure", {
       value: snapshot.bloodPressure.systolic,
       value_secondary: snapshot.bloodPressure.diastolic,
@@ -391,7 +425,7 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
     });
   }
 
-  if (snapshot.temperature) {
+  if (snapshot.temperature?.average != null) {
     await pushRow("BodyTemperature", {
       value: snapshot.temperature.average,
       measured_at: snapshot.timestamp,
@@ -416,6 +450,22 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
       start_time: snapshot.window.start,
       end_time: snapshot.window.end,
     });
+  }
+
+  if (snapshot.sleep) {
+    await pushRow("SleepSession", {
+      value: snapshot.sleep.duration, // horas dormidas
+      measured_at: snapshot.timestamp,
+      start_time: snapshot.window.start,
+      end_time: snapshot.window.end,
+    });
+  }
+
+  if (snapshot.sleep) {
+    console.log(
+      "[HealthSync] Sleep duration (horas):",
+      snapshot.sleep.duration,
+    );
   }
 
   if (rows.length === 0) {
@@ -563,7 +613,7 @@ export async function getHealthSyncStatus(): Promise<{
 export async function runSyncNow(): Promise<void> {
   try {
     // Limpa o último sync para forçar janela de 30 dias
-    // await AsyncStorage.removeItem(LAST_SYNC_STORAGE_KEY);
+    await AsyncStorage.removeItem(LAST_SYNC_STORAGE_KEY);
     await runSyncLogic();
     console.log("[HealthSync] ✅ Sync Automatico completo");
   } catch (err) {
