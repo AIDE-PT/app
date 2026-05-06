@@ -1,8 +1,8 @@
+import { useTheme } from "@/hooks/useTheme";
 import { useRouter } from "expo-router";
 import React from "react";
 import { Text, TouchableOpacity } from "react-native";
 import ArrowIcon from "../svg/ArrowIcon";
-import { useTheme } from "@/hooks/useTheme";
 
 interface BackButtonProps {
   label?: string;
@@ -25,7 +25,7 @@ const BackButton = ({
     <TouchableOpacity
       onPress={onPress || (() => router.back())}
       activeOpacity={0.7}
-      className={`flex-row items-center self-start py-2  ${className}`}
+      className={`flex-row items-center self-start pt-3 pb-2 ${className}`}
       accessibilityRole="button"
       accessibilityLabel={label || "Voltar"}
       accessibilityHint="Volta para o ecrã anterior."

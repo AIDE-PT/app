@@ -14,12 +14,12 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   AppState,
-  SafeAreaView,
   ScrollView,
   Text,
   View,
   type AppStateStatus,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 type RequestState = "idle" | "pending" | "success" | "denied" | "error";
 
