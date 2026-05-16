@@ -872,7 +872,7 @@ export const DASHBOARD_CONFIG: DASHBOARD_CONFIGProps[] = [
     endpoint: "steps",
   },
   {
-    id: "blood Pressure",
+    id: "bloodPressure",
     type: "bloodPressure",
     variant: "1-3",
     value: "10.432",
