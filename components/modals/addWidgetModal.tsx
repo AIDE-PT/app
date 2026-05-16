@@ -130,7 +130,7 @@ export const AddWidgetModal = ({
             <WidgetAdd
               label="PRESSÃO"
               Icon={PressaoIcon}
-              onPress={() => handleAdd("blood Pressure")}
+              onPress={() => handleAdd("bloodPressure")}
               width={cardWidth}
             />
             <WidgetAdd
