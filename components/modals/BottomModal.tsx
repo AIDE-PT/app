@@ -2,14 +2,14 @@ import { useTheme } from "@/hooks/useTheme";
 import { BlurView } from "expo-blur";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated,
-  Easing,
-  Modal,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  useWindowDimensions,
-  View,
+    Animated,
+    Easing,
+    Modal,
+    Pressable,
+    ScrollView,
+    StyleSheet,
+    useWindowDimensions,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
