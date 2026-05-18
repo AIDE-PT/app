@@ -9,6 +9,7 @@ import HomeIcon from "../svg/HomeNovoIcon";
 import ProfileIcon from "../svg/PerfilIcon";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
+import { Feather } from "@expo/vector-icons";
 
 interface navBarProps {
   dark?: boolean;
@@ -83,6 +84,16 @@ const Navbar = ({
               accessibilityHint="Abre o histórico diário."
             >
               <CalendarIcon color={iconColor} />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              className={`${styleBall} ${buttonBg}`}
+              onPress={() => router.push("/notas" as never)}
+              accessibilityRole="button"
+              accessibilityLabel="Notas"
+              accessibilityHint="Abre as notas colaborativas."
+            >
+              <Feather name="file-text" size={22} color={iconColor} />
             </TouchableOpacity>
 
             <TouchableOpacity
