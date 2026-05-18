@@ -3,15 +3,14 @@ import React from "react";
 import { Text, View, useWindowDimensions } from "react-native";
 import { WidgetAdd } from "../buttons/widgetAdd";
 import {
-  BpmIcon,
-  CalIcon,
-  GlicoseIcon,
-  O2Icon,
-  PassosIcon,
-  PressaoIcon,
-  SonoIcon,
-  StressIcon,
-  TempIcon,
+    BpmIcon,
+    CalIcon,
+    O2Icon,
+    PassosIcon,
+    PressaoIcon,
+    SonoIcon,
+    StressIcon,
+    TempIcon,
 } from "../svg/HealthIcons";
 import BottomModal from "./BottomModal";
 
@@ -76,9 +75,9 @@ export const AddWidgetModal = ({
               width={cardWidth}
             />
             <WidgetAdd
-              label="GLICOSE"
-              Icon={GlicoseIcon}
-              onPress={() => handleAdd("glycemia")}
+              label="CAL"
+              Icon={CalIcon}
+              onPress={() => handleAdd("cal")}
               width={cardWidth}
             />
           </View>
@@ -136,7 +135,7 @@ export const AddWidgetModal = ({
             <WidgetAdd
               label="CAL"
               Icon={CalIcon}
-              onPress={() => handleAdd("glycemia")}
+              onPress={() => handleAdd("cal")}
               width={cardWidth}
             />
             <WidgetAdd
