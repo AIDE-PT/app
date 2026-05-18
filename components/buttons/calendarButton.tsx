@@ -1,8 +1,8 @@
 import CalendarIcon from "@/components/svg/CalendarIcon";
 import { useTheme } from "@/hooks/useTheme";
 import DateTimePicker, {
-  DateTimePickerAndroid,
-  DateTimePickerEvent,
+    DateTimePickerAndroid,
+    DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity } from "react-native";
@@ -58,14 +58,14 @@ export const CalendarButton = ({
       <TouchableOpacity
         onPress={handlePress}
         style={styles.buttonShadow}
-        className={`flex-row items-center px-4 py-2 rounded-full border self-start ml-4 ${isDark ? "bg-[#1A1A2E] border-gray-700" : "bg-white border-gray-100"}`}
+        className={`mx-1 flex-row items-center rounded-full border px-3 py-1.5 ${isDark ? "bg-[#1A1A2E] border-gray-700" : "bg-white border-gray-100"}`}
         accessibilityRole="button"
         accessibilityLabel={label}
         accessibilityHint="Abre a seleção de data."
       >
-        <CalendarIcon color={isDark ? "#ffffff" : "#191915"} />
+        <CalendarIcon size={18} color={isDark ? "#ffffff" : "#191915"} />
         <Text
-          className={`ml-2 text-xl font-semibold ${isDark ? "text-white" : "text-black"}`}
+          className={`ml-1.5 text-base font-medium ${isDark ? "text-white" : "text-black"}`}
         >
           {label}
         </Text>
@@ -85,6 +85,6 @@ export const CalendarButton = ({
 
 const styles = StyleSheet.create({
   buttonShadow: {
-    boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
+    boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.10)",
   },
 });
