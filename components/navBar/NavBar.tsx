@@ -1,13 +1,13 @@
-import React, { useState } from "react";
-import { TouchableOpacity, View, StyleSheet } from "react-native";
+import { useTheme } from "@/hooks/useTheme";
 import { BlurView } from "expo-blur";
+import { useRouter } from "expo-router";
+import React, { useState } from "react";
+import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { AddWidgetModal } from "../modals/addWidgetModal";
 import AddIcon from "../svg/AdicionarIcon";
 import CalendarIcon from "../svg/HistoricoDiarioIcon";
 import HomeIcon from "../svg/HomeNovoIcon";
 import ProfileIcon from "../svg/PerfilIcon";
-import { useRouter } from "expo-router";
-import { useTheme } from "@/hooks/useTheme";
 
 interface navBarProps {
   dark?: boolean;
@@ -27,11 +27,12 @@ const Navbar = ({
   const dark = darkProp !== undefined ? darkProp : isDark;
 
   const styleBall =
-    "items-center w-[52px] h-[52px] rounded-[100px] justify-center";
+    "items-center w-[48px] h-[48px] rounded-[100px] justify-center";
 
   // Colors for dark mode
   const iconColor = dark ? "white" : "#191915";
   const buttonBg = dark ? "bg-[#131632]" : "bg-white";
+  const navIconSize = 20;
 
   return (
     <>
@@ -60,7 +61,7 @@ const Navbar = ({
             accessibilityLabel="Adicionar"
             accessibilityHint="Abre a lista de widgets disponíveis."
           >
-            <AddIcon color={iconColor} />
+            <AddIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -70,7 +71,7 @@ const Navbar = ({
             accessibilityLabel="Historico"
             accessibilityHint="Abre o histórico diário."
           >
-            <CalendarIcon color={iconColor} />
+            <CalendarIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -80,7 +81,7 @@ const Navbar = ({
             accessibilityLabel="Inicio"
             accessibilityHint="Abre o dashboard principal."
           >
-            <HomeIcon color={iconColor} />
+            <HomeIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -90,7 +91,7 @@ const Navbar = ({
             accessibilityLabel="Perfil"
             accessibilityHint="Abre o perfil e definições."
           >
-            <ProfileIcon color={iconColor} />
+            <ProfileIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
         </View>
       </View>
@@ -111,8 +112,8 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 8,
-    gap: 16,
+    padding: 7,
+    gap: 14,
     borderRadius: 100,
     overflow: "hidden",
   },

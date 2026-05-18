@@ -33,12 +33,12 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
+import { runSyncNow } from "@/src/tasks/healthBackgroundSync";
 import { supabase } from "@/utils/supabase/client";
+import { Button } from "../buttons/button";
 import TopBar from "../topBar/TopBar";
 import DashboardMetricWidget from "../widgets/DashboardMetricWidget";
 import HealthStatusHero from "./HealthStatusHero";
-import { runSyncNow } from "@/src/tasks/healthBackgroundSync";
-import { Button } from "../buttons/button";
 
 if (
   Platform.OS === "android" &&
@@ -561,6 +561,12 @@ export default function EditableDashboard({
     return "good";
   })();
 
+  const heroUserName =
+    typeof user?.user_metadata?.name === "string" &&
+    user.user_metadata.name.trim().length > 0
+      ? user.user_metadata.name.trim()
+      : user?.email ?? "Utilizador";
+
   const refetchStepsMetrics = useCallback(() => {
     queryClient.refetchQueries({ queryKey: ["steps", "latest"], exact: true });
     queryClient.refetchQueries({ queryKey: ["steps", "stats"], exact: true });
@@ -634,8 +640,9 @@ export default function EditableDashboard({
           >
             {/* Hero Section — extends to top edge, content padded below TopBar */}
             <HealthStatusHero
-              userName="Juliana K."
+              userName={heroUserName}
               cuidadoName={selectedCuidado?.name ?? "Sem cuidado associado"}
+              isCuidadoAccount={profileType === "cuidado"}
               status={heroStatus}
               topExtension={heroTopExtension}
               onCheckNotifications={() => router.push("/notificacoes")}
