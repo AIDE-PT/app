@@ -33,7 +33,6 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
-import { runSyncNow } from "@/src/tasks/healthBackgroundSync";
 import { supabase } from "@/utils/supabase/client";
 import { Button } from "../buttons/button";
 import TopBar from "../topBar/TopBar";
@@ -700,11 +699,13 @@ export default function EditableDashboard({
               )}
 
             {/* // <HealthDashboard /> } */}
+            {/*
             <Button
               variant="primary"
               label="Forçar Sync"
               onPress={() => void runSyncNow()}
             />
+            */}
             <WidgetGrid
               contentRef={gridContentRef}
               onContentLayout={measureGrid}
