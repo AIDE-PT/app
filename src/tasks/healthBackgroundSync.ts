@@ -16,14 +16,13 @@
 import { sendLocalDataEntryNotification } from "@/src/services/localNotifications";
 import { supabase } from "@/utils/supabase/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as BackgroundFetch from "expo-background-fetch";
-import * as TaskManager from "expo-task-manager";
 import {
     getGrantedPermissions,
     initialize,
     readRecords,
     type RecordResult,
 } from "react-native-health-connect";
+import { Platform } from "react-native";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
@@ -87,6 +86,13 @@ type SyncedEntryNotification = {
   measuredAt?: string | null;
 };
 
+type BackgroundFetchModule = typeof import("expo-background-fetch");
+type TaskManagerModule = typeof import("expo-task-manager");
+type BackgroundModules = {
+  BackgroundFetch: BackgroundFetchModule;
+  TaskManager: TaskManagerModule;
+};
+
 // Mapeamento dos tipos do Health Connect para os nomes na BD.
 // Estes nomes têm de existir na tabela biometric_data_types.
 const BIOMETRIC_TYPE_NAMES: Record<HealthRecordType, string> = {
@@ -125,6 +131,35 @@ const REQUIRED_PERMISSIONS: {
   { accessType: "read", recordType: "TotalCaloriesBurned" },
   { accessType: "read", recordType: "SleepSession" },
 ];
+
+let cachedBackgroundModulesPromise: Promise<BackgroundModules | null> | null =
+  null;
+let taskDefined = false;
+
+async function loadBackgroundModules(): Promise<BackgroundModules | null> {
+  if (Platform.OS !== "android") return null;
+
+  if (!cachedBackgroundModulesPromise) {
+    cachedBackgroundModulesPromise = (async () => {
+      try {
+        const [BackgroundFetch, TaskManager] = await Promise.all([
+          import("expo-background-fetch"),
+          import("expo-task-manager"),
+        ]);
+
+        return { BackgroundFetch, TaskManager };
+      } catch (error) {
+        console.warn(
+          "[HealthSync] Expo background modules indisponiveis neste runtime:",
+          error,
+        );
+        return null;
+      }
+    })();
+  }
+
+  return cachedBackgroundModulesPromise;
+}
 
 // ─── Utilitários ───────────────────────────────────────────────────────────────
 
@@ -596,22 +631,40 @@ async function runSyncLogic(): Promise<void> {
   await setLastSyncEndTime(snapshot.window.end);
 }
 
-// ─── Definição da Task ─────────────────────────────────────────────────────────
+// ─── Definição lazy da Task ───────────────────────────────────────────────────
 
-TaskManager.defineTask(TASK_NAME, async () => {
-  console.log(
-    `\n[HealthSync] ⏰ Task iniciada às ${new Date().toLocaleTimeString()}`,
-  );
+async function ensureTaskIsDefined(): Promise<BackgroundModules | null> {
+  const modules = await loadBackgroundModules();
+  if (!modules) return null;
+  if (taskDefined) return modules;
+
+  const { TaskManager, BackgroundFetch } = modules;
 
   try {
-    await runSyncLogic();
-    console.log(`[HealthSync] ✅ Sync completo`);
-    return BackgroundFetch.BackgroundFetchResult.NewData;
-  } catch (err) {
-    console.error("[HealthSync] ❌ Erro na task:", err);
-    return BackgroundFetch.BackgroundFetchResult.Failed;
+    TaskManager.defineTask(TASK_NAME, async () => {
+      console.log(
+        `\n[HealthSync] ⏰ Task iniciada às ${new Date().toLocaleTimeString()}`,
+      );
+
+      try {
+        await runSyncLogic();
+        console.log(`[HealthSync] ✅ Sync completo`);
+        return BackgroundFetch.BackgroundFetchResult.NewData;
+      } catch (err) {
+        console.error("[HealthSync] ❌ Erro na task:", err);
+        return BackgroundFetch.BackgroundFetchResult.Failed;
+      }
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!/already\s+defined/i.test(message)) {
+      throw error;
+    }
   }
-});
+
+  taskDefined = true;
+  return modules;
+}
 
 // ─── API pública ───────────────────────────────────────────────────────────────
 
@@ -620,6 +673,14 @@ TaskManager.defineTask(TASK_NAME, async () => {
  * Chamar uma vez após o utilizador conceder permissões Health Connect.
  */
 export async function registerHealthBackgroundSync(): Promise<void> {
+  const modules = await ensureTaskIsDefined();
+  if (!modules) {
+    console.warn("[HealthSync] Background polling indisponivel neste runtime.");
+    return;
+  }
+
+  const { TaskManager, BackgroundFetch } = modules;
+
   try {
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
     if (isRegistered) {
@@ -647,6 +708,11 @@ export async function registerHealthBackgroundSync(): Promise<void> {
  * Chamar quando o utilizador revoga permissões ou faz logout.
  */
 export async function unregisterHealthBackgroundSync(): Promise<void> {
+  const modules = await loadBackgroundModules();
+  if (!modules) return;
+
+  const { TaskManager, BackgroundFetch } = modules;
+
   try {
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
     if (isRegistered) {
@@ -663,8 +729,14 @@ export async function unregisterHealthBackgroundSync(): Promise<void> {
  */
 export async function getHealthSyncStatus(): Promise<{
   isRegistered: boolean;
-  fetchStatus: BackgroundFetch.BackgroundFetchStatus | null;
+  fetchStatus: number | null;
 }> {
+  const modules = await loadBackgroundModules();
+  if (!modules) {
+    return { isRegistered: false, fetchStatus: null };
+  }
+
+  const { TaskManager, BackgroundFetch } = modules;
   const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
   const fetchStatus = await BackgroundFetch.getStatusAsync();
   return { isRegistered, fetchStatus };
