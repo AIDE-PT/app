@@ -16,13 +16,13 @@
 import { sendLocalDataEntryNotification } from "@/src/services/localNotifications";
 import { supabase } from "@/utils/supabase/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from "react-native";
 import {
     getGrantedPermissions,
     initialize,
     readRecords,
     type RecordResult,
 } from "react-native-health-connect";
-import { Platform } from "react-native";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
