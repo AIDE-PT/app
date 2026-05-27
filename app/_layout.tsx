@@ -1,6 +1,7 @@
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
+import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
@@ -9,7 +10,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef } from "react";
 import { Platform } from "react-native";
 import "../global.css";
-import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 
 const queryClient = new QueryClient();
 
