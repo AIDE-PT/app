@@ -7,11 +7,8 @@ import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef } from "react";
+import { Platform } from "react-native";
 import "../global.css";
-import {
-  registerHealthBackgroundSync,
-  runSyncNow,
-} from "@/src/tasks/healthBackgroundSync";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 
 const queryClient = new QueryClient();
@@ -52,8 +49,25 @@ export default function RootLayout() {
     if (hasStartedHealthSync.current) return;
 
     hasStartedHealthSync.current = true;
-    void registerHealthBackgroundSync();
-    void runSyncNow();
+    if (Platform.OS !== "android") return;
+
+    const startHealthSync = async () => {
+      try {
+        const { registerHealthBackgroundSync, runSyncNow } = await import(
+          "@/src/tasks/healthBackgroundSync"
+        );
+
+        await registerHealthBackgroundSync();
+        await runSyncNow();
+      } catch (error) {
+        console.warn(
+          "[HealthSync] Background sync indisponivel neste runtime:",
+          error,
+        );
+      }
+    };
+
+    void startHealthSync();
   }, [isLoading, healthConnectStatus?.permissionsGranted]);
 
   if (!fontsLoaded) return null;
