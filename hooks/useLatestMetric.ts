@@ -3,14 +3,9 @@ import {
   readSteps,
   type StepRecord,
 } from "@/src/services/healthConnect";
+import { supabase } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { Platform } from "react-native";
-
-const API_BASE = Platform.select({
-  android: "http://10.0.2.2:3000",
-  default: "http://localhost:3000",
-});
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
@@ -28,6 +23,122 @@ type MetricQueryData = {
   latest: ApiMetricRecord;
 };
 
+// ─── Supabase fetch ────────────────────────────────────────────────────────────
+
+async function fetchMetricFromSupabaseByTypeNames(
+  typeNames: string[],
+  isBP: boolean,
+): Promise<MetricQueryData | null> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const patientId = session?.user?.id ?? null;
+  if (!patientId) return null;
+
+  const { data: typeRows, error: typeError } = await supabase
+    .from("biometric_data_types")
+    .select("id,name")
+    .in("name", typeNames);
+
+  if (typeError) {
+    console.error("[useLatestMetric] type lookup error", typeError);
+    return null;
+  }
+
+  const typeIds = (Array.isArray(typeRows) ? typeRows : [])
+    .map((row: any) => String(row?.id ?? ""))
+    .filter(Boolean);
+
+  if (!typeIds.length) return null;
+
+  const { data: rows, error } = await supabase
+    .from("biometric_data")
+    .select("value,value_secondary,measured_at,created_at")
+    .eq("patient_id", patientId)
+    .in("biometric_data_type_id", typeIds)
+    .order("measured_at", { ascending: false, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (error) {
+    console.error("[useLatestMetric] metric query error", error);
+    return null;
+  }
+
+  const dataRows = Array.isArray(rows) ? (rows as any[]) : [];
+  if (!dataRows.length) return null;
+
+  const latest = dataRows[0];
+  const history = dataRows.map((row) => {
+    if (isBP) {
+      const sys = Number(row?.value ?? 0);
+      const dia = Number(row?.value_secondary ?? 0);
+      return Math.round((sys + dia) / 2);
+    }
+    return Number(row?.value ?? 0);
+  });
+
+  return {
+    displayValue: isBP
+      ? `${latest?.value ?? "--"}/${latest?.value_secondary ?? "--"}`
+      : `${latest?.value ?? 0}`,
+    history,
+    latest: {
+      timestamp: latest?.measured_at ?? latest?.created_at ?? undefined,
+      value: latest?.value ?? undefined,
+      systolic: isBP ? (latest?.value ?? undefined) : undefined,
+      diastolic: isBP ? (latest?.value_secondary ?? undefined) : undefined,
+    },
+  };
+}
+
+// ─── Mapeamento endpoint → nomes na BD ────────────────────────────────────────
+
+const TYPE_MAP: Record<string, string[]> = {
+  bpm: ["heart_rate", "Batimento Cardíaco"],
+  o2: ["oxygen_saturation", "Saturação de Oxigénio"],
+  temperature: ["body_temperature", "Temperatura Corporal"],
+  stress: ["stress"],
+  glycemia: ["glycemia", "Glicemia"],
+  bloodPressure: ["blood_pressure", "Pressão Arterial"],
+  steps: ["steps"],
+  sleep: ["sleep"],
+  cal: ["total_calories_burned"],
+  calories: ["total_calories_burned"],
+};
+
+const BP_ENDPOINTS = new Set(["bloodPressure"]);
+
+function minutesToHoursValue(value: unknown) {
+  const minutes = Number(value ?? 0);
+  if (!Number.isFinite(minutes)) return 0;
+  return minutes / 60;
+}
+
+function formatHours(hours: number) {
+  if (!Number.isFinite(hours) || hours <= 0) return "--";
+  return hours < 10 ? hours.toFixed(1) : `${Math.round(hours)}`;
+}
+
+function mapMetricToHours(
+  metric: MetricQueryData | null,
+): MetricQueryData | null {
+  if (!metric) return null;
+  const latestHours = minutesToHoursValue(metric.latest?.value);
+  return {
+    ...metric,
+    displayValue: formatHours(latestHours),
+    history: metric.history.map((v) => {
+      const hours = minutesToHoursValue(v);
+      return Math.round(hours * 10) / 10;
+    }),
+    latest: { ...metric.latest, value: latestHours },
+  };
+}
+
+// ─── Steps (Health Connect) ───────────────────────────────────────────────────
+
 type HealthConnectFallbackRecord = {
   startTime: number;
   endTime: number;
@@ -38,14 +149,11 @@ function getDayWindow(date: Date) {
   const start = new Date(date);
   start.setHours(0, 0, 0, 0);
   const end = new Date(start.getTime() + DAY_MS);
-  return {
-    startMs: start.getTime(),
-    endMs: end.getTime(),
-  };
+  return { startMs: start.getTime(), endMs: end.getTime() };
 }
 
 function aggregateStepsByHour(
-  records: Array<StepRecord | HealthConnectFallbackRecord>,
+  records: (StepRecord | HealthConnectFallbackRecord)[],
   startMs: number,
   endMs: number,
 ) {
@@ -74,6 +182,80 @@ function aggregateStepsByHour(
   return buckets.map((value) => Math.max(0, Math.round(value)));
 }
 
+async function fetchStepsFromSupabaseDaily(): Promise<MetricQueryData | null> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const patientId = session?.user?.id ?? null;
+  if (!patientId) return null;
+
+  const { data: typeRow, error: typeError } = await supabase
+    .from("biometric_data_types")
+    .select("id")
+    .eq("name", "steps")
+    .maybeSingle();
+
+  if (typeError) {
+    console.error("[useLatestMetric] steps type lookup error", typeError);
+    return null;
+  }
+
+  if (!typeRow?.id) return null;
+
+  const { startMs, endMs } = getDayWindow(new Date());
+  const startIso = new Date(startMs).toISOString();
+  const endIso = new Date(endMs).toISOString();
+
+  const { data: rows, error } = await supabase
+    .from("biometric_data")
+    .select("value,start_time,end_time,measured_at,created_at")
+    .eq("patient_id", patientId)
+    .eq("biometric_data_type_id", typeRow.id)
+    .lt("start_time", endIso)
+    .gt("end_time", startIso)
+    .order("start_time", { ascending: true, nullsFirst: false })
+    .order("measured_at", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("[useLatestMetric] steps query error", error);
+    return null;
+  }
+
+  const dataRows = Array.isArray(rows) ? (rows as any[]) : [];
+  if (!dataRows.length) return null;
+
+  const records: HealthConnectFallbackRecord[] = dataRows
+    .map((row) => {
+      const startRaw = row?.start_time ?? row?.measured_at ?? row?.created_at;
+      const endRaw = row?.end_time ?? row?.measured_at ?? row?.created_at;
+      const startTime = new Date(String(startRaw ?? "")).getTime();
+      const endTime = new Date(String(endRaw ?? "")).getTime();
+      const count = Number(row?.value ?? 0);
+      return { startTime, endTime, count };
+    })
+    .filter(
+      (record) =>
+        Number.isFinite(record.startTime) &&
+        Number.isFinite(record.endTime) &&
+        record.endTime > record.startTime &&
+        Number.isFinite(record.count) &&
+        record.count > 0,
+    );
+
+  if (!records.length) return null;
+
+  const hourly = aggregateStepsByHour(records, startMs, endMs);
+  const totalSteps = hourly.reduce((sum, value) => sum + value, 0);
+
+  return {
+    displayValue: `${totalSteps}`,
+    history: [...hourly].reverse(),
+    latest: { timestamp: new Date().toISOString(), value: totalSteps },
+  };
+}
+
 async function readStepsWithLibraryFallback(
   startMs: number,
   endMs: number,
@@ -91,7 +273,7 @@ async function readStepsWithLibraryFallback(
           };
           ascendingOrder: boolean;
         },
-      ) => Promise<{ records?: Array<Record<string, unknown>> }>;
+      ) => Promise<{ records?: Record<string, unknown>[] }>;
     };
 
     if (
@@ -102,10 +284,7 @@ async function readStepsWithLibraryFallback(
     }
 
     const initialized = await healthConnect.initialize();
-    if (!initialized) {
-      console.log("[StepsWidget] fallback initialize=false");
-      return null;
-    }
+    if (!initialized) return null;
 
     const result = await healthConnect.readRecords("Steps", {
       timeRangeFilter: {
@@ -133,11 +312,7 @@ async function readStepsWithLibraryFallback(
             : new Date(String(endRaw ?? "")).getTime();
         const count = Number(countRaw ?? 0);
 
-        return {
-          startTime,
-          endTime,
-          count,
-        };
+        return { startTime, endTime, count };
       })
       .filter(
         (record) =>
@@ -150,7 +325,6 @@ async function readStepsWithLibraryFallback(
     console.log("[StepsWidget] fallback records", {
       recordsCount: parsed.length,
     });
-
     return parsed;
   } catch (error) {
     console.log("[StepsWidget] fallback error", error);
@@ -158,58 +332,15 @@ async function readStepsWithLibraryFallback(
   }
 }
 
-async function fetchMetricFromApi(
-  endpoint: string,
-  isBP: boolean,
-): Promise<MetricQueryData | null> {
-  const response = await axios.get(`${API_BASE}/${endpoint}`);
-  const data = response.data as ApiMetricRecord[];
-
-  if (!Array.isArray(data) || data.length === 0) return null;
-
-  const sorted = [...data].sort(
-    (a, b) =>
-      new Date(b.timestamp ?? 0).getTime() -
-      new Date(a.timestamp ?? 0).getTime(),
-  );
-
-  const latest = sorted[0];
-  const history = sorted.slice(0, 20).map((item) => {
-    if (isBP && item.systolic !== undefined && item.diastolic !== undefined) {
-      return Math.round((item.systolic + item.diastolic) / 2);
-    }
-    return Number(item.value ?? 0);
-  });
-
-  return {
-    displayValue: isBP
-      ? `${latest.systolic ?? "--"}/${latest.diastolic ?? "--"}`
-      : `${latest.value ?? 0}`,
-    history,
-    latest,
-  };
-}
-
 async function fetchHealthConnectStepsDaily(): Promise<MetricQueryData | null> {
-  if (Platform.OS !== "android") {
-    return null;
-  }
+  if (Platform.OS !== "android") return null;
 
   try {
     const status = await getHealthConnectStatus();
-    if (!status.available || !status.permissionsGranted) {
-      console.log(
-        "[StepsWidget] health connect unavailable or permission missing",
-        {
-          available: status.available,
-          permissionsGranted: status.permissionsGranted,
-        },
-      );
-      return null;
-    }
+    if (!status.available || !status.permissionsGranted) return null;
 
     const { startMs, endMs } = getDayWindow(new Date());
-    let records: Array<StepRecord | HealthConnectFallbackRecord> = [];
+    let records: (StepRecord | HealthConnectFallbackRecord)[] = [];
 
     try {
       records = await readSteps(startMs, endMs);
@@ -225,18 +356,11 @@ async function fetchHealthConnectStepsDaily(): Promise<MetricQueryData | null> {
         startMs,
         endMs,
       );
-      if (fallbackRecords?.length) {
-        records = fallbackRecords;
-      }
-    }
-
-    if (!records.length) {
-      console.log("[StepsWidget] no step records from bridge or fallback");
+      if (fallbackRecords?.length) records = fallbackRecords;
     }
 
     const hourly = aggregateStepsByHour(records, startMs, endMs);
     const totalSteps = hourly.reduce((sum, value) => sum + value, 0);
-    const nowIso = new Date().toISOString();
 
     console.log("[StepsWidget] final daily aggregate", {
       totalSteps,
@@ -246,12 +370,8 @@ async function fetchHealthConnectStepsDaily(): Promise<MetricQueryData | null> {
 
     return {
       displayValue: `${totalSteps}`,
-      // Keep newest-first to match current app expectations.
       history: [...hourly].reverse(),
-      latest: {
-        timestamp: nowIso,
-        value: totalSteps,
-      },
+      latest: { timestamp: new Date().toISOString(), value: totalSteps },
     };
   } catch (error) {
     console.log(
@@ -262,13 +382,21 @@ async function fetchHealthConnectStepsDaily(): Promise<MetricQueryData | null> {
   }
 }
 
+// ─── Hooks públicos ───────────────────────────────────────────────────────────
+
 export function useMetricStats(endpoint: string) {
   return useQuery({
     queryKey: [endpoint, "stats"],
     enabled: !!endpoint && endpoint !== "undefined",
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+    refetchOnReconnect: true,
     queryFn: async () => {
       if (endpoint === "steps") {
-        const stepsMetric = await fetchHealthConnectStepsDaily();
+        const stepsMetric =
+          (await fetchStepsFromSupabaseDaily()) ??
+          (await fetchHealthConnectStepsDaily());
         if (stepsMetric?.history?.length) {
           return {
             min: Math.min(...stepsMetric.history),
@@ -277,25 +405,57 @@ export function useMetricStats(endpoint: string) {
         }
       }
 
-      const response = await axios.get(`${API_BASE}/${endpoint}Stats`);
-      return response.data as { min: number; max: number };
+      // Para todos os outros, calcula min/max a partir da BD
+      const typeNames = TYPE_MAP[endpoint];
+      if (!typeNames) return { min: 0, max: 0 };
+
+      const isBP = BP_ENDPOINTS.has(endpoint);
+      const dataRaw = await fetchMetricFromSupabaseByTypeNames(typeNames, isBP);
+      const data = endpoint === "sleep" ? mapMetricToHours(dataRaw) : dataRaw;
+      if (!data?.history?.length) return { min: 0, max: 0 };
+
+      return {
+        min: Math.min(...data.history),
+        max: Math.max(...data.history),
+      };
     },
-    refetchInterval: 10000,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: true,
   });
 }
 
 export function useHealthMetric(endpoint: string, isBP: boolean = false) {
   return useQuery({
     queryKey: [endpoint, "latest"],
-    enabled: !!endpoint && endpoint !== "undefined", // Proteção extra
+    enabled: !!endpoint && endpoint !== "undefined",
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
+    refetchOnReconnect: true,
     queryFn: async () => {
+      // Passos — BD primeiro (sincronizado), Health Connect como fallback
       if (endpoint === "steps") {
-        const healthConnectSteps = await fetchHealthConnectStepsDaily();
-        if (healthConnectSteps) return healthConnectSteps;
+        return (
+          (await fetchStepsFromSupabaseDaily()) ??
+          (await fetchHealthConnectStepsDaily())
+        );
       }
 
-      return fetchMetricFromApi(endpoint, isBP);
+      // Todos os outros endpoints — BD via Supabase
+      const typeNames = TYPE_MAP[endpoint];
+      if (!typeNames) {
+        console.warn(`[useHealthMetric] Endpoint desconhecido: "${endpoint}"`);
+        return null;
+      }
+
+      const useBP = isBP || BP_ENDPOINTS.has(endpoint);
+      const dataRaw = await fetchMetricFromSupabaseByTypeNames(
+        typeNames,
+        useBP,
+      );
+      return endpoint === "sleep" ? mapMetricToHours(dataRaw) : dataRaw;
     },
-    refetchInterval: 5000,
+    refetchInterval: 60000,
+    refetchIntervalInBackground: true,
   });
 }

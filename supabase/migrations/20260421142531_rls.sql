@@ -160,4 +160,4 @@ USING (
     AND connections.care_receiver_id = profiles.id
   )
   OR id = auth.uid() -- Can always see own profile
-);
+);
