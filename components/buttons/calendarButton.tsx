@@ -1,8 +1,8 @@
 import CalendarIcon from "@/components/svg/CalendarIcon";
 import { useTheme } from "@/hooks/useTheme";
 import DateTimePicker, {
-    DateTimePickerAndroid,
-    DateTimePickerEvent,
+  DateTimePickerAndroid,
+  DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
 import React, { useState } from "react";
 import { Platform, StyleSheet, Text, TouchableOpacity } from "react-native";
