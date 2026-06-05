@@ -6,8 +6,13 @@ import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import "../global.css";
+import {
+  registerHealthBackgroundSync,
+  runSyncNow,
+} from "@/src/tasks/healthBackgroundSync";
+import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 
 const queryClient = new QueryClient();
 
@@ -33,15 +38,25 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (fontsLoaded) {
-      SplashScreen.hideAsync().catch(() => {
-        // Ignore race-condition errors if splash is already hidden.
-      });
+      SplashScreen.hideAsync().catch(() => {});
     }
   }, [fontsLoaded]);
 
-  if (!fontsLoaded) {
-    return null;
-  }
+  const { status: healthConnectStatus, isLoading } = useHealthConnectStatus();
+  const hasStartedHealthSync = useRef(false);
+
+  // Regista a task e faz 1 sync imediato quando as permissões ficam prontas.
+  useEffect(() => {
+    if (isLoading) return;
+    if (!healthConnectStatus?.permissionsGranted) return;
+    if (hasStartedHealthSync.current) return;
+
+    hasStartedHealthSync.current = true;
+    void registerHealthBackgroundSync();
+    void runSyncNow();
+  }, [isLoading, healthConnectStatus?.permissionsGranted]);
+
+  if (!fontsLoaded) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
