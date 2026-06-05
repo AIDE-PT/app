@@ -421,7 +421,9 @@ function buildExternalId(
   return `health_connect:${patientId}:${metricName}:${window.start}:${window.end}`;
 }
 
-function formatEntryValueForNotification(entry: SyncedEntryNotification): string {
+function formatEntryValueForNotification(
+  entry: SyncedEntryNotification,
+): string {
   if (entry.metric === "BloodPressure" && entry.valueSecondary != null) {
     return `${entry.value}/${entry.valueSecondary} mmHg`;
   }
@@ -763,4 +765,3 @@ export async function runSyncNow(): Promise<void> {
 }
 
 export { TASK_NAME };
-

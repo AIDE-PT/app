@@ -53,9 +53,8 @@ export default function RootLayout() {
 
     const startHealthSync = async () => {
       try {
-        const { registerHealthBackgroundSync, runSyncNow } = await import(
-          "@/src/tasks/healthBackgroundSync"
-        );
+        const { registerHealthBackgroundSync, runSyncNow } =
+          await import("@/src/tasks/healthBackgroundSync");
 
         await registerHealthBackgroundSync();
         await runSyncNow();

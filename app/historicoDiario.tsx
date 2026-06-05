@@ -2,15 +2,19 @@ import { CalendarButton } from "@/components/buttons/calendarButton";
 import LineChartSlim from "@/components/charts/LineChartSlim";
 import { CalendarModal } from "@/components/modals/CalendarModal";
 import { supabase } from "@/utils/supabase/client";
-import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+} from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    ScrollView,
-    Text,
-    View,
+  ActivityIndicator,
+  Dimensions,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
@@ -166,10 +170,13 @@ const METRIC_CARDS: MetricCardConfig[] = [
 ];
 
 const createEmptySeries = (): Record<MetricKey, MetricSeries> =>
-  METRIC_CARDS.reduce((acc, metric) => {
-    acc[metric.key] = { points: [], displayValue: "--", pointCount: 0 };
-    return acc;
-  }, {} as Record<MetricKey, MetricSeries>);
+  METRIC_CARDS.reduce(
+    (acc, metric) => {
+      acc[metric.key] = { points: [], displayValue: "--", pointCount: 0 };
+      return acc;
+    },
+    {} as Record<MetricKey, MetricSeries>,
+  );
 
 const toEpoch = (value: string | null | undefined) => {
   if (!value) return null;
@@ -263,14 +270,20 @@ const fetchMetricsByRange = async (
     }
   });
 
-  const pointBuckets = METRIC_CARDS.reduce((acc, metric) => {
-    acc[metric.key] = [] as Array<{
-      timestamp: number;
-      value: number;
-      displayValue?: string;
-    }>;
-    return acc;
-  }, {} as Record<MetricKey, Array<{ timestamp: number; value: number; displayValue?: string }>>);
+  const pointBuckets = METRIC_CARDS.reduce(
+    (acc, metric) => {
+      acc[metric.key] = [] as {
+        timestamp: number;
+        value: number;
+        displayValue?: string;
+      }[];
+      return acc;
+    },
+    {} as Record<
+      MetricKey,
+      { timestamp: number; value: number; displayValue?: string }[]
+    >,
+  );
 
   const nonStepTypeIds = Array.from(typeIdToMetric.entries())
     .filter(([, key]) => key !== "steps")
@@ -356,8 +369,12 @@ const fetchMetricsByRange = async (
     }
 
     normalizedStepRows.forEach((row) => {
-      const startTime = toEpoch(row.start_time ?? row.measured_at ?? row.created_at);
-      const endTime = toEpoch(row.end_time ?? row.start_time ?? row.measured_at ?? row.created_at);
+      const startTime = toEpoch(
+        row.start_time ?? row.measured_at ?? row.created_at,
+      );
+      const endTime = toEpoch(
+        row.end_time ?? row.start_time ?? row.measured_at ?? row.created_at,
+      );
       const value = Number(row.value ?? NaN);
 
       if (
@@ -497,7 +514,10 @@ const HistoricoDiarioContent = () => {
                 </Text>
               </View>
             ) : (
-              <View className="mt-3 flex-row flex-wrap" style={{ gap: GRID_GAP }}>
+              <View
+                className="mt-3 flex-row flex-wrap"
+                style={{ gap: GRID_GAP }}
+              >
                 {METRIC_CARDS.map((metric) => {
                   const data = metricSeries?.[metric.key] ?? {
                     points: [],

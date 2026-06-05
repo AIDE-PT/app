@@ -3,13 +3,13 @@ import React from "react";
 import { Text, View, useWindowDimensions } from "react-native";
 import { WidgetAdd } from "../buttons/widgetAdd";
 import {
-    BpmIcon,
-    CalIcon,
-    O2Icon,
-    PassosIcon,
-    PressaoIcon,
-    SonoIcon,
-    TempIcon,
+  BpmIcon,
+  CalIcon,
+  O2Icon,
+  PassosIcon,
+  PressaoIcon,
+  SonoIcon,
+  TempIcon,
 } from "../svg/HealthIcons";
 import { DASHBOARD_CONFIG } from "../widgets/WidgetWrapper";
 import BottomModal from "./BottomModal";
@@ -34,7 +34,9 @@ const WIDGET_META_BY_ID: Record<
   string,
   {
     label: string;
-    Icon: React.FC<import("react-native-svg").SvgProps & { size?: number; color?: string }>;
+    Icon: React.FC<
+      import("react-native-svg").SvgProps & { size?: number; color?: string }
+    >;
   }
 > = {
   heart: { label: "BPM", Icon: BpmIcon },

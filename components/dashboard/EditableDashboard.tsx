@@ -565,7 +565,7 @@ export default function EditableDashboard({
     typeof user?.user_metadata?.name === "string" &&
     user.user_metadata.name.trim().length > 0
       ? user.user_metadata.name.trim()
-      : user?.email ?? "Utilizador";
+      : (user?.email ?? "Utilizador");
 
   const refetchStepsMetrics = useCallback(() => {
     queryClient.refetchQueries({ queryKey: ["steps", "latest"], exact: true });
