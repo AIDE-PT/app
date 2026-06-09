@@ -13,16 +13,13 @@
  * de qualquer rendering ocorrer.
  */
 
-import * as BackgroundFetch from "expo-background-fetch";
-import * as TaskManager from "expo-task-manager";
+import { supabase } from "@/utils/supabase/client";
 import {
   getGrantedPermissions,
   initialize,
   readRecords,
   type RecordResult,
 } from "react-native-health-connect";
-import { supabase } from "@/utils/supabase/client";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
@@ -41,6 +38,63 @@ const RETRY_DELAY_MS = 2000;
 
 /** Janela de tempo do primeiro sync (dias atrás). */
 const INITIAL_SYNC_DAYS = 30;
+const BACKGROUND_READ_PERMISSION =
+  "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND";
+
+type BackgroundFetchModule = typeof import("expo-background-fetch");
+type TaskManagerModule = typeof import("expo-task-manager");
+type BackgroundFetchStatus =
+  import("expo-background-fetch").BackgroundFetchStatus;
+
+let cachedExpoModules: {
+  BackgroundFetch: BackgroundFetchModule;
+  TaskManager: TaskManagerModule;
+} | null = null;
+let hasDefinedTask = false;
+
+async function getExpoTaskModules(): Promise<{
+  BackgroundFetch: BackgroundFetchModule;
+  TaskManager: TaskManagerModule;
+}> {
+  if (cachedExpoModules) return cachedExpoModules;
+
+  const [BackgroundFetch, TaskManager] = await Promise.all([
+    import("expo-background-fetch"),
+    import("expo-task-manager"),
+  ]);
+
+  cachedExpoModules = { BackgroundFetch, TaskManager };
+  return cachedExpoModules;
+}
+
+async function ensureTaskDefined(): Promise<{
+  BackgroundFetch: BackgroundFetchModule;
+  TaskManager: TaskManagerModule;
+}> {
+  const modules = await getExpoTaskModules();
+  if (hasDefinedTask) return modules;
+
+  const { BackgroundFetch, TaskManager } = modules;
+
+  TaskManager.defineTask(TASK_NAME, async () => {
+    console.log(
+      `\n[HealthSync] ⏰ Task iniciada às ${new Date().toLocaleTimeString()}`,
+    );
+
+    try {
+      const didSync = await runSyncLogic("background");
+      return didSync
+        ? BackgroundFetch.BackgroundFetchResult.NewData
+        : BackgroundFetch.BackgroundFetchResult.NoData;
+    } catch (err) {
+      console.error("[HealthSync] ❌ Erro na task:", err);
+      return BackgroundFetch.BackgroundFetchResult.Failed;
+    }
+  });
+
+  hasDefinedTask = true;
+  return modules;
+}
 
 // ─── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -143,6 +197,17 @@ async function checkPermissions(): Promise<boolean> {
           g.recordType === required.recordType &&
           g.accessType === required.accessType,
       ),
+    );
+  } catch {
+    return false;
+  }
+}
+
+async function checkBackgroundReadPermission(): Promise<boolean> {
+  try {
+    const granted = await getGrantedPermissions();
+    return Array.from(granted as unknown as Iterable<string>).includes(
+      BACKGROUND_READ_PERMISSION,
     );
   } catch {
     return false;
@@ -485,13 +550,25 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
 
 // ─── Lógica partilhada de sync ─────────────────────────────────────────────────
 
-async function runSyncLogic(): Promise<void> {
+async function runSyncLogic(
+  context: "foreground" | "background" = "foreground",
+): Promise<boolean> {
+  if (context === "background") {
+    const hasBackgroundRead = await checkBackgroundReadPermission();
+    if (!hasBackgroundRead) {
+      console.log(
+        "[HealthSync] Background sync skipped: missing READ_HEALTH_DATA_IN_BACKGROUND permission.",
+      );
+      return false;
+    }
+  }
+
   console.log("[HealthSync] 1. A inicializar...");
   const isInitialized = await initialize();
   console.log("[HealthSync] 2. isInitialized:", isInitialized);
   if (!isInitialized) {
     console.warn("[HealthSync] ⚠️  Health Connect não disponível.");
-    return;
+    return false;
   }
 
   // Verificação passiva — NÃO abre diálogo, seguro no background
@@ -500,7 +577,7 @@ async function runSyncLogic(): Promise<void> {
   console.log("[HealthSync] 4. hasPermissions:", hasPermissions);
   if (!hasPermissions) {
     console.warn("[HealthSync] ⚠️  Permissões insuficientes — sync ignorado.");
-    return;
+    return false;
   }
   console.log("[HealthSync] 5. A calcular janela temporal...");
 
@@ -526,24 +603,8 @@ async function runSyncLogic(): Promise<void> {
   await withRetry(() => sendSnapshotToSupabase(snapshot));
   console.log("[HealthSync] 9. Enviado!");
   await setLastSyncEndTime(snapshot.window.end);
+  return true;
 }
-
-// ─── Definição da Task ─────────────────────────────────────────────────────────
-
-TaskManager.defineTask(TASK_NAME, async () => {
-  console.log(
-    `\n[HealthSync] ⏰ Task iniciada às ${new Date().toLocaleTimeString()}`,
-  );
-
-  try {
-    await runSyncLogic();
-    console.log(`[HealthSync] ✅ Sync completo`);
-    return BackgroundFetch.BackgroundFetchResult.NewData;
-  } catch (err) {
-    console.error("[HealthSync] ❌ Erro na task:", err);
-    return BackgroundFetch.BackgroundFetchResult.Failed;
-  }
-});
 
 // ─── API pública ───────────────────────────────────────────────────────────────
 
@@ -553,6 +614,7 @@ TaskManager.defineTask(TASK_NAME, async () => {
  */
 export async function registerHealthBackgroundSync(): Promise<void> {
   try {
+    const { BackgroundFetch, TaskManager } = await ensureTaskDefined();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
     if (isRegistered) {
       console.log("[HealthSync] ✅ Task já registada.");
@@ -580,6 +642,7 @@ export async function registerHealthBackgroundSync(): Promise<void> {
  */
 export async function unregisterHealthBackgroundSync(): Promise<void> {
   try {
+    const { BackgroundFetch, TaskManager } = await getExpoTaskModules();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
     if (isRegistered) {
       await BackgroundFetch.unregisterTaskAsync(TASK_NAME);
@@ -595,11 +658,16 @@ export async function unregisterHealthBackgroundSync(): Promise<void> {
  */
 export async function getHealthSyncStatus(): Promise<{
   isRegistered: boolean;
-  fetchStatus: BackgroundFetch.BackgroundFetchStatus | null;
+  fetchStatus: BackgroundFetchStatus | null;
 }> {
-  const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
-  const fetchStatus = await BackgroundFetch.getStatusAsync();
-  return { isRegistered, fetchStatus };
+  try {
+    const { BackgroundFetch, TaskManager } = await getExpoTaskModules();
+    const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
+    const fetchStatus = await BackgroundFetch.getStatusAsync();
+    return { isRegistered, fetchStatus };
+  } catch {
+    return { isRegistered: false, fetchStatus: null };
+  }
 }
 
 /**
@@ -612,10 +680,12 @@ export async function getHealthSyncStatus(): Promise<{
  */
 export async function runSyncNow(): Promise<void> {
   try {
-    // Limpa o último sync para forçar janela de 30 dias
-    await AsyncStorage.removeItem(LAST_SYNC_STORAGE_KEY);
-    await runSyncLogic();
-    console.log("[HealthSync] ✅ Sync Automatico completo");
+    const didSync = await runSyncLogic("foreground");
+    if (didSync) {
+      console.log("[HealthSync] ✅ Sync Automatico completo");
+    } else {
+      console.log("[HealthSync] ℹ️ Sync Automatico sem dados novos");
+    }
   } catch (err) {
     console.error("[HealthSync] ❌ Erro no sync Automatico:", err);
     throw err;
