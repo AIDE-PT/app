@@ -1,7 +1,7 @@
 import {
-    getHealthConnectStatus,
-    readSteps,
-    type StepRecord,
+  getHealthConnectStatus,
+  readSteps,
+  type StepRecord,
 } from "@/src/services/healthConnect";
 import { supabase } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -246,8 +246,7 @@ async function fetchStepsFromSupabaseDaily(): Promise<MetricQueryData | null> {
       const startTime = new Date(String(startRaw ?? "")).getTime();
       const endTime = new Date(String(endRaw ?? "")).getTime();
       const count = Number(row?.value ?? 0);
-      const sourceApp =
-        row?.source_app == null ? null : String(row.source_app);
+      const sourceApp = row?.source_app == null ? null : String(row.source_app);
       return { startTime, endTime, count, sourceApp };
     })
     .filter(
@@ -267,9 +266,7 @@ async function fetchStepsFromSupabaseDaily(): Promise<MetricQueryData | null> {
   );
   const recordsToAggregate = shortWindowRecords.length
     ? shortWindowRecords
-    : [...records]
-        .sort((a, b) => b.endTime - a.endTime)
-        .slice(0, 1);
+    : [...records].sort((a, b) => b.endTime - a.endTime).slice(0, 1);
 
   const hourly = aggregateStepsByHour(recordsToAggregate, startMs, endMs);
   const totalSteps = hourly.reduce((sum, value) => sum + value, 0);
@@ -423,7 +420,10 @@ function asFiniteNumber(value: unknown): number | null {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function ensureNonEmptyHistory(values: number[], fallbackValue: number): number[] {
+function ensureNonEmptyHistory(
+  values: number[],
+  fallbackValue: number,
+): number[] {
   if (values.length) return values;
   return Number.isFinite(fallbackValue) ? [fallbackValue] : [];
 }
@@ -494,7 +494,11 @@ async function fetchHealthConnectMetricDaily(
     const { startMs, endMs } = getDayWindow(new Date());
 
     if (endpoint === "bpm") {
-      const records = await readHealthConnectRecords("HeartRate", startMs, endMs);
+      const records = await readHealthConnectRecords(
+        "HeartRate",
+        startMs,
+        endMs,
+      );
       if (!records?.length) return null;
 
       const samples = records.flatMap((record) =>
@@ -551,9 +555,9 @@ async function fetchHealthConnectMetricDaily(
       return {
         displayValue: `${latestPair.systolic}/${latestPair.diastolic}`,
         history: ensureNonEmptyHistory(
-          pairs.slice(-24).map((pair) =>
-            Math.round((pair.systolic + pair.diastolic) / 2),
-          ),
+          pairs
+            .slice(-24)
+            .map((pair) => Math.round((pair.systolic + pair.diastolic) / 2)),
           Math.round((latestPair.systolic + latestPair.diastolic) / 2),
         ),
         latest: {
@@ -611,14 +615,22 @@ async function fetchHealthConnectMetricDaily(
     }
 
     if (endpoint === "sleep") {
-      const records = await readHealthConnectRecords("SleepSession", startMs, endMs);
+      const records = await readHealthConnectRecords(
+        "SleepSession",
+        startMs,
+        endMs,
+      );
       if (!records?.length) return null;
 
       const durations = records
         .map((record) => {
           const start = toEpochMs(record?.startTime);
           const end = toEpochMs(record?.endTime);
-          if (!Number.isFinite(start) || !Number.isFinite(end) || end <= start) {
+          if (
+            !Number.isFinite(start) ||
+            !Number.isFinite(end) ||
+            end <= start
+          ) {
             return null;
           }
           const hours = (end - start) / (1000 * 60 * 60);
@@ -627,9 +639,8 @@ async function fetchHealthConnectMetricDaily(
         .filter((value): value is number => value != null && value > 0);
 
       if (!durations.length) return null;
-      const totalSleep = Math.round(
-        durations.reduce((sum, value) => sum + value, 0) * 10,
-      ) / 10;
+      const totalSleep =
+        Math.round(durations.reduce((sum, value) => sum + value, 0) * 10) / 10;
 
       return {
         displayValue: formatHours(totalSleep),
@@ -679,7 +690,9 @@ async function fetchHealthConnectMetricDaily(
           ),
         )
         .filter((value): value is number => value != null)
-        .map((rmssd) => clamp(Math.round(100 - ((rmssd - 15) / 85) * 100), 0, 100));
+        .map((rmssd) =>
+          clamp(Math.round(100 - ((rmssd - 15) / 85) * 100), 0, 100),
+        );
 
       if (hrvValues.length) {
         const latest = hrvValues[hrvValues.length - 1];

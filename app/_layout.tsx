@@ -59,13 +59,15 @@ export default function RootLayout() {
 
     void (async () => {
       try {
-        const { registerHealthBackgroundSync, runSyncNow } = await import(
-          "@/src/tasks/healthBackgroundSync"
-        );
+        const { registerHealthBackgroundSync, runSyncNow } =
+          await import("@/src/tasks/healthBackgroundSync");
         await registerHealthBackgroundSync();
         await runSyncNow();
       } catch (error) {
-        console.warn("[HealthSync] Failed to initialize background sync", error);
+        console.warn(
+          "[HealthSync] Failed to initialize background sync",
+          error,
+        );
         hasStartedHealthSync.current = false;
       }
     })();
