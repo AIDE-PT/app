@@ -1,18 +1,16 @@
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
+import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Constants from "expo-constants";
 import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef } from "react";
+import { Platform } from "react-native";
 import "../global.css";
-import {
-  registerHealthBackgroundSync,
-  runSyncNow,
-} from "@/src/tasks/healthBackgroundSync";
-import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 
 const queryClient = new QueryClient();
 
@@ -51,9 +49,26 @@ export default function RootLayout() {
     if (!healthConnectStatus?.permissionsGranted) return;
     if (hasStartedHealthSync.current) return;
 
+    if (Platform.OS !== "android") return;
+    if (Constants.executionEnvironment === "storeClient") {
+      // Expo Go does not include expo-task-manager native module.
+      return;
+    }
+
     hasStartedHealthSync.current = true;
-    void registerHealthBackgroundSync();
-    void runSyncNow();
+
+    void (async () => {
+      try {
+        const { registerHealthBackgroundSync, runSyncNow } = await import(
+          "@/src/tasks/healthBackgroundSync"
+        );
+        await registerHealthBackgroundSync();
+        await runSyncNow();
+      } catch (error) {
+        console.warn("[HealthSync] Failed to initialize background sync", error);
+        hasStartedHealthSync.current = false;
+      }
+    })();
   }, [isLoading, healthConnectStatus?.permissionsGranted]);
 
   if (!fontsLoaded) return null;

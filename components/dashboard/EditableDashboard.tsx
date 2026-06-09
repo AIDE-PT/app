@@ -2,32 +2,35 @@ import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import Constants from "expo-constants";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Animated,
-  GestureResponderEvent,
-  LayoutAnimation,
-  LayoutChangeEvent,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  UIManager,
-  View,
+    ActivityIndicator,
+    Animated,
+    GestureResponderEvent,
+    LayoutAnimation,
+    LayoutChangeEvent,
+    Platform,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    UIManager,
+    View,
 } from "react-native";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+    SafeAreaView,
+    useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 import { LightBackground } from "@/components/DotBackground";
 import Navbar from "@/components/navBar/NavBar";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import {
-  DASHBOARD_CONFIG,
-  WidgetVariant,
+    DASHBOARD_CONFIG,
+    WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
@@ -37,8 +40,6 @@ import { supabase } from "@/utils/supabase/client";
 import TopBar from "../topBar/TopBar";
 import DashboardMetricWidget from "../widgets/DashboardMetricWidget";
 import HealthStatusHero from "./HealthStatusHero";
-import { runSyncNow } from "@/src/tasks/healthBackgroundSync";
-import { Button } from "../buttons/button";
 
 if (
   Platform.OS === "android" &&
@@ -113,6 +114,7 @@ export default function EditableDashboard({
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [cuidados, setCuidados] = useState<CuidadoOption[]>([]);
   const [selectedCuidado, setSelectedCuidado] = useState<CuidadoOption>();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const gridContentRef = useRef<View | null>(null);
@@ -125,6 +127,21 @@ export default function EditableDashboard({
   const suppressNextPressRef = useRef(false);
   const hasLoadedLayoutRef = useRef(false);
   const queryClient = useQueryClient();
+
+  const handleManualSync = useCallback(async () => {
+    if (Platform.OS !== "android") return;
+    if (Constants.executionEnvironment === "storeClient") {
+      console.warn("[HealthSync] Manual sync is unavailable in Expo Go.");
+      return;
+    }
+
+    try {
+      const { runSyncNow } = await import("@/src/tasks/healthBackgroundSync");
+      await runSyncNow();
+    } catch (error) {
+      console.warn("[HealthSync] Failed to run manual sync", error);
+    }
+  }, []);
 
   const loadAssociatedCuidados = useCallback(async () => {
     if (!user?.id || profileType !== "aider") {
@@ -566,6 +583,26 @@ export default function EditableDashboard({
     queryClient.refetchQueries({ queryKey: ["steps", "stats"], exact: true });
   }, [queryClient]);
 
+  const handlePullToRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+
+    setIsRefreshing(true);
+    try {
+      await handleManualSync();
+      await refreshHealthConnectStatus();
+      refetchStepsMetrics();
+      queryClient.refetchQueries({ queryKey: ["alerts"], exact: true });
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [
+    handleManualSync,
+    isRefreshing,
+    queryClient,
+    refetchStepsMetrics,
+    refreshHealthConnectStatus,
+  ]);
+
   useFocusEffect(
     useCallback(() => {
       let isMounted = true;
@@ -631,6 +668,17 @@ export default function EditableDashboard({
           <ScrollView
             style={{ flex: 1 }}
             scrollEnabled={draggingWidgetId === null}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={() => {
+                  void handlePullToRefresh();
+                }}
+                tintColor={isDark ? "#FFFFFF" : "#1F2937"}
+                colors={["#5061FF"]}
+                progressBackgroundColor={isDark ? "#000412" : "#ECF5FF"}
+              />
+            }
           >
             {/* Hero Section — extends to top edge, content padded below TopBar */}
             <HealthStatusHero
@@ -640,6 +688,30 @@ export default function EditableDashboard({
               topExtension={heroTopExtension}
               onCheckNotifications={() => router.push("/notificacoes")}
             />
+
+            {isRefreshing && (
+              <View className="px-4 mb-2">
+                <View
+                  className={`rounded-2xl px-4 py-3 flex-row items-center ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                  style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                  accessible
+                  accessibilityRole="text"
+                  accessibilityLabel="A sincronizar dados de saúde"
+                >
+                  <ActivityIndicator
+                    size="small"
+                    color={isDark ? "#A9BDFF" : "#5061FF"}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no"
+                  />
+                  <Text
+                    className={`ml-3 text-sm font-bold ${isDark ? "text-white" : "text-slate-700"}`}
+                  >
+                    A sincronizar dados...
+                  </Text>
+                </View>
+              </View>
+            )}
 
             {!isLoadingHealthConnect &&
               healthConnectStatus &&
@@ -691,13 +763,6 @@ export default function EditableDashboard({
                   </TouchableOpacity>
                 </View>
               )}
-
-            {/* // <HealthDashboard /> } */}
-            <Button
-              variant="primary"
-              label="Forçar Sync"
-              onPress={() => void runSyncNow()}
-            />
             <WidgetGrid
               contentRef={gridContentRef}
               onContentLayout={measureGrid}
