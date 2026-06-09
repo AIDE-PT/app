@@ -15,10 +15,10 @@
 
 import { supabase } from "@/utils/supabase/client";
 import {
-    getGrantedPermissions,
-    initialize,
-    readRecords,
-    type RecordResult,
+  getGrantedPermissions,
+  initialize,
+  readRecords,
+  type RecordResult,
 } from "react-native-health-connect";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -46,12 +46,10 @@ type TaskManagerModule = typeof import("expo-task-manager");
 type BackgroundFetchStatus =
   import("expo-background-fetch").BackgroundFetchStatus;
 
-let cachedExpoModules:
-  | {
-      BackgroundFetch: BackgroundFetchModule;
-      TaskManager: TaskManagerModule;
-    }
-  | null = null;
+let cachedExpoModules: {
+  BackgroundFetch: BackgroundFetchModule;
+  TaskManager: TaskManagerModule;
+} | null = null;
 let hasDefinedTask = false;
 
 async function getExpoTaskModules(): Promise<{
@@ -695,4 +693,3 @@ export async function runSyncNow(): Promise<void> {
 }
 
 export { TASK_NAME };
-
