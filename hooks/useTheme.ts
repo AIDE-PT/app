@@ -1,6 +1,6 @@
 import {
-  type ColorPaletteType,
-  useThemeContext,
+    type ColorPaletteType,
+    useThemeContext,
 } from "@/contexts/ThemeContext";
 
 const semanticPalettes: Record<
@@ -105,8 +105,10 @@ export const useTheme = () => {
     isDark,
     theme,
     colorPalette,
+    widgetView,
     setTheme,
     setColorPalette,
+    setWidgetView,
     toggleTheme,
   } = useThemeContext();
 
@@ -116,8 +118,10 @@ export const useTheme = () => {
     isDark,
     theme,
     colorPalette,
+    widgetView,
     setTheme,
     setColorPalette,
+    setWidgetView,
     toggleTheme,
 
     // Convenience color getters
