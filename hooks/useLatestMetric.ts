@@ -1,7 +1,7 @@
 import {
-  getHealthConnectStatus,
-  readSteps,
-  type StepRecord,
+    getHealthConnectStatus,
+    readSteps,
+    type StepRecord,
 } from "@/src/services/healthConnect";
 import { supabase } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
