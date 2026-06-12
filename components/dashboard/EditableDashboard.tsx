@@ -115,6 +115,8 @@ export default function EditableDashboard({
   const [cuidados, setCuidados] = useState<CuidadoOption[]>([]);
   const [selectedCuidado, setSelectedCuidado] = useState<CuidadoOption>();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const metricPatientId =
+    profileType === "aider" ? (selectedCuidado?.id ?? null) : (user?.id ?? null);
 
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const gridContentRef = useRef<View | null>(null);
@@ -579,8 +581,8 @@ export default function EditableDashboard({
   })();
 
   const refetchStepsMetrics = useCallback(() => {
-    queryClient.refetchQueries({ queryKey: ["steps", "latest"], exact: true });
-    queryClient.refetchQueries({ queryKey: ["steps", "stats"], exact: true });
+    queryClient.refetchQueries({ queryKey: ["steps", "latest"] });
+    queryClient.refetchQueries({ queryKey: ["steps", "stats"] });
   }, [queryClient]);
 
   const handlePullToRefresh = useCallback(async () => {
@@ -816,6 +818,7 @@ export default function EditableDashboard({
                         endpoint={item.endpoint}
                         variant={item.variant as WidgetVariant}
                         iconSize={24}
+                        patientId={metricPatientId}
                       />
                     </Pressable>
 
@@ -935,6 +938,7 @@ export default function EditableDashboard({
                     endpoint={draggingWidget.endpoint}
                     variant={draggingWidget.variant as WidgetVariant}
                     iconSize={24}
+                    patientId={metricPatientId}
                   />
                 </View>
               )}
