@@ -3,6 +3,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Constants from "expo-constants";
 import { useFonts } from "expo-font";
 import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
@@ -48,25 +49,28 @@ export default function RootLayout() {
     if (!healthConnectStatus?.permissionsGranted) return;
     if (hasStartedHealthSync.current) return;
 
-    hasStartedHealthSync.current = true;
     if (Platform.OS !== "android") return;
+    if (Constants.executionEnvironment === "storeClient") {
+      // Expo Go does not include expo-task-manager native module.
+      return;
+    }
 
-    const startHealthSync = async () => {
+    hasStartedHealthSync.current = true;
+
+    void (async () => {
       try {
         const { registerHealthBackgroundSync, runSyncNow } =
           await import("@/src/tasks/healthBackgroundSync");
-
         await registerHealthBackgroundSync();
         await runSyncNow();
       } catch (error) {
         console.warn(
-          "[HealthSync] Background sync indisponivel neste runtime:",
+          "[HealthSync] Failed to initialize background sync",
           error,
         );
+        hasStartedHealthSync.current = false;
       }
-    };
-
-    void startHealthSync();
+    })();
   }, [isLoading, healthConnectStatus?.permissionsGranted]);
 
   if (!fontsLoaded) return null;
