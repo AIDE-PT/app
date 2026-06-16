@@ -23,6 +23,7 @@ import Svg, {
 interface HealthStatusHeroProps {
   userName?: string;
   cuidadoName?: string;
+  isCuidadoAccount?: boolean;
   status?: "good" | "warning" | "critical";
   onCheckNotifications?: () => void;
   topExtension?: number;
@@ -31,6 +32,7 @@ interface HealthStatusHeroProps {
 export default function HealthStatusHero({
   userName = "Juliana K.",
   cuidadoName = "Emilia Almeida",
+  isCuidadoAccount = false,
   status = "good",
   onCheckNotifications,
   topExtension = 0,
@@ -284,6 +286,16 @@ export default function HealthStatusHero({
             warning: "Requer alguma atenção",
             critical: "Intervenção imediata",
           };
+          const cuidadoSubtitleMap = {
+            good: "está tudo bem",
+            warning: "não está tudo bem",
+            critical: "não está tudo bem",
+          };
+          const titleText = isCuidadoAccount ? `Olá ${userName},` : cuidadoName;
+          const subtitleText = isCuidadoAccount
+            ? cuidadoSubtitleMap[s]
+            : subtitleMap[s];
+          const isCuidadoGoodState = isCuidadoAccount && s === "good";
           const badgeIconMap = {
             good: "shield",
             warning: "alert-circle",
@@ -311,10 +323,16 @@ export default function HealthStatusHero({
               {/* Titles */}
               <View style={styles.titleContainer}>
                 <Text style={[styles.cuidadoNameText, { color: c.textMain }]}>
-                  {cuidadoName}
+                  {titleText}
                 </Text>
-                <Text style={[styles.subtitleText, { color: c.textSub }]}>
-                  {subtitleMap[s]}
+                <Text
+                  style={[
+                    styles.subtitleText,
+                    isCuidadoGoodState && styles.subtitleTextEmphasis,
+                    { color: isCuidadoGoodState ? c.textMain : c.textSub },
+                  ]}
+                >
+                  {subtitleText}
                 </Text>
               </View>
 
@@ -324,7 +342,7 @@ export default function HealthStatusHero({
                   <View
                     style={[styles.statusBadge, { backgroundColor: c.badgeBg }]}
                     accessibilityRole="image"
-                    accessibilityLabel={`Estado ${subtitleMap[s]}`}
+                    accessibilityLabel={`Estado ${subtitleText}`}
                   >
                     <Feather
                       name={s === "good" ? "shield" : badgeIconMap[s]}
@@ -431,6 +449,12 @@ const styles = StyleSheet.create({
     fontWeight: "400",
     letterSpacing: 0.2,
     textAlign: "center",
+  },
+  subtitleTextEmphasis: {
+    fontFamily: "Safiro-Medium",
+    fontSize: 18,
+    fontWeight: "500",
+    letterSpacing: 0,
   },
   bottomRow: {
     flexDirection: "row",
