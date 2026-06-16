@@ -13,11 +13,17 @@ interface navBarProps {
   dark?: boolean;
   notEditable?: boolean;
   onAddWidget?: (widgetId: string) => void;
+  disableNavigation?: boolean;
+  highlightAddButton?: boolean;
+  disableAddAction?: boolean;
 }
 const Navbar = ({
   dark: darkProp,
   notEditable = false,
   onAddWidget,
+  disableNavigation = false,
+  highlightAddButton = false,
+  disableAddAction = false,
 }: navBarProps) => {
   const [isModalVisible, setModalVisible] = useState(false);
   const router = useRouter();
@@ -56,10 +62,26 @@ const Navbar = ({
           />
           <TouchableOpacity
             className={`${styleBall} ${buttonBg}`}
-            onPress={notEditable ? () => setModalVisible(true) : () => {}}
+            onPress={
+              notEditable && !disableAddAction
+                ? () => setModalVisible(true)
+                : () => {}
+            }
+            disabled={disableAddAction}
+            style={
+              disableAddAction
+                ? { opacity: 0.45 }
+                : highlightAddButton
+                  ? {
+                      borderWidth: 2,
+                      borderColor: "#5061FF",
+                    }
+                  : undefined
+            }
             accessibilityRole="button"
             accessibilityLabel="Adicionar"
             accessibilityHint="Abre a lista de widgets disponíveis."
+            accessibilityState={{ disabled: disableAddAction }}
           >
             <AddIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
@@ -67,9 +89,12 @@ const Navbar = ({
           <TouchableOpacity
             className={`${styleBall} ${buttonBg}`}
             onPress={() => router.push("/historicoDiario")}
+            disabled={disableNavigation}
+            style={disableNavigation ? { opacity: 0.45 } : undefined}
             accessibilityRole="button"
             accessibilityLabel="Historico"
             accessibilityHint="Abre o histórico diário."
+            accessibilityState={{ disabled: disableNavigation }}
           >
             <CalendarIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
@@ -77,9 +102,12 @@ const Navbar = ({
           <TouchableOpacity
             className={`${styleBall} ${buttonBg}`}
             onPress={() => router.push("/testDashboard")}
+            disabled={disableNavigation}
+            style={disableNavigation ? { opacity: 0.45 } : undefined}
             accessibilityRole="button"
             accessibilityLabel="Inicio"
             accessibilityHint="Abre o dashboard principal."
+            accessibilityState={{ disabled: disableNavigation }}
           >
             <HomeIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
@@ -87,9 +115,12 @@ const Navbar = ({
           <TouchableOpacity
             className={`${styleBall} ${buttonBg}`}
             onPress={() => router.push("/definicoes")}
+            disabled={disableNavigation}
+            style={disableNavigation ? { opacity: 0.45 } : undefined}
             accessibilityRole="button"
             accessibilityLabel="Perfil"
             accessibilityHint="Abre o perfil e definições."
+            accessibilityState={{ disabled: disableNavigation }}
           >
             <ProfileIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
