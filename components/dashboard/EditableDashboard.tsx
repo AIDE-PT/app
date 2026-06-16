@@ -6,31 +6,31 @@ import Constants from "expo-constants";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
-  Animated,
-  GestureResponderEvent,
-  LayoutAnimation,
-  LayoutChangeEvent,
-  Platform,
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  UIManager,
-  View,
+    ActivityIndicator,
+    Animated,
+    GestureResponderEvent,
+    LayoutAnimation,
+    LayoutChangeEvent,
+    Platform,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    UIManager,
+    View,
 } from "react-native";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+    SafeAreaView,
+    useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 import { LightBackground } from "@/components/DotBackground";
 import Navbar from "@/components/navBar/NavBar";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import {
-  DASHBOARD_CONFIG,
-  WidgetVariant,
+    DASHBOARD_CONFIG,
+    WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
@@ -566,7 +566,8 @@ export default function EditableDashboard({
     outputRange: [0.96, 1],
   });
 
-  const { isDark } = useTheme();
+  const { isDark, widgetView } = useTheme();
+  const useSuperSimplifiedWidgets = widgetView === "simplificada";
   const {
     status: healthConnectStatus,
     isLoading: isLoadingHealthConnect,
@@ -959,6 +960,7 @@ export default function EditableDashboard({
                         endpoint={item.endpoint}
                         variant={item.variant as WidgetVariant}
                         iconSize={24}
+                        superSimplified={useSuperSimplifiedWidgets}
                       />
                     </Pressable>
 
@@ -1078,6 +1080,7 @@ export default function EditableDashboard({
                     endpoint={draggingWidget.endpoint}
                     variant={draggingWidget.variant as WidgetVariant}
                     iconSize={24}
+                    superSimplified={useSuperSimplifiedWidgets}
                   />
                 </View>
               )}
