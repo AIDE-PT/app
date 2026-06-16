@@ -6,6 +6,30 @@ const uuid = require("uuid");
 // eslint-disable-next-line no-undef
 const dbPath = path.join(__dirname, "db.json");
 
+function loadEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
+
+  const content = fs.readFileSync(filePath, "utf8");
+  const lines = content.split(/\r?\n/);
+
+  lines.forEach((line) => {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) return;
+
+    const separatorIndex = trimmed.indexOf("=");
+    if (separatorIndex <= 0) return;
+
+    const key = trimmed.slice(0, separatorIndex).trim();
+    const value = trimmed.slice(separatorIndex + 1).trim();
+
+    if (key && process.env[key] == null) {
+      process.env[key] = value;
+    }
+  });
+}
+
+loadEnvFile(path.join(__dirname, "..", ".env"));
+
 // --- Helper Functions ---
 
 function generateId() {
@@ -486,7 +510,13 @@ function startJsonServer() {
   console.log("Starting JSON Server...");
   const serverProcess = spawn(
     "npx",
-    ["json-server", "--watch", "db.json", "--port", "3000"],
+    [
+      "json-server",
+      "--watch",
+      "db.json",
+      "--port",
+      "3000",
+    ],
     {
       // eslint-disable-next-line no-undef
       cwd: __dirname,
@@ -500,6 +530,22 @@ function startJsonServer() {
   });
 
   return serverProcess;
+}
+
+function startAiServer() {
+  console.log("Starting AI Server...");
+  const aiProcess = spawn("node", ["ai-server.js"], {
+    // eslint-disable-next-line no-undef
+    cwd: __dirname,
+    stdio: "inherit",
+    shell: true,
+  });
+
+  aiProcess.on("error", (err) => {
+    console.error("Failed to start AI server:", err);
+  });
+
+  return aiProcess;
 }
 
 // --- Main Simulation Loop ---
@@ -572,10 +618,12 @@ function startSimulation(intervalMs = 10000) {
 // --- Entry Point ---
 
 const serverProcess = startJsonServer();
+const aiProcess = startAiServer();
 startSimulation(10000);
 
 // Cleanup on exit
 process.on("SIGINT", () => {
   serverProcess.kill();
+  aiProcess.kill();
   process.exit();
 });

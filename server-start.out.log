@@ -1,0 +1,47 @@
+
+> aide@1.0.0 server
+> node server/server.js
+
+Starting JSON Server...
+Starting AI Server...
+Starting Data Simulation (10s interval)...
+[11:59:46] Generated Data =>
+            BPM: 89
+            BP: 120/84
+            Glycemia: 120
+            O2: 99%
+            Temp: 37°C
+            Stress: 80
+            Steps: 11411
+[AI] server listening on http://localhost:3001
+--watch/-w can be omitted, JSON Server 1+ watches for file changes by default
+JSON Server started on PORT :3000
+Press CTRL-C to stop
+Watching db.json...
+
+♡( ◡‿◡ )
+
+Index:
+http://localhost:3000/
+
+Static files:
+Serving ./public directory if it exists
+
+Endpoints:
+http://localhost:3000/bpm
+http://localhost:3000/bloodPressure
+http://localhost:3000/glycemia
+http://localhost:3000/temperature
+http://localhost:3000/stress
+http://localhost:3000/sleepStats
+http://localhost:3000/bpmStats
+http://localhost:3000/bloodPressureStats
+http://localhost:3000/glycemiaStats
+http://localhost:3000/o2Stats
+http://localhost:3000/temperatureStats
+http://localhost:3000/stressStats
+http://localhost:3000/sleep
+http://localhost:3000/o2
+http://localhost:3000/steps
+http://localhost:3000/stepsStats
+http://localhost:3000/alerts

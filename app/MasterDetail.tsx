@@ -1,11 +1,19 @@
 import BackButton from "@/components/buttons/backButton";
 import LineChartSlim from "@/components/charts/LineChartSlim";
 import LightBackground from "@/components/DotBackground";
+import { useAuth } from "@/contexts/AuthContext";
 import { useHealthMetric, useMetricStats } from "@/hooks/useLatestMetric";
+import {
+  fetchMetricInsight,
+  type MetricExpectedRange,
+  type MetricInsightPayload,
+  type MetricInsightResponse,
+} from "@/src/services/metricInsight";
 import { useTheme } from "@/hooks/useTheme";
+import { useQuery } from "@tanstack/react-query";
 import { Feather } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   ActivityIndicator,
@@ -87,6 +95,18 @@ interface PatternIndicator {
 
 const calcAvg = (arr: number[]) =>
   arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0;
+
+const MIN_HISTORY_FOR_AI = 5;
+const AI_HISTORY_WINDOW = 20;
+
+const EXPECTED_RANGES: Record<string, MetricExpectedRange> = {
+  heart: { label: "faixa normal", min: 60, max: 100 },
+  stress: { label: "faixa moderada", min: 0, max: 70 },
+  steps: { label: "meta diaria", min: 7000, max: 10000 },
+  temp: { label: "temperatura normal", min: 36, max: 37.5 },
+  o2: { label: "oxigenacao normal", min: 96, max: 100 },
+  glycemia: { label: "meta calorica", min: 1500, max: 2200 },
+};
 
 const announceEntryValue = (label: string) => {
   AccessibilityInfo.announceForAccessibility(label);
@@ -302,6 +322,37 @@ function buildAccessibleSummary({
       " ",
     ),
   };
+}
+
+function getExpectedRange(type: string): MetricExpectedRange {
+  return EXPECTED_RANGES[type] ?? { label: "faixa normal", min: 0, max: 0 };
+}
+
+function SparklesStarsIcon({ color }: { color: string }) {
+  return (
+    <Svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      accessible={false}
+    >
+      <Path
+        d="M12 2.4L14.35 7.35L19.8 8.04L15.77 11.77L16.8 17.1L12 14.49L7.2 17.1L8.23 11.77L4.2 8.04L9.65 7.35L12 2.4Z"
+        fill={color}
+      />
+      <Path
+        d="M19 12.8L19.87 14.63L21.88 14.88L20.39 16.26L20.77 18.23L19 17.27L17.23 18.23L17.61 16.26L16.12 14.88L18.13 14.63L19 12.8Z"
+        fill={color}
+        opacity={0.72}
+      />
+      <Path
+        d="M5 14.2L5.67 15.6L7.2 15.79L6.07 16.84L6.36 18.34L5 17.6L3.64 18.34L3.93 16.84L2.8 15.79L4.33 15.6L5 14.2Z"
+        fill={color}
+        opacity={0.72}
+      />
+    </Svg>
+  );
 }
 
 // ─── Metric Configurations ────────────────────────────────────────────────────
@@ -1478,6 +1529,8 @@ export default function MasterDetail() {
   const resolvedType = type && METRIC_CONFIGS[type] ? type : DEFAULT_TYPE;
   const baseConfig = METRIC_CONFIGS[resolvedType];
   const { isDark, colors } = useTheme();
+  const { user } = useAuth();
+  const [hasRequestedAiInsight, setHasRequestedAiInsight] = useState(false);
   const config: MetricConfig = {
     ...baseConfig,
     ...(resolvedType === "temp"
@@ -1508,9 +1561,83 @@ export default function MasterDetail() {
 
   const currentRaw: number = metricData?.latest?.value ?? 0;
   const history: number[] = metricData?.history ?? [];
+  const historyForAi = history
+    .filter((value) => Number.isFinite(value))
+    .slice(0, AI_HISTORY_WINDOW);
+  const canRequestAiInsight = historyForAi.length >= MIN_HISTORY_FOR_AI;
+  const expectedRange = getExpectedRange(resolvedType);
   const chartData = history.length >= 2 ? [...history].reverse() : [0, 0];
   const allTimeMin = stats?.min ?? (history.length ? Math.min(...history) : 0);
   const allTimeMax = stats?.max ?? (history.length ? Math.max(...history) : 0);
+
+  const insightPayload = useMemo<MetricInsightPayload>(
+    () => ({
+      type: resolvedType,
+      endpoint: config.endpoint,
+      currentValue: Number.isFinite(currentRaw) ? currentRaw : 0,
+      history: historyForAi,
+      min: Number.isFinite(allTimeMin) ? allTimeMin : 0,
+      max: Number.isFinite(allTimeMax) ? allTimeMax : 0,
+      unit: config.displayUnit,
+      timestamp:
+        metricData?.latest?.timestamp ?? new Date().toISOString(),
+      expectedRange,
+    }),
+    [
+      resolvedType,
+      config.endpoint,
+      config.displayUnit,
+      currentRaw,
+      historyForAi,
+      allTimeMin,
+      allTimeMax,
+      metricData?.latest?.timestamp,
+      expectedRange,
+    ],
+  );
+
+  const metricWindowSignature = useMemo(
+    () =>
+      [
+        resolvedType,
+        insightPayload.currentValue,
+        insightPayload.min,
+        insightPayload.max,
+        insightPayload.timestamp,
+        historyForAi.join("|"),
+      ].join("::"),
+    [
+      resolvedType,
+      insightPayload.currentValue,
+      insightPayload.min,
+      insightPayload.max,
+      insightPayload.timestamp,
+      historyForAi,
+    ],
+  );
+
+  const {
+    data: aiInsight,
+    isFetching: isFetchingAiInsight,
+    isError: isAiInsightError,
+    error: aiInsightError,
+    refetch: refetchAiInsight,
+  } = useQuery<MetricInsightResponse>({
+    queryKey: ["metric-ai-insight", metricWindowSignature],
+    enabled: false,
+    staleTime: 60 * 60 * 1000,
+    gcTime: 2 * 60 * 60 * 1000,
+    queryFn: () =>
+      fetchMetricInsight(insightPayload, {
+        rateLimitKey: user?.id ?? "anonymous",
+      }),
+  });
+
+  const handleAiInsightPress = () => {
+    setHasRequestedAiInsight(true);
+    if (!canRequestAiInsight || isFetchingAiInsight) return;
+    void refetchAiInsight();
+  };
 
   const status = config.getStatus(currentRaw);
   const palette = buildStatusPalette(colors.semantic, isDark)[status];
@@ -1928,6 +2055,134 @@ export default function MasterDetail() {
                       )}
                     </View>
                   </View>
+                </View>
+
+                <View
+                  className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                  style={shadow}
+                >
+                  <View className="flex-row items-center justify-between gap-4">
+                    <View className="flex-1">
+                      <Text
+                        className="text-base font-safiro"
+                        style={{ color: config.accent }}
+                      >
+                        Leitura IA
+                      </Text>
+                      <Text className={`text-xs mt-1 font-open-sans ${ts}`}>
+                        Toque para gerar uma interpretacao segura dos dados
+                        atuais.
+                      </Text>
+                    </View>
+                    <Pressable
+                      onPress={handleAiInsightPress}
+                      disabled={isFetchingAiInsight}
+                      accessibilityRole="button"
+                      accessibilityLabel="Gerar interpretacao por IA"
+                      className="flex-row items-center px-4 py-2.5 rounded-full"
+                      style={{
+                        backgroundColor: `${config.accent}1A`,
+                        borderWidth: 1,
+                        borderColor: `${config.accent}4D`,
+                        opacity: isFetchingAiInsight ? 0.7 : 1,
+                      }}
+                    >
+                      {isFetchingAiInsight ? (
+                        <ActivityIndicator size="small" color={config.accent} />
+                      ) : (
+                        <SparklesStarsIcon color={config.accent} />
+                      )}
+                      <Text
+                        className="text-xs font-bold ml-2 font-open-sans"
+                        style={{ color: config.accent }}
+                      >
+                        Interpretar
+                      </Text>
+                    </Pressable>
+                  </View>
+
+                  {hasRequestedAiInsight ? (
+                    <View
+                      className="mt-4 rounded-2xl p-4"
+                      style={{
+                        backgroundColor: isDark
+                          ? "rgba(255,255,255,0.04)"
+                          : "#F8FAFC",
+                        borderWidth: 1,
+                        borderColor: isDark
+                          ? "rgba(255,255,255,0.08)"
+                          : "#E5E7EB",
+                      }}
+                    >
+                      {!canRequestAiInsight ? (
+                        <Text className={`text-sm font-open-sans ${ts}`}>
+                          Sao precisas pelo menos 5 leituras para gerar uma
+                          interpretacao confiavel.
+                        </Text>
+                      ) : isFetchingAiInsight ? (
+                        <Text className={`text-sm font-open-sans ${ts}`}>
+                          A gerar interpretacao da IA...
+                        </Text>
+                      ) : aiInsight ? (
+                        <>
+                          <Text className={`text-sm font-open-sans mb-3 ${tp}`}>
+                            {aiInsight.summary}
+                          </Text>
+
+                          <View className="flex-row items-center gap-2 mb-3">
+                            <View
+                              className="px-2.5 py-1 rounded-full"
+                              style={{
+                                backgroundColor:
+                                  aiInsight.riskLevel === "alto"
+                                    ? `${colors.semantic.danger}20`
+                                    : aiInsight.riskLevel === "moderado"
+                                      ? `${colors.semantic.warning}20`
+                                      : `${colors.semantic.success}20`,
+                              }}
+                            >
+                              <Text
+                                className="text-xs font-bold font-open-sans"
+                                style={{
+                                  color:
+                                    aiInsight.riskLevel === "alto"
+                                      ? colors.semantic.danger
+                                      : aiInsight.riskLevel === "moderado"
+                                        ? colors.semantic.warning
+                                        : colors.semantic.success,
+                                }}
+                              >
+                                Risco: {aiInsight.riskLevel}
+                              </Text>
+                            </View>
+                            <Text className={`text-xs font-open-sans ${ts}`}>
+                              Tendencia: {aiInsight.trend}
+                            </Text>
+                          </View>
+
+                          <View className="mb-3">
+                            {aiInsight.actions.map((action, index) => (
+                              <Text
+                                key={`${action}-${index}`}
+                                className={`text-sm font-open-sans mb-1 ${tp}`}
+                              >
+                                {`${index + 1}. ${action}`}
+                              </Text>
+                            ))}
+                          </View>
+
+                          <Text className={`text-xs font-open-sans ${ts}`}>
+                            {aiInsight.warning}
+                          </Text>
+                        </>
+                      ) : isAiInsightError ? (
+                        <Text className="text-sm font-open-sans text-red-500">
+                          {(aiInsightError as Error)?.message ||
+                            "Nao foi possivel gerar a interpretacao agora."}
+                        </Text>
+                      ) : null}
+                    </View>
+                  ) : null}
                 </View>
 
                 {/*
