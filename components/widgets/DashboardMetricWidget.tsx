@@ -8,6 +8,7 @@ interface Props {
   endpoint: string;
   variant: "1-1" | "1-2" | "1-3" | "2-3";
   iconSize?: number;
+  patientId?: string | null;
   superSimplified?: boolean;
 }
 
@@ -16,10 +17,11 @@ export default function DashboardMetricWidget({
   endpoint,
   variant,
   iconSize = 20,
+  patientId,
   superSimplified = false,
 }: Props) {
   const isBP = type === "bloodPressure";
-  const { data, isLoading } = useHealthMetric(endpoint, isBP);
+  const { data, isLoading } = useHealthMetric(endpoint, isBP, patientId);
   const isStepsWidget = type === "steps";
 
   const styles = METRIC_STYLES[type];
