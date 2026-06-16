@@ -2,7 +2,7 @@ import React from "react";
 import { Path, Svg, SvgProps } from "react-native-svg";
 
 const NotificationBell = ({
-  size = 24,
+  size = 22,
   color = "#000000",
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
@@ -15,7 +15,7 @@ const NotificationBell = ({
       accessible={props.accessible ?? false}
       focusable={false}
       stroke={color}
-      strokeWidth="3"
+      strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
       {...props}
