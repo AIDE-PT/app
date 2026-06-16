@@ -36,7 +36,7 @@ const TopBar = ({
 
   const iconColor = isDark ? "white" : "#000000";
   const ballBg = isDark ? "bg-[#131632]" : "bg-white";
-  const styleBall = `items-center w-[50px] h-[50px] rounded-[100px] justify-center ${ballBg}`;
+  const styleBall = `items-center w-[46px] h-[46px] rounded-[100px] justify-center ${ballBg}`;
 
   const backgroundStyle = showBackground
     ? {
@@ -84,25 +84,25 @@ const TopBar = ({
           <SOSButton />
 
           <TouchableOpacity
-            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
             className={styleBall}
             onPress={onNotificationPress}
             accessibilityRole="button"
             accessibilityLabel="Abrir notificações"
             accessibilityHint="Mostra os alertas e notificações."
           >
-            <NotificationBell color={iconColor} />
+            <NotificationBell color={iconColor} size={21} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
             className={styleBall}
             onPress={onSettingsPress}
             accessibilityRole="button"
             accessibilityLabel="Abrir definições"
             accessibilityHint="Abre as definições da aplicação."
           >
-            <SettingsIcon color={iconColor} />
+            <SettingsIcon color={iconColor} size={21} />
           </TouchableOpacity>
         </>
       ) : (
@@ -120,25 +120,25 @@ const TopBar = ({
 
           <View className="flex-row gap-3">
             <TouchableOpacity
-              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
               className={styleBall}
               onPress={onNotificationPress}
               accessibilityRole="button"
               accessibilityLabel="Abrir notificações"
               accessibilityHint="Mostra os alertas e notificações."
             >
-              <NotificationBell color={iconColor} />
+              <NotificationBell color={iconColor} size={21} />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
               className={styleBall}
               onPress={onSettingsPress}
               accessibilityRole="button"
               accessibilityLabel="Abrir definições"
               accessibilityHint="Abre as definições da aplicação."
             >
-              <SettingsIcon color={iconColor} />
+              <SettingsIcon color={iconColor} size={21} />
             </TouchableOpacity>
           </View>
         </>

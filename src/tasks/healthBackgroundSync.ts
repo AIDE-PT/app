@@ -133,6 +133,20 @@ type HealthSnapshot = {
   sleep: { duration: number; count: number } | null;
 };
 
+type SyncedEntryNotification = {
+  metric: HealthRecordType;
+  value: number;
+  valueSecondary?: number | null;
+  measuredAt?: string | null;
+};
+
+type BackgroundFetchModule = typeof import("expo-background-fetch");
+type TaskManagerModule = typeof import("expo-task-manager");
+type BackgroundModules = {
+  BackgroundFetch: BackgroundFetchModule;
+  TaskManager: TaskManagerModule;
+};
+
 // Mapeamento dos tipos do Health Connect para os nomes na BD.
 // Estes nomes têm de existir na tabela biometric_data_types.
 const BIOMETRIC_TYPE_NAMES: Record<HealthRecordType, string> = {
@@ -143,6 +157,19 @@ const BIOMETRIC_TYPE_NAMES: Record<HealthRecordType, string> = {
   OxygenSaturation: "oxygen_saturation",
   TotalCaloriesBurned: "total_calories_burned",
   SleepSession: "sleep",
+};
+
+const METRIC_NOTIFICATION_META: Record<
+  HealthRecordType,
+  { label: string; unit?: string }
+> = {
+  HeartRate: { label: "Frequencia cardiaca", unit: "bpm" },
+  Steps: { label: "Passos", unit: "passos" },
+  BloodPressure: { label: "Pressao arterial", unit: "mmHg" },
+  BodyTemperature: { label: "Temperatura corporal", unit: "C" },
+  OxygenSaturation: { label: "Saturacao de oxigenio", unit: "%" },
+  TotalCaloriesBurned: { label: "Calorias", unit: "kcal" },
+  SleepSession: { label: "Sono", unit: "h" },
 };
 
 // Permissões necessárias — usadas para verificação passiva (sem diálogo)
@@ -158,6 +185,35 @@ const REQUIRED_PERMISSIONS: {
   { accessType: "read", recordType: "TotalCaloriesBurned" },
   { accessType: "read", recordType: "SleepSession" },
 ];
+
+let cachedBackgroundModulesPromise: Promise<BackgroundModules | null> | null =
+  null;
+let taskDefined = false;
+
+async function loadBackgroundModules(): Promise<BackgroundModules | null> {
+  if (Platform.OS !== "android") return null;
+
+  if (!cachedBackgroundModulesPromise) {
+    cachedBackgroundModulesPromise = (async () => {
+      try {
+        const [BackgroundFetch, TaskManager] = await Promise.all([
+          import("expo-background-fetch"),
+          import("expo-task-manager"),
+        ]);
+
+        return { BackgroundFetch, TaskManager };
+      } catch (error) {
+        console.warn(
+          "[HealthSync] Expo background modules indisponiveis neste runtime:",
+          error,
+        );
+        return null;
+      }
+    })();
+  }
+
+  return cachedBackgroundModulesPromise;
+}
 
 // ─── Utilitários ───────────────────────────────────────────────────────────────
 
@@ -430,6 +486,45 @@ function buildExternalId(
   return `health_connect:${patientId}:${metricName}:${window.start}:${window.end}`;
 }
 
+function formatEntryValueForNotification(
+  entry: SyncedEntryNotification,
+): string {
+  if (entry.metric === "BloodPressure" && entry.valueSecondary != null) {
+    return `${entry.value}/${entry.valueSecondary} mmHg`;
+  }
+
+  const unit = METRIC_NOTIFICATION_META[entry.metric].unit;
+  return unit ? `${entry.value} ${unit}` : String(entry.value);
+}
+
+async function notifySyncedEntries(
+  entries: SyncedEntryNotification[],
+): Promise<void> {
+  let requestPermissionIfNeeded = true;
+
+  for (const entry of entries) {
+    try {
+      await sendLocalDataEntryNotification({
+        metricLabel: METRIC_NOTIFICATION_META[entry.metric].label,
+        valueText: formatEntryValueForNotification(entry),
+        measuredAt: entry.measuredAt,
+        requestPermissionIfNeeded,
+      });
+      requestPermissionIfNeeded = false;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      if (message.includes("permission denied")) {
+        console.warn(
+          "[HealthSync] Notificacoes sem permissao. Os dados continuam a sincronizar sem alerta.",
+        );
+        return;
+      }
+
+      console.warn("[HealthSync] Falha ao criar notificacao local:", error);
+    }
+  }
+}
+
 async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError) throw userError;
@@ -442,6 +537,7 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
 
   const nowIso = new Date().toISOString();
   const rows: BiometricDataInsert[] = [];
+  const notificationEntries: SyncedEntryNotification[] = [];
 
   const pushRow = async (
     metric: HealthRecordType,
@@ -456,6 +552,13 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
       external_id: buildExternalId(metricName, patientId, snapshot.window),
       last_modified: nowIso,
       ...row,
+    });
+
+    notificationEntries.push({
+      metric,
+      value: row.value,
+      valueSecondary: row.value_secondary,
+      measuredAt: row.measured_at,
     });
   };
 
@@ -545,6 +648,8 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
 
   if (error) throw error;
 
+  await notifySyncedEntries(notificationEntries);
+
   console.log(`[HealthSync] ✅ ${rows.length} registo(s) sincronizado(s).`);
 }
 
@@ -613,6 +718,14 @@ async function runSyncLogic(
  * Chamar uma vez após o utilizador conceder permissões Health Connect.
  */
 export async function registerHealthBackgroundSync(): Promise<void> {
+  const modules = await ensureTaskIsDefined();
+  if (!modules) {
+    console.warn("[HealthSync] Background polling indisponivel neste runtime.");
+    return;
+  }
+
+  const { TaskManager, BackgroundFetch } = modules;
+
   try {
     const { BackgroundFetch, TaskManager } = await ensureTaskDefined();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
@@ -641,6 +754,11 @@ export async function registerHealthBackgroundSync(): Promise<void> {
  * Chamar quando o utilizador revoga permissões ou faz logout.
  */
 export async function unregisterHealthBackgroundSync(): Promise<void> {
+  const modules = await loadBackgroundModules();
+  if (!modules) return;
+
+  const { TaskManager, BackgroundFetch } = modules;
+
   try {
     const { BackgroundFetch, TaskManager } = await getExpoTaskModules();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);

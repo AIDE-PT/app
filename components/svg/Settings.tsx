@@ -2,7 +2,7 @@ import React from "react";
 import { Circle, Path, Svg, SvgProps } from "react-native-svg";
 
 const SettingsIcon = ({
-  size = 24,
+  size = 22,
   color = "#000000",
   ...props
 }: SvgProps & { size?: number; color?: string }) => {
@@ -15,7 +15,7 @@ const SettingsIcon = ({
       accessible={props.accessible ?? false}
       focusable={false}
       stroke={color}
-      strokeWidth="3"
+      strokeWidth="2.2"
       strokeLinecap="round"
       strokeLinejoin="round"
       {...props}

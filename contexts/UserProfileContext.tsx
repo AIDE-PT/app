@@ -51,21 +51,40 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const userTypeId = await resolveUserTypeId(type);
 
-    const { error } = await supabase.from("users").upsert(
-      {
-        id: user.id,
-        email: user.email,
-        name:
-          typeof user.user_metadata?.name === "string"
-            ? user.user_metadata.name
-            : null,
-        user_type_id: userTypeId,
-      },
-      { onConflict: "id" },
-    );
+    // RLS often permits UPDATE on own row but blocks INSERT, so update first.
+    const { data: updatedRows, error: updateError } = await supabase
+      .from("users")
+      .update({ user_type_id: userTypeId })
+      .eq("id", user.id)
+      .select("id")
+      .limit(1);
 
-    if (error) {
-      throw new Error("Nao foi possivel guardar o tipo de perfil no backend.");
+    if (updateError) {
+      throw new Error(
+        `Nao foi possivel atualizar o tipo de perfil no backend: ${updateError.message}`,
+      );
+    }
+
+    if (updatedRows && updatedRows.length > 0) {
+      return;
+    }
+
+    // If no row exists yet, try to create it. If policy blocks INSERT, caller may
+    // continue with local cache and retry sync in a future session.
+    const { error: insertError } = await supabase.from("users").insert({
+      id: user.id,
+      email: user.email,
+      name:
+        typeof user.user_metadata?.name === "string"
+          ? user.user_metadata.name
+          : null,
+      user_type_id: userTypeId,
+    });
+
+    if (insertError) {
+      throw new Error(
+        `Nao foi possivel guardar o tipo de perfil no backend: ${insertError.message}`,
+      );
     }
   };
 
@@ -134,7 +153,14 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
 
           // If backend is still empty, backfill from resolved local profile.
           if (!backendProfile) {
-            await persistProfileTypeInBackend(resolvedProfile);
+            try {
+              await persistProfileTypeInBackend(resolvedProfile);
+            } catch (error) {
+              console.warn(
+                "Profile type backend sync skipped during load:",
+                error,
+              );
+            }
           }
         } else {
           setProfileTypeState(null);
@@ -163,7 +189,12 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       if (type) {
         await AsyncStorage.setItem(scopedKey, type);
-        await persistProfileTypeInBackend(type);
+
+        try {
+          await persistProfileTypeInBackend(type);
+        } catch (error) {
+          console.warn("Error syncing profile type with backend:", error);
+        }
       } else {
         await AsyncStorage.removeItem(scopedKey);
       }
