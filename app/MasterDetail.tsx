@@ -5,10 +5,11 @@ import { useHealthMetric, useMetricStats } from "@/hooks/useLatestMetric";
 import { useTheme } from "@/hooks/useTheme";
 import { Feather } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   AccessibilityInfo,
   ActivityIndicator,
+  Animated,
   Dimensions,
   Pressable,
   ScrollView,
@@ -77,6 +78,13 @@ interface MetricScale {
 }
 
 type PatternLevel = "low" | "medium" | "high";
+type HistoryRange = "day" | "week" | "month";
+const RANGE_TABS: readonly { key: HistoryRange; label: string }[] = [
+  { key: "day", label: "Dia" },
+  { key: "week", label: "Semana" },
+  { key: "month", label: "Mês" },
+];
+const RANGE_NAV_PADDING = 4;
 
 interface PatternIndicator {
   level: PatternLevel;
@@ -101,6 +109,21 @@ const getRelativeDayLabel = (daysAgo: number) => {
     month: "long",
     year: "numeric",
   }).format(targetDate);
+};
+
+const getRangeAxisLabels = (range: HistoryRange, points: number) => {
+  const span = Math.max(points - 1, 1);
+  if (range === "day") return { start: `-${span}h`, end: "agora" };
+  return { start: `-${span}d`, end: "hoje" };
+};
+
+const getRangeEntryTimeLabel = (range: HistoryRange, offset: number) => {
+  const safeOffset = Math.max(0, offset);
+  if (range === "day") {
+    if (safeOffset === 0) return "Agora";
+    return `Há ${safeOffset} ${safeOffset === 1 ? "hora" : "horas"}`;
+  }
+  return getRelativeDayLabel(safeOffset);
 };
 
 function getTrendText({
@@ -434,6 +457,91 @@ const METRIC_CONFIGS: Record<string, MetricConfig> = {
       },
     ],
   },
+  bloodPressure: {
+    label: "Pressão Arterial",
+    endpoint: "bloodPressure",
+    displayUnit: "mmHg",
+    lineColor: "#F87171",
+    gradientColor: "#F87171",
+    yAxisSuffix: " mmHg",
+    segments: 4,
+    yMin: 60,
+    yMax: 180,
+    accent: "#F87171",
+    accentLight: "#FEE2E2",
+    formatValue: (v) => Math.round(v).toString(),
+    getStatus: (v) => (v < 120 ? "normal" : v < 140 ? "warning" : "alert"),
+    statusLabel: (s) =>
+      s === "normal" ? "Normal" : s === "warning" ? "Elevada" : "Crítica",
+    extraCards: (h) => [
+      {
+        label: "Média",
+        value: Math.round(calcAvg(h)).toString(),
+        unit: "mmHg",
+        icon: "activity",
+      },
+    ],
+  },
+  sleep: {
+    label: "Sono",
+    endpoint: "sleep",
+    displayUnit: "h",
+    lineColor: "#818CF8",
+    gradientColor: "#818CF8",
+    yAxisSuffix: "h",
+    segments: 4,
+    yMin: 0,
+    yMax: 12,
+    accent: "#818CF8",
+    accentLight: "#E0E7FF",
+    formatValue: (v) => v.toFixed(1),
+    getStatus: (v) =>
+      v >= 7 && v <= 9 ? "normal" : v >= 6 ? "warning" : "alert",
+    statusLabel: (s) =>
+      s === "normal"
+        ? "Adequado"
+        : s === "warning"
+          ? "Insuficiente"
+          : "Privação",
+    extraCards: (h) => [
+      {
+        label: "Média",
+        value: calcAvg(h).toFixed(1),
+        unit: "h",
+        icon: "moon",
+      },
+    ],
+  },
+  cal: {
+    label: "Calorias",
+    endpoint: "cal",
+    displayUnit: "kcal",
+    lineColor: "#FB923C",
+    gradientColor: "#FB923C",
+    yAxisSuffix: "",
+    segments: 4,
+    accent: "#FB923C",
+    accentLight: "#FFEDD5",
+    formatValue: (v) => Math.round(v).toString(),
+    getStatus: (v) => (v < 1500 ? "warning" : v <= 2200 ? "normal" : "alert"),
+    statusLabel: (s) =>
+      s === "normal" ? "Na Meta" : s === "warning" ? "Abaixo" : "Acima",
+    extraCards: (h) => [
+      {
+        label: "Queimadas",
+        value: Math.round(calcAvg(h)).toString(),
+        unit: "kcal",
+        icon: "zap",
+      },
+      { label: "Meta", value: "2 000", unit: "kcal", icon: "flag" },
+      {
+        label: "Progresso",
+        value: `${Math.min(Math.round((calcAvg(h) / 2000) * 100), 100)}`,
+        unit: "%",
+        icon: "percent",
+      },
+    ],
+  },
 };
 
 const DEFAULT_TYPE = "heart";
@@ -551,6 +659,36 @@ function getStandardizedMetricScale(
         ],
       };
     case "glycemia":
+      return {
+        min: 0,
+        max: 2600,
+        bands: [
+          { label: "Abaixo", min: 0, max: 1500, color: semantic.warning },
+          { label: "Na Meta", min: 1500, max: 2200, color: semantic.success },
+          { label: "Acima", min: 2200, max: 2600, color: semantic.danger },
+        ],
+      };
+    case "bloodPressure":
+      return {
+        min: 60,
+        max: 180,
+        bands: [
+          { label: "Normal", min: 60, max: 120, color: semantic.success },
+          { label: "Elevada", min: 120, max: 140, color: semantic.warning },
+          { label: "Crítica", min: 140, max: 180, color: semantic.danger },
+        ],
+      };
+    case "sleep":
+      return {
+        min: 0,
+        max: 12,
+        bands: [
+          { label: "Privação", min: 0, max: 6, color: semantic.danger },
+          { label: "Insuficiente", min: 6, max: 7, color: semantic.warning },
+          { label: "Adequado", min: 7, max: 12, color: semantic.success },
+        ],
+      };
+    case "cal":
       return {
         min: 0,
         max: 2600,
@@ -702,11 +840,13 @@ function HeartTripleRings({
 function O2RangeColumns({
   history,
   currentValue,
+  range,
   isDark,
   semantic,
 }: {
   history: number[];
   currentValue: number;
+  range: HistoryRange;
   isDark: boolean;
   semantic: { success: string; warning: string; danger: string };
 }) {
@@ -721,10 +861,17 @@ function O2RangeColumns({
   const yMin = 85,
     yMax = 100;
 
-  // Build per-day buckets: group history into ~28 buckets
+  // Build buckets from the selected range.
   const raw =
-    history.length >= 2 ? [...history].reverse() : Array(14).fill(currentValue);
-  const bucketCount = Math.min(raw.length, 28);
+    history.length >= 2
+      ? [...history].reverse()
+      : Array(range === "day" ? 24 : range === "week" ? 7 : 30).fill(
+          currentValue,
+        );
+  const bucketCount = Math.min(
+    raw.length,
+    range === "day" ? 24 : range === "week" ? 7 : 30,
+  );
   const bucketSize = Math.max(1, Math.floor(raw.length / bucketCount));
   const buckets = Array.from({ length: bucketCount }, (_, i) => {
     const slice = raw.slice(i * bucketSize, i * bucketSize + bucketSize);
@@ -745,6 +892,7 @@ function O2RangeColumns({
   const textColor = isDark ? "rgba(255,255,255,0.62)" : "#6B7280";
   const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
   const barColor = "#7C89FF";
+  const axisLabels = getRangeAxisLabels(range, bucketCount);
 
   return (
     <View style={{ width: W, height: H, position: "relative" }}>
@@ -829,7 +977,7 @@ function O2RangeColumns({
           fill={textColor}
           textAnchor="start"
         >
-          -{bucketCount}d
+          {axisLabels.start}
         </SvgText>
         <SvgText
           x={W - pR}
@@ -838,7 +986,7 @@ function O2RangeColumns({
           fill={textColor}
           textAnchor="end"
         >
-          hoje
+          {axisLabels.end}
         </SvgText>
       </Svg>
 
@@ -849,9 +997,10 @@ function O2RangeColumns({
         const daysAgo = bucketCount - 1 - i;
         const midpoint = (b.lo + b.hi) / 2;
         const indicator = getO2PatternIndicator(midpoint, semantic);
+        const pointTimeLabel = getRangeEntryTimeLabel(range, daysAgo);
         const entryLabel = b.single
-          ? `${getRelativeDayLabel(daysAgo)}. Saturação ${Math.round(b.hi)} por cento. Indicador ${indicator.label}.`
-          : `${getRelativeDayLabel(daysAgo)}. Intervalo de saturação de ${Math.round(b.lo)} a ${Math.round(b.hi)} por cento. Indicador ${indicator.label}.`;
+          ? `${pointTimeLabel}. Saturação ${Math.round(b.hi)} por cento. Indicador ${indicator.label}.`
+          : `${pointTimeLabel}. Intervalo de saturação de ${Math.round(b.lo)} a ${Math.round(b.hi)} por cento. Indicador ${indicator.label}.`;
         const hitTop = b.single ? Math.max(0, yHi - 14) : yHi;
         const hitHeight = b.single ? 28 : Math.max(28, yLo - yHi);
         return (
@@ -909,13 +1058,15 @@ function O2RangeColumns({
   );
 }
 
-// ─── STEPS: Bar chart (14 days) + progress line overlay ──────────────────────
+// ─── STEPS: Bar chart + progress line overlay ────────────────────────────────
 function StepsBars({
   data,
+  range,
   isDark,
   semantic,
 }: {
   data: number[];
+  range: HistoryRange;
   isDark: boolean;
   semantic: { success: string; warning: string; danger: string };
 }) {
@@ -927,12 +1078,15 @@ function StepsBars({
     pB = 28;
   const cW = W - pL - pR,
     cH = H - pT - pB;
-  const bars = data.slice(0, 14).reverse();
+  const bars = data
+    .slice(0, range === "day" ? 24 : range === "week" ? 7 : 30)
+    .reverse();
   const maxVal = Math.max(...bars, 1);
   const bW = (cW / bars.length) * 0.52;
   const gW = (cW / bars.length) * 0.48;
   const trackColor = isDark ? "rgba(255,255,255,0.05)" : "#EFF6FF";
   const textColor = isDark ? "rgba(255,255,255,0.56)" : "#64748B";
+  const axisLabels = getRangeAxisLabels(range, bars.length);
 
   const pts = bars.map((v, i) => ({
     x: pL + i * (bW + gW) + bW / 2,
@@ -1014,7 +1168,7 @@ function StepsBars({
           fill={textColor}
           textAnchor="end"
         >
-          hoje
+          {axisLabels.end}
         </SvgText>
         <SvgText
           x={pL}
@@ -1023,7 +1177,7 @@ function StepsBars({
           fill={textColor}
           textAnchor="start"
         >
-          -14d
+          {axisLabels.start}
         </SvgText>
       </Svg>
 
@@ -1033,7 +1187,8 @@ function StepsBars({
         const y = pT + cH - bH;
         const daysAgo = bars.length - 1 - i;
         const indicator = getStepsPatternIndicator(v, semantic);
-        const entryLabel = `${getRelativeDayLabel(daysAgo)}. ${Math.round(v).toLocaleString("pt-PT")} passos. Indicador ${indicator.label}.`;
+        const pointTimeLabel = getRangeEntryTimeLabel(range, daysAgo);
+        const entryLabel = `${pointTimeLabel}. ${Math.round(v).toLocaleString("pt-PT")} passos. Indicador ${indicator.label}.`;
         return (
           <Pressable
             key={`steps-hit-${i}`}
@@ -1324,21 +1479,27 @@ function CalBurst({ value, isDark }: { value: number; isDark: boolean }) {
 function StressWave({
   value,
   history,
+  range,
   isDark,
   colorFn,
   indicatorFn,
 }: {
   value: number;
   history: number[];
+  range: HistoryRange;
   isDark: boolean;
   colorFn?: (v: number) => string;
   indicatorFn?: (v: number) => PatternIndicator;
 }) {
   const W = screenWidth - 80,
     H = 150;
-  const bars = history.slice(0, 24).reverse();
+  const bars = history
+    .slice(0, range === "day" ? 24 : range === "week" ? 7 : 30)
+    .reverse();
   if (bars.length < 2) return null;
-  const midY = H / 2;
+  const chartBottom = H - 16;
+  const chartTop = 12;
+  const chartHeight = chartBottom - chartTop;
   const bW = (W / bars.length) * 0.5;
   const gW = (W / bars.length) * 0.5;
   const stressColor = (v: number) =>
@@ -1346,41 +1507,34 @@ function StressWave({
   const getColor = colorFn ?? stressColor;
   const maxVal = Math.max(...bars, 1);
   const normalize = (v: number) => v / maxVal;
+  const axisLabels = getRangeAxisLabels(range, bars.length);
   return (
     <View style={{ width: W, height: H, position: "relative" }}>
       <Svg width={W} height={H}>
         {bars.map((v, i) => {
-          const halfH = normalize(v) * (H * 0.43);
+          const barH = Math.max(normalize(v) * chartHeight, 2);
           const x = i * (bW + gW);
+          const y = chartBottom - barH;
           const color = getColor(v);
           return (
             <G key={i}>
               <Rect
                 x={x}
-                y={midY - halfH}
+                y={y}
                 width={bW}
-                height={halfH}
+                height={barH}
                 rx={bW / 2}
                 fill={color}
                 opacity="0.9"
-              />
-              <Rect
-                x={x}
-                y={midY}
-                width={bW}
-                height={halfH}
-                rx={bW / 2}
-                fill={color}
-                opacity="0.45"
               />
             </G>
           );
         })}
         <Line
           x1={0}
-          y1={midY}
+          y1={chartBottom}
           x2={W}
-          y2={midY}
+          y2={chartBottom}
           stroke={isDark ? "rgba(255,255,255,0.13)" : "rgba(0,0,0,0.08)"}
           strokeWidth="1"
           strokeDasharray="4,4"
@@ -1395,14 +1549,34 @@ function StressWave({
         >
           {Math.round(value)}
         </SvgText>
+        <SvgText
+          x={0}
+          y={H - 2}
+          fontSize="9"
+          fill={isDark ? "rgba(255,255,255,0.56)" : "#64748B"}
+          textAnchor="start"
+        >
+          {axisLabels.start}
+        </SvgText>
+        <SvgText
+          x={W}
+          y={H - 2}
+          fontSize="9"
+          fill={isDark ? "rgba(255,255,255,0.56)" : "#64748B"}
+          textAnchor="end"
+        >
+          {axisLabels.end}
+        </SvgText>
       </Svg>
 
       {bars.map((v, i) => {
-        const halfH = normalize(v) * (H * 0.43);
+        const barH = Math.max(normalize(v) * chartHeight, 2);
         const x = i * (bW + gW);
+        const y = chartBottom - barH;
         const daysAgo = bars.length - 1 - i;
         const indicator = indicatorFn?.(v);
-        const entryLabel = `${getRelativeDayLabel(daysAgo)}. Valor ${Math.round(v)}.${indicator ? ` Indicador ${indicator.label}.` : ""}`;
+        const pointTimeLabel = getRangeEntryTimeLabel(range, daysAgo);
+        const entryLabel = `${pointTimeLabel}. Valor ${Math.round(v)}.${indicator ? ` Indicador ${indicator.label}.` : ""}`;
         return (
           <Pressable
             key={`wave-hit-${i}`}
@@ -1410,9 +1584,9 @@ function StressWave({
               styles.chartHit,
               {
                 left: x,
-                top: midY - halfH,
+                top: y,
                 width: Math.max(bW, 18),
-                height: Math.max(halfH * 2, 28),
+                height: Math.max(barH, 28),
               },
             ]}
             accessible
@@ -1429,8 +1603,9 @@ function StressWave({
 
       {indicatorFn &&
         bars.map((v, i) => {
-          const halfH = normalize(v) * (H * 0.43);
+          const barH = Math.max(normalize(v) * chartHeight, 2);
           const x = i * (bW + gW);
+          const y = chartBottom - barH;
           const indicator = indicatorFn(v);
           return (
             <View
@@ -1440,7 +1615,7 @@ function StressWave({
               style={{
                 position: "absolute",
                 left: x + bW / 2 - 8,
-                top: Math.max(2, midY - halfH - 18),
+                top: Math.max(2, y - 18),
                 width: 16,
                 height: 16,
                 borderRadius: 8,
@@ -1473,9 +1648,18 @@ const styles = StyleSheet.create({
 // ═══════════════════════════════════════════════════════════════════════════════
 // MAIN COMPONENT
 // ═══════════════════════════════════════════════════════════════════════════════
+// Maps legacy or malformed widget IDs to the correct METRIC_CONFIGS key
+const WIDGET_TYPE_ALIAS: Record<string, string> = {
+  "blood Pressure": "bloodPressure",
+};
+
 export default function MasterDetail() {
   const { type } = useLocalSearchParams<{ type: string }>();
-  const resolvedType = type && METRIC_CONFIGS[type] ? type : DEFAULT_TYPE;
+  const normalizedType = WIDGET_TYPE_ALIAS[type ?? ""] ?? type;
+  const resolvedType =
+    normalizedType && METRIC_CONFIGS[normalizedType]
+      ? normalizedType
+      : DEFAULT_TYPE;
   const baseConfig = METRIC_CONFIGS[resolvedType];
   const { isDark, colors } = useTheme();
   const config: MetricConfig = {
@@ -1505,12 +1689,48 @@ export default function MasterDetail() {
 
   const { data: metricData, isLoading } = useHealthMetric(config.endpoint);
   const { data: stats } = useMetricStats(config.endpoint);
+  const [selectedRange, setSelectedRange] = useState<HistoryRange>("day");
+  const [rangeNavWidth, setRangeNavWidth] = useState(0);
+  const activeRangePillX = useRef(new Animated.Value(0)).current;
+  const activeRangeIndex = RANGE_TABS.findIndex(
+    (tab) => tab.key === selectedRange,
+  );
+  const rangeTabWidth =
+    rangeNavWidth > RANGE_NAV_PADDING * 2
+      ? (rangeNavWidth - RANGE_NAV_PADDING * 2) / RANGE_TABS.length
+      : 0;
 
   const currentRaw: number = metricData?.latest?.value ?? 0;
   const history: number[] = metricData?.history ?? [];
-  const chartData = history.length >= 2 ? [...history].reverse() : [0, 0];
+  const rangeSampleCount =
+    selectedRange === "day" ? 24 : selectedRange === "week" ? 7 : 30;
+  const rangeHistory = history.slice(
+    0,
+    Math.min(history.length, rangeSampleCount),
+  );
+  const chartData =
+    rangeHistory.length >= 2
+      ? [...rangeHistory].reverse()
+      : history.length >= 2
+        ? [...history.slice(0, 2)].reverse()
+        : [0, 0];
   const allTimeMin = stats?.min ?? (history.length ? Math.min(...history) : 0);
   const allTimeMax = stats?.max ?? (history.length ? Math.max(...history) : 0);
+  const dayLabel = new Intl.DateTimeFormat("pt-PT", {
+    weekday: "long",
+    day: "2-digit",
+    month: "short",
+  }).format(new Date());
+  const monthLabel = new Intl.DateTimeFormat("pt-PT", {
+    month: "long",
+    year: "numeric",
+  }).format(new Date());
+  const rangeDescription =
+    selectedRange === "day"
+      ? `Dia: ${dayLabel}`
+      : selectedRange === "week"
+        ? "Última semana"
+        : `Mês atual: ${monthLabel}`;
 
   const status = config.getStatus(currentRaw);
   const palette = buildStatusPalette(colors.semantic, isDark)[status];
@@ -1541,6 +1761,15 @@ export default function MasterDetail() {
       lastAnnouncedSummaryRef.current = accessibleSummary.accessibilityLabel;
     });
   }, [isLoading, accessibleSummary.accessibilityLabel]);
+
+  useEffect(() => {
+    if (rangeTabWidth <= 0 || activeRangeIndex < 0) return;
+    Animated.timing(activeRangePillX, {
+      toValue: activeRangeIndex * rangeTabWidth,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [activeRangeIndex, activeRangePillX, rangeTabWidth]);
 
   const cardBg = isDark
     ? "bg-aide-dark-card border-white/10"
@@ -1700,237 +1929,306 @@ export default function MasterDetail() {
                 />
               </View>
             ) : (
-              <ScrollView
-                className="flex-1"
-                showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 48 }}
-              >
-                <View
-                  accessible
-                  collapsable={false}
-                  importantForAccessibility="yes"
-                  accessibilityLabel={accessibleSummary.accessibilityLabel}
-                  style={{
-                    position: "absolute",
-                    width: 1,
-                    height: 1,
-                    opacity: 0,
-                  }}
-                />
-
-                {/* ── Hero Value Card ────────────────────────────────────── */}
-                <View
-                  className={`rounded-3xl p-6 border mb-5 ${cardBg}`}
-                  style={shadow}
-                  accessible
-                  focusable
-                  importantForAccessibility="yes"
-                  accessibilityRole="text"
-                  accessibilityLabel={heroAccessibilityLabel}
-                >
-                  <View className="flex-row items-start justify-between gap-4">
-                    <View className="flex-1" style={{ minWidth: 0 }}>
-                      <Text
-                        className="text-base font-safiro"
-                        style={{ color: config.accent }}
-                      >
-                        {heroTitle}
-                      </Text>
-                      <View
-                        className="mb-3"
-                        accessible
-                        accessibilityRole="text"
-                        accessibilityLabel={spokenCurrent}
-                        focusable
-                        importantForAccessibility="yes"
-                      >
-                        <Text
-                          style={{
-                            color: isDark ? "#FFFFFF" : "#111827",
-                            fontSize: heroFontSize,
-                            lineHeight: heroLineHeight,
-                            fontWeight: "800",
-                            letterSpacing: -2,
-                          }}
-                          className="font-open-sans"
-                          numberOfLines={1}
-                          adjustsFontSizeToFit
-                          minimumFontScale={0.8}
-                          accessible={false}
-                        >
-                          {heroValue}
-                        </Text>
-                        <Text
-                          className={`text-base font-medium ${tu}`}
-                          accessible={false}
-                        >
-                          {config.displayUnit}
-                        </Text>
-                      </View>
-                      <View
-                        className="self-start flex-row items-center gap-1.5 px-4 py-1.5 rounded-full"
+              <>
+                <View className="w-full mb-5">
+                  <View
+                    onLayout={(event) =>
+                      setRangeNavWidth(event.nativeEvent.layout.width)
+                    }
+                    className={`flex-row rounded-full p-1 ${
+                      isDark ? "bg-white/10" : "bg-slate-100"
+                    }`}
+                    style={{
+                      borderWidth: 1,
+                      borderColor: isDark
+                        ? "rgba(255,255,255,0.12)"
+                        : "rgba(15,23,42,0.08)",
+                      shadowColor: isDark ? "#000000" : "#0F172A",
+                      shadowOffset: { width: 0, height: 6 },
+                      shadowOpacity: isDark ? 0.4 : 0.12,
+                      shadowRadius: 12,
+                      elevation: 6,
+                    }}
+                  >
+                    {rangeTabWidth > 0 ? (
+                      <Animated.View
+                        pointerEvents="none"
                         style={{
-                          backgroundColor: palette.bg,
-                          borderWidth: 1,
-                          borderColor: palette.border,
+                          position: "absolute",
+                          top: RANGE_NAV_PADDING,
+                          bottom: RANGE_NAV_PADDING,
+                          left: RANGE_NAV_PADDING,
+                          width: rangeTabWidth,
+                          borderRadius: 999,
+                          backgroundColor: config.accent,
+                          transform: [{ translateX: activeRangePillX }],
                         }}
-                      >
-                        <Feather
-                          name={
-                            status === "normal"
-                              ? "check-circle"
-                              : status === "warning"
-                                ? "alert-circle"
-                                : "alert-triangle"
-                          }
-                          size={13}
-                          color={palette.text}
-                          accessible={false}
-                        />
-                        <Text
-                          className="text-xs font-bold font-open-sans"
-                          style={{ color: palette.text }}
+                      />
+                    ) : null}
+                    {RANGE_TABS.map((tab) => {
+                      const isActive = selectedRange === tab.key;
+                      return (
+                        <Pressable
+                          key={tab.key}
+                          className="flex-1 rounded-full px-3 py-2 items-center"
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: isActive }}
+                          accessibilityLabel={`Selecionar ${tab.label.toLowerCase()}`}
+                          onPress={() => setSelectedRange(tab.key)}
                         >
-                          {config.statusLabel(status)}
-                        </Text>
-                      </View>
-                    </View>
-                    <View
-                      className="items-end gap-3 flex-shrink-0"
-                      style={{ width: 120 }}
-                    >
-                      {resolvedType === "steps" ? (
-                        <>
-                          <View
-                            className="items-end"
-                            accessible
-                            accessibilityRole="text"
-                            accessibilityLabel={`Media diaria ${spokenDailyAverage}.`}
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{
+                              color: isActive
+                                ? "#FFFFFF"
+                                : isDark
+                                  ? "rgba(255,255,255,0.72)"
+                                  : "#334155",
+                              fontWeight: isActive ? "700" : "500",
+                            }}
                           >
-                            <View className="flex-row items-baseline">
-                              <Text
-                                className={`text-2xl font-bold font-open-sans ${tp}`}
-                                accessible={false}
-                              >
-                                {Math.round(calcAvg(history)).toLocaleString(
-                                  "pt-PT",
-                                )}
-                              </Text>
-                              <Text
-                                className={`text-xs ml-1 ${tu}`}
-                                accessible={false}
-                              >
-                                passos
-                              </Text>
-                            </View>
-                            <Text
-                              className="text-xs font-open-sans mt-0.5"
-                              style={{ color: tAccent }}
-                              accessible={false}
-                            >
-                              Média Diária
-                            </Text>
-                          </View>
-                          <View
-                            className={`w-10 h-[2px] ${isDark ? "bg-white/15" : "bg-gray-300"}`}
-                          />
-                          <View
-                            className="items-end"
-                            accessible
-                            accessibilityRole="text"
-                            accessibilityLabel="Meta 10 mil passos."
-                          >
-                            <View className="flex-row items-baseline">
-                              <Text
-                                className={`text-2xl font-bold font-open-sans ${tp}`}
-                                accessible={false}
-                              >
-                                10 000
-                              </Text>
-                              <Text
-                                className={`text-xs ml-1 ${tu}`}
-                                accessible={false}
-                              >
-                                passos
-                              </Text>
-                            </View>
-                            <Text
-                              className="text-xs font-open-sans mt-0.5"
-                              style={{ color: tAccent }}
-                              accessible={false}
-                            >
-                              Meta
-                            </Text>
-                          </View>
-                        </>
-                      ) : (
-                        <>
-                          <View
-                            className="items-end"
-                            accessible
-                            accessibilityRole="text"
-                            accessibilityLabel={`Maximo ${spokenMax}.`}
-                          >
-                            <View className="flex-row items-baseline">
-                              <Text
-                                className={`text-2xl font-bold font-open-sans ${tp}`}
-                                accessible={false}
-                              >
-                                {allTimeMax}
-                              </Text>
-                              <Text
-                                className={`text-xs ml-1 ${tu}`}
-                                accessible={false}
-                              >
-                                {config.displayUnit}
-                              </Text>
-                            </View>
-                            <Text
-                              className="text-xs font-open-sans mt-0.5"
-                              style={{ color: tAccent }}
-                              accessible={false}
-                            >
-                              Máximo
-                            </Text>
-                          </View>
-                          <View
-                            className={`w-10 h-[2px] ${isDark ? "bg-white/15" : "bg-gray-300"}`}
-                          />
-                          <View
-                            className="items-end"
-                            accessible
-                            accessibilityRole="text"
-                            accessibilityLabel={`Minimo ${spokenMin}.`}
-                          >
-                            <View className="flex-row items-baseline">
-                              <Text
-                                className={`text-2xl font-bold font-open-sans ${tp}`}
-                                accessible={false}
-                              >
-                                {allTimeMin}
-                              </Text>
-                              <Text
-                                className={`text-xs ml-1 ${tu}`}
-                                accessible={false}
-                              >
-                                {config.displayUnit}
-                              </Text>
-                            </View>
-                            <Text
-                              className="text-xs font-open-sans mt-0.5"
-                              style={{ color: tAccent }}
-                              accessible={false}
-                            >
-                              Mínimo
-                            </Text>
-                          </View>
-                        </>
-                      )}
-                    </View>
+                            {tab.label}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
                   </View>
+                  <Text className={`text-xs font-open-sans mt-2 ${ts}`}>
+                    {rangeDescription}
+                  </Text>
                 </View>
 
-                {/*
+                <ScrollView
+                  className="flex-1"
+                  showsVerticalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 48 }}
+                >
+                  <View
+                    accessible
+                    collapsable={false}
+                    importantForAccessibility="yes"
+                    accessibilityLabel={accessibleSummary.accessibilityLabel}
+                    style={{
+                      position: "absolute",
+                      width: 1,
+                      height: 1,
+                      opacity: 0,
+                    }}
+                  />
+
+                  {/* ── Hero Value Card ────────────────────────────────────── */}
+                  <View
+                    className={`rounded-3xl p-6 border mb-5 ${cardBg}`}
+                    style={shadow}
+                    accessible
+                    focusable
+                    importantForAccessibility="yes"
+                    accessibilityRole="text"
+                    accessibilityLabel={heroAccessibilityLabel}
+                  >
+                    <View className="flex-row items-start justify-between gap-4">
+                      <View className="flex-1" style={{ minWidth: 0 }}>
+                        <Text
+                          className="text-base font-safiro"
+                          style={{ color: config.accent }}
+                        >
+                          {heroTitle}
+                        </Text>
+                        <View
+                          className="mb-3"
+                          accessible
+                          accessibilityRole="text"
+                          accessibilityLabel={spokenCurrent}
+                          focusable
+                          importantForAccessibility="yes"
+                        >
+                          <Text
+                            style={{
+                              color: isDark ? "#FFFFFF" : "#111827",
+                              fontSize: heroFontSize,
+                              lineHeight: heroLineHeight,
+                              fontWeight: "800",
+                              letterSpacing: -2,
+                            }}
+                            className="font-open-sans"
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.8}
+                            accessible={false}
+                          >
+                            {heroValue}
+                          </Text>
+                          <Text
+                            className={`text-base font-medium ${tu}`}
+                            accessible={false}
+                          >
+                            {config.displayUnit}
+                          </Text>
+                        </View>
+                        <View
+                          className="self-start flex-row items-center gap-1.5 px-4 py-1.5 rounded-full"
+                          style={{
+                            backgroundColor: palette.bg,
+                            borderWidth: 1,
+                            borderColor: palette.border,
+                          }}
+                        >
+                          <Feather
+                            name={
+                              status === "normal"
+                                ? "check-circle"
+                                : status === "warning"
+                                  ? "alert-circle"
+                                  : "alert-triangle"
+                            }
+                            size={13}
+                            color={palette.text}
+                            accessible={false}
+                          />
+                          <Text
+                            className="text-xs font-bold font-open-sans"
+                            style={{ color: palette.text }}
+                          >
+                            {config.statusLabel(status)}
+                          </Text>
+                        </View>
+                      </View>
+                      <View
+                        className="items-end gap-3 flex-shrink-0"
+                        style={{ width: 120 }}
+                      >
+                        {resolvedType === "steps" ? (
+                          <>
+                            <View
+                              className="items-end"
+                              accessible
+                              accessibilityRole="text"
+                              accessibilityLabel={`Media diaria ${spokenDailyAverage}.`}
+                            >
+                              <View className="flex-row items-baseline">
+                                <Text
+                                  className={`text-2xl font-bold font-open-sans ${tp}`}
+                                  accessible={false}
+                                >
+                                  {Math.round(calcAvg(history)).toLocaleString(
+                                    "pt-PT",
+                                  )}
+                                </Text>
+                                <Text
+                                  className={`text-xs ml-1 ${tu}`}
+                                  accessible={false}
+                                >
+                                  passos
+                                </Text>
+                              </View>
+                              <Text
+                                className="text-xs font-open-sans mt-0.5"
+                                style={{ color: tAccent }}
+                                accessible={false}
+                              >
+                                Média Diária
+                              </Text>
+                            </View>
+                            <View
+                              className={`w-10 h-[2px] ${isDark ? "bg-white/15" : "bg-gray-300"}`}
+                            />
+                            <View
+                              className="items-end"
+                              accessible
+                              accessibilityRole="text"
+                              accessibilityLabel="Meta 10 mil passos."
+                            >
+                              <View className="flex-row items-baseline">
+                                <Text
+                                  className={`text-2xl font-bold font-open-sans ${tp}`}
+                                  accessible={false}
+                                >
+                                  10 000
+                                </Text>
+                                <Text
+                                  className={`text-xs ml-1 ${tu}`}
+                                  accessible={false}
+                                >
+                                  passos
+                                </Text>
+                              </View>
+                              <Text
+                                className="text-xs font-open-sans mt-0.5"
+                                style={{ color: tAccent }}
+                                accessible={false}
+                              >
+                                Meta
+                              </Text>
+                            </View>
+                          </>
+                        ) : (
+                          <>
+                            <View
+                              className="items-end"
+                              accessible
+                              accessibilityRole="text"
+                              accessibilityLabel={`Maximo ${spokenMax}.`}
+                            >
+                              <View className="flex-row items-baseline">
+                                <Text
+                                  className={`text-2xl font-bold font-open-sans ${tp}`}
+                                  accessible={false}
+                                >
+                                  {allTimeMax}
+                                </Text>
+                                <Text
+                                  className={`text-xs ml-1 ${tu}`}
+                                  accessible={false}
+                                >
+                                  {config.displayUnit}
+                                </Text>
+                              </View>
+                              <Text
+                                className="text-xs font-open-sans mt-0.5"
+                                style={{ color: tAccent }}
+                                accessible={false}
+                              >
+                                Máximo
+                              </Text>
+                            </View>
+                            <View
+                              className={`w-10 h-[2px] ${isDark ? "bg-white/15" : "bg-gray-300"}`}
+                            />
+                            <View
+                              className="items-end"
+                              accessible
+                              accessibilityRole="text"
+                              accessibilityLabel={`Minimo ${spokenMin}.`}
+                            >
+                              <View className="flex-row items-baseline">
+                                <Text
+                                  className={`text-2xl font-bold font-open-sans ${tp}`}
+                                  accessible={false}
+                                >
+                                  {allTimeMin}
+                                </Text>
+                                <Text
+                                  className={`text-xs ml-1 ${tu}`}
+                                  accessible={false}
+                                >
+                                  {config.displayUnit}
+                                </Text>
+                              </View>
+                              <Text
+                                className="text-xs font-open-sans mt-0.5"
+                                style={{ color: tAccent }}
+                                accessible={false}
+                              >
+                                Mínimo
+                              </Text>
+                            </View>
+                          </>
+                        )}
+                      </View>
+                    </View>
+                  </View>
+
+                  {/*
                 <View
                   className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
                   style={shadow}
@@ -1948,857 +2246,881 @@ export default function MasterDetail() {
                 </View>
                 */}
 
-                {/* ════ UNIQUE VISUALIZATIONS PER METRIC ════ */}
+                  {/* ════ UNIQUE VISUALIZATIONS PER METRIC ════ */}
 
-                {/* ── HEART: EEG waveform ───────────────────────────────── */}
-                {resolvedType === "heart" && (
-                  <View
-                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
-                    style={shadow}
-                  >
-                    <View className="flex-row items-center justify-between mb-4">
-                      <Text
-                        className="text-base font-safiro"
-                        style={{ color: config.accent }}
+                  {/* ── HEART: EEG waveform ───────────────────────────────── */}
+                  {resolvedType === "heart" && (
+                    <View
+                      className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                      style={shadow}
+                    >
+                      <View className="flex-row items-center justify-between mb-4">
+                        <Text
+                          className="text-base font-safiro"
+                          style={{ color: config.accent }}
+                        >
+                          Perfil Cardíaco
+                        </Text>
+                        <View className="flex-row gap-4">
+                          {[
+                            { color: colors.semantic.success, label: "Normal" },
+                            {
+                              color: colors.semantic.warning,
+                              label: "Elevado",
+                            },
+                            { color: colors.semantic.danger, label: "Crítico" },
+                          ].map((r) => (
+                            <View
+                              key={r.label}
+                              className="items-center gap-0.5"
+                              accessible
+                              accessibilityRole="text"
+                              accessibilityLabel={`Legenda cardíaca: ${r.label}.`}
+                            >
+                              <View
+                                className="w-3 h-3 rounded-full"
+                                style={{ backgroundColor: r.color }}
+                                accessible={false}
+                              />
+                              <Text
+                                className="text-xs font-open-sans"
+                                style={{
+                                  color: isDark
+                                    ? "rgba(255,255,255,0.62)"
+                                    : "#6B7280",
+                                }}
+                                accessible={false}
+                              >
+                                {r.label}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
+                      <View
+                        className="items-center"
+                        accessible={false}
+                        importantForAccessibility="no"
                       >
-                        Perfil Cardíaco
-                      </Text>
-                      <View className="flex-row gap-4">
-                        {[
-                          { color: colors.semantic.success, label: "Normal" },
-                          { color: colors.semantic.warning, label: "Elevado" },
-                          { color: colors.semantic.danger, label: "Crítico" },
-                        ].map((r) => (
+                        <StressWave
+                          value={currentRaw}
+                          history={rangeHistory}
+                          range={selectedRange}
+                          isDark={isDark}
+                          indicatorFn={(v) =>
+                            getHeartPatternIndicator(v, colors.semantic)
+                          }
+                          colorFn={(v) =>
+                            v <= 60
+                              ? "#93C5FD"
+                              : v <= 100
+                                ? colors.semantic.success
+                                : v <= 140
+                                  ? colors.semantic.warning
+                                  : colors.semantic.danger
+                          }
+                        />
+                      </View>
+                      <View className="flex-row h-2 rounded-full overflow-hidden mt-4">
+                        <View
+                          style={{ flex: 20, backgroundColor: "#93C5FD" }}
+                        />
+                        <View
+                          style={{
+                            flex: 40,
+                            backgroundColor: colors.semantic.success,
+                          }}
+                        />
+                        <View
+                          style={{
+                            flex: 30,
+                            backgroundColor: colors.semantic.warning,
+                          }}
+                        />
+                        <View
+                          style={{
+                            flex: 10,
+                            backgroundColor: colors.semantic.danger,
+                          }}
+                        />
+                      </View>
+                      <View className="flex-row justify-between mt-1">
+                        {["40", "60", "100", "140+"].map((v) => (
+                          <Text
+                            key={v}
+                            className={`text-xs font-open-sans ${ts}`}
+                          >
+                            {v}
+                          </Text>
+                        ))}
+                      </View>
+                      <View
+                        className="rounded-2xl p-3 mt-3"
+                        style={{
+                          backgroundColor: isDark
+                            ? "rgba(255,255,255,0.04)"
+                            : "#F6F7FF",
+                        }}
+                        accessible
+                        accessibilityRole="text"
+                        accessibilityLabel="Indicadores do grafico cardiaco: seta para baixo indica batimento baixo, traco indica normal, seta para cima indica elevado ou critico."
+                      >
+                        <Text className={`text-xs font-open-sans mb-2 ${ts}`}>
+                          Indicadores por barra
+                        </Text>
+                        <View className="flex-row items-center justify-between">
+                          <View className="flex-row items-center gap-1.5">
+                            <Feather
+                              name="chevron-down"
+                              size={12}
+                              color="#93C5FD"
+                            />
+                            <Text className={`text-xs font-open-sans ${ts}`}>
+                              Baixo
+                            </Text>
+                          </View>
+                          <View className="flex-row items-center gap-1.5">
+                            <Feather
+                              name="minus"
+                              size={12}
+                              color={colors.semantic.success}
+                            />
+                            <Text className={`text-xs font-open-sans ${ts}`}>
+                              Normal
+                            </Text>
+                          </View>
+                          <View className="flex-row items-center gap-1.5">
+                            <Feather
+                              name="chevron-up"
+                              size={12}
+                              color={colors.semantic.warning}
+                            />
+                            <Text className={`text-xs font-open-sans ${ts}`}>
+                              Elevado
+                            </Text>
+                          </View>
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
+                  {/* ── O2: Range column chart ──────────────────────────── */}
+                  {resolvedType === "o2" && (
+                    <View
+                      className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                      style={shadow}
+                    >
+                      <View className="flex-row items-center justify-between mb-1">
+                        <Text
+                          className="text-base font-safiro"
+                          style={{ color: config.accent }}
+                        >
+                          Saturação Atual
+                        </Text>
+                        <Text className={`text-xs font-open-sans ${ts}`}>
+                          {rangeDescription}
+                        </Text>
+                      </View>
+                      <View className="flex-row items-baseline gap-1 mb-3">
+                        <Text
+                          style={{
+                            color: isDark ? "#FFF" : "#111827",
+                            fontSize: 28,
+                            fontWeight: "800",
+                          }}
+                          className="font-open-sans"
+                        >
+                          {allTimeMin}–{allTimeMax}
+                        </Text>
+                        <Text className={`text-sm font-open-sans ${tu}`}>
+                          %
+                        </Text>
+                      </View>
+                      <View accessible={false} importantForAccessibility="no">
+                        <O2RangeColumns
+                          history={rangeHistory}
+                          currentValue={currentRaw}
+                          range={selectedRange}
+                          isDark={isDark}
+                          semantic={colors.semantic}
+                        />
+                      </View>
+                      <View className="flex-row justify-center gap-8 mt-4">
+                        {O2_LEGEND.map((r) => (
                           <View
                             key={r.label}
-                            className="items-center gap-0.5"
+                            className="items-center gap-1"
                             accessible
                             accessibilityRole="text"
-                            accessibilityLabel={`Legenda cardíaca: ${r.label}.`}
+                            accessibilityLabel={`${r.label}. ${r.desc}.`}
                           >
                             <View
-                              className="w-3 h-3 rounded-full"
+                              className="w-8 h-3 rounded-full"
                               style={{ backgroundColor: r.color }}
                               accessible={false}
                             />
                             <Text
                               className="text-xs font-open-sans"
-                              style={{
-                                color: isDark
-                                  ? "rgba(255,255,255,0.62)"
-                                  : "#6B7280",
-                              }}
+                              style={{ color: tAccent }}
                               accessible={false}
                             >
                               {r.label}
+                            </Text>
+                            <Text
+                              className={`text-xs font-open-sans ${ts}`}
+                              accessible={false}
+                            >
+                              {r.desc}
                             </Text>
                           </View>
                         ))}
                       </View>
                     </View>
-                    <View
-                      className="items-center"
-                      accessible={false}
-                      importantForAccessibility="no"
-                    >
-                      <StressWave
-                        value={currentRaw}
-                        history={history}
-                        isDark={isDark}
-                        indicatorFn={(v) =>
-                          getHeartPatternIndicator(v, colors.semantic)
-                        }
-                        colorFn={(v) =>
-                          v <= 60
-                            ? "#93C5FD"
-                            : v <= 100
-                              ? colors.semantic.success
-                              : v <= 140
-                                ? colors.semantic.warning
-                                : colors.semantic.danger
-                        }
-                      />
-                    </View>
-                    <View className="flex-row h-2 rounded-full overflow-hidden mt-4">
-                      <View style={{ flex: 20, backgroundColor: "#93C5FD" }} />
-                      <View
-                        style={{
-                          flex: 40,
-                          backgroundColor: colors.semantic.success,
-                        }}
-                      />
-                      <View
-                        style={{
-                          flex: 30,
-                          backgroundColor: colors.semantic.warning,
-                        }}
-                      />
-                      <View
-                        style={{
-                          flex: 10,
-                          backgroundColor: colors.semantic.danger,
-                        }}
-                      />
-                    </View>
-                    <View className="flex-row justify-between mt-1">
-                      {["40", "60", "100", "140+"].map((v) => (
-                        <Text
-                          key={v}
-                          className={`text-xs font-open-sans ${ts}`}
-                        >
-                          {v}
-                        </Text>
-                      ))}
-                    </View>
-                    <View
-                      className="rounded-2xl p-3 mt-3"
-                      style={{
-                        backgroundColor: isDark
-                          ? "rgba(255,255,255,0.04)"
-                          : "#F6F7FF",
-                      }}
-                      accessible
-                      accessibilityRole="text"
-                      accessibilityLabel="Indicadores do grafico cardiaco: seta para baixo indica batimento baixo, traco indica normal, seta para cima indica elevado ou critico."
-                    >
-                      <Text className={`text-xs font-open-sans mb-2 ${ts}`}>
-                        Indicadores por barra
-                      </Text>
-                      <View className="flex-row items-center justify-between">
-                        <View className="flex-row items-center gap-1.5">
-                          <Feather
-                            name="chevron-down"
-                            size={12}
-                            color="#93C5FD"
-                          />
-                          <Text className={`text-xs font-open-sans ${ts}`}>
-                            Baixo
-                          </Text>
-                        </View>
-                        <View className="flex-row items-center gap-1.5">
-                          <Feather
-                            name="minus"
-                            size={12}
-                            color={colors.semantic.success}
-                          />
-                          <Text className={`text-xs font-open-sans ${ts}`}>
-                            Normal
-                          </Text>
-                        </View>
-                        <View className="flex-row items-center gap-1.5">
-                          <Feather
-                            name="chevron-up"
-                            size={12}
-                            color={colors.semantic.warning}
-                          />
-                          <Text className={`text-xs font-open-sans ${ts}`}>
-                            Elevado
-                          </Text>
-                        </View>
-                      </View>
-                    </View>
-                  </View>
-                )}
+                  )}
 
-                {/* ── O2: Range column chart ──────────────────────────── */}
-                {resolvedType === "o2" && (
-                  <View
-                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
-                    style={shadow}
-                  >
-                    <View className="flex-row items-center justify-between mb-1">
-                      <Text
-                        className="text-base font-safiro"
-                        style={{ color: config.accent }}
-                      >
-                        Saturação Atual
-                      </Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>
-                        Intervalo diário
-                      </Text>
-                    </View>
-                    <View className="flex-row items-baseline gap-1 mb-3">
-                      <Text
-                        style={{
-                          color: isDark ? "#FFF" : "#111827",
-                          fontSize: 28,
-                          fontWeight: "800",
-                        }}
-                        className="font-open-sans"
-                      >
-                        {allTimeMin}–{allTimeMax}
-                      </Text>
-                      <Text className={`text-sm font-open-sans ${tu}`}>%</Text>
-                    </View>
-                    <View accessible={false} importantForAccessibility="no">
-                      <O2RangeColumns
-                        history={history}
-                        currentValue={currentRaw}
-                        isDark={isDark}
-                        semantic={colors.semantic}
-                      />
-                    </View>
-                    <View className="flex-row justify-center gap-8 mt-4">
-                      {O2_LEGEND.map((r) => (
-                        <View
-                          key={r.label}
-                          className="items-center gap-1"
-                          accessible
-                          accessibilityRole="text"
-                          accessibilityLabel={`${r.label}. ${r.desc}.`}
+                  {/* ── STEPS: Bar + line chart ───────────────────────────── */}
+                  {resolvedType === "steps" && (
+                    <View
+                      className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                      style={shadow}
+                    >
+                      <View className="flex-row items-center justify-between mb-4">
+                        <Text
+                          className="text-base font-safiro"
+                          style={{ color: config.accent }}
                         >
-                          <View
-                            className="w-8 h-3 rounded-full"
-                            style={{ backgroundColor: r.color }}
-                            accessible={false}
-                          />
+                          Passos Diários
+                        </Text>
+                        <Text className={`text-xs font-open-sans ${ts}`}>
+                          {rangeDescription}
+                        </Text>
+                      </View>
+                      <View
+                        className="items-center"
+                        accessible={false}
+                        importantForAccessibility="no"
+                      >
+                        <StepsBars
+                          data={
+                            rangeHistory.length >= 2 ? rangeHistory : [0, 0]
+                          }
+                          range={selectedRange}
+                          isDark={isDark}
+                          semantic={colors.semantic}
+                        />
+                      </View>
+                      <View className="mt-4">
+                        <View className="flex-row justify-between mb-1">
                           <Text
                             className="text-xs font-open-sans"
                             style={{ color: tAccent }}
-                            accessible={false}
                           >
-                            {r.label}
+                            Progresso para a meta
                           </Text>
                           <Text
-                            className={`text-xs font-open-sans ${ts}`}
-                            accessible={false}
+                            className="text-xs font-bold font-open-sans"
+                            style={{ color: config.accent }}
                           >
-                            {r.desc}
+                            {Math.min(
+                              Math.round(
+                                ((rangeHistory[0] ?? history[0] ?? 0) / 10000) *
+                                  100,
+                              ),
+                              100,
+                            )}
+                            %
                           </Text>
                         </View>
-                      ))}
+                        <View
+                          className={`h-3 rounded-full overflow-hidden ${isDark ? "bg-white/15" : "bg-blue-100"}`}
+                        >
+                          <View
+                            className="h-3 rounded-full"
+                            style={{
+                              width: `${Math.min(((rangeHistory[0] ?? history[0] ?? 0) / 10000) * 100, 100)}%`,
+                              backgroundColor: config.accent,
+                            }}
+                          />
+                        </View>
+                        <View className="flex-row justify-between mt-1">
+                          <Text className={`text-xs font-open-sans ${ts}`}>
+                            0
+                          </Text>
+                          <Text className={`text-xs font-open-sans ${ts}`}>
+                            10 000
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                  </View>
-                )}
+                  )}
 
-                {/* ── STEPS: Bar + line chart ───────────────────────────── */}
-                {resolvedType === "steps" && (
-                  <View
-                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
-                    style={shadow}
-                  >
-                    <View className="flex-row items-center justify-between mb-4">
+                  {/* ── TEMP: Thermometer ─────────────────────────────────── */}
+                  {resolvedType === "temp" && (
+                    <View
+                      className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                      style={shadow}
+                    >
                       <Text
-                        className="text-base font-safiro"
+                        className="text-base font-safiro mb-4"
                         style={{ color: config.accent }}
                       >
-                        Passos Diários
+                        Temperatura Atual
                       </Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>
-                        Últimos 14 dias
-                      </Text>
-                    </View>
-                    <View
-                      className="items-center"
-                      accessible={false}
-                      importantForAccessibility="no"
-                    >
-                      <StepsBars
-                        data={history.length >= 2 ? history : [0, 0]}
-                        isDark={isDark}
-                        semantic={colors.semantic}
-                      />
-                    </View>
-                    <View className="mt-4">
-                      <View className="flex-row justify-between mb-1">
-                        <Text
-                          className="text-xs font-open-sans"
-                          style={{ color: tAccent }}
+                      <View className="flex-row items-center">
+                        <View
+                          className="items-center justify-center"
+                          accessible
+                          focusable
+                          importantForAccessibility="yes"
+                          accessibilityRole="image"
+                          accessibilityLabel={`Grafico de temperatura corporal. Valor atual ${spokenCurrent}.`}
                         >
-                          Progresso para a meta
-                        </Text>
+                          <Thermometer
+                            value={currentRaw}
+                            isDark={isDark}
+                            semantic={colors.semantic}
+                          />
+                        </View>
+                        <View className="flex-1 gap-3 pl-2">
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{ color: tAccent }}
+                          >
+                            Referência
+                          </Text>
+                          {TEMP_ZONES.map((z) => {
+                            const active =
+                              currentRaw >= z.range[0] &&
+                              currentRaw < z.range[1];
+                            return (
+                              <View
+                                key={z.label}
+                                className="flex-row items-center gap-2 py-1.5 px-2.5 rounded-xl"
+                                accessible
+                                accessibilityRole="text"
+                                accessibilityLabel={`${z.label}. Intervalo ${z.display}.${active ? " Zona atual." : ""}`}
+                                style={
+                                  active
+                                    ? {
+                                        backgroundColor: `${z.color}28`,
+                                        borderWidth: 1,
+                                        borderColor: z.color,
+                                      }
+                                    : undefined
+                                }
+                              >
+                                <View
+                                  className="w-2.5 h-2.5 rounded-full"
+                                  style={{ backgroundColor: z.color }}
+                                  accessible={false}
+                                />
+                                <View>
+                                  <Text
+                                    className="text-xs font-open-sans"
+                                    style={{
+                                      color: tAccent,
+                                      fontWeight: active ? "700" : "400",
+                                    }}
+                                    accessible={false}
+                                  >
+                                    {z.label}
+                                  </Text>
+                                  <Text
+                                    className={`text-xs font-open-sans ${ts}`}
+                                    accessible={false}
+                                  >
+                                    {z.display}
+                                  </Text>
+                                </View>
+                              </View>
+                            );
+                          })}
+                        </View>
+                      </View>
+                    </View>
+                  )}
+
+                  {/* ── CALORIES: Sunburst ────────────────────────────────── */}
+                  {resolvedType === "glycemia" && (
+                    <View
+                      className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                      style={shadow}
+                    >
+                      <View className="flex-row items-center justify-between mb-2">
                         <Text
-                          className="text-xs font-bold font-open-sans"
+                          className="text-base font-safiro"
                           style={{ color: config.accent }}
                         >
-                          {Math.min(
-                            Math.round(((history[0] ?? 0) / 10000) * 100),
-                            100,
-                          )}
-                          %
+                          Calorias Queimadas
+                        </Text>
+                        <Text className={`text-xs font-open-sans ${ts}`}>
+                          Meta: 2 000 kcal
                         </Text>
                       </View>
                       <View
-                        className={`h-3 rounded-full overflow-hidden ${isDark ? "bg-white/15" : "bg-blue-100"}`}
+                        className="items-center"
+                        accessible
+                        focusable
+                        importantForAccessibility="yes"
+                        accessibilityRole="image"
+                        accessibilityLabel={`Grafico de calorias queimadas. Valor atual ${spokenCurrent}. Meta 2 mil kcal.`}
+                      >
+                        <CalBurst value={currentRaw} isDark={isDark} />
+                      </View>
+                      <View
+                        className={`h-2 rounded-full mt-2 ${isDark ? "bg-white/15" : "bg-orange-100"}`}
                       >
                         <View
-                          className="h-3 rounded-full"
+                          className="h-2 rounded-full"
                           style={{
-                            width: `${Math.min(((history[0] ?? 0) / 10000) * 100, 100)}%`,
+                            width: `${Math.min((currentRaw / 2000) * 100, 100)}%`,
                             backgroundColor: config.accent,
                           }}
                         />
                       </View>
                       <View className="flex-row justify-between mt-1">
                         <Text className={`text-xs font-open-sans ${ts}`}>
-                          0
+                          0 kcal
                         </Text>
                         <Text className={`text-xs font-open-sans ${ts}`}>
-                          10 000
+                          2 000 kcal
                         </Text>
                       </View>
                     </View>
-                  </View>
-                )}
+                  )}
 
-                {/* ── TEMP: Thermometer ─────────────────────────────────── */}
-                {resolvedType === "temp" && (
-                  <View
-                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
-                    style={shadow}
-                  >
-                    <Text
-                      className="text-base font-safiro mb-4"
-                      style={{ color: config.accent }}
+                  {/* ── STRESS: 3-Ring Concentric Circles ────────────────── */}
+                  {resolvedType === "stress" && (
+                    <View
+                      className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                      style={shadow}
                     >
-                      Temperatura Atual
-                    </Text>
-                    <View className="flex-row items-center">
+                      <View className="flex-row items-center justify-between mb-1">
+                        <Text
+                          className="text-base font-safiro"
+                          style={{ color: config.accent }}
+                        >
+                          Zonas de Stress
+                        </Text>
+                        <View className="flex-row gap-3">
+                          {[
+                            { color: colors.semantic.success, label: "Baixo" },
+                            {
+                              color: colors.semantic.warning,
+                              label: "Moderado",
+                            },
+                            { color: colors.semantic.danger, label: "Alto" },
+                          ].map((z) => (
+                            <View
+                              key={z.label}
+                              className="flex-row items-center gap-1"
+                              accessible
+                              accessibilityRole="text"
+                              accessibilityLabel={`Nivel de stress ${z.label}.`}
+                            >
+                              <View
+                                className="w-2 h-2 rounded-full"
+                                style={{ backgroundColor: z.color }}
+                                accessible={false}
+                              />
+                              <Text
+                                className="text-xs font-open-sans"
+                                style={{
+                                  color: isDark
+                                    ? "rgba(255,255,255,0.62)"
+                                    : "#6B7280",
+                                }}
+                                accessible={false}
+                              >
+                                {z.label}
+                              </Text>
+                            </View>
+                          ))}
+                        </View>
+                      </View>
                       <View
-                        className="items-center justify-center"
+                        className="items-center py-2"
                         accessible
                         focusable
                         importantForAccessibility="yes"
                         accessibilityRole="image"
-                        accessibilityLabel={`Grafico de temperatura corporal. Valor atual ${spokenCurrent}.`}
+                        accessibilityLabel={`Grafico de zonas de stress. Valor atual ${spokenCurrent}.`}
                       >
-                        <Thermometer
+                        <HeartTripleRings
                           value={currentRaw}
                           isDark={isDark}
+                          centerLabel="stress"
                           semantic={colors.semantic}
                         />
                       </View>
-                      <View className="flex-1 gap-3 pl-2">
+                      <View
+                        className="rounded-2xl p-3 mt-1"
+                        style={{
+                          backgroundColor: isDark
+                            ? "rgba(255,255,255,0.04)"
+                            : config.accentLight,
+                        }}
+                      >
                         <Text
-                          className="text-xs font-open-sans"
-                          style={{ color: tAccent }}
+                          className="text-xs font-open-sans text-center"
+                          style={{
+                            color: isDark
+                              ? "rgba(255,255,255,0.62)"
+                              : "#4B5563",
+                          }}
                         >
-                          Referência
+                          Cada anel representa uma zona de stress. O ponto
+                          luminoso indica a progressão na zona atual.
                         </Text>
-                        {TEMP_ZONES.map((z) => {
-                          const active =
-                            currentRaw >= z.range[0] && currentRaw < z.range[1];
-                          return (
-                            <View
-                              key={z.label}
-                              className="flex-row items-center gap-2 py-1.5 px-2.5 rounded-xl"
-                              accessible
-                              accessibilityRole="text"
-                              accessibilityLabel={`${z.label}. Intervalo ${z.display}.${active ? " Zona atual." : ""}`}
-                              style={
-                                active
-                                  ? {
-                                      backgroundColor: `${z.color}28`,
-                                      borderWidth: 1,
-                                      borderColor: z.color,
-                                    }
-                                  : undefined
-                              }
-                            >
-                              <View
-                                className="w-2.5 h-2.5 rounded-full"
-                                style={{ backgroundColor: z.color }}
-                                accessible={false}
-                              />
-                              <View>
-                                <Text
-                                  className="text-xs font-open-sans"
-                                  style={{
-                                    color: tAccent,
-                                    fontWeight: active ? "700" : "400",
-                                  }}
-                                  accessible={false}
-                                >
-                                  {z.label}
-                                </Text>
-                                <Text
-                                  className={`text-xs font-open-sans ${ts}`}
-                                  accessible={false}
-                                >
-                                  {z.display}
-                                </Text>
-                              </View>
-                            </View>
-                          );
-                        })}
                       </View>
                     </View>
-                  </View>
-                )}
+                  )}
 
-                {/* ── CALORIES: Sunburst ────────────────────────────────── */}
-                {resolvedType === "glycemia" && (
                   <View
                     className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
                     style={shadow}
+                    accessible
+                    focusable
+                    importantForAccessibility="yes"
+                    accessibilityRole="text"
+                    accessibilityLabel={`Posicao atual da metrica. Valor atual ${spokenCurrent}. Zona atual ${activeBand.label}.`}
                   >
-                    <View className="flex-row items-center justify-between mb-2">
+                    <View className="flex-row items-center justify-between mb-3">
                       <Text
                         className="text-base font-safiro"
-                        style={{ color: config.accent }}
+                        style={{ color: tAccent }}
                       >
-                        Calorias Queimadas
+                        Posição Atual da Métrica
                       </Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>
-                        Meta: 2 000 kcal
-                      </Text>
+                      <View className="flex-row items-center gap-2 px-2 py-1 rounded-full">
+                        <View
+                          className="w-2.5 h-2.5 rounded-full"
+                          style={{ backgroundColor: activeBand.color }}
+                        />
+                        <Text
+                          className="text-xs font-open-sans"
+                          style={{ color: activeBand.color }}
+                        >
+                          {activeBand.label}
+                        </Text>
+                      </View>
                     </View>
-                    <View
-                      className="items-center"
-                      accessible
-                      focusable
-                      importantForAccessibility="yes"
-                      accessibilityRole="image"
-                      accessibilityLabel={`Grafico de calorias queimadas. Valor atual ${spokenCurrent}. Meta 2 mil kcal.`}
-                    >
-                      <CalBurst value={currentRaw} isDark={isDark} />
-                    </View>
-                    <View
-                      className={`h-2 rounded-full mt-2 ${isDark ? "bg-white/15" : "bg-orange-100"}`}
-                    >
-                      <View
-                        className="h-2 rounded-full"
-                        style={{
-                          width: `${Math.min((currentRaw / 2000) * 100, 100)}%`,
-                          backgroundColor: config.accent,
-                        }}
-                      />
-                    </View>
-                    <View className="flex-row justify-between mt-1">
-                      <Text className={`text-xs font-open-sans ${ts}`}>
-                        0 kcal
-                      </Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>
-                        2 000 kcal
-                      </Text>
-                    </View>
-                  </View>
-                )}
 
-                {/* ── STRESS: 3-Ring Concentric Circles ────────────────── */}
-                {resolvedType === "stress" && (
-                  <View
-                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
-                    style={shadow}
-                  >
-                    <View className="flex-row items-center justify-between mb-1">
-                      <Text
-                        className="text-base font-safiro"
-                        style={{ color: config.accent }}
-                      >
-                        Zonas de Stress
+                    <View className="flex-row items-baseline gap-1 mb-4">
+                      <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                        {config.formatValue(currentRaw)}
                       </Text>
-                      <View className="flex-row gap-3">
-                        {[
-                          { color: colors.semantic.success, label: "Baixo" },
-                          { color: colors.semantic.warning, label: "Moderado" },
-                          { color: colors.semantic.danger, label: "Alto" },
-                        ].map((z) => (
+                      <Text className={`text-sm font-open-sans ${tu}`}>
+                        {config.displayUnit}
+                      </Text>
+                      <Text className={`text-xs font-open-sans ml-1 ${ts}`}>
+                        valor atual
+                      </Text>
+                    </View>
+
+                    <View className="gap-2">
+                      {standardizedScale.bands.map((band, index) => {
+                        const isBandActive = band.label === activeBand.label;
+                        return (
                           <View
-                            key={z.label}
-                            className="flex-row items-center gap-1"
+                            key={band.label}
+                            className="rounded-2xl px-3 py-3 border flex-row items-center justify-between"
                             accessible
                             accessibilityRole="text"
-                            accessibilityLabel={`Nivel de stress ${z.label}.`}
+                            accessibilityLabel={`${band.label}. Intervalo ${getBandRangeSpeech(band, index)}.${isBandActive ? " Zona ativa." : ""}`}
+                            style={
+                              isBandActive
+                                ? {
+                                    borderColor: band.color,
+                                    backgroundColor: "transparent",
+                                  }
+                                : {
+                                    borderColor: isDark
+                                      ? "rgba(255,255,255,0.08)"
+                                      : "rgba(15,23,42,0.08)",
+                                    backgroundColor: "transparent",
+                                  }
+                            }
                           >
-                            <View
-                              className="w-2 h-2 rounded-full"
-                              style={{ backgroundColor: z.color }}
-                              accessible={false}
-                            />
-                            <Text
-                              className="text-xs font-open-sans"
-                              style={{
-                                color: isDark
-                                  ? "rgba(255,255,255,0.62)"
-                                  : "#6B7280",
-                              }}
-                              accessible={false}
-                            >
-                              {z.label}
-                            </Text>
+                            <View className="flex-row items-center gap-2.5">
+                              <View
+                                className="w-2.5 h-2.5 rounded-full"
+                                style={{ backgroundColor: band.color }}
+                                accessible={false}
+                              />
+                              <Text
+                                className="text-base font-open-sans"
+                                style={{
+                                  color: band.color,
+                                  fontWeight: isBandActive ? "700" : "500",
+                                }}
+                                accessible={false}
+                              >
+                                {band.label}
+                              </Text>
+                            </View>
+                            <View className="flex-row items-center gap-2">
+                              <Text
+                                className={`text-sm font-open-sans ${ts}`}
+                                accessible={false}
+                              >
+                                {getBandRangeText(band, index)}
+                              </Text>
+                            </View>
                           </View>
-                        ))}
-                      </View>
+                        );
+                      })}
                     </View>
+                  </View>
+
+                  {/* ── History Line Chart ────────────────────────────────── */}
+                  {resolvedType === "heart" ? (
+                    // Heart: Show average visualization
                     <View
-                      className="items-center py-2"
+                      className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                      style={shadow}
                       accessible
                       focusable
                       importantForAccessibility="yes"
                       accessibilityRole="image"
-                      accessibilityLabel={`Grafico de zonas de stress. Valor atual ${spokenCurrent}.`}
+                      accessibilityLabel={`Grafico de medias cardiacas. Media ${heartAvg !== null ? `${formatNarratorNumber(Math.round(heartAvg))} bpm` : "indisponivel"}. Media alta ${heartAvgHigh !== null ? `${formatNarratorNumber(Math.round(heartAvgHigh))} bpm` : "indisponivel"}. Media baixa ${heartAvgLow !== null ? `${formatNarratorNumber(Math.round(heartAvgLow))} bpm` : "indisponivel"}.`}
                     >
-                      <HeartTripleRings
-                        value={currentRaw}
-                        isDark={isDark}
-                        centerLabel="stress"
-                        semantic={colors.semantic}
-                      />
-                    </View>
-                    <View
-                      className="rounded-2xl p-3 mt-1"
-                      style={{
-                        backgroundColor: isDark
-                          ? "rgba(255,255,255,0.04)"
-                          : config.accentLight,
-                      }}
-                    >
-                      <Text
-                        className="text-xs font-open-sans text-center"
-                        style={{
-                          color: isDark ? "rgba(255,255,255,0.62)" : "#4B5563",
-                        }}
-                      >
-                        Cada anel representa uma zona de stress. O ponto
-                        luminoso indica a progressão na zona atual.
-                      </Text>
-                    </View>
-                  </View>
-                )}
-
-                <View
-                  className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
-                  style={shadow}
-                  accessible
-                  focusable
-                  importantForAccessibility="yes"
-                  accessibilityRole="text"
-                  accessibilityLabel={`Posicao atual da metrica. Valor atual ${spokenCurrent}. Zona atual ${activeBand.label}.`}
-                >
-                  <View className="flex-row items-center justify-between mb-3">
-                    <Text
-                      className="text-base font-safiro"
-                      style={{ color: tAccent }}
-                    >
-                      Posição Atual da Métrica
-                    </Text>
-                    <View className="flex-row items-center gap-2 px-2 py-1 rounded-full">
-                      <View
-                        className="w-2.5 h-2.5 rounded-full"
-                        style={{ backgroundColor: activeBand.color }}
-                      />
-                      <Text
-                        className="text-xs font-open-sans"
-                        style={{ color: activeBand.color }}
-                      >
-                        {activeBand.label}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View className="flex-row items-baseline gap-1 mb-4">
-                    <Text className={`text-2xl font-bold font-safiro ${tp}`}>
-                      {config.formatValue(currentRaw)}
-                    </Text>
-                    <Text className={`text-sm font-open-sans ${tu}`}>
-                      {config.displayUnit}
-                    </Text>
-                    <Text className={`text-xs font-open-sans ml-1 ${ts}`}>
-                      valor atual
-                    </Text>
-                  </View>
-
-                  <View className="gap-2">
-                    {standardizedScale.bands.map((band, index) => {
-                      const isBandActive = band.label === activeBand.label;
-                      return (
-                        <View
-                          key={band.label}
-                          className="rounded-2xl px-3 py-3 border flex-row items-center justify-between"
-                          accessible
-                          accessibilityRole="text"
-                          accessibilityLabel={`${band.label}. Intervalo ${getBandRangeSpeech(band, index)}.${isBandActive ? " Zona ativa." : ""}`}
-                          style={
-                            isBandActive
-                              ? {
-                                  borderColor: band.color,
-                                  backgroundColor: "transparent",
-                                }
-                              : {
-                                  borderColor: isDark
-                                    ? "rgba(255,255,255,0.08)"
-                                    : "rgba(15,23,42,0.08)",
-                                  backgroundColor: "transparent",
-                                }
-                          }
-                        >
-                          <View className="flex-row items-center gap-2.5">
-                            <View
-                              className="w-2.5 h-2.5 rounded-full"
-                              style={{ backgroundColor: band.color }}
-                              accessible={false}
-                            />
-                            <Text
-                              className="text-base font-open-sans"
-                              style={{
-                                color: band.color,
-                                fontWeight: isBandActive ? "700" : "500",
-                              }}
-                              accessible={false}
-                            >
-                              {band.label}
-                            </Text>
-                          </View>
-                          <View className="flex-row items-center gap-2">
-                            <Text
-                              className={`text-sm font-open-sans ${ts}`}
-                              accessible={false}
-                            >
-                              {getBandRangeText(band, index)}
-                            </Text>
-                          </View>
-                        </View>
-                      );
-                    })}
-                  </View>
-                </View>
-
-                {/* ── History Line Chart ────────────────────────────────── */}
-                {resolvedType === "heart" ? (
-                  // Heart: Show average visualization
-                  <View
-                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
-                    style={shadow}
-                    accessible
-                    focusable
-                    importantForAccessibility="yes"
-                    accessibilityRole="image"
-                    accessibilityLabel={`Grafico de medias cardiacas. Media ${heartAvg !== null ? `${formatNarratorNumber(Math.round(heartAvg))} bpm` : "indisponivel"}. Media alta ${heartAvgHigh !== null ? `${formatNarratorNumber(Math.round(heartAvgHigh))} bpm` : "indisponivel"}. Media baixa ${heartAvgLow !== null ? `${formatNarratorNumber(Math.round(heartAvgLow))} bpm` : "indisponivel"}.`}
-                  >
-                    <View className="flex-row justify-between items-center mb-4">
-                      <Text
-                        className="text-base font-safiro"
-                        style={{ color: tAccent }}
-                      >
-                        Médias
-                      </Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>
-                        Análise de padrões
-                      </Text>
-                    </View>
-                    {/* Average Visualization */}
-                    {(() => {
-                      const h = chartData || [];
-                      if (!h.length) {
-                        return (
-                          <View className="items-center justify-center py-8">
-                            <Text className={`text-sm ${ts}`}>
-                              Aguardando dados...
-                            </Text>
-                          </View>
-                        );
-                      }
-                      const avg = calcAvg(h);
-                      const highs = h.filter((v) => v > 100);
-                      const lows = h.filter((v) => v < 60);
-                      const avgHigh = highs.length ? calcAvg(highs) : null;
-                      const avgLow = lows.length ? calcAvg(lows) : null;
-
-                      return (
-                        <View className="flex-row items-center justify-between">
-                          {/* Main Average Circle */}
-                          <View className="items-center">
-                            <View
-                              className="w-24 h-24 rounded-full items-center justify-center border-4"
-                              style={{
-                                borderColor: config.accent,
-                                backgroundColor: isDark
-                                  ? "rgba(124,137,255,0.1)"
-                                  : "#EEF0FF",
-                              }}
-                            >
-                              <Text
-                                className="text-3xl font-bold font-safiro"
-                                style={{ color: config.accent }}
-                              >
-                                {Math.round(avg)}
-                              </Text>
-                              <Text className={`text-xs ${ts}`}>Média</Text>
-                            </View>
-                          </View>
-
-                          {/* High and Low Averages */}
-                          <View className="flex-1 ml-4 gap-3">
-                            {/* High */}
-                            <View
-                              className="rounded-xl p-3 flex-row items-center justify-between"
-                              style={{
-                                backgroundColor: isDark
-                                  ? "rgba(252,165,165,0.1)"
-                                  : "#FEF2F2",
-                              }}
-                              accessible
-                              accessibilityRole="text"
-                              accessibilityLabel={`Media alta. ${avgHigh !== null ? `${formatNarratorNumber(Math.round(avgHigh))} bpm` : "indisponivel"}.`}
-                            >
-                              <View className="flex-row items-center gap-2">
-                                <View
-                                  className="w-8 h-8 rounded-full items-center justify-center"
-                                  style={{
-                                    backgroundColor: colors.semantic.danger,
-                                  }}
-                                >
-                                  <Feather
-                                    name="trending-up"
-                                    size={16}
-                                    color="#991B1B"
-                                    accessible={false}
-                                  />
-                                </View>
-                                <Text
-                                  className={`text-sm font-open-sans ${ts}`}
-                                  accessible={false}
-                                >
-                                  Média Alta
-                                </Text>
-                              </View>
-                              <Text
-                                className="text-lg font-bold font-safiro"
-                                style={{ color: colors.semantic.danger }}
-                                accessible={false}
-                              >
-                                {avgHigh !== null ? Math.round(avgHigh) : "--"}
-                              </Text>
-                            </View>
-
-                            {/* Low */}
-                            <View
-                              className="rounded-xl p-3 flex-row items-center justify-between"
-                              style={{
-                                backgroundColor: isDark
-                                  ? "rgba(134,239,172,0.1)"
-                                  : "#F0FDF4",
-                              }}
-                              accessible
-                              accessibilityRole="text"
-                              accessibilityLabel={`Media baixa. ${avgLow !== null ? `${formatNarratorNumber(Math.round(avgLow))} bpm` : "indisponivel"}.`}
-                            >
-                              <View className="flex-row items-center gap-2">
-                                <View
-                                  className="w-8 h-8 rounded-full items-center justify-center"
-                                  style={{
-                                    backgroundColor: colors.semantic.success,
-                                  }}
-                                >
-                                  <Feather
-                                    name="trending-down"
-                                    size={16}
-                                    color="#166534"
-                                    accessible={false}
-                                  />
-                                </View>
-                                <Text
-                                  className={`text-sm font-open-sans ${ts}`}
-                                  accessible={false}
-                                >
-                                  Média Baixa
-                                </Text>
-                              </View>
-                              <Text
-                                className="text-lg font-bold font-safiro"
-                                style={{ color: colors.semantic.success }}
-                                accessible={false}
-                              >
-                                {avgLow !== null ? Math.round(avgLow) : "--"}
-                              </Text>
-                            </View>
-                          </View>
-                        </View>
-                      );
-                    })()}
-                  </View>
-                ) : resolvedType !== "o2" ? (
-                  <View
-                    className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
-                    style={shadow}
-                    accessible
-                    focusable
-                    importantForAccessibility="yes"
-                    accessibilityRole="image"
-                    accessibilityLabel={`Grafico de historico. Ultimas ${chartData.length} leituras. Valor mais recente ${spokenChartLatest}.`}
-                  >
-                    <View className="flex-row justify-between items-center mb-4">
-                      <Text
-                        className="text-base font-safiro"
-                        style={{ color: tAccent }}
-                      >
-                        Histórico
-                      </Text>
-                      <Text className={`text-xs font-open-sans ${ts}`}>
-                        Últimas 20 leituras
-                      </Text>
-                    </View>
-                    <LineChartSlim
-                      data={chartData}
-                      width={screenWidth - 72}
-                      height={180}
-                      lineColor={config.lineColor}
-                      gradientFrom={config.gradientColor}
-                      gradientTo={config.gradientColor}
-                      gradientFromOpacity={0.28}
-                      gradientToOpacity={0}
-                      yAxisSuffix={config.yAxisSuffix}
-                      segments={config.segments}
-                      {...(config.yMin !== undefined
-                        ? { yMin: config.yMin }
-                        : {})}
-                      {...(config.yMax !== undefined
-                        ? { yMax: config.yMax }
-                        : {})}
-                    />
-                  </View>
-                ) : null}
-
-                {/* ── Extra Info Cards ──────────────────────────────────── */}
-                <View className="flex-row flex-wrap gap-3 mb-4">
-                  {extraCards.map((card) => (
-                    <View
-                      key={card.label}
-                      className={`rounded-2xl p-4 border ${cardBg}`}
-                      style={[
-                        shadow,
-                        { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
-                      ]}
-                      accessible
-                      accessibilityRole="text"
-                      accessibilityLabel={`${card.label}. ${formatNarratorNumber(Number(card.value.replace(/\s/g, "")) || 0)}${card.unit ? ` ${card.unit === "%" ? "por cento" : card.unit}` : ""}.`}
-                    >
-                      <View className="flex-row items-center gap-2 mb-2">
-                        <View
-                          className="w-7 h-7 rounded-lg items-center justify-center"
-                          style={{ backgroundColor: `${config.accent}20` }}
-                        >
-                          <Feather
-                            name={card.icon as any}
-                            size={14}
-                            color={config.accent}
-                            accessible={false}
-                          />
-                        </View>
+                      <View className="flex-row justify-between items-center mb-4">
                         <Text
-                          className="text-xs font-open-sans"
+                          className="text-base font-safiro"
                           style={{ color: tAccent }}
                         >
-                          {card.label}
+                          Médias
+                        </Text>
+                        <Text className={`text-xs font-open-sans ${ts}`}>
+                          Análise de padrões
                         </Text>
                       </View>
-                      <View className="flex-row items-baseline">
-                        <Text
-                          className={`text-2xl font-bold font-safiro ${tp}`}
-                        >
-                          {card.value}
-                        </Text>
-                        {card.unit ? (
-                          <Text className={`text-xs ml-1 ${tu}`}>
-                            {card.unit}
-                          </Text>
-                        ) : null}
-                      </View>
+                      {/* Average Visualization */}
+                      {(() => {
+                        const h = chartData || [];
+                        if (!h.length) {
+                          return (
+                            <View className="items-center justify-center py-8">
+                              <Text className={`text-sm ${ts}`}>
+                                Aguardando dados...
+                              </Text>
+                            </View>
+                          );
+                        }
+                        const avg = calcAvg(h);
+                        const highs = h.filter((v) => v > 100);
+                        const lows = h.filter((v) => v < 60);
+                        const avgHigh = highs.length ? calcAvg(highs) : null;
+                        const avgLow = lows.length ? calcAvg(lows) : null;
+
+                        return (
+                          <View className="flex-row items-center justify-between">
+                            {/* Main Average Circle */}
+                            <View className="items-center">
+                              <View
+                                className="w-24 h-24 rounded-full items-center justify-center border-4"
+                                style={{
+                                  borderColor: config.accent,
+                                  backgroundColor: isDark
+                                    ? "rgba(124,137,255,0.1)"
+                                    : "#EEF0FF",
+                                }}
+                              >
+                                <Text
+                                  className="text-3xl font-bold font-safiro"
+                                  style={{ color: config.accent }}
+                                >
+                                  {Math.round(avg)}
+                                </Text>
+                                <Text className={`text-xs ${ts}`}>Média</Text>
+                              </View>
+                            </View>
+
+                            {/* High and Low Averages */}
+                            <View className="flex-1 ml-4 gap-3">
+                              {/* High */}
+                              <View
+                                className="rounded-xl p-3 flex-row items-center justify-between"
+                                style={{
+                                  backgroundColor: isDark
+                                    ? "rgba(252,165,165,0.1)"
+                                    : "#FEF2F2",
+                                }}
+                                accessible
+                                accessibilityRole="text"
+                                accessibilityLabel={`Media alta. ${avgHigh !== null ? `${formatNarratorNumber(Math.round(avgHigh))} bpm` : "indisponivel"}.`}
+                              >
+                                <View className="flex-row items-center gap-2">
+                                  <View
+                                    className="w-8 h-8 rounded-full items-center justify-center"
+                                    style={{
+                                      backgroundColor: colors.semantic.danger,
+                                    }}
+                                  >
+                                    <Feather
+                                      name="trending-up"
+                                      size={16}
+                                      color="#991B1B"
+                                      accessible={false}
+                                    />
+                                  </View>
+                                  <Text
+                                    className={`text-sm font-open-sans ${ts}`}
+                                    accessible={false}
+                                  >
+                                    Média Alta
+                                  </Text>
+                                </View>
+                                <Text
+                                  className="text-lg font-bold font-safiro"
+                                  style={{ color: colors.semantic.danger }}
+                                  accessible={false}
+                                >
+                                  {avgHigh !== null
+                                    ? Math.round(avgHigh)
+                                    : "--"}
+                                </Text>
+                              </View>
+
+                              {/* Low */}
+                              <View
+                                className="rounded-xl p-3 flex-row items-center justify-between"
+                                style={{
+                                  backgroundColor: isDark
+                                    ? "rgba(134,239,172,0.1)"
+                                    : "#F0FDF4",
+                                }}
+                                accessible
+                                accessibilityRole="text"
+                                accessibilityLabel={`Media baixa. ${avgLow !== null ? `${formatNarratorNumber(Math.round(avgLow))} bpm` : "indisponivel"}.`}
+                              >
+                                <View className="flex-row items-center gap-2">
+                                  <View
+                                    className="w-8 h-8 rounded-full items-center justify-center"
+                                    style={{
+                                      backgroundColor: colors.semantic.success,
+                                    }}
+                                  >
+                                    <Feather
+                                      name="trending-down"
+                                      size={16}
+                                      color="#166534"
+                                      accessible={false}
+                                    />
+                                  </View>
+                                  <Text
+                                    className={`text-sm font-open-sans ${ts}`}
+                                    accessible={false}
+                                  >
+                                    Média Baixa
+                                  </Text>
+                                </View>
+                                <Text
+                                  className="text-lg font-bold font-safiro"
+                                  style={{ color: colors.semantic.success }}
+                                  accessible={false}
+                                >
+                                  {avgLow !== null ? Math.round(avgLow) : "--"}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        );
+                      })()}
                     </View>
-                  ))}
-                </View>
-              </ScrollView>
+                  ) : resolvedType !== "o2" ? (
+                    <View
+                      className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
+                      style={shadow}
+                      accessible
+                      focusable
+                      importantForAccessibility="yes"
+                      accessibilityRole="image"
+                      accessibilityLabel={`Grafico de historico. Ultimas ${chartData.length} leituras. Valor mais recente ${spokenChartLatest}.`}
+                    >
+                      <View className="flex-row justify-between items-center mb-4">
+                        <Text
+                          className="text-base font-safiro"
+                          style={{ color: tAccent }}
+                        >
+                          Histórico
+                        </Text>
+                        <Text className={`text-xs font-open-sans ${ts}`}>
+                          {rangeDescription}
+                        </Text>
+                      </View>
+                      <LineChartSlim
+                        data={chartData}
+                        width={screenWidth - 72}
+                        height={180}
+                        lineColor={config.lineColor}
+                        gradientFrom={config.gradientColor}
+                        gradientTo={config.gradientColor}
+                        gradientFromOpacity={0.28}
+                        gradientToOpacity={0}
+                        yAxisSuffix={config.yAxisSuffix}
+                        segments={config.segments}
+                        {...(config.yMin !== undefined
+                          ? { yMin: config.yMin }
+                          : {})}
+                        {...(config.yMax !== undefined
+                          ? { yMax: config.yMax }
+                          : {})}
+                      />
+                    </View>
+                  ) : null}
+
+                  {/* ── Extra Info Cards ──────────────────────────────────── */}
+                  <View className="flex-row flex-wrap gap-3 mb-4">
+                    {extraCards.map((card) => (
+                      <View
+                        key={card.label}
+                        className={`rounded-2xl p-4 border ${cardBg}`}
+                        style={[
+                          shadow,
+                          { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
+                        ]}
+                        accessible
+                        accessibilityRole="text"
+                        accessibilityLabel={`${card.label}. ${formatNarratorNumber(Number(card.value.replace(/\s/g, "")) || 0)}${card.unit ? ` ${card.unit === "%" ? "por cento" : card.unit}` : ""}.`}
+                      >
+                        <View className="flex-row items-center gap-2 mb-2">
+                          <View
+                            className="w-7 h-7 rounded-lg items-center justify-center"
+                            style={{ backgroundColor: `${config.accent}20` }}
+                          >
+                            <Feather
+                              name={card.icon as any}
+                              size={14}
+                              color={config.accent}
+                              accessible={false}
+                            />
+                          </View>
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{ color: tAccent }}
+                          >
+                            {card.label}
+                          </Text>
+                        </View>
+                        <View className="flex-row items-baseline">
+                          <Text
+                            className={`text-2xl font-bold font-safiro ${tp}`}
+                          >
+                            {card.value}
+                          </Text>
+                          {card.unit ? (
+                            <Text className={`text-xs ml-1 ${tu}`}>
+                              {card.unit}
+                            </Text>
+                          ) : null}
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                </ScrollView>
+              </>
             )}
           </SafeAreaView>
         </View>

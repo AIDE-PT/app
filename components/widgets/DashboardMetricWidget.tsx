@@ -9,6 +9,7 @@ interface Props {
   variant: "1-1" | "1-2" | "1-3" | "2-3";
   iconSize?: number;
   patientId?: string | null;
+  superSimplified?: boolean;
 }
 
 export default function DashboardMetricWidget({
@@ -17,6 +18,7 @@ export default function DashboardMetricWidget({
   variant,
   iconSize = 20,
   patientId,
+  superSimplified = false,
 }: Props) {
   const isBP = type === "bloodPressure";
   const { data, isLoading } = useHealthMetric(endpoint, isBP, patientId);
@@ -57,6 +59,8 @@ export default function DashboardMetricWidget({
         feedbackColor="#E5E7EB"
         history={[]}
         color={styles.color}
+        metricType={type}
+        superSimplified={superSimplified}
       />
     );
   }
@@ -74,6 +78,8 @@ export default function DashboardMetricWidget({
         feedbackColor="#FCA5A5"
         history={[]}
         color={styles.color}
+        metricType={type}
+        superSimplified={superSimplified}
       />
     );
   }
@@ -109,6 +115,7 @@ export default function DashboardMetricWidget({
       history={data.history}
       metricType={type}
       color={styles.color}
+      superSimplified={superSimplified}
       yMin={type === "temp" ? 35 : undefined}
       yMax={type === "temp" ? 40 : undefined}
       segments={type === "temp" ? 5 : 3}
