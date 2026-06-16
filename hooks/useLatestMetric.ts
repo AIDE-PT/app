@@ -1,7 +1,7 @@
 import {
-  getHealthConnectStatus,
-  readSteps,
-  type StepRecord,
+    getHealthConnectStatus,
+    readSteps,
+    type StepRecord,
 } from "@/src/services/healthConnect";
 import { supabase } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -23,17 +23,47 @@ type MetricQueryData = {
   latest: ApiMetricRecord;
 };
 
+type TargetPatientId = string | null | undefined;
+
+function normalizeTargetPatientId(
+  targetPatientId: TargetPatientId,
+): string | null | undefined {
+  if (targetPatientId === null) return null;
+  if (typeof targetPatientId !== "string") return undefined;
+
+  const trimmed = targetPatientId.trim();
+  return trimmed ? trimmed : null;
+}
+
+async function getAuthenticatedUserId() {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  return session?.user?.id ?? null;
+}
+
+async function resolvePatientId(
+  targetPatientId: TargetPatientId,
+): Promise<string | null> {
+  const normalizedTargetPatientId = normalizeTargetPatientId(targetPatientId);
+
+  if (normalizedTargetPatientId === null) return null;
+  if (typeof normalizedTargetPatientId === "string") {
+    return normalizedTargetPatientId;
+  }
+
+  return getAuthenticatedUserId();
+}
+
 // ─── Supabase fetch ────────────────────────────────────────────────────────────
 
 async function fetchMetricFromSupabaseByTypeNames(
   typeNames: string[],
   isBP: boolean,
+  targetPatientId?: TargetPatientId,
 ): Promise<MetricQueryData | null> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const patientId = session?.user?.id ?? null;
+  const patientId = await resolvePatientId(targetPatientId);
   if (!patientId) return null;
 
   const { data: typeRows, error: typeError } = await supabase
@@ -195,12 +225,10 @@ function aggregateStepsByHour(
   return buckets.map((value) => Math.max(0, Math.round(value)));
 }
 
-async function fetchStepsFromSupabaseDaily(): Promise<MetricQueryData | null> {
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-
-  const patientId = session?.user?.id ?? null;
+async function fetchStepsFromSupabaseDaily(
+  targetPatientId?: TargetPatientId,
+): Promise<MetricQueryData | null> {
+  const patientId = await resolvePatientId(targetPatientId);
   if (!patientId) return null;
 
   const { data: typeRow, error: typeError } = await supabase
@@ -727,22 +755,40 @@ async function fetchHealthConnectMetricDaily(
 
 // ─── Hooks públicos ───────────────────────────────────────────────────────────
 
-export function useMetricStats(endpoint: string) {
+export function useMetricStats(
+  endpoint: string,
+  targetPatientId?: TargetPatientId,
+) {
+  const patientScope =
+    targetPatientId === null
+      ? "none"
+      : normalizeTargetPatientId(targetPatientId) ?? "self";
+
   return useQuery({
-    queryKey: [endpoint, "stats"],
+    queryKey: [endpoint, "stats", patientScope],
     enabled: !!endpoint && endpoint !== "undefined",
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: "always",
     refetchOnReconnect: true,
     queryFn: async () => {
-      const healthConnectOnly =
-        Platform.OS === "android" && HEALTH_CONNECT_ENDPOINTS.has(endpoint);
+      const normalizedTargetPatientId = normalizeTargetPatientId(targetPatientId);
+      if (normalizedTargetPatientId === null) return { min: 0, max: 0 };
 
-      const healthConnectMetric =
-        endpoint === "steps"
+      const authUserId = await getAuthenticatedUserId();
+      const resolvedPatientId = await resolvePatientId(normalizedTargetPatientId);
+      if (!resolvedPatientId) return { min: 0, max: 0 };
+
+      const canUseHealthConnect =
+        Platform.OS === "android" && resolvedPatientId === authUserId;
+      const healthConnectOnly =
+        canUseHealthConnect && HEALTH_CONNECT_ENDPOINTS.has(endpoint);
+
+      const healthConnectMetric = canUseHealthConnect
+        ? endpoint === "steps"
           ? await fetchHealthConnectStepsDaily()
-          : await fetchHealthConnectMetricDaily(endpoint);
+          : await fetchHealthConnectMetricDaily(endpoint)
+        : null;
 
       if (healthConnectMetric?.history?.length) {
         return {
@@ -758,7 +804,11 @@ export function useMetricStats(endpoint: string) {
       if (!typeNames) return { min: 0, max: 0 };
 
       const isBP = BP_ENDPOINTS.has(endpoint);
-      const dataRaw = await fetchMetricFromSupabaseByTypeNames(typeNames, isBP);
+      const dataRaw = await fetchMetricFromSupabaseByTypeNames(
+        typeNames,
+        isBP,
+        resolvedPatientId,
+      );
       const data = endpoint === "sleep" ? mapMetricToHours(dataRaw) : dataRaw;
       if (!data?.history?.length) return { min: 0, max: 0 };
 
@@ -772,26 +822,51 @@ export function useMetricStats(endpoint: string) {
   });
 }
 
-export function useHealthMetric(endpoint: string, isBP: boolean = false) {
+export function useHealthMetric(
+  endpoint: string,
+  isBP: boolean = false,
+  targetPatientId?: TargetPatientId,
+) {
+  const patientScope =
+    targetPatientId === null
+      ? "none"
+      : normalizeTargetPatientId(targetPatientId) ?? "self";
+
   return useQuery({
-    queryKey: [endpoint, "latest"],
+    queryKey: [endpoint, "latest", patientScope],
     enabled: !!endpoint && endpoint !== "undefined",
     staleTime: 0,
     gcTime: 0,
     refetchOnMount: "always",
     refetchOnReconnect: true,
     queryFn: async () => {
+      const normalizedTargetPatientId = normalizeTargetPatientId(targetPatientId);
+      if (normalizedTargetPatientId === null) return null;
+
+      const authUserId = await getAuthenticatedUserId();
+      const resolvedPatientId = await resolvePatientId(normalizedTargetPatientId);
+      if (!resolvedPatientId) return null;
+
+      const canUseHealthConnect =
+        Platform.OS === "android" && resolvedPatientId === authUserId;
       const healthConnectOnly =
-        Platform.OS === "android" && HEALTH_CONNECT_ENDPOINTS.has(endpoint);
+        canUseHealthConnect && HEALTH_CONNECT_ENDPOINTS.has(endpoint);
 
       // Passos — Health Connect primeiro (valor diario em tempo real), BD como fallback
       if (endpoint === "steps") {
-        const stepsMetric = await fetchHealthConnectStepsDaily();
+        const stepsMetric = canUseHealthConnect
+          ? await fetchHealthConnectStepsDaily()
+          : null;
         if (stepsMetric) return stepsMetric;
-        return healthConnectOnly ? null : fetchStepsFromSupabaseDaily();
+
+        return healthConnectOnly
+          ? null
+          : fetchStepsFromSupabaseDaily(resolvedPatientId);
       }
 
-      const healthConnectMetric = await fetchHealthConnectMetricDaily(endpoint);
+      const healthConnectMetric = canUseHealthConnect
+        ? await fetchHealthConnectMetricDaily(endpoint)
+        : null;
       if (healthConnectMetric) return healthConnectMetric;
 
       if (healthConnectOnly) return null;
@@ -807,6 +882,7 @@ export function useHealthMetric(endpoint: string, isBP: boolean = false) {
       const dataRaw = await fetchMetricFromSupabaseByTypeNames(
         typeNames,
         useBP,
+        resolvedPatientId,
       );
       return endpoint === "sleep" ? mapMetricToHours(dataRaw) : dataRaw;
     },

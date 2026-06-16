@@ -6,11 +6,11 @@ import { supabase } from "@/utils/supabase/client";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  Text,
-  View,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
@@ -20,6 +20,19 @@ import { Input } from "../components/input/Input";
 import { QRcode } from "../components/input/QRcode";
 
 const emailSchema = z.string().email({ message: "Email invalido" });
+
+const isCuidadoDesignation = (designation: unknown) => {
+  const normalized = String(designation ?? "")
+    .trim()
+    .toLowerCase();
+
+  return (
+    normalized === "cuidado" ||
+    normalized === "patient" ||
+    normalized === "pacient" ||
+    normalized === "paciente"
+  );
+};
 
 export default function AssociarPage() {
   const { user } = useAuth();
@@ -47,7 +60,7 @@ export default function AssociarPage() {
     try {
       const { data: cuidadoUser, error: cuidadoError } = await supabase
         .from("users")
-        .select("id, email")
+        .select("id, email, user_type_id")
         .ilike("email", normalizedEmail)
         .maybeSingle();
 
@@ -63,6 +76,27 @@ export default function AssociarPage() {
 
       if (cuidadoUser.id === user.id) {
         setError("Nao pode associar a propria conta.");
+        return;
+      }
+
+      if (!cuidadoUser.user_type_id) {
+        setError("A conta indicada nao tem tipo de perfil configurado.");
+        return;
+      }
+
+      const { data: cuidadoType, error: cuidadoTypeError } = await supabase
+        .from("user_types")
+        .select("designation")
+        .eq("id", cuidadoUser.user_type_id)
+        .maybeSingle();
+
+      if (cuidadoTypeError) {
+        setError("Nao foi possivel validar o tipo de perfil do cuidado.");
+        return;
+      }
+
+      if (!isCuidadoDesignation(cuidadoType?.designation)) {
+        setError("A conta indicada nao esta configurada como cuidado.");
         return;
       }
 
