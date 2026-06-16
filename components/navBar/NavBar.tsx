@@ -33,11 +33,12 @@ const Navbar = ({
   const dark = darkProp !== undefined ? darkProp : isDark;
 
   const styleBall =
-    "items-center w-[52px] h-[52px] rounded-[100px] justify-center";
+    "items-center w-[48px] h-[48px] rounded-[100px] justify-center";
 
   // Colors for dark mode
   const iconColor = dark ? "white" : "#191915";
   const buttonBg = dark ? "bg-[#131632]" : "bg-white";
+  const navIconSize = 20;
 
   return (
     <>
@@ -82,7 +83,7 @@ const Navbar = ({
             accessibilityHint="Abre a lista de widgets disponíveis."
             accessibilityState={{ disabled: disableAddAction }}
           >
-            <AddIcon color={iconColor} />
+            <AddIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -95,7 +96,7 @@ const Navbar = ({
             accessibilityHint="Abre o histórico diário."
             accessibilityState={{ disabled: disableNavigation }}
           >
-            <CalendarIcon color={iconColor} />
+            <CalendarIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -108,7 +109,7 @@ const Navbar = ({
             accessibilityHint="Abre o dashboard principal."
             accessibilityState={{ disabled: disableNavigation }}
           >
-            <HomeIcon color={iconColor} />
+            <HomeIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -121,7 +122,7 @@ const Navbar = ({
             accessibilityHint="Abre o perfil e definições."
             accessibilityState={{ disabled: disableNavigation }}
           >
-            <ProfileIcon color={iconColor} />
+            <ProfileIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
         </View>
       </View>
@@ -142,8 +143,8 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 8,
-    gap: 16,
+    padding: 7,
+    gap: 14,
     borderRadius: 100,
     overflow: "hidden",
   },

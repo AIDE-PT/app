@@ -3,15 +3,15 @@ import React from "react";
 import { Text, View, useWindowDimensions } from "react-native";
 import { WidgetAdd } from "../buttons/widgetAdd";
 import {
-    BpmIcon,
-    CalIcon,
-    O2Icon,
-    PassosIcon,
-    PressaoIcon,
-    SonoIcon,
-    StressIcon,
-    TempIcon,
+  BpmIcon,
+  CalIcon,
+  O2Icon,
+  PassosIcon,
+  PressaoIcon,
+  SonoIcon,
+  TempIcon,
 } from "../svg/HealthIcons";
+import { DASHBOARD_CONFIG } from "../widgets/WidgetWrapper";
 import BottomModal from "./BottomModal";
 
 interface AddWidgetModalProps {
@@ -19,6 +19,34 @@ interface AddWidgetModalProps {
   onClose: () => void;
   onAddWidget: (widgetId: string) => void;
 }
+
+const HEALTH_CONNECT_SUPPORTED_ENDPOINTS = new Set([
+  "bpm",
+  "steps",
+  "bloodPressure",
+  "temperature",
+  "sleep",
+  "o2",
+  "cal",
+]);
+
+const WIDGET_META_BY_ID: Record<
+  string,
+  {
+    label: string;
+    Icon: React.FC<
+      import("react-native-svg").SvgProps & { size?: number; color?: string }
+    >;
+  }
+> = {
+  heart: { label: "BPM", Icon: BpmIcon },
+  temp: { label: "TEMP", Icon: TempIcon },
+  bloodPressure: { label: "PRESSÃO", Icon: PressaoIcon },
+  steps: { label: "PASSOS", Icon: PassosIcon },
+  sleep: { label: "SONO", Icon: SonoIcon },
+  o2: { label: "O2", Icon: O2Icon },
+  cal: { label: "CAL", Icon: CalIcon },
+};
 
 export const AddWidgetModal = ({
   visible,
@@ -40,6 +68,10 @@ export const AddWidgetModal = ({
     (contentWidth - cardGap * (columnCount - 1)) / columnCount,
   );
 
+  const providerWidgets = DASHBOARD_CONFIG.filter((widget) =>
+    HEALTH_CONNECT_SUPPORTED_ENDPOINTS.has(widget.endpoint),
+  ).filter((widget) => WIDGET_META_BY_ID[widget.id]);
+
   const handleAdd = (widgetId: string) => {
     onAddWidget(widgetId);
     onClose();
@@ -51,39 +83,6 @@ export const AddWidgetModal = ({
         className="pb-8"
         style={{ width: contentWidth, alignSelf: "center" }}
       >
-        {/* Fitbit Section */}
-        <View className="mb-7">
-          <Text
-            className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}
-          >
-            Fitbit
-          </Text>
-          <View
-            className="flex-row flex-wrap"
-            style={{ rowGap: cardGap, columnGap: cardGap }}
-          >
-            <WidgetAdd
-              label="BPM"
-              Icon={BpmIcon}
-              onPress={() => handleAdd("heart")}
-              width={cardWidth}
-            />
-            <WidgetAdd
-              label="TEMP"
-              Icon={TempIcon}
-              onPress={() => handleAdd("temp")}
-              width={cardWidth}
-            />
-            <WidgetAdd
-              label="CAL"
-              Icon={CalIcon}
-              onPress={() => handleAdd("cal")}
-              width={cardWidth}
-            />
-          </View>
-        </View>
-
-        {/* Health Connect Section */}
         <View className="mb-7">
           <Text
             className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}
@@ -94,56 +93,18 @@ export const AddWidgetModal = ({
             className="flex-row flex-wrap"
             style={{ rowGap: cardGap, columnGap: cardGap }}
           >
-            <WidgetAdd
-              label="PASSOS"
-              Icon={PassosIcon}
-              onPress={() => handleAdd("steps")}
-              width={cardWidth}
-            />
-            <WidgetAdd
-              label="SONO"
-              Icon={SonoIcon}
-              onPress={() => handleAdd("sleep")}
-              width={cardWidth}
-            />
-            <WidgetAdd
-              label="O2"
-              Icon={O2Icon}
-              onPress={() => handleAdd("o2")}
-              width={cardWidth}
-            />
-          </View>
-        </View>
-
-        {/* Garmin Section */}
-        <View className="mb-7">
-          <Text
-            className={`text-lg font-bold mb-3 font-safiro ${isDark ? "text-white" : "text-black"}`}
-          >
-            Garmin
-          </Text>
-          <View
-            className="flex-row flex-wrap"
-            style={{ rowGap: cardGap, columnGap: cardGap }}
-          >
-            <WidgetAdd
-              label="PRESSÃO"
-              Icon={PressaoIcon}
-              onPress={() => handleAdd("bloodPressure")}
-              width={cardWidth}
-            />
-            <WidgetAdd
-              label="CAL"
-              Icon={CalIcon}
-              onPress={() => handleAdd("cal")}
-              width={cardWidth}
-            />
-            <WidgetAdd
-              label="STRESS"
-              Icon={StressIcon}
-              onPress={() => handleAdd("stress")}
-              width={cardWidth}
-            />
+            {providerWidgets.map((widget) => {
+              const meta = WIDGET_META_BY_ID[widget.id];
+              return (
+                <WidgetAdd
+                  key={widget.id}
+                  label={meta.label}
+                  Icon={meta.Icon}
+                  onPress={() => handleAdd(widget.id)}
+                  width={cardWidth}
+                />
+              );
+            })}
           </View>
         </View>
       </View>

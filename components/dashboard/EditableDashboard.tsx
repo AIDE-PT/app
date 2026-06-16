@@ -2,6 +2,7 @@ import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import Constants from "expo-constants";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
@@ -12,7 +13,7 @@ import {
   LayoutChangeEvent,
   Platform,
   Pressable,
-  Alert as RNAlert,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -114,7 +115,7 @@ export default function EditableDashboard({
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [cuidados, setCuidados] = useState<CuidadoOption[]>([]);
   const [selectedCuidado, setSelectedCuidado] = useState<CuidadoOption>();
-  const [topBarOverlayHeight, setTopBarOverlayHeight] = useState(0);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const gridContentRef = useRef<View | null>(null);
@@ -128,6 +129,21 @@ export default function EditableDashboard({
   const hasLoadedLayoutRef = useRef(false);
   const previousOnboardingCompletedRef = useRef<boolean | null>(null);
   const queryClient = useQueryClient();
+
+  const handleManualSync = useCallback(async () => {
+    if (Platform.OS !== "android") return;
+    if (Constants.executionEnvironment === "storeClient") {
+      console.warn("[HealthSync] Manual sync is unavailable in Expo Go.");
+      return;
+    }
+
+    try {
+      const { runSyncNow } = await import("@/src/tasks/healthBackgroundSync");
+      await runSyncNow();
+    } catch (error) {
+      console.warn("[HealthSync] Failed to run manual sync", error);
+    }
+  }, []);
 
   const loadAssociatedCuidados = useCallback(async () => {
     if (!user?.id || profileType !== "aider") {
@@ -659,10 +675,36 @@ export default function EditableDashboard({
     return "good";
   })();
 
+  const heroUserName =
+    typeof user?.user_metadata?.name === "string" &&
+    user.user_metadata.name.trim().length > 0
+      ? user.user_metadata.name.trim()
+      : (user?.email ?? "Utilizador");
+
   const refetchStepsMetrics = useCallback(() => {
     queryClient.refetchQueries({ queryKey: ["steps", "latest"], exact: true });
     queryClient.refetchQueries({ queryKey: ["steps", "stats"], exact: true });
   }, [queryClient]);
+
+  const handlePullToRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+
+    setIsRefreshing(true);
+    try {
+      await handleManualSync();
+      await refreshHealthConnectStatus();
+      refetchStepsMetrics();
+      queryClient.refetchQueries({ queryKey: ["alerts"], exact: true });
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [
+    handleManualSync,
+    isRefreshing,
+    queryClient,
+    refetchStepsMetrics,
+    refreshHealthConnectStatus,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -740,154 +782,50 @@ export default function EditableDashboard({
           <ScrollView
             style={{ flex: 1 }}
             scrollEnabled={draggingWidgetId === null}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={() => {
+                  void handlePullToRefresh();
+                }}
+                tintColor={isDark ? "#FFFFFF" : "#1F2937"}
+                colors={["#5061FF"]}
+                progressBackgroundColor={isDark ? "#000412" : "#ECF5FF"}
+              />
+            }
           >
-            {shouldShowOnboardingHero ? (
-              <View
-                className="px-4 mb-2"
-                style={{ paddingTop: onboardingTopPadding }}
-              >
+            {/* Hero Section — extends to top edge, content padded below TopBar */}
+            <HealthStatusHero
+              userName={heroUserName}
+              cuidadoName={selectedCuidado?.name ?? "Sem cuidado associado"}
+              isCuidadoAccount={profileType === "cuidado"}
+              status={heroStatus}
+              topExtension={heroTopExtension}
+              onCheckNotifications={() => router.push("/notificacoes")}
+            />
+
+            {isRefreshing && (
+              <View className="px-4 mb-2">
                 <View
-                  className={`rounded-[28px] p-5 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                  className={`rounded-2xl px-4 py-3 flex-row items-center ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
                   style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                  accessible
+                  accessibilityRole="text"
+                  accessibilityLabel="A sincronizar dados de saúde"
                 >
-                  {isOnboardingLoading ? (
-                    <View className="flex-row items-center">
-                      <ActivityIndicator
-                        color={isDark ? "#93c5fd" : "#1d4ed8"}
-                      />
-                      <Text
-                        className={`ml-3 text-sm font-open-sans ${isDark ? "text-white/80" : "text-slate-700"}`}
-                      >
-                        A preparar o onboarding inicial...
-                      </Text>
-                    </View>
-                  ) : (
-                    <>
-                      <View className="flex-row items-center justify-between">
-                        <Text
-                          className={`text-base font-bold ${isDark ? "text-white" : "text-black"}`}
-                        >
-                          Onboarding inicial
-                        </Text>
-                        <Text
-                          className={`text-xs font-open-sans ${isDark ? "text-white/60" : "text-slate-600"}`}
-                        >
-                          {onboardingState.healthConnectDone &&
-                          onboardingState.firstWidgetAddedDone
-                            ? "2/2"
-                            : onboardingState.healthConnectDone ||
-                                onboardingState.firstWidgetAddedDone
-                              ? "1/2"
-                              : "0/2"}
-                        </Text>
-                      </View>
-
-                      <View className="mt-4 gap-3">
-                        <View className="flex-row items-center">
-                          <Feather
-                            name={
-                              onboardingState.healthConnectDone
-                                ? "check-circle"
-                                : "circle"
-                            }
-                            size={18}
-                            color={
-                              onboardingState.healthConnectDone
-                                ? isDark
-                                  ? "#86efac"
-                                  : "#16a34a"
-                                : isDark
-                                  ? "#93c5fd"
-                                  : "#1d4ed8"
-                            }
-                          />
-                          <Text
-                            className={`ml-2 text-sm font-open-sans ${isDark ? "text-white/80" : "text-slate-700"}`}
-                          >
-                            Ligar ao Health Connect
-                          </Text>
-                        </View>
-
-                        <View className="flex-row items-center">
-                          <Feather
-                            name={
-                              onboardingState.firstWidgetAddedDone
-                                ? "check-circle"
-                                : "circle"
-                            }
-                            size={18}
-                            color={
-                              onboardingState.firstWidgetAddedDone
-                                ? isDark
-                                  ? "#86efac"
-                                  : "#16a34a"
-                                : isDark
-                                  ? "#93c5fd"
-                                  : "#1d4ed8"
-                            }
-                          />
-                          <Text
-                            className={`ml-2 text-sm font-open-sans ${isDark ? "text-white/80" : "text-slate-700"}`}
-                          >
-                            Adicionar o primeiro widget
-                          </Text>
-                        </View>
-                      </View>
-
-                      {highlightHealthConnectStep && (
-                        <View className="mt-4">
-                          <Text
-                            className={`mb-3 text-xs font-open-sans ${isDark ? "text-white/65" : "text-slate-600"}`}
-                          >
-                            Passo atual: ative as permissões do Health Connect
-                            para continuar.
-                          </Text>
-                          <Button
-                            variant="primary"
-                            label="Ligar Health Connect"
-                            onPress={() => void handleHealthConnectPress()}
-                          />
-                        </View>
-                      )}
-
-                      {highlightWidgetStep && (
-                        <Text
-                          className={`mt-4 text-xs font-open-sans ${isDark ? "text-white/65" : "text-slate-600"}`}
-                        >
-                          Passo atual: toque em Adicionar (+) na barra inferior
-                          e selecione um widget.
-                        </Text>
-                      )}
-
-                      <TouchableOpacity
-                        className="mt-4 self-start"
-                        onPress={() => void skipOnboarding()}
-                        accessibilityRole="button"
-                        accessibilityLabel="Saltar onboarding"
-                        accessibilityHint="Conclui o onboarding e desbloqueia o dashboard."
-                      >
-                        <Text
-                          className={`text-sm font-open-sans font-bold ${isDark ? "text-blue-300" : "text-blue-700"}`}
-                        >
-                          Saltar onboarding
-                        </Text>
-                      </TouchableOpacity>
-                    </>
-                  )}
+                  <ActivityIndicator
+                    size="small"
+                    color={isDark ? "#A9BDFF" : "#5061FF"}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no"
+                  />
+                  <Text
+                    className={`ml-3 text-sm font-bold ${isDark ? "text-white" : "text-slate-700"}`}
+                  >
+                    A sincronizar dados...
+                  </Text>
                 </View>
               </View>
-            ) : (
-              <HealthStatusHero
-                userName="Juliana K."
-                cuidadoName={selectedCuidado?.name ?? "Sem cuidado associado"}
-                status={heroStatus}
-                topExtension={heroTopExtension}
-                onCheckNotifications={
-                  isDashboardLocked
-                    ? undefined
-                    : () => router.push("/notificacoes")
-                }
-              />
             )}
 
             {!isLoadingHealthConnect &&
@@ -958,22 +896,6 @@ export default function EditableDashboard({
               disabled={isDashboardLocked}
             />
             */}
-
-            {activeWidgets.length === 0 && (
-              <View className="px-4 mt-2 mb-2">
-                <View
-                  className={`rounded-[24px] p-4 ${isDark ? "bg-white/5" : "bg-[#F6F8FF]"}`}
-                >
-                  <Text
-                    className={`text-sm font-open-sans ${isDark ? "text-white/80" : "text-slate-700"}`}
-                  >
-                    Ainda não existem widgets no seu dashboard. Adicione o
-                    primeiro widget no botão Adicionar (+).
-                  </Text>
-                </View>
-              </View>
-            )}
-
             <WidgetGrid
               contentRef={gridContentRef}
               onContentLayout={measureGrid}
