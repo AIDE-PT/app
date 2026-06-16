@@ -34,9 +34,11 @@ import {
 } from "@/components/widgets/WidgetWrapper";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
+import useHardOnboarding from "@/hooks/useHardOnboarding";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/utils/supabase/client";
+import { Button } from "../buttons/button";
 import TopBar from "../topBar/TopBar";
 import DashboardMetricWidget from "../widgets/DashboardMetricWidget";
 import HealthStatusHero from "./HealthStatusHero";
@@ -106,8 +108,7 @@ export default function EditableDashboard({
   const router = useRouter();
   const { user, isLoading: authLoading } = useAuth();
   const { profileType } = useUserProfile();
-  const [activeWidgets, setActiveWidgets] =
-    useState<DashboardWidget[]>(DASHBOARD_CONFIG);
+  const [activeWidgets, setActiveWidgets] = useState<DashboardWidget[]>([]);
   const [, setIsEditing] = useState(false);
   const [openSizeMenuId, setOpenSizeMenuId] = useState<string | null>(null);
   const [draggingWidgetId, setDraggingWidgetId] = useState<string | null>(null);
@@ -128,6 +129,7 @@ export default function EditableDashboard({
   const lastSwapTargetRef = useRef<string | null>(null);
   const suppressNextPressRef = useRef(false);
   const hasLoadedLayoutRef = useRef(false);
+  const previousOnboardingCompletedRef = useRef<boolean | null>(null);
   const queryClient = useQueryClient();
 
   const handleManualSync = useCallback(async () => {
@@ -239,13 +241,19 @@ export default function EditableDashboard({
   const loadDashboard = async () => {
     const applyFallbackFromLocal = async () => {
       const saved = await AsyncStorage.getItem(STORAGE_KEY);
-      if (!saved) return;
+      if (!saved) {
+        setActiveWidgets([]);
+        return;
+      }
 
       const parsed = JSON.parse(saved);
       const savedWidgets = getSavedWidgets(parsed);
       if (savedWidgets) {
         setActiveWidgets(repairWidgets(savedWidgets));
+        return;
       }
+
+      setActiveWidgets([]);
     };
 
     try {
@@ -291,6 +299,8 @@ export default function EditableDashboard({
   useEffect(() => {
     if (authLoading) return;
     loadDashboard();
+    // loadDashboard intentionally depends on auth/user state only for initial/follow-up user loads.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authLoading, user?.id]);
 
   useEffect(() => {
@@ -433,7 +443,7 @@ export default function EditableDashboard({
   };
 
   const beginDrag = (id: string, event: GestureResponderEvent) => {
-    if (notEditable) return;
+    if (notEditable || isDashboardLocked) return;
     const layout = cardLayoutsRef.current[id];
     if (!layout) return;
     const startPoint = getPointFromEvent(event);
@@ -530,6 +540,8 @@ export default function EditableDashboard({
   };
 
   const handleCardPress = (widgetId: string) => {
+    if (isDashboardLocked) return;
+
     if (suppressNextPressRef.current) {
       suppressNextPressRef.current = false;
       return;
@@ -556,15 +568,101 @@ export default function EditableDashboard({
     outputRange: [0.96, 1],
   });
 
-  const { isDark } = useTheme();
+  const { isDark, widgetView } = useTheme();
+  const useSuperSimplifiedWidgets = widgetView === "simplificada";
   const {
     status: healthConnectStatus,
     isLoading: isLoadingHealthConnect,
     refresh: refreshHealthConnectStatus,
   } = useHealthConnectStatus();
+  const hasHealthConnectPermissions = Boolean(
+    healthConnectStatus?.permissionsGranted,
+  );
+  const {
+    state: onboardingState,
+    currentStep: onboardingStep,
+    isLoading: isOnboardingLoading,
+    skipOnboarding,
+    completeHealthConnectStep,
+    isActive: isOnboardingActive,
+  } = useHardOnboarding({
+    userId: user?.id,
+    healthConnectGranted: hasHealthConnectPermissions,
+    hasAtLeastOneWidget: activeWidgets.length > 0,
+  });
+  const isHardOnboardingActive = !isOnboardingLoading && isOnboardingActive;
+  const isDashboardLocked =
+    isHardOnboardingActive && onboardingStep !== "completed";
+  const highlightHealthConnectStep =
+    isDashboardLocked && onboardingStep === "health-connect";
+  const highlightWidgetStep =
+    isDashboardLocked && onboardingStep === "add-widget";
+  const shouldShowOnboardingHero = isOnboardingLoading || isHardOnboardingActive;
+  const isAndroid = Platform.OS === "android";
+
+  const showPopup = useCallback((title: string, message: string) => {
+    if (Platform.OS === "web" && typeof globalThis.alert === "function") {
+      globalThis.alert(`${title}\n\n${message}`);
+      return;
+    }
+
+    RNAlert.alert(title, message);
+  }, []);
+
+  const handleHealthConnectPress = useCallback(async () => {
+    await completeHealthConnectStep();
+
+    if (isAndroid) {
+      router.push("/health-connect");
+      return;
+    }
+
+    showPopup(
+      "Health Connect indisponivel",
+      "Esta funcionalidade esta disponivel apenas em Android.",
+    );
+  }, [completeHealthConnectStep, isAndroid, router, showPopup]);
+
+  useEffect(() => {
+    if (isOnboardingLoading) return;
+
+    if (previousOnboardingCompletedRef.current === null) {
+      previousOnboardingCompletedRef.current = onboardingState.completed;
+      return;
+    }
+
+    if (
+      !previousOnboardingCompletedRef.current &&
+      onboardingState.completed
+    ) {
+      showPopup("Parabens!", "Fez o onboarding com sucesso.");
+    }
+
+    previousOnboardingCompletedRef.current = onboardingState.completed;
+  }, [isOnboardingLoading, onboardingState.completed, showPopup]);
+
+  const setSizeSafe = (id: string, variant: WidgetVariant) => {
+    if (isDashboardLocked) return;
+    setSize(id, variant);
+  };
+
+  const deleteWidgetSafe = (id: string) => {
+    if (isDashboardLocked) return;
+    deleteWidget(id);
+  };
+
+  const toggleSizeMenuSafe = (id: string) => {
+    if (isDashboardLocked) return;
+    toggleSizeMenu(id);
+  };
+
   const insets = useSafeAreaInsets();
   const TOP_BAR_HEIGHT = 30;
+  const TOP_BAR_CONTENT_HEIGHT = 90;
   const heroTopExtension = notEditable ? 0 : insets.top + TOP_BAR_HEIGHT;
+  const onboardingTopPadding = notEditable
+    ? 12
+    : Math.max(topBarOverlayHeight, insets.top + TOP_BAR_CONTENT_HEIGHT) + 12;
 
   const { data: alerts = [] } = useQuery<Alert[]>({
     queryKey: ["alerts"],
@@ -579,6 +677,12 @@ export default function EditableDashboard({
       return "warning";
     return "good";
   })();
+
+  const heroUserName =
+    typeof user?.user_metadata?.name === "string" &&
+    user.user_metadata.name.trim().length > 0
+      ? user.user_metadata.name.trim()
+      : (user?.email ?? "Utilizador");
 
   const refetchStepsMetrics = useCallback(() => {
     queryClient.refetchQueries({ queryKey: ["steps", "latest"] });
@@ -629,6 +733,9 @@ export default function EditableDashboard({
         {/* TopBar as absolute overlay so Hero bleeds behind it */}
         {!notEditable && (
           <View
+            onLayout={(event) => {
+              setTopBarOverlayHeight(event.nativeEvent.layout.height);
+            }}
             style={{
               position: "absolute",
               top: 0,
@@ -656,8 +763,16 @@ export default function EditableDashboard({
                 cuidados={cuidados}
                 selectedCuidado={selectedCuidado}
                 onSelectCuidado={(cuidado) => setSelectedCuidado(cuidado)}
-                onNotificationPress={() => router.push("/notificacoes")}
-                onSettingsPress={() => router.push("/definicoes")}
+                onNotificationPress={
+                  isDashboardLocked
+                    ? undefined
+                    : () => router.push("/notificacoes")
+                }
+                onSettingsPress={
+                  isDashboardLocked
+                    ? undefined
+                    : () => router.push("/definicoes")
+                }
               />
             </SafeAreaView>
           </View>
@@ -684,8 +799,9 @@ export default function EditableDashboard({
           >
             {/* Hero Section — extends to top edge, content padded below TopBar */}
             <HealthStatusHero
-              userName="Juliana K."
+              userName={heroUserName}
               cuidadoName={selectedCuidado?.name ?? "Sem cuidado associado"}
+              isCuidadoAccount={profileType === "cuidado"}
               status={heroStatus}
               topExtension={heroTopExtension}
               onCheckNotifications={() => router.push("/notificacoes")}
@@ -721,9 +837,17 @@ export default function EditableDashboard({
                 <View className="px-4 mb-2">
                   <TouchableOpacity
                     activeOpacity={0.9}
-                    onPress={() => router.push("/health-connect")}
+                    onPress={() => void handleHealthConnectPress()}
                     className={`rounded-[28px] p-5 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
-                    style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                    style={{
+                      boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
+                      borderWidth: highlightHealthConnectStep ? 1.8 : 0,
+                      borderColor: highlightHealthConnectStep
+                        ? isDark
+                          ? "#93c5fd"
+                          : "#1d4ed8"
+                        : "transparent",
+                    }}
                     accessibilityRole="button"
                     accessibilityLabel="Abrir Health Connect"
                     accessibilityHint="Abre a pagina do Health Connect para concluir a ligacao."
@@ -765,6 +889,16 @@ export default function EditableDashboard({
                   </TouchableOpacity>
                 </View>
               )}
+
+            {/* // <HealthDashboard /> } */}
+            {/*
+            <Button
+              variant="primary"
+              label="Forçar Sync"
+              onPress={() => void runSyncNow()}
+              disabled={isDashboardLocked}
+            />
+            */}
             <WidgetGrid
               contentRef={gridContentRef}
               onContentLayout={measureGrid}
@@ -790,25 +924,35 @@ export default function EditableDashboard({
                   >
                     <Pressable
                       onPress={() => handleCardPress(item.id)}
-                      onPressIn={notEditable ? undefined : measureGrid}
+                      onPressIn={
+                        notEditable || isDashboardLocked
+                          ? undefined
+                          : measureGrid
+                      }
                       onLongPress={
-                        notEditable
+                        notEditable || isDashboardLocked
                           ? undefined
                           : (event) => beginDrag(item.id, event)
                       }
                       onTouchMove={
-                        notEditable
+                        notEditable || isDashboardLocked
                           ? undefined
                           : (event) => handleDragMove(item.id, event)
                       }
                       onTouchEnd={
-                        notEditable ? undefined : () => finishDrag(item.id)
+                        notEditable || isDashboardLocked
+                          ? undefined
+                          : () => finishDrag(item.id)
                       }
                       onTouchCancel={
-                        notEditable ? undefined : () => finishDrag(item.id)
+                        notEditable || isDashboardLocked
+                          ? undefined
+                          : () => finishDrag(item.id)
                       }
                       onPressOut={
-                        notEditable ? undefined : () => finishDrag(item.id)
+                        notEditable || isDashboardLocked
+                          ? undefined
+                          : () => finishDrag(item.id)
                       }
                       delayLongPress={280}
                       style={isBeingDragged ? { opacity: 0.1 } : undefined}
@@ -819,12 +963,13 @@ export default function EditableDashboard({
                         variant={item.variant as WidgetVariant}
                         iconSize={24}
                         patientId={metricPatientId}
+                        superSimplified={useSuperSimplifiedWidgets}
                       />
                     </Pressable>
 
-                    {!notEditable && (
+                    {!notEditable && !isDashboardLocked && (
                       <TouchableOpacity
-                        onPress={() => toggleSizeMenu(item.id)}
+                        onPress={() => toggleSizeMenuSafe(item.id)}
                         className={`absolute top-2 right-2 h-7 w-7 rounded-full items-center justify-center z-40 ${isDark ? "bg-aide-dark-card border border-white/20" : "bg-white/90 border border-slate-200"}`}
                         disabled={Boolean(draggingWidgetId)}
                         accessibilityRole="button"
@@ -840,7 +985,7 @@ export default function EditableDashboard({
                       </TouchableOpacity>
                     )}
 
-                    {!notEditable && isSizeMenuOpen && (
+                    {!notEditable && !isDashboardLocked && isSizeMenuOpen && (
                       <Animated.View
                         style={{
                           position: "absolute",
@@ -873,7 +1018,7 @@ export default function EditableDashboard({
                               key={option.variant}
                               className={`px-4 py-3 flex-row items-center justify-between ${selected ? (isDark ? "bg-blue-900/50" : "bg-blue-50") : isDark ? "bg-transparent" : "bg-white"}`}
                               onPress={() => {
-                                setSize(item.id, option.variant);
+                                setSizeSafe(item.id, option.variant);
                                 closeSizeMenu();
                               }}
                               accessibilityRole="button"
@@ -900,7 +1045,7 @@ export default function EditableDashboard({
                         <TouchableOpacity
                           className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"} border-t ${isDark ? "border-white/10" : "border-slate-100"}`}
                           onPress={() => {
-                            deleteWidget(item.id);
+                            deleteWidgetSafe(item.id);
                           }}
                           accessibilityRole="button"
                           accessibilityLabel={`Eliminar widget ${item.type}`}
@@ -939,13 +1084,20 @@ export default function EditableDashboard({
                     variant={draggingWidget.variant as WidgetVariant}
                     iconSize={24}
                     patientId={metricPatientId}
+                    superSimplified={useSuperSimplifiedWidgets}
                   />
                 </View>
               )}
             </WidgetGrid>
           </ScrollView>
         </SafeAreaView>
-        <Navbar notEditable onAddWidget={addWidget} />
+        <Navbar
+          notEditable
+          onAddWidget={addWidget}
+          disableNavigation={isDashboardLocked}
+          highlightAddButton={highlightWidgetStep}
+          disableAddAction={isDashboardLocked && !highlightWidgetStep}
+        />
       </View>
     </LightBackground>
   );

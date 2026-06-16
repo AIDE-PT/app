@@ -1,10 +1,36 @@
+import { useAuth } from "@/contexts/AuthContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import React from "react";
-import { View } from "react-native";
+import React, { useCallback } from "react";
+import { Alert, View } from "react-native";
 import ElementoDefinicao from "./elemento_definicao";
+
+const ONBOARDING_STORAGE_KEY = "@aide_onboarding";
 
 const DefinicoesLista = () => {
   const router = useRouter();
+  const { user } = useAuth();
+
+  const handleResetOnboardingDebug = useCallback(async () => {
+    if (!user?.id) {
+      Alert.alert("Debug onboarding", "Sem utilizador autenticado.");
+      return;
+    }
+
+    try {
+      await AsyncStorage.removeItem(`${ONBOARDING_STORAGE_KEY}:${user.id}`);
+      Alert.alert(
+        "Debug onboarding",
+        "Onboarding reativado para este utilizador.",
+      );
+    } catch (error) {
+      console.log("Erro ao resetar onboarding (debug)", error);
+      Alert.alert(
+        "Debug onboarding",
+        "Não foi possível reativar o onboarding.",
+      );
+    }
+  }, [user?.id]);
 
   const menuDefinicoes: { label: string; href?: string }[] = [
     { label: "Gerir Aiders", href: "/associar" },
@@ -32,6 +58,15 @@ const DefinicoesLista = () => {
           }}
         />
       ))}
+
+      {__DEV__ ? (
+        <ElementoDefinicao
+          title="Debug: Reativar onboarding"
+          onPress={() => {
+            void handleResetOnboardingDebug();
+          }}
+        />
+      ) : null}
     </View>
   );
 };
