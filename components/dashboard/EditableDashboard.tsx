@@ -2,15 +2,18 @@ import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
+import Constants from "expo-constants";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   GestureResponderEvent,
   LayoutAnimation,
   LayoutChangeEvent,
   Platform,
   Pressable,
+  RefreshControl,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -112,6 +115,7 @@ export default function EditableDashboard({
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
   const [cuidados, setCuidados] = useState<CuidadoOption[]>([]);
   const [selectedCuidado, setSelectedCuidado] = useState<CuidadoOption>();
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const gridContentRef = useRef<View | null>(null);
@@ -124,6 +128,21 @@ export default function EditableDashboard({
   const suppressNextPressRef = useRef(false);
   const hasLoadedLayoutRef = useRef(false);
   const queryClient = useQueryClient();
+
+  const handleManualSync = useCallback(async () => {
+    if (Platform.OS !== "android") return;
+    if (Constants.executionEnvironment === "storeClient") {
+      console.warn("[HealthSync] Manual sync is unavailable in Expo Go.");
+      return;
+    }
+
+    try {
+      const { runSyncNow } = await import("@/src/tasks/healthBackgroundSync");
+      await runSyncNow();
+    } catch (error) {
+      console.warn("[HealthSync] Failed to run manual sync", error);
+    }
+  }, []);
 
   const loadAssociatedCuidados = useCallback(async () => {
     if (!user?.id || profileType !== "aider") {
@@ -564,12 +583,32 @@ export default function EditableDashboard({
     typeof user?.user_metadata?.name === "string" &&
     user.user_metadata.name.trim().length > 0
       ? user.user_metadata.name.trim()
-      : user?.email ?? "Utilizador";
+      : (user?.email ?? "Utilizador");
 
   const refetchStepsMetrics = useCallback(() => {
     queryClient.refetchQueries({ queryKey: ["steps", "latest"], exact: true });
     queryClient.refetchQueries({ queryKey: ["steps", "stats"], exact: true });
   }, [queryClient]);
+
+  const handlePullToRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+
+    setIsRefreshing(true);
+    try {
+      await handleManualSync();
+      await refreshHealthConnectStatus();
+      refetchStepsMetrics();
+      queryClient.refetchQueries({ queryKey: ["alerts"], exact: true });
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [
+    handleManualSync,
+    isRefreshing,
+    queryClient,
+    refetchStepsMetrics,
+    refreshHealthConnectStatus,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -636,6 +675,17 @@ export default function EditableDashboard({
           <ScrollView
             style={{ flex: 1 }}
             scrollEnabled={draggingWidgetId === null}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={() => {
+                  void handlePullToRefresh();
+                }}
+                tintColor={isDark ? "#FFFFFF" : "#1F2937"}
+                colors={["#5061FF"]}
+                progressBackgroundColor={isDark ? "#000412" : "#ECF5FF"}
+              />
+            }
           >
             {/* Hero Section — extends to top edge, content padded below TopBar */}
             <HealthStatusHero
@@ -646,6 +696,30 @@ export default function EditableDashboard({
               topExtension={heroTopExtension}
               onCheckNotifications={() => router.push("/notificacoes")}
             />
+
+            {isRefreshing && (
+              <View className="px-4 mb-2">
+                <View
+                  className={`rounded-2xl px-4 py-3 flex-row items-center ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                  style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                  accessible
+                  accessibilityRole="text"
+                  accessibilityLabel="A sincronizar dados de saúde"
+                >
+                  <ActivityIndicator
+                    size="small"
+                    color={isDark ? "#A9BDFF" : "#5061FF"}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no"
+                  />
+                  <Text
+                    className={`ml-3 text-sm font-bold ${isDark ? "text-white" : "text-slate-700"}`}
+                  >
+                    A sincronizar dados...
+                  </Text>
+                </View>
+              </View>
+            )}
 
             {!isLoadingHealthConnect &&
               healthConnectStatus &&

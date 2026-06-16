@@ -13,9 +13,7 @@
       "icon": "./assets/icon/colorBackground.png",
       "infoPlist": {
         "CFBundleDevelopmentRegion": "pt",
-        "CFBundleLocalizations": [
-          "pt-PT"
-        ]
+        "CFBundleLocalizations": ["pt-PT"]
       }
     },
     "android": {
