@@ -1,5 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Feather } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
@@ -18,9 +16,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import LightBackground from "@/components/DotBackground";
 import BackButton from "@/components/buttons/backButton";
 import { useTheme } from "@/hooks/useTheme";
-import type { Note } from "./NotesDashboard";
+import {
+  createNote,
+  getNoteById,
+  updateNote,
+} from "@/utils/supabase/notesService";
 
-const STORAGE_KEY = "@aide_notes";
 const DEFAULT_AUTHOR = "frontend-demo-user";
 
 export default function AddNoteForm() {
@@ -37,20 +38,20 @@ export default function AddNoteForm() {
 
   useEffect(() => {
     if (!id) return;
+
     const loadNote = async () => {
       try {
-        const raw = await AsyncStorage.getItem(STORAGE_KEY);
-        const notes: Note[] = raw ? JSON.parse(raw) : [];
-        const note = notes.find((n) => n.id === id);
+        const note = await getNoteById(id);
         if (note) {
           setTitle(note.title);
-          setContent(note.content || "");
-          setAuthor(note.author);
+          setContent(note.description || "");
+          setAuthor(note.creator_id || DEFAULT_AUTHOR);
         }
       } catch (error) {
         console.log("Erro ao carregar nota", error);
       }
     };
+
     loadNote();
   }, [id]);
 
@@ -62,36 +63,22 @@ export default function AddNoteForm() {
 
     setIsSaving(true);
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      const notes: Note[] = raw ? JSON.parse(raw) : [];
-      const now = new Date().toISOString();
+      // TODO: substituir estes valores pelos IDs reais do paciente/utilizador
+      const patientId = "demo-patient-id";
+      const creatorId = "demo-creator-id";
 
-      if (isEditing) {
-        const updated = notes.map((n) =>
-          n.id === id
-            ? {
-                ...n,
-                title: title.trim() || "Sem título",
-                content: content.trim(),
-                author,
-                updatedAt: now,
-              }
-            : n,
-        );
-        await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      } else {
-        const newNote: Note = {
-          id: `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`,
+      if (isEditing && id) {
+        await updateNote(id, {
           title: title.trim() || "Sem título",
-          content: content.trim(),
-          author,
-          createdAt: now,
-          updatedAt: now,
-        };
-        await AsyncStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify([newNote, ...notes]),
-        );
+          description: content.trim(),
+        });
+      } else {
+        await createNote({
+          patient_id: patientId,
+          creator_id: creatorId,
+          title: title.trim() || "Sem título",
+          description: content.trim(),
+        });
       }
 
       router.back();
@@ -193,9 +180,7 @@ export default function AddNoteForm() {
                     : "bg-white/85 border-white"
                 }`}
               >
-                <Text
-                  className={`text-sm font-open-sans-semibold ${textMain}`}
-                >
+                <Text className={`text-sm font-open-sans-semibold ${textMain}`}>
                   Conteúdo
                 </Text>
                 <TextInput
