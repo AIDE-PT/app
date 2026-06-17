@@ -2,7 +2,8 @@ import LightBackground from "@/components/DotBackground";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { SafeAreaView, ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import aider from "../assets/images/aider.png";
 import cuidado from "../assets/images/cuidado.png";
 import icon_aider from "../assets/images/icon_aider.png";
@@ -16,13 +17,21 @@ export default function PerfilScreen() {
   const isDark = false;
   const { setProfileType } = useUserProfile();
 
-  const handleAvançar = () => {
+  const handleAvançar = async () => {
     if (!selected) return;
-    setProfileType(selected);
-    if (selected === "cuidado") {
-      router.push("/extraData");
-    } else {
-      router.push("/associar");
+
+    try {
+      await setProfileType(selected);
+      if (selected === "cuidado") {
+        router.push("/extraData");
+      } else {
+        router.push("/associar");
+      }
+    } catch {
+      Alert.alert(
+        "Erro",
+        "Nao foi possivel guardar o tipo de perfil. Tente novamente.",
+      );
     }
   };
 

@@ -1,12 +1,24 @@
-import { useRouter } from "expo-router";
-import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { LightBackground } from "@/components/DotBackground";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/utils/supabase/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useGlobalSearchParams, useRouter } from "expo-router";
+import { useEffect, useState } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { z } from "zod";
 import { Button } from "../components/buttons/button";
 import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
-import { LightBackground } from "@/components/DotBackground";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Email obrigatório").email("Email inválido"),
+  password: z.string().min(1, "Password obrigatória"),
+});
+
+type LoginFormData = z.infer<typeof loginSchema>;
 
 const DividerWithText = ({
   text,
@@ -34,12 +46,64 @@ const DividerWithText = ({
 
 export default function Login() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const params = useGlobalSearchParams<{ next?: string }>();
+  const { session, isLoading: authLoading } = useAuth();
+  const nextRoute =
+    typeof params.next === "string" ? params.next : "/testDashboard";
   const isDark = false;
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleLogin = () => {
-    router.push("/testDashboard" as any);
+  useEffect(() => {
+    if (!authLoading && session) {
+      router.replace(nextRoute as any);
+    }
+  }, [authLoading, nextRoute, router, session]);
+
+  const {
+    control,
+    handleSubmit,
+    formState: { errors, touchedFields, dirtyFields, isSubmitted },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    mode: "onChange",
+    reValidateMode: "onChange",
+  });
+
+  const shouldShowFieldError = (field: keyof LoginFormData) =>
+    !!errors[field] &&
+    (isSubmitted || !!touchedFields[field] || !!dirtyFields[field]);
+
+  const handleLogin = async (data: LoginFormData) => {
+    setIsLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+
+      console.log("ERRO:", JSON.stringify(error));
+      console.log("DATA:", JSON.stringify(data));
+
+      if (error) {
+        const messages: Record<string, string> = {
+          "Invalid login credentials": "Email ou password incorrectos.",
+          "Email not confirmed": "Confirma o teu email antes de fazer login.",
+          "Too many requests": "Demasiadas tentativas. Aguarda alguns minutos.",
+          "Failed to fetch": "Sem ligação à internet. Verifica a tua rede.",
+        };
+
+        const msg = messages[error.message] ?? error.message;
+        Alert.alert("Erro no Login", msg, [{ text: "OK" }]);
+      } else {
+        router.replace(nextRoute as any);
+      }
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleGoogleLogin = () => {
@@ -66,27 +130,51 @@ export default function Login() {
             </View>
 
             <View className="mb-4 gap-4">
-              <Input
-                variant="light"
-                forceLight
-                type="email"
-                label="Email ou telemovel"
-                placeholder="Email/telemovel"
-                value={email}
-                onChangeText={setEmail}
-                helperText="Introduza o email ou numero usado no registo."
-                validateAs="emailOrPhone"
+              <Controller
+                control={control}
+                name="email"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    variant="light"
+                    forceLight
+                    type="email"
+                    label="Email ou telemovel"
+                    placeholder="Email/telemovel"
+                    helperText="Introduza o email ou numero usado no registo."
+                    errorText={
+                      shouldShowFieldError("email")
+                        ? errors.email?.message
+                        : undefined
+                    }
+                    validateAs="emailOrPhone"
+                    value={value}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                  />
+                )}
               />
 
-              <Input
-                variant="light"
-                forceLight
-                type="password"
-                label="Password"
-                placeholder="Password"
-                value={password}
-                onChangeText={setPassword}
-                helperText="Escreva a password da sua conta."
+              <Controller
+                control={control}
+                name="password"
+                render={({ field: { onChange, onBlur, value } }) => (
+                  <Input
+                    variant="light"
+                    forceLight
+                    type="password"
+                    label="Password"
+                    placeholder="Password"
+                    helperText="Escreva a password da sua conta."
+                    errorText={
+                      shouldShowFieldError("password")
+                        ? errors.password?.message
+                        : undefined
+                    }
+                    value={value}
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                  />
+                )}
               />
             </View>
 
@@ -112,7 +200,8 @@ export default function Login() {
                 variant="primary"
                 forceLight
                 label="Avancar"
-                onPress={handleLogin}
+                onPress={handleSubmit(handleLogin)}
+                loading={isLoading}
               />
 
               <View className="mt-6 flex-row">

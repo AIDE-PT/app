@@ -1,9 +1,10 @@
-import { router } from "expo-router";
-import React from "react";
-import { ScrollView, SafeAreaView, Text, View } from "react-native";
-import BackButton from "../components/buttons/backButton";
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
+import { router } from "expo-router";
+import React from "react";
+import { ScrollView, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import BackButton from "../components/buttons/backButton";
 
 // Section component for each privacy section
 interface SectionProps {
@@ -74,11 +75,13 @@ const Privacidade = () => {
     <LightBackground>
       <View className="flex-1 px-4 pt-10">
         <SafeAreaView className="flex-1">
-          <BackButton
-            label="Política de Privacidade"
-            dark={isDark}
-            onPress={() => router.push("/definicoes")}
-          />
+          <View className="mb-4">
+            <BackButton
+              label="Política de Privacidade"
+              dark={isDark}
+              onPress={() => router.push("/definicoes")}
+            />
+          </View>
 
           {/* Content */}
           <ScrollView
