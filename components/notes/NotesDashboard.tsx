@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { format } from "date-fns";
 import { useRouter } from "expo-router";
@@ -16,19 +15,12 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import LightBackground from "@/components/DotBackground";
 import BackButton from "@/components/buttons/backButton";
 import { useTheme } from "@/hooks/useTheme";
+import {
+  deleteNote,
+  getNotesByPatient,
+  type Note,
+} from "@/utils/supabase/notesService";
 import { useFocusEffect } from "@react-navigation/native";
-
-const STORAGE_KEY = "@aide_notes";
-const REORDER_KEY = "@aide_notes_order";
-
-export type Note = {
-  id: string;
-  title: string;
-  content: string;
-  author: string;
-  createdAt: string;
-  updatedAt: string;
-};
 
 const NOTE_COLORS = ["#FFFFFF", "#FFF7D6", "#EAF7FF", "#F1F8E9", "#FCE7F3"];
 
@@ -41,31 +33,18 @@ export default function NotesDashboard() {
 
   const loadNotes = useCallback(async () => {
     try {
-      const raw = await AsyncStorage.getItem(STORAGE_KEY);
-      const parsed: Note[] = raw ? JSON.parse(raw) : [];
+      // TODO: substituir pelo ID do paciente real vindo do perfil/contexto
+      const patientId = "demo-patient-id";
+      const data = await getNotesByPatient(patientId);
 
-      const orderRaw = await AsyncStorage.getItem(REORDER_KEY);
-      if (orderRaw) {
-        const order: string[] = JSON.parse(orderRaw);
-        const noteMap = new Map(parsed.map((n) => [n.id, n]));
-        const ordered = order
-          .map((id) => noteMap.get(id))
-          .filter((n): n is Note => n !== undefined);
-        const remaining = parsed.filter((n) => !order.includes(n.id));
-        remaining.sort(
-          (a, b) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-        );
-        setNotes([...ordered, ...remaining]);
-      } else {
-        parsed.sort(
-          (a, b) =>
-            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-        );
-        setNotes(parsed);
-      }
+      const sorted = [...data].sort(
+        (a, b) =>
+          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+      );
+      setNotes(sorted);
     } catch (error) {
       console.log("Erro ao carregar notas", error);
+      setNotes([]);
     } finally {
       setLoading(false);
     }
@@ -78,48 +57,24 @@ export default function NotesDashboard() {
     }, [loadNotes]),
   );
 
-  const deleteNote = (noteId: string) => {
+  const handleDeleteNote = (noteId: string) => {
     Alert.alert("Eliminar nota", "Tem a certeza?", [
       { text: "Cancelar", style: "cancel" },
       {
         text: "Eliminar",
         style: "destructive",
         onPress: async () => {
-          const updated = notes.filter((n) => n.id !== noteId);
-          await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-          const orderRaw = await AsyncStorage.getItem(REORDER_KEY);
-          if (orderRaw) {
-            const order: string[] = JSON.parse(orderRaw);
-            await AsyncStorage.setItem(
-              REORDER_KEY,
-              JSON.stringify(order.filter((id) => id !== noteId)),
-            );
+          try {
+            await deleteNote(noteId);
+            setNotes((current) => current.filter((note) => note.id !== noteId));
+          } catch (error) {
+            console.log("Erro ao eliminar nota", error);
+            Alert.alert("Erro", "Não foi possível eliminar a nota.");
           }
-          setNotes(updated);
         },
       },
     ]);
   };
-
-  const persistOrder = async (orderedIds: string[]) => {
-    await AsyncStorage.setItem(REORDER_KEY, JSON.stringify(orderedIds));
-  };
-
-  const moveNote = (index: number, direction: "up" | "down") => {
-    const targetIndex = direction === "up" ? index - 1 : index + 1;
-    if (targetIndex < 0 || targetIndex >= notes.length) return;
-
-    setNotes((current) => {
-      const updated = [...current];
-      const [moved] = updated.splice(index, 1);
-      updated.splice(targetIndex, 0, moved);
-      persistOrder(updated.map((n) => n.id));
-      return updated;
-    });
-  };
-
-  const enterReorderMode = () => setReorderMode(true);
-  const exitReorderMode = () => setReorderMode(false);
 
   const panelClass = isDark
     ? "bg-aide-dark-card border-white/10"
@@ -132,17 +87,17 @@ export default function NotesDashboard() {
     return (
       <Pressable
         onPress={() => router.push(`/add_notas?id=${item.id}` as never)}
-        onLongPress={() => deleteNote(item.id)}
+        onLongPress={() => handleDeleteNote(item.id)}
         className="mb-3 w-[48.5%]"
       >
         <View
           className={`rounded-[20px] border p-4 min-h-[130px] justify-between ${
-            isDark
-              ? "bg-[#131632] border-white/10"
-              : "bg-white border-white/90"
+            isDark ? "bg-[#131632] border-white/10" : "bg-white border-white/90"
           }`}
           style={{
-            backgroundColor: isDark ? "rgba(19,22,50,0.92)" : NOTE_COLORS[colorIndex],
+            backgroundColor: isDark
+              ? "rgba(19,22,50,0.92)"
+              : NOTE_COLORS[colorIndex],
             borderColor: isDark
               ? "rgba(255,255,255,0.1)"
               : "rgba(255,255,255,0.9)",
@@ -159,14 +114,14 @@ export default function NotesDashboard() {
               className={`mt-2 text-sm leading-5 ${textMuted}`}
               numberOfLines={3}
             >
-              {item.content || "Sem conteúdo"}
+              {item.description || "Sem conteúdo"}
             </Text>
           </View>
 
           <View className="mt-3">
             <Text className={`text-[10px] ${textMuted}`} numberOfLines={1}>
-              {item.author} ·{" "}
-              {format(new Date(item.updatedAt), "dd/MM/yyyy")}
+              {item.creator_id} ·{" "}
+              {format(new Date(item.updated_at), "dd/MM/yyyy")}
             </Text>
           </View>
         </View>
