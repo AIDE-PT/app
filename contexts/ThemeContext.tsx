@@ -9,18 +9,22 @@ export type ColorPaletteType =
   | "protanopia"
   | "tritanopia"
   | "highContrast";
+export type WidgetViewType = "detalhada" | "simplificada";
 
 interface ThemeContextType {
   isDark: boolean;
   theme: ThemeType;
   colorPalette: ColorPaletteType;
+  widgetView: WidgetViewType;
   setTheme: (theme: ThemeType) => void;
   setColorPalette: (palette: ColorPaletteType) => void;
+  setWidgetView: (view: WidgetViewType) => void;
   toggleTheme: () => void;
 }
 
 const THEME_STORAGE_KEY = "@aide_theme";
 const COLOR_PALETTE_STORAGE_KEY = "@aide_color_palette";
+const WIDGET_VIEW_STORAGE_KEY = "@aide_widget_view";
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
@@ -28,15 +32,18 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const [theme, setThemeState] = useState<ThemeType>("light");
   const [colorPalette, setColorPaletteState] =
     useState<ColorPaletteType>("default");
+  const [widgetView, setWidgetViewState] =
+    useState<WidgetViewType>("detalhada");
   const [isLoading, setIsLoading] = useState(true);
 
-  // Load saved theme and color palette on mount
+  // Load saved theme, palette, and widget view on mount.
   useEffect(() => {
     const loadPreferences = async () => {
       try {
-        const [savedTheme, savedPalette] = await Promise.all([
+        const [savedTheme, savedPalette, savedWidgetView] = await Promise.all([
           AsyncStorage.getItem(THEME_STORAGE_KEY),
           AsyncStorage.getItem(COLOR_PALETTE_STORAGE_KEY),
+          AsyncStorage.getItem(WIDGET_VIEW_STORAGE_KEY),
         ]);
 
         if (savedTheme === "dark" || savedTheme === "light") {
@@ -51,6 +58,13 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
           savedPalette === "highContrast"
         ) {
           setColorPaletteState(savedPalette);
+        }
+
+        if (
+          savedWidgetView === "detalhada" ||
+          savedWidgetView === "simplificada"
+        ) {
+          setWidgetViewState(savedWidgetView);
         }
       } catch (error) {
         console.error("Error loading theme preferences:", error);
@@ -79,6 +93,15 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const setWidgetView = async (newView: WidgetViewType) => {
+    try {
+      await AsyncStorage.setItem(WIDGET_VIEW_STORAGE_KEY, newView);
+      setWidgetViewState(newView);
+    } catch (error) {
+      console.error("Error saving widget view:", error);
+    }
+  };
+
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
@@ -95,8 +118,10 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         isDark: theme === "dark",
         theme,
         colorPalette,
+        widgetView,
         setTheme,
         setColorPalette,
+        setWidgetView,
         toggleTheme,
       }}
     >

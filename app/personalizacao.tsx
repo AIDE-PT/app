@@ -1,24 +1,27 @@
 import BackButton from "@/components/buttons/backButton";
 import LightBackground from "@/components/DotBackground";
 import Navbar from "@/components/navBar/NavBar";
-import { type ColorPaletteType } from "@/contexts/ThemeContext";
+import {
+    type ColorPaletteType,
+    type WidgetViewType,
+} from "@/contexts/ThemeContext";
 import React, { useEffect, useRef, useState } from "react";
 import {
-  Animated,
-  Image,
-  SafeAreaView,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
+    Animated,
+    Image,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 import temaClaro from "@/assets/images/tema_claro.png";
 import temaEscuro from "@/assets/images/tema_escuro.png";
 import { useTheme } from "@/hooks/useTheme";
 
 type TabType = "temas" | "cores";
-type ViewType = "detalhada" | "simplificada";
+type ViewType = WidgetViewType;
 
 type ColorOption = {
   id: ColorPaletteType;
@@ -61,10 +64,17 @@ const COLOR_OPTIONS: ColorOption[] = [
 ];
 
 const Personalizacao = () => {
-  const { isDark, setTheme, colorPalette, setColorPalette, colors } =
-    useTheme();
+  const {
+    isDark,
+    setTheme,
+    colorPalette,
+    setColorPalette,
+    widgetView,
+    setWidgetView,
+    colors,
+  } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>("temas");
-  const [selectedView, setSelectedView] = useState<ViewType>("detalhada");
+  const [selectedView, setSelectedView] = useState<ViewType>(widgetView);
 
   // Animation values
   const themeAnimations = useRef({
@@ -73,8 +83,8 @@ const Personalizacao = () => {
   }).current;
 
   const viewAnimations = useRef({
-    detalhada: new Animated.Value(1),
-    simplificada: new Animated.Value(0),
+    detalhada: new Animated.Value(widgetView === "detalhada" ? 1 : 0),
+    simplificada: new Animated.Value(widgetView === "simplificada" ? 1 : 0),
   }).current;
 
   // Sync animation with theme on mount
@@ -82,6 +92,14 @@ const Personalizacao = () => {
     themeAnimations.escuro.setValue(isDark ? 1 : 0);
     themeAnimations.claro.setValue(isDark ? 0 : 1);
   }, [isDark, themeAnimations.claro, themeAnimations.escuro]);
+
+  useEffect(() => {
+    setSelectedView(widgetView);
+    viewAnimations.detalhada.setValue(widgetView === "detalhada" ? 1 : 0);
+    viewAnimations.simplificada.setValue(
+      widgetView === "simplificada" ? 1 : 0,
+    );
+  }, [widgetView, viewAnimations.detalhada, viewAnimations.simplificada]);
 
   const handleThemeChange = (theme: "escuro" | "claro") => {
     // Update global theme
@@ -106,6 +124,7 @@ const Personalizacao = () => {
 
   const handleViewChange = (view: ViewType) => {
     setSelectedView(view);
+    setWidgetView(view);
     Animated.parallel([
       Animated.timing(viewAnimations[view], {
         toValue: 1,
@@ -128,7 +147,7 @@ const Personalizacao = () => {
       <View className="flex-1">
         <SafeAreaView className="flex-1">
           {/* Header */}
-          <View className="px-4 pt-10">
+          <View className="px-4 pt-10 mb-4">
             <BackButton label="Personalização" dark={isDark} />
           </View>
 

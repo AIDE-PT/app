@@ -1,12 +1,11 @@
+import { useUserProfile } from "@/contexts/UserProfileContext";
+import { useTheme } from "@/hooks/useTheme";
 import React from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
-import { BlurView } from "expo-blur";
 import ChoseCuidado from "../buttons/choseCuidado";
 import SOSButton from "../buttons/sosButton";
 import NotificationBell from "../svg/NotificationBell";
 import SettingsIcon from "../svg/Settings";
-import { useTheme } from "@/hooks/useTheme";
-import { useUserProfile } from "@/contexts/UserProfileContext";
 
 interface Cuidado {
   id: string;
@@ -37,42 +36,37 @@ const TopBar = ({
 
   const iconColor = isDark ? "white" : "#000000";
   const ballBg = isDark ? "bg-[#131632]" : "bg-white";
-  const styleBall = `items-center w-[50px] h-[50px] rounded-[100px] justify-center ${ballBg}`;
+  const styleBall = `items-center w-[46px] h-[46px] rounded-[100px] justify-center ${ballBg}`;
 
   const backgroundStyle = showBackground
     ? {
         borderBottomLeftRadius: 40,
         borderBottomRightRadius: 40,
-        paddingTop: 58,
-        paddingBottom: 16,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.12,
         shadowRadius: 8,
-        elevation: 4,
         overflow: "visible" as const,
       }
     : {};
 
+  const topBarLayerStyle = {
+    overflow: "visible" as const,
+    zIndex: 60,
+    elevation: 60,
+  };
+
   const overlayColor = isDark
     ? "rgba(0, 4, 18, 0.55)"
-    : "rgba(219, 237, 248, 0.45)";
+    : "rgba(219, 237, 248, 1)";
 
   return (
     <View
-      className={`flex-row z-50 px-4 py-2 ${profileType === "cuidado" ? "items-center justify-between" : "items-start justify-between"} ${className}`}
-      style={backgroundStyle}
+      className={`flex-row z-50 px-4 py-5 ${profileType === "cuidado" ? "items-center justify-between" : "items-start justify-between"} ${className}`}
+      style={[backgroundStyle, topBarLayerStyle]}
     >
       {showBackground && (
         <>
-          <BlurView
-            intensity={60}
-            tint={isDark ? "dark" : "light"}
-            style={[
-              StyleSheet.absoluteFillObject,
-              { borderBottomLeftRadius: 40, borderBottomRightRadius: 40 },
-            ]}
-          />
           <View
             style={[
               StyleSheet.absoluteFillObject,
@@ -90,30 +84,33 @@ const TopBar = ({
           <SOSButton />
 
           <TouchableOpacity
-            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
             className={styleBall}
             onPress={onNotificationPress}
             accessibilityRole="button"
             accessibilityLabel="Abrir notificações"
             accessibilityHint="Mostra os alertas e notificações."
           >
-            <NotificationBell color={iconColor} />
+            <NotificationBell color={iconColor} size={21} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
             className={styleBall}
             onPress={onSettingsPress}
             accessibilityRole="button"
             accessibilityLabel="Abrir definições"
             accessibilityHint="Abre as definições da aplicação."
           >
-            <SettingsIcon color={iconColor} />
+            <SettingsIcon color={iconColor} size={21} />
           </TouchableOpacity>
         </>
       ) : (
         <>
-          <View className="flex-1 mr-4">
+          <View
+            className="flex-1 mr-4"
+            style={{ overflow: "visible", zIndex: 2000, elevation: 2000 }}
+          >
             <ChoseCuidado
               cuidados={cuidados}
               selectedCuidado={selectedCuidado}
@@ -123,25 +120,25 @@ const TopBar = ({
 
           <View className="flex-row gap-3">
             <TouchableOpacity
-              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
               className={styleBall}
               onPress={onNotificationPress}
               accessibilityRole="button"
               accessibilityLabel="Abrir notificações"
               accessibilityHint="Mostra os alertas e notificações."
             >
-              <NotificationBell color={iconColor} />
+              <NotificationBell color={iconColor} size={21} />
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
               className={styleBall}
               onPress={onSettingsPress}
               accessibilityRole="button"
               accessibilityLabel="Abrir definições"
               accessibilityHint="Abre as definições da aplicação."
             >
-              <SettingsIcon color={iconColor} />
+              <SettingsIcon color={iconColor} size={21} />
             </TouchableOpacity>
           </View>
         </>

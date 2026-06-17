@@ -1,13 +1,15 @@
-import React from "react";
-import { WidgetWrapper, METRIC_STYLES } from "./WidgetWrapper";
-import WidgetIcon, { IconType } from "../svg/WidgetIcon";
 import { useHealthMetric } from "@/hooks/useLatestMetric";
+import React, { useEffect } from "react";
+import WidgetIcon, { IconType } from "../svg/WidgetIcon";
+import { METRIC_STYLES, WidgetWrapper } from "./WidgetWrapper";
 
 interface Props {
   type: IconType;
   endpoint: string;
   variant: "1-1" | "1-2" | "1-3" | "2-3";
   iconSize?: number;
+  patientId?: string | null;
+  superSimplified?: boolean;
 }
 
 export default function DashboardMetricWidget({
@@ -15,11 +17,34 @@ export default function DashboardMetricWidget({
   endpoint,
   variant,
   iconSize = 20,
+  patientId,
+  superSimplified = false,
 }: Props) {
   const isBP = type === "bloodPressure";
-  const { data, isLoading } = useHealthMetric(endpoint, isBP);
+  const { data, isLoading } = useHealthMetric(endpoint, isBP, patientId);
+  const isStepsWidget = type === "steps";
 
   const styles = METRIC_STYLES[type];
+
+  useEffect(() => {
+    if (!isStepsWidget) return;
+
+    console.log("[StepsWidget] state", {
+      endpoint,
+      variant,
+      isLoading,
+      hasData: Boolean(data),
+    });
+
+    if (!data) return;
+
+    console.log("[StepsWidget] payload", {
+      displayValue: data.displayValue,
+      historyLength: data.history.length,
+      latest: data.latest,
+      latestBucketsPreview: data.history.slice(0, 6),
+    });
+  }, [data, endpoint, isLoading, isStepsWidget, variant]);
 
   // 1. Enquanto carrega
   if (isLoading) {
@@ -34,6 +59,8 @@ export default function DashboardMetricWidget({
         feedbackColor="#E5E7EB"
         history={[]}
         color={styles.color}
+        metricType={type}
+        superSimplified={superSimplified}
       />
     );
   }
@@ -51,6 +78,8 @@ export default function DashboardMetricWidget({
         feedbackColor="#FCA5A5"
         history={[]}
         color={styles.color}
+        metricType={type}
+        superSimplified={superSimplified}
       />
     );
   }
@@ -86,6 +115,7 @@ export default function DashboardMetricWidget({
       history={data.history}
       metricType={type}
       color={styles.color}
+      superSimplified={superSimplified}
       yMin={type === "temp" ? 35 : undefined}
       yMax={type === "temp" ? 40 : undefined}
       segments={type === "temp" ? 5 : 3}

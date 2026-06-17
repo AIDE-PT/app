@@ -1,3 +1,4 @@
+import { sendLocalSOSNotification } from "@/src/services/localNotifications";
 import React from "react";
 import { Alert, Platform, TouchableOpacity, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
@@ -22,7 +23,7 @@ const SOSSvg = () => (
   </Svg>
 );
 
-const handleSOS = () => {
+const handleSOS = async () => {
   if (
     Platform.OS === "web" &&
     typeof window !== "undefined" &&
@@ -38,7 +39,14 @@ const handleSOS = () => {
       }
     });
   } else {
-    Alert.alert("SOS Ativado", "O pedido de socorro foi enviado.");
+    try {
+      await sendLocalSOSNotification();
+    } catch {
+      Alert.alert(
+        "Permissao Necessaria",
+        "Ative as notificacoes do dispositivo para receber alertas SOS.",
+      );
+    }
   }
 };
 

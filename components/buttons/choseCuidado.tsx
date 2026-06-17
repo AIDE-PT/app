@@ -48,8 +48,21 @@ export const ChoseCuidado = ({
     overflow: "hidden",
   }));
 
+  const dropdownLayerStyle = isOpen
+    ? { zIndex: 2000, elevation: 2000 }
+    : { zIndex: 50, elevation: 50 };
+
   return (
-    <View className={`w-full z-50 ${className}`}>
+    <View
+      className={`w-full ${className}`}
+      style={[
+        {
+          position: "relative",
+          overflow: "visible",
+        },
+        dropdownLayerStyle,
+      ]}
+    >
       {/* Placeholder to maintain layout height */}
       <View className="w-full flex-row items-center justify-center px-6 py-3 opacity-0">
         <Text className="text-xl font-semibold mr-2">
@@ -60,8 +73,14 @@ export const ChoseCuidado = ({
 
       {/* Actual expanding component */}
       <View
-        className="absolute top-0 left-0 right-0 z-50 rounded-[30px]"
-        style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+        className="absolute top-0 left-0 right-0 rounded-[30px]"
+        style={[
+          {
+            boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
+            overflow: "visible",
+          },
+          dropdownLayerStyle,
+        ]}
       >
         <View
           className={`rounded-[30px] overflow-hidden ${isDark ? "bg-[#131632]" : "bg-white"}`}

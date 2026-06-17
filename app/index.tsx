@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { Dimensions, Text, View } from "react-native";
@@ -196,7 +197,18 @@ const ConcentricRings = ({ isDark }: { isDark: boolean }) => {
 
 export default function App() {
   const router = useRouter();
+  const { session, isLoading } = useAuth();
   const isDark = false;
+
+  useEffect(() => {
+    if (!isLoading && session) {
+      router.replace("/testDashboard" as any);
+    }
+  }, [isLoading, router, session]);
+
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <SafeAreaView className="flex-1">
@@ -251,7 +263,7 @@ export default function App() {
               forceLight
               label="Começa Já!"
               onPress={() => {
-                router.push("/terms-of-service?fromStart=true");
+                router.push("/register" as any);
               }}
             />
           </View>

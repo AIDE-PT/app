@@ -1,41 +1,52 @@
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
-import { useRouter } from "expo-router";
+import Constants from "expo-constants";
+import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  Animated,
-  GestureResponderEvent,
-  LayoutAnimation,
-  LayoutChangeEvent,
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  UIManager,
-  View,
+    ActivityIndicator,
+    Animated,
+    GestureResponderEvent,
+    LayoutAnimation,
+    LayoutChangeEvent,
+    Platform,
+    Pressable,
+    RefreshControl,
+    ScrollView,
+    Text,
+    TouchableOpacity,
+    UIManager,
+    View,
 } from "react-native";
 import {
-  SafeAreaView,
-  useSafeAreaInsets,
+    SafeAreaView,
+    useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 import { LightBackground } from "@/components/DotBackground";
 import Navbar from "@/components/navBar/NavBar";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import {
-  DASHBOARD_CONFIG,
-  WidgetVariant,
+    DASHBOARD_CONFIG,
+    WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
+import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from "@/contexts/UserProfileContext";
+import useHardOnboarding from "@/hooks/useHardOnboarding";
+import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
+import { supabase } from "@/utils/supabase/client";
+import { Button } from "../buttons/button";
 import TopBar from "../topBar/TopBar";
 import DashboardMetricWidget from "../widgets/DashboardMetricWidget";
 import HealthStatusHero from "./HealthStatusHero";
 
 if (
   Platform.OS === "android" &&
+  !(Platform.constants as { isNewArchEnabled?: boolean } | undefined)
+    ?.isNewArchEnabled &&
   UIManager.setLayoutAnimationEnabledExperimental
 ) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -84,22 +95,29 @@ type DragEventLike = {
   };
 };
 
+type CuidadoOption = {
+  id: string;
+  name: string;
+};
+
 export default function EditableDashboard({
   notEditable = false,
 }: {
   notEditable?: boolean;
 }) {
   const router = useRouter();
-  const [activeWidgets, setActiveWidgets] =
-    useState<DashboardWidget[]>(DASHBOARD_CONFIG);
+  const { user, isLoading: authLoading } = useAuth();
+  const { profileType } = useUserProfile();
+  const [activeWidgets, setActiveWidgets] = useState<DashboardWidget[]>([]);
   const [, setIsEditing] = useState(false);
   const [openSizeMenuId, setOpenSizeMenuId] = useState<string | null>(null);
   const [draggingWidgetId, setDraggingWidgetId] = useState<string | null>(null);
   const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
-  const [selectedCuidado, setSelectedCuidado] = useState({
-    id: "1",
-    name: "Emilia Almeida",
-  });
+  const [cuidados, setCuidados] = useState<CuidadoOption[]>([]);
+  const [selectedCuidado, setSelectedCuidado] = useState<CuidadoOption>();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const metricPatientId =
+    profileType === "aider" ? (selectedCuidado?.id ?? null) : (user?.id ?? null);
 
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const gridContentRef = useRef<View | null>(null);
@@ -111,28 +129,160 @@ export default function EditableDashboard({
   const lastSwapTargetRef = useRef<string | null>(null);
   const suppressNextPressRef = useRef(false);
   const hasLoadedLayoutRef = useRef(false);
+  const previousOnboardingCompletedRef = useRef<boolean | null>(null);
+  const queryClient = useQueryClient();
 
-  const cuidados = [
-    { id: "1", name: "Emilia Almeida" },
-    { id: "2", name: "Joao Silva" },
-  ];
+  const handleManualSync = useCallback(async () => {
+    if (Platform.OS !== "android") return;
+    if (Constants.executionEnvironment === "storeClient") {
+      console.warn("[HealthSync] Manual sync is unavailable in Expo Go.");
+      return;
+    }
+
+    try {
+      const { runSyncNow } = await import("@/src/tasks/healthBackgroundSync");
+      await runSyncNow();
+    } catch (error) {
+      console.warn("[HealthSync] Failed to run manual sync", error);
+    }
+  }, []);
+
+  const loadAssociatedCuidados = useCallback(async () => {
+    if (!user?.id || profileType !== "aider") {
+      setCuidados([]);
+      setSelectedCuidado(undefined);
+      return;
+    }
+
+    try {
+      const { data: relations, error: relationsError } = await supabase
+        .from("care_relations")
+        .select("user_id_pacient")
+        .eq("user_id_aider", user.id);
+
+      if (relationsError) {
+        console.log(
+          "Erro ao carregar associacoes do aider",
+          relationsError.message,
+        );
+        return;
+      }
+
+      const patientIds = (relations ?? [])
+        .map((relation) => relation.user_id_pacient)
+        .filter((id): id is string => Boolean(id));
+
+      if (patientIds.length === 0) {
+        setCuidados([]);
+        setSelectedCuidado(undefined);
+        return;
+      }
+
+      const { data: patients, error: patientsError } = await supabase
+        .from("users")
+        .select("id, name, email")
+        .in("id", patientIds);
+
+      if (patientsError) {
+        console.log(
+          "Erro ao carregar dados dos cuidados associados",
+          patientsError.message,
+        );
+        return;
+      }
+
+      const mappedCuidados: CuidadoOption[] = (patients ?? []).map(
+        (patient) => ({
+          id: patient.id,
+          name: patient.name?.trim() || patient.email || "Cuidado",
+        }),
+      );
+
+      setCuidados(mappedCuidados);
+      setSelectedCuidado((previous) => {
+        if (
+          previous &&
+          mappedCuidados.some((cuidado) => cuidado.id === previous.id)
+        ) {
+          return previous;
+        }
+        return mappedCuidados[0];
+      });
+    } catch (error) {
+      console.log("Erro ao carregar cuidados associados", error);
+    }
+  }, [profileType, user?.id]);
+
+  const repairWidgets = (list: DashboardWidget[]) =>
+    (list || []).map((widget) => {
+      const original = DASHBOARD_CONFIG.find(
+        (config) => config.id === widget.id,
+      );
+      return {
+        ...widget,
+        endpoint: widget.endpoint || original?.endpoint || "",
+      };
+    });
+
+  const getSavedWidgets = (raw: unknown): DashboardWidget[] | null => {
+    if (Array.isArray(raw)) return raw as DashboardWidget[];
+
+    if (
+      raw &&
+      typeof raw === "object" &&
+      Array.isArray((raw as { activeWidgets?: unknown }).activeWidgets)
+    ) {
+      return (raw as { activeWidgets: DashboardWidget[] }).activeWidgets;
+    }
+
+    return null;
+  };
 
   const loadDashboard = async () => {
-    try {
+    const applyFallbackFromLocal = async () => {
       const saved = await AsyncStorage.getItem(STORAGE_KEY);
-      if (!saved) return;
+      if (!saved) {
+        setActiveWidgets([]);
+        return;
+      }
 
       const parsed = JSON.parse(saved);
-      const repair = (list: DashboardWidget[]) =>
-        (list || []).map((w) => {
-          const original = DASHBOARD_CONFIG.find((c) => c.id === w.id);
-          return {
-            ...w,
-            endpoint: w.endpoint || original?.endpoint || "",
-          };
-        });
+      const savedWidgets = getSavedWidgets(parsed);
+      if (savedWidgets) {
+        setActiveWidgets(repairWidgets(savedWidgets));
+        return;
+      }
 
-      setActiveWidgets(repair(parsed.activeWidgets || []));
+      setActiveWidgets([]);
+    };
+
+    try {
+      if (user?.id) {
+        const { data, error } = await supabase
+          .from("users")
+          .select("widgets")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (error) {
+          console.log("Erro ao carregar widgets no Supabase", error.message);
+          await applyFallbackFromLocal();
+          return;
+        }
+
+        const remoteWidgets = getSavedWidgets(data?.widgets);
+        if (remoteWidgets) {
+          const repaired = repairWidgets(remoteWidgets);
+          setActiveWidgets(repaired);
+          await AsyncStorage.setItem(
+            STORAGE_KEY,
+            JSON.stringify({ activeWidgets: repaired }),
+          );
+          return;
+        }
+      }
+
+      await applyFallbackFromLocal();
     } catch (e) {
       console.log("Erro ao carregar dashboard", e);
     } finally {
@@ -147,8 +297,16 @@ export default function EditableDashboard({
   };
 
   useEffect(() => {
+    if (authLoading) return;
     loadDashboard();
-  }, []);
+    // loadDashboard intentionally depends on auth/user state only for initial/follow-up user loads.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authLoading, user?.id]);
+
+  useEffect(() => {
+    if (authLoading) return;
+    loadAssociatedCuidados();
+  }, [authLoading, loadAssociatedCuidados]);
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -163,10 +321,21 @@ export default function EditableDashboard({
         STORAGE_KEY,
         JSON.stringify({ activeWidgets }),
       );
+
+      if (user?.id) {
+        const { error } = await supabase
+          .from("users")
+          .update({ widgets: { activeWidgets } })
+          .eq("id", user.id);
+
+        if (error) {
+          console.log("Erro ao guardar widgets no Supabase", error.message);
+        }
+      }
     } catch (e) {
       console.log("Erro ao guardar dashboard", e);
     }
-  }, [activeWidgets]);
+  }, [activeWidgets, user?.id]);
 
   useEffect(() => {
     if (!hasLoadedLayoutRef.current) return;
@@ -274,7 +443,7 @@ export default function EditableDashboard({
   };
 
   const beginDrag = (id: string, event: GestureResponderEvent) => {
-    if (notEditable) return;
+    if (notEditable || isDashboardLocked) return;
     const layout = cardLayoutsRef.current[id];
     if (!layout) return;
     const startPoint = getPointFromEvent(event);
@@ -371,6 +540,8 @@ export default function EditableDashboard({
   };
 
   const handleCardPress = (widgetId: string) => {
+    if (isDashboardLocked) return;
+
     if (suppressNextPressRef.current) {
       suppressNextPressRef.current = false;
       return;
@@ -397,10 +568,101 @@ export default function EditableDashboard({
     outputRange: [0.96, 1],
   });
 
-  const { isDark } = useTheme();
+  const { isDark, widgetView } = useTheme();
+  const useSuperSimplifiedWidgets = widgetView === "simplificada";
+  const {
+    status: healthConnectStatus,
+    isLoading: isLoadingHealthConnect,
+    refresh: refreshHealthConnectStatus,
+  } = useHealthConnectStatus();
+  const hasHealthConnectPermissions = Boolean(
+    healthConnectStatus?.permissionsGranted,
+  );
+  const {
+    state: onboardingState,
+    currentStep: onboardingStep,
+    isLoading: isOnboardingLoading,
+    skipOnboarding,
+    completeHealthConnectStep,
+    isActive: isOnboardingActive,
+  } = useHardOnboarding({
+    userId: user?.id,
+    healthConnectGranted: hasHealthConnectPermissions,
+    hasAtLeastOneWidget: activeWidgets.length > 0,
+  });
+  const isHardOnboardingActive = !isOnboardingLoading && isOnboardingActive;
+  const isDashboardLocked =
+    isHardOnboardingActive && onboardingStep !== "completed";
+  const highlightHealthConnectStep =
+    isDashboardLocked && onboardingStep === "health-connect";
+  const highlightWidgetStep =
+    isDashboardLocked && onboardingStep === "add-widget";
+  const shouldShowOnboardingHero = isOnboardingLoading || isHardOnboardingActive;
+  const isAndroid = Platform.OS === "android";
+
+  const showPopup = useCallback((title: string, message: string) => {
+    if (Platform.OS === "web" && typeof globalThis.alert === "function") {
+      globalThis.alert(`${title}\n\n${message}`);
+      return;
+    }
+
+    RNAlert.alert(title, message);
+  }, []);
+
+  const handleHealthConnectPress = useCallback(async () => {
+    await completeHealthConnectStep();
+
+    if (isAndroid) {
+      router.push("/health-connect");
+      return;
+    }
+
+    showPopup(
+      "Health Connect indisponivel",
+      "Esta funcionalidade esta disponivel apenas em Android.",
+    );
+  }, [completeHealthConnectStep, isAndroid, router, showPopup]);
+
+  useEffect(() => {
+    if (isOnboardingLoading) return;
+
+    if (previousOnboardingCompletedRef.current === null) {
+      previousOnboardingCompletedRef.current = onboardingState.completed;
+      return;
+    }
+
+    if (
+      !previousOnboardingCompletedRef.current &&
+      onboardingState.completed
+    ) {
+      showPopup("Parabens!", "Fez o onboarding com sucesso.");
+    }
+
+    previousOnboardingCompletedRef.current = onboardingState.completed;
+  }, [isOnboardingLoading, onboardingState.completed, showPopup]);
+
+  const setSizeSafe = (id: string, variant: WidgetVariant) => {
+    if (isDashboardLocked) return;
+    setSize(id, variant);
+  };
+
+  const deleteWidgetSafe = (id: string) => {
+    if (isDashboardLocked) return;
+    deleteWidget(id);
+  };
+
+  const toggleSizeMenuSafe = (id: string) => {
+    if (isDashboardLocked) return;
+    toggleSizeMenu(id);
+  };
+
   const insets = useSafeAreaInsets();
   const TOP_BAR_HEIGHT = 30;
+  const TOP_BAR_CONTENT_HEIGHT = 90;
   const heroTopExtension = notEditable ? 0 : insets.top + TOP_BAR_HEIGHT;
+  const onboardingTopPadding = notEditable
+    ? 12
+    : Math.max(topBarOverlayHeight, insets.top + TOP_BAR_CONTENT_HEIGHT) + 12;
 
   const { data: alerts = [] } = useQuery<Alert[]>({
     queryKey: ["alerts"],
@@ -416,33 +678,101 @@ export default function EditableDashboard({
     return "good";
   })();
 
+  const heroUserName =
+    typeof user?.user_metadata?.name === "string" &&
+    user.user_metadata.name.trim().length > 0
+      ? user.user_metadata.name.trim()
+      : (user?.email ?? "Utilizador");
+
+  const refetchStepsMetrics = useCallback(() => {
+    queryClient.refetchQueries({ queryKey: ["steps", "latest"] });
+    queryClient.refetchQueries({ queryKey: ["steps", "stats"] });
+  }, [queryClient]);
+
+  const handlePullToRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+
+    setIsRefreshing(true);
+    try {
+      await handleManualSync();
+      await refreshHealthConnectStatus();
+      refetchStepsMetrics();
+      queryClient.refetchQueries({ queryKey: ["alerts"], exact: true });
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [
+    handleManualSync,
+    isRefreshing,
+    queryClient,
+    refetchStepsMetrics,
+    refreshHealthConnectStatus,
+  ]);
+
+  useFocusEffect(
+    useCallback(() => {
+      let isMounted = true;
+
+      const syncStepsAfterPermissionRefresh = async () => {
+        await refreshHealthConnectStatus();
+        if (!isMounted) return;
+        refetchStepsMetrics();
+      };
+
+      void syncStepsAfterPermissionRefresh();
+
+      return () => {
+        isMounted = false;
+      };
+    }, [refetchStepsMetrics, refreshHealthConnectStatus]),
+  );
+
   return (
     <LightBackground status={heroStatus}>
       <View style={{ flex: 1 }}>
         {/* TopBar as absolute overlay so Hero bleeds behind it */}
         {!notEditable && (
           <View
+            onLayout={(event) => {
+              setTopBarOverlayHeight(event.nativeEvent.layout.height);
+            }}
             style={{
               position: "absolute",
               top: 0,
               left: 0,
               right: 0,
-              zIndex: 20,
-              elevation: 20,
+              zIndex: 2000,
+              elevation: 2000,
               overflow: "visible",
             }}
           >
             <SafeAreaView
-              style={{ backgroundColor: "transparent" }}
+              style={{
+                borderBottomLeftRadius: 40,
+                borderBottomRightRadius: 40,
+                overflow: "visible",
+                backgroundColor: isDark
+                  ? "rgba(0, 4, 18, 1)"
+                  : "rgba(219, 237, 248, 1)",
+                elevation: 4,
+              }}
               edges={["top"]}
             >
               <TopBar
                 showBackground={true}
                 cuidados={cuidados}
                 selectedCuidado={selectedCuidado}
-                onSelectCuidado={setSelectedCuidado}
-                onNotificationPress={() => router.push("/notificacoes")}
-                onSettingsPress={() => router.push("/definicoes")}
+                onSelectCuidado={(cuidado) => setSelectedCuidado(cuidado)}
+                onNotificationPress={
+                  isDashboardLocked
+                    ? undefined
+                    : () => router.push("/notificacoes")
+                }
+                onSettingsPress={
+                  isDashboardLocked
+                    ? undefined
+                    : () => router.push("/definicoes")
+                }
               />
             </SafeAreaView>
           </View>
@@ -455,16 +785,120 @@ export default function EditableDashboard({
           <ScrollView
             style={{ flex: 1 }}
             scrollEnabled={draggingWidgetId === null}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefreshing}
+                onRefresh={() => {
+                  void handlePullToRefresh();
+                }}
+                tintColor={isDark ? "#FFFFFF" : "#1F2937"}
+                colors={["#5061FF"]}
+                progressBackgroundColor={isDark ? "#000412" : "#ECF5FF"}
+              />
+            }
           >
             {/* Hero Section — extends to top edge, content padded below TopBar */}
             <HealthStatusHero
-              userName="Juliana K."
-              cuidadoName={selectedCuidado.name}
+              userName={heroUserName}
+              cuidadoName={selectedCuidado?.name ?? "Sem cuidado associado"}
+              isCuidadoAccount={profileType === "cuidado"}
               status={heroStatus}
               topExtension={heroTopExtension}
               onCheckNotifications={() => router.push("/notificacoes")}
             />
 
+            {isRefreshing && (
+              <View className="px-4 mb-2">
+                <View
+                  className={`rounded-2xl px-4 py-3 flex-row items-center ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                  style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                  accessible
+                  accessibilityRole="text"
+                  accessibilityLabel="A sincronizar dados de saúde"
+                >
+                  <ActivityIndicator
+                    size="small"
+                    color={isDark ? "#A9BDFF" : "#5061FF"}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no"
+                  />
+                  <Text
+                    className={`ml-3 text-sm font-bold ${isDark ? "text-white" : "text-slate-700"}`}
+                  >
+                    A sincronizar dados...
+                  </Text>
+                </View>
+              </View>
+            )}
+
+            {!isLoadingHealthConnect &&
+              healthConnectStatus &&
+              !healthConnectStatus.permissionsGranted && (
+                <View className="px-4 mb-2">
+                  <TouchableOpacity
+                    activeOpacity={0.9}
+                    onPress={() => void handleHealthConnectPress()}
+                    className={`rounded-[28px] p-5 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                    style={{
+                      boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
+                      borderWidth: highlightHealthConnectStep ? 1.8 : 0,
+                      borderColor: highlightHealthConnectStep
+                        ? isDark
+                          ? "#93c5fd"
+                          : "#1d4ed8"
+                        : "transparent",
+                    }}
+                    accessibilityRole="button"
+                    accessibilityLabel="Abrir Health Connect"
+                    accessibilityHint="Abre a pagina do Health Connect para concluir a ligacao."
+                  >
+                    <View className="flex-row items-center">
+                      <View
+                        className="w-12 h-12 rounded-full items-center justify-center"
+                        style={{
+                          backgroundColor: isDark
+                            ? "rgba(214, 69, 80, 0.18)"
+                            : "rgba(214, 69, 80, 0.1)",
+                        }}
+                      >
+                        <Feather
+                          name="heart"
+                          size={20}
+                          color={isDark ? "#fda4af" : "#be123c"}
+                        />
+                      </View>
+                      <View className="flex-1 ml-4">
+                        <Text
+                          className={`text-base font-bold ${isDark ? "text-white" : "text-black"}`}
+                        >
+                          Ligar ao Health Connect
+                        </Text>
+                        <Text
+                          className={`mt-1 text-xs ${isDark ? "text-white/60" : "text-slate-600"}`}
+                        >
+                          Ative o acesso a passos, frequencia cardiaca e outros
+                          dados de saude para completar a ligacao de saude.
+                        </Text>
+                      </View>
+                      <Feather
+                        name="chevron-right"
+                        size={20}
+                        color={isDark ? "#ffffff" : "#0f172a"}
+                      />
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+            {/* // <HealthDashboard /> } */}
+            {/*
+            <Button
+              variant="primary"
+              label="Forçar Sync"
+              onPress={() => void runSyncNow()}
+              disabled={isDashboardLocked}
+            />
+            */}
             <WidgetGrid
               contentRef={gridContentRef}
               onContentLayout={measureGrid}
@@ -490,25 +924,35 @@ export default function EditableDashboard({
                   >
                     <Pressable
                       onPress={() => handleCardPress(item.id)}
-                      onPressIn={notEditable ? undefined : measureGrid}
+                      onPressIn={
+                        notEditable || isDashboardLocked
+                          ? undefined
+                          : measureGrid
+                      }
                       onLongPress={
-                        notEditable
+                        notEditable || isDashboardLocked
                           ? undefined
                           : (event) => beginDrag(item.id, event)
                       }
                       onTouchMove={
-                        notEditable
+                        notEditable || isDashboardLocked
                           ? undefined
                           : (event) => handleDragMove(item.id, event)
                       }
                       onTouchEnd={
-                        notEditable ? undefined : () => finishDrag(item.id)
+                        notEditable || isDashboardLocked
+                          ? undefined
+                          : () => finishDrag(item.id)
                       }
                       onTouchCancel={
-                        notEditable ? undefined : () => finishDrag(item.id)
+                        notEditable || isDashboardLocked
+                          ? undefined
+                          : () => finishDrag(item.id)
                       }
                       onPressOut={
-                        notEditable ? undefined : () => finishDrag(item.id)
+                        notEditable || isDashboardLocked
+                          ? undefined
+                          : () => finishDrag(item.id)
                       }
                       delayLongPress={280}
                       style={isBeingDragged ? { opacity: 0.1 } : undefined}
@@ -518,12 +962,14 @@ export default function EditableDashboard({
                         endpoint={item.endpoint}
                         variant={item.variant as WidgetVariant}
                         iconSize={24}
+                        patientId={metricPatientId}
+                        superSimplified={useSuperSimplifiedWidgets}
                       />
                     </Pressable>
 
-                    {!notEditable && (
+                    {!notEditable && !isDashboardLocked && (
                       <TouchableOpacity
-                        onPress={() => toggleSizeMenu(item.id)}
+                        onPress={() => toggleSizeMenuSafe(item.id)}
                         className={`absolute top-2 right-2 h-7 w-7 rounded-full items-center justify-center z-40 ${isDark ? "bg-aide-dark-card border border-white/20" : "bg-white/90 border border-slate-200"}`}
                         disabled={Boolean(draggingWidgetId)}
                         accessibilityRole="button"
@@ -539,7 +985,7 @@ export default function EditableDashboard({
                       </TouchableOpacity>
                     )}
 
-                    {!notEditable && isSizeMenuOpen && (
+                    {!notEditable && !isDashboardLocked && isSizeMenuOpen && (
                       <Animated.View
                         style={{
                           position: "absolute",
@@ -572,7 +1018,7 @@ export default function EditableDashboard({
                               key={option.variant}
                               className={`px-4 py-3 flex-row items-center justify-between ${selected ? (isDark ? "bg-blue-900/50" : "bg-blue-50") : isDark ? "bg-transparent" : "bg-white"}`}
                               onPress={() => {
-                                setSize(item.id, option.variant);
+                                setSizeSafe(item.id, option.variant);
                                 closeSizeMenu();
                               }}
                               accessibilityRole="button"
@@ -599,7 +1045,7 @@ export default function EditableDashboard({
                         <TouchableOpacity
                           className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"} border-t ${isDark ? "border-white/10" : "border-slate-100"}`}
                           onPress={() => {
-                            deleteWidget(item.id);
+                            deleteWidgetSafe(item.id);
                           }}
                           accessibilityRole="button"
                           accessibilityLabel={`Eliminar widget ${item.type}`}
@@ -637,13 +1083,21 @@ export default function EditableDashboard({
                     endpoint={draggingWidget.endpoint}
                     variant={draggingWidget.variant as WidgetVariant}
                     iconSize={24}
+                    patientId={metricPatientId}
+                    superSimplified={useSuperSimplifiedWidgets}
                   />
                 </View>
               )}
             </WidgetGrid>
           </ScrollView>
         </SafeAreaView>
-        <Navbar notEditable onAddWidget={addWidget} />
+        <Navbar
+          notEditable
+          onAddWidget={addWidget}
+          disableNavigation={isDashboardLocked}
+          highlightAddButton={highlightWidgetStep}
+          disableAddAction={isDashboardLocked && !highlightWidgetStep}
+        />
       </View>
     </LightBackground>
   );

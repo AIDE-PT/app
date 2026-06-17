@@ -3,15 +3,15 @@ import { Feather } from "@expo/vector-icons";
 import React, { ReactNode } from "react";
 import { Dimensions, Text, View, ViewStyle } from "react-native";
 import Svg, {
-  Circle,
-  Defs,
-  G,
-  Line,
-  LinearGradient,
-  Path,
-  Rect,
-  Stop,
-  Text as SvgText,
+    Circle,
+    Defs,
+    G,
+    Line,
+    LinearGradient,
+    Path,
+    Rect,
+    Stop,
+    Text as SvgText,
 } from "react-native-svg";
 import { IconType } from "../svg/WidgetIcon";
 
@@ -233,63 +233,134 @@ function StressMiniChart({
 
 //  3. Steps  vertical bar chart with goal line
 function StepsMiniChart({
-  data,
+  currentSteps,
+  goal = 10000,
   w,
   h,
   isDark,
   semantic = DEFAULT_SEMANTIC,
 }: {
-  data: number[];
+  currentSteps: number;
+  goal?: number;
   w: number;
   h: number;
   isDark: boolean;
   semantic?: { success: string; warning: string; danger: string };
 }) {
-  const goal = 10000;
-  const bars = data.slice(-10).reverse();
-  if (!bars.length) return null;
-  const dataMax = Math.max(...bars, goal);
-  const gap = 2;
-  const barW = Math.max(Math.floor(w / bars.length) - gap, 2);
-  const toH = (v: number) => (v / dataMax) * h;
-  const goalY = (1 - goal / dataMax) * h;
-  const barColor = (v: number) =>
-    v >= goal ? semantic.success : v >= goal * 0.7 ? BRAND_BLUE : "#94A3B8";
-  const gIds = bars.map((_, i) => `sb${i}`);
+  const safeGoal = Math.max(goal, 1);
+  const progressPct = Math.min(Math.max(currentSteps / safeGoal, 0), 1);
+  const milestones = [0.25, 0.5];
+
+  const padX = 6;
+  const trackH = Math.min(Math.max(Math.round(h * 0.24), 10), 16);
+  const trackY = Math.round((h - trackH) / 2);
+  const trackW = Math.max(w - padX * 2, 10);
+  const fillW = Math.max(trackW * progressPct, 0);
+  const trackColor = isDark ? "rgba(255,255,255,0.14)" : "#E2E8F0";
+
   return (
     <Svg width={w} height={h}>
       <Defs>
-        {bars.map((v, i) => (
-          <LinearGradient key={i} id={gIds[i]} x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0%" stopColor={barColor(v)} stopOpacity="1" />
-            <Stop offset="100%" stopColor={barColor(v)} stopOpacity="0.5" />
-          </LinearGradient>
-        ))}
+        <LinearGradient id="stepsProgressFill" x1="0" y1="0" x2="1" y2="0">
+          <Stop offset="0%" stopColor={BRAND_BLUE} stopOpacity="0.95" />
+          <Stop offset="100%" stopColor={semantic.success} stopOpacity="0.95" />
+        </LinearGradient>
       </Defs>
-      {bars.map((v, i) => {
-        const bh = toH(v);
-        const x = i * (barW + gap);
+
+      <Rect
+        x={padX}
+        y={trackY}
+        width={trackW}
+        height={trackH}
+        rx={trackH / 2}
+        fill={trackColor}
+      />
+
+      {fillW > 0 && (
+        <Rect
+          x={padX}
+          y={trackY}
+          width={fillW}
+          height={trackH}
+          rx={trackH / 2}
+          fill="url(#stepsProgressFill)"
+        />
+      )}
+
+      {milestones.map((milestone) => {
+        const x = padX + trackW * milestone;
+        const reached = progressPct >= milestone;
+        const markerRadius = 7;
+        const markerFill = reached
+          ? semantic.success
+          : isDark
+            ? "rgba(255,255,255,0.26)"
+            : "#CBD5E1";
+
         return (
-          <Rect
-            key={i}
-            x={x}
-            y={h - bh}
-            width={barW}
-            height={bh}
-            rx={2}
-            fill={`url(#${gIds[i]})`}
-          />
+          <G key={milestone}>
+            <Circle
+              cx={x}
+              cy={trackY + trackH / 2}
+              r={markerRadius}
+              fill={markerFill}
+            />
+
+            {reached ? (
+              <>
+                <Line
+                  x1={x - 3}
+                  y1={trackY + trackH / 2}
+                  x2={x - 1}
+                  y2={trackY + trackH / 2 + 2.5}
+                  stroke="#ffffff"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+                <Line
+                  x1={x - 1}
+                  y1={trackY + trackH / 2 + 2.5}
+                  x2={x + 3.5}
+                  y2={trackY + trackH / 2 - 2.5}
+                  stroke="#ffffff"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </>
+            ) : (
+              <Circle
+                cx={x}
+                cy={trackY + trackH / 2}
+                r={2}
+                fill={isDark ? "#0f172a" : "#ffffff"}
+                opacity={0.5}
+              />
+            )}
+
+            <SvgText
+              x={x}
+              y={trackY - 4}
+              fontSize="8"
+              fontWeight="700"
+              fill={isDark ? "rgba(255,255,255,0.7)" : "#64748B"}
+              textAnchor="middle"
+            >
+              {`${Math.round(milestone * 100)}%`}
+            </SvgText>
+          </G>
         );
       })}
-      <Line
-        x1={0}
-        y1={goalY}
-        x2={w}
-        y2={goalY}
-        stroke={semantic.success}
-        strokeWidth="1"
-        strokeDasharray="3,3"
-      />
+
+      <SvgText
+        x={padX + trackW}
+        y={trackY + trackH + 12}
+        fontSize="8"
+        fontWeight="700"
+        fill={isDark ? "rgba(255,255,255,0.7)" : "#64748B"}
+        textAnchor="end"
+      >
+        {`${Math.round(progressPct * 100)}%`}
+      </SvgText>
     </Svg>
   );
 }
@@ -746,17 +817,32 @@ function getStatus(
   type: IconType,
   valueStr: string,
 ): { text: string; status: MetricStatus } {
-  const v = parseFloat(valueStr);
-  if (isNaN(v)) return { text: "normal", status: "normal" };
+  const parseMetricValue = (rawValue: string) => {
+    const cleaned = rawValue.trim().replace(",", ".");
+    if (cleaned.includes("/")) {
+      return parseFloat(cleaned.split("/")[0]);
+    }
+    return parseFloat(cleaned);
+  };
+
+  const v = parseMetricValue(valueStr);
+  if (!Number.isFinite(v)) return { text: "sem dados", status: "warning" };
+
   switch (type) {
     case "heartRate":
+      if (v >= 120) return { text: "elevado", status: "alert" };
       return v > 100
-        ? { text: "exercício", status: "warning" }
+        ? { text: "acelerado", status: "warning" }
+        : v < 50
+          ? { text: "baixo", status: "warning" }
         : { text: "normal", status: "normal" };
     case "temp":
+      if (v >= 38) return { text: "febre", status: "alert" };
       return v > 37.5
-        ? { text: "febre", status: "warning" }
-        : { text: "normal", status: "normal" };
+        ? { text: "a subir", status: "warning" }
+        : v < 35.5
+          ? { text: "baixo", status: "warning" }
+          : { text: "normal", status: "normal" };
     case "stress":
       return v < 40
         ? { text: "baixo", status: "normal" }
@@ -764,13 +850,175 @@ function getStatus(
           ? { text: "moderado", status: "warning" }
           : { text: "alto", status: "alert" };
     case "o2":
-      return v >= 96
+      return v >= 95
         ? { text: "normal", status: "normal" }
-        : v >= 94
+        : v >= 92
           ? { text: "baixo", status: "warning" }
           : { text: "critico", status: "alert" };
+    case "steps":
+      return v >= 10000
+        ? { text: "meta", status: "normal" }
+        : v >= 6000
+          ? { text: "a progredir", status: "warning" }
+          : { text: "baixo", status: "warning" };
+    case "sleep":
+      if (v >= 7 && v <= 9) return { text: "bom", status: "normal" };
+      if ((v >= 6 && v < 7) || (v > 9 && v <= 10)) {
+        return { text: "irregular", status: "warning" };
+      }
+      return { text: "insuficiente", status: "alert" };
+    case "bloodPressure":
+      if (v < 90 || v >= 140) return { text: "elevada", status: "alert" };
+      if (v >= 120) return { text: "a subir", status: "warning" };
+      return { text: "normal", status: "normal" };
+    case "cal":
+      return v >= 700
+        ? { text: "ativo", status: "normal" }
+        : v >= 350
+          ? { text: "moderado", status: "warning" }
+          : { text: "baixo", status: "warning" };
+    case "glucose":
+      if (v >= 70 && v <= 140) return { text: "normal", status: "normal" };
+      if (v > 140 && v <= 180) return { text: "a subir", status: "warning" };
+      return { text: "fora", status: "alert" };
     default:
       return { text: "normal", status: "normal" };
+  }
+}
+
+function getSuperSimpleCopy(
+  type: IconType,
+  status: { text: string; status: MetricStatus },
+): { label: string; headline: string; subtitle: string; meter: number } {
+  if (status.text === "sem dados") {
+    return {
+      label: "Sem dados",
+      headline: "A recolher dados",
+      subtitle: "Assim que houver medições, mostramos um resumo simples.",
+      meter: 15,
+    };
+  }
+
+  const base =
+    status.status === "normal"
+      ? { label: "Estavel", meter: 85 }
+      : status.status === "warning"
+        ? { label: "Atenção", meter: 55 }
+        : { label: "Alerta", meter: 25 };
+
+  switch (type) {
+    case "heartRate":
+      return {
+        ...base,
+        headline:
+          status.status === "normal" ? "Ritmo tranquilo" : "Ritmo alterado",
+        subtitle:
+          status.status === "normal"
+            ? "Tudo dentro do esperado neste momento."
+            : "Convem pausar e acompanhar como se sente.",
+      };
+    case "steps":
+      return {
+        ...base,
+        headline:
+          status.status === "normal"
+            ? "Movimento muito bom"
+            : "Pode mexer mais",
+        subtitle:
+          status.status === "normal"
+            ? "Mantenha o ritmo de hoje."
+            : "Uma caminhada curta ja faz diferenca.",
+      };
+    case "temp":
+      return {
+        ...base,
+        headline:
+          status.status === "alert"
+            ? "Possivel febre"
+            : status.status === "warning"
+              ? "Temperatura a subir"
+              : "Temperatura estavel",
+        subtitle:
+          status.status === "normal"
+            ? "Sem sinais de variacao importante."
+            : "Vale a pena descansar e reavaliar depois.",
+      };
+    case "sleep":
+      return {
+        ...base,
+        headline:
+          status.status === "normal"
+            ? "Sono equilibrado"
+            : "Sono irregular",
+        subtitle:
+          status.status === "normal"
+            ? "Boa recuperacao para o dia."
+            : "Tente manter horarios mais consistentes.",
+      };
+    case "o2":
+      return {
+        ...base,
+        headline:
+          status.status === "normal"
+            ? "Respiracao estavel"
+            : "Respiracao a vigiar",
+        subtitle:
+          status.status === "normal"
+            ? "Oxigenacao dentro do esperado."
+            : "Se persistir, procure orientacao clinica.",
+      };
+    case "bloodPressure":
+      return {
+        ...base,
+        headline:
+          status.status === "normal" ? "Pressao estavel" : "Pressao alterada",
+        subtitle:
+          status.status === "normal"
+            ? "Leitura dentro de um intervalo confortavel."
+            : "Acompanhe com calma e repita a medicao depois.",
+      };
+    case "cal":
+      return {
+        ...base,
+        headline:
+          status.status === "normal"
+            ? "Atividade do dia boa"
+            : "Atividade moderada",
+        subtitle:
+          status.status === "normal"
+            ? "Continue com esse nivel de movimento."
+            : "Pequenas pausas ativas ajudam bastante.",
+      };
+    case "stress":
+      return {
+        ...base,
+        headline:
+          status.status === "normal"
+            ? "Stress controlado"
+            : status.status === "warning"
+              ? "Stress moderado"
+              : "Stress elevado",
+        subtitle:
+          status.status === "normal"
+            ? "Estado emocional dentro do esperado."
+            : "Respire fundo e reduza o ritmo por alguns minutos.",
+      };
+    case "glucose":
+      return {
+        ...base,
+        headline:
+          status.status === "normal" ? "Glicose estavel" : "Glicose a vigiar",
+        subtitle:
+          status.status === "normal"
+            ? "Valor dentro da faixa habitual."
+            : "Mantenha acompanhamento e rotina alimentar.",
+      };
+    default:
+      return {
+        ...base,
+        headline: status.status === "normal" ? "Estado estavel" : "Estado a vigiar",
+        subtitle: "Resumo simplificado ativo para facilitar leitura.",
+      };
   }
 }
 
@@ -801,7 +1049,7 @@ export const DASHBOARD_CONFIG: DASHBOARD_CONFIGProps[] = [
     endpoint: "steps",
   },
   {
-    id: "blood Pressure",
+    id: "bloodPressure",
     type: "bloodPressure",
     variant: "1-3",
     value: "10.432",
@@ -833,12 +1081,12 @@ export const DASHBOARD_CONFIG: DASHBOARD_CONFIGProps[] = [
     endpoint: "o2",
   },
   {
-    id: "glycemia",
+    id: "cal",
     type: "cal",
     variant: "1-2",
     value: "450",
     feedback: "meta",
-    endpoint: "glycemia",
+    endpoint: "cal",
   },
   {
     id: "stress",
@@ -932,6 +1180,7 @@ interface WidgetWrapperProps {
   segments?: number;
   sparklineHeight?: number;
   valueOffsetBottom?: number;
+  superSimplified?: boolean;
 }
 
 //  WidgetWrapper
@@ -946,6 +1195,7 @@ export function WidgetWrapper({
   style,
   history = [],
   metricType,
+  superSimplified = false,
 }: WidgetWrapperProps) {
   const { isDark, colors } = useTheme();
 
@@ -980,6 +1230,75 @@ export function WidgetWrapper({
     ? getStatus(metricType, value)
     : { text: feedback, status: "normal" as MetricStatus };
   const palette = statusPalette[status.status];
+
+  if (superSimplified && metricType) {
+    const simpleCopy = getSuperSimpleCopy(metricType, status);
+    const meterTrack = isDark ? "rgba(255,255,255,0.14)" : "#E2E8F0";
+
+    return (
+      <View
+        style={[
+          { width, height, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.12)" },
+          style,
+        ]}
+        className={`${bgColor} rounded-[20px] p-3 border ${borderColor} overflow-hidden`}
+      >
+        <View className="flex-row items-center justify-between">
+          <View className="flex-row items-center gap-1.5">
+            {icon}
+            <Text
+              className={`text-sm font-open-sans-semibold ${isDark ? "text-white" : "text-slate-800"}`}
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+          </View>
+
+          <View
+            className="px-2 py-1 rounded-full"
+            style={{
+              backgroundColor: palette.bg,
+              borderWidth: 1,
+              borderColor: palette.border,
+            }}
+          >
+            <Text
+              className="text-[10px] font-open-sans-semibold"
+              style={{ color: palette.text }}
+            >
+              {simpleCopy.label}
+            </Text>
+          </View>
+        </View>
+
+        <View className="flex-1 justify-center py-1">
+          <Text
+            className={`text-lg font-open-sans-semibold ${isDark ? "text-white" : "text-slate-900"}`}
+          >
+            {simpleCopy.headline}
+          </Text>
+          <Text
+            className={`text-xs mt-1 ${isDark ? "text-white/70" : "text-slate-600"}`}
+          >
+            {simpleCopy.subtitle}
+          </Text>
+        </View>
+
+        <View
+          style={{ backgroundColor: meterTrack }}
+          className="h-[7px] rounded-full overflow-hidden"
+        >
+          <View
+            style={{
+              width: `${simpleCopy.meter}%`,
+              backgroundColor: palette.border,
+            }}
+            className="h-full rounded-full"
+          />
+        </View>
+      </View>
+    );
+  }
 
   //  Chart dimensions per size
   // For 1-1: chart replaces bottom half. For 1-2/1-3: chart in the right side pocket.
@@ -1025,7 +1344,8 @@ export function WidgetWrapper({
       case "steps":
         return (
           <StepsMiniChart
-            data={history}
+            currentSteps={parseFloat(value) || 0}
+            goal={10000}
             w={cw}
             h={ch}
             isDark={isDark}
@@ -1331,7 +1651,7 @@ export function WidgetWrapper({
             alignItems: "center",
             justifyContent: "center",
             paddingRight: metricType === "stress" ? 2 : 0,
-            paddingTop: metricType === "steps" ? 26 : 0,
+            paddingTop: metricType === "steps" ? 0 : 0,
           }}
         >
           {chart}
