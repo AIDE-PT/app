@@ -7,6 +7,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
+    Alert as RNAlert,
     Animated,
     GestureResponderEvent,
     LayoutAnimation,
@@ -53,6 +54,7 @@ if (
 }
 
 const STORAGE_KEY = "@dashboard_layout";
+const NEW_ACCOUNT_ONBOARDING_WINDOW_MS = 24 * 60 * 60 * 1000;
 
 const API_BASE = Platform.select({
   android: "http://10.0.2.2:3000",
@@ -116,6 +118,7 @@ export default function EditableDashboard({
   const [cuidados, setCuidados] = useState<CuidadoOption[]>([]);
   const [selectedCuidado, setSelectedCuidado] = useState<CuidadoOption>();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [topBarOverlayHeight, setTopBarOverlayHeight] = useState(0);
   const metricPatientId =
     profileType === "aider" ? (selectedCuidado?.id ?? null) : (user?.id ?? null);
 
@@ -589,6 +592,10 @@ export default function EditableDashboard({
     userId: user?.id,
     healthConnectGranted: hasHealthConnectPermissions,
     hasAtLeastOneWidget: activeWidgets.length > 0,
+    isEnabled:
+      typeof user?.created_at === "string" &&
+      Date.now() - new Date(user.created_at).getTime() <=
+        NEW_ACCOUNT_ONBOARDING_WINDOW_MS,
   });
   const isHardOnboardingActive = !isOnboardingLoading && isOnboardingActive;
   const isDashboardLocked =

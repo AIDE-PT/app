@@ -22,6 +22,16 @@ const DEFAULT_ONBOARDING_STATE: HardOnboardingState = {
   completedAt: null,
 };
 
+const createCompletedOnboardingState = (
+  completedAt = new Date().toISOString(),
+): HardOnboardingState => ({
+  version: ONBOARDING_VERSION,
+  completed: true,
+  healthConnectDone: true,
+  firstWidgetAddedDone: true,
+  completedAt,
+});
+
 const getOnboardingStorageKey = (userId: string) =>
   `${ONBOARDING_STORAGE_KEY}:${userId}`;
 
@@ -52,12 +62,14 @@ type UseHardOnboardingParams = {
   userId?: string;
   healthConnectGranted: boolean;
   hasAtLeastOneWidget: boolean;
+  isEnabled?: boolean;
 };
 
 export function useHardOnboarding({
   userId,
   healthConnectGranted,
   hasAtLeastOneWidget,
+  isEnabled = true,
 }: UseHardOnboardingParams) {
   const [state, setState] = useState<HardOnboardingState>(
     DEFAULT_ONBOARDING_STATE,
@@ -86,25 +98,42 @@ export function useHardOnboarding({
         const key = getOnboardingStorageKey(userId);
         const raw = await AsyncStorage.getItem(key);
         if (!raw) {
-          setState(DEFAULT_ONBOARDING_STATE);
+          const fallbackState = isEnabled
+            ? DEFAULT_ONBOARDING_STATE
+            : createCompletedOnboardingState();
+          setState(fallbackState);
+          if (!isEnabled) {
+            await AsyncStorage.setItem(key, JSON.stringify(fallbackState));
+          }
           return;
         }
 
         const parsed = normalizeState(JSON.parse(raw));
+        if (!isEnabled && !parsed.completed) {
+          const completedState = createCompletedOnboardingState(
+            parsed.completedAt ?? undefined,
+          );
+          setState(completedState);
+          await AsyncStorage.setItem(key, JSON.stringify(completedState));
+          return;
+        }
+
         setState(parsed);
       } catch (error) {
         console.log("Erro ao carregar onboarding", error);
-        setState(DEFAULT_ONBOARDING_STATE);
+        setState(
+          isEnabled ? DEFAULT_ONBOARDING_STATE : createCompletedOnboardingState(),
+        );
       } finally {
         setIsLoading(false);
       }
     };
 
     void load();
-  }, [userId]);
+  }, [isEnabled, userId]);
 
   useEffect(() => {
-    if (isLoading || !userId || state.completed) return;
+    if (isLoading || !userId || state.completed || !isEnabled) return;
 
     const nextState: HardOnboardingState = {
       ...state,
@@ -133,6 +162,7 @@ export function useHardOnboarding({
     persistState,
     state,
     userId,
+    isEnabled,
   ]);
 
   const completeOnboarding = useCallback(async () => {
@@ -178,7 +208,7 @@ export function useHardOnboarding({
     skipOnboarding,
     completeOnboarding,
     completeHealthConnectStep,
-    isActive: !state.completed,
+    isActive: isEnabled && !state.completed,
   };
 }
 

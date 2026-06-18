@@ -1,6 +1,8 @@
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ConsentProvider } from "@/contexts/ConsentContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
+import ConsentModal from "@/components/modals/ConsentModal";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Constants from "expo-constants";
@@ -79,11 +81,14 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <UserProfileProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" />
-            </Stack>
-          </UserProfileProvider>
+          <ConsentProvider>
+            <UserProfileProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+              </Stack>
+              <ConsentModal />
+            </UserProfileProvider>
+          </ConsentProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

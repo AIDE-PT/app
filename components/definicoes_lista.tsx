@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useConsent } from "@/contexts/ConsentContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
@@ -10,6 +11,8 @@ const ONBOARDING_STORAGE_KEY = "@aide_onboarding";
 const DefinicoesLista = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const { isModalVisible, isPreviewMode, openConsentPreview, closeConsentPreview } =
+    useConsent();
 
   const handleResetOnboardingDebug = useCallback(async () => {
     if (!user?.id) {
@@ -58,6 +61,22 @@ const DefinicoesLista = () => {
           }}
         />
       ))}
+
+      <ElementoDefinicao
+        title={
+          isModalVisible && isPreviewMode
+            ? "Ocultar pop-up de cookies e RGPD"
+            : "Mostrar pop-up de cookies e RGPD"
+        }
+        onPress={() => {
+          if (isModalVisible && isPreviewMode) {
+            closeConsentPreview();
+            return;
+          }
+
+          openConsentPreview();
+        }}
+      />
 
       {__DEV__ ? (
         <ElementoDefinicao

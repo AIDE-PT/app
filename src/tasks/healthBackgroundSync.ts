@@ -20,6 +20,8 @@ import {
   readRecords,
   type RecordResult,
 } from "react-native-health-connect";
+import { Platform } from "react-native";
+import { sendLocalDataEntryNotification } from "@/src/services/localNotifications";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
@@ -140,8 +142,6 @@ type SyncedEntryNotification = {
   measuredAt?: string | null;
 };
 
-type BackgroundFetchModule = typeof import("expo-background-fetch");
-type TaskManagerModule = typeof import("expo-task-manager");
 type BackgroundModules = {
   BackgroundFetch: BackgroundFetchModule;
   TaskManager: TaskManagerModule;
@@ -718,13 +718,9 @@ async function runSyncLogic(
  * Chamar uma vez após o utilizador conceder permissões Health Connect.
  */
 export async function registerHealthBackgroundSync(): Promise<void> {
-  const modules = await ensureTaskIsDefined();
-  if (!modules) {
-    console.warn("[HealthSync] Background polling indisponivel neste runtime.");
+  if (Platform.OS !== "android") {
     return;
   }
-
-  const { TaskManager, BackgroundFetch } = modules;
 
   try {
     const { BackgroundFetch, TaskManager } = await ensureTaskDefined();
@@ -754,10 +750,7 @@ export async function registerHealthBackgroundSync(): Promise<void> {
  * Chamar quando o utilizador revoga permissões ou faz logout.
  */
 export async function unregisterHealthBackgroundSync(): Promise<void> {
-  const modules = await loadBackgroundModules();
-  if (!modules) return;
-
-  const { TaskManager, BackgroundFetch } = modules;
+  if (Platform.OS !== "android") return;
 
   try {
     const { BackgroundFetch, TaskManager } = await getExpoTaskModules();
@@ -778,6 +771,10 @@ export async function getHealthSyncStatus(): Promise<{
   isRegistered: boolean;
   fetchStatus: BackgroundFetchStatus | null;
 }> {
+  if (Platform.OS !== "android") {
+    return { isRegistered: false, fetchStatus: null };
+  }
+
   try {
     const { BackgroundFetch, TaskManager } = await getExpoTaskModules();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
