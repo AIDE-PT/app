@@ -1,3 +1,4 @@
+import { LOCAL_API_BASE as API_BASE } from "@/constants/api";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -53,11 +54,6 @@ if (
 }
 
 const STORAGE_KEY = "@dashboard_layout";
-
-const API_BASE = Platform.select({
-  android: "http://10.0.2.2:3000",
-  default: "http://localhost:3000",
-});
 
 interface Alert {
   id: string;
@@ -549,7 +545,11 @@ export default function EditableDashboard({
       return;
     }
 
-    router.push(`/MasterDetail?type=${widgetId}`);
+    router.push(
+      `/MasterDetail?type=${widgetId}${
+        metricPatientId ? `&patientId=${metricPatientId}` : ""
+      }`,
+    );
   };
 
   const draggingWidget = draggingWidgetId

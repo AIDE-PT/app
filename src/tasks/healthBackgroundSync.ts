@@ -13,7 +13,7 @@
  * de qualquer rendering ocorrer.
  */
 
-import { supabase } from "@/utils/supabase/client";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { sendLocalDataEntryNotification } from "@/src/services/localNotifications";
 import {
   getGrantedPermissions,
@@ -21,7 +21,7 @@ import {
   readRecords,
   type RecordResult,
 } from "react-native-health-connect";
-import { Platform } from "react-native";
+import { Platform, PermissionsAndroid } from "react-native";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
@@ -260,11 +260,9 @@ async function checkPermissions(): Promise<boolean> {
 }
 
 async function checkBackgroundReadPermission(): Promise<boolean> {
+  if (Platform.OS !== "android") return false;
   try {
-    const granted = await getGrantedPermissions();
-    return Array.from(granted as unknown as Iterable<string>).includes(
-      BACKGROUND_READ_PERMISSION,
-    );
+    return await PermissionsAndroid.check(BACKGROUND_READ_PERMISSION as never);
   } catch {
     return false;
   }
@@ -305,7 +303,7 @@ async function getBiometricDataTypeIdByName(name: string): Promise<string> {
   const cached = biometricTypeIdCache.get(name);
   if (cached) return cached;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("biometric_data_types")
     .select("id")
     .eq("name", name)
@@ -329,7 +327,7 @@ async function ensureUserRowExists(
   email?: string | null,
   name?: string | null,
 ): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabaseClient()
     .from("users")
     .upsert(
       {
@@ -343,8 +341,37 @@ async function ensureUserRowExists(
     .maybeSingle();
 
   if (error) {
-    throw error;
+    // A linha do utilizador já é criada pelo trigger handle_new_user no signup,
+    // por isso este upsert é apenas best-effort. Se falhar (ex.: RLS sem política
+    // de INSERT neste ambiente), NÃO é fatal: a linha existe na mesma e o FK do
+    // biometric_data fica satisfeito. Não bloquear o sync por causa disto.
+    console.warn(
+      "[HealthSync] ensureUserRowExists ignorado (linha já existe via trigger):",
+      error.message,
+    );
   }
+}
+
+// Só perfis "cuidado" geram/enviam os próprios dados biométricos. Um "aider"
+// monitoriza pacientes e não deve sincronizar Health Connect próprio.
+// Devolve true apenas quando o perfil é POSITIVAMENTE "aider"; se o tipo for
+// desconhecido (user_type_id nulo), devolve false para não bloquear cuidados.
+async function isAiderProfile(userId: string): Promise<boolean> {
+  const { data: userRow, error: userError } = await getSupabaseClient()
+    .from("users")
+    .select("user_type_id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (userError || !userRow?.user_type_id) return false;
+
+  const { data: userType } = await getSupabaseClient()
+    .from("user_types")
+    .select("designation")
+    .eq("id", userRow.user_type_id)
+    .maybeSingle();
+
+  return String(userType?.designation ?? "").trim().toLowerCase() === "aider";
 }
 
 // ─── Leitura do Health Connect ─────────────────────────────────────────────────
@@ -549,7 +576,8 @@ async function notifySyncedEntries(
 }
 
 async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const { data: userData, error: userError } =
+    await getSupabaseClient().auth.getUser();
   if (userError) throw userError;
 
   const patientId = userData.user?.id;
@@ -673,7 +701,7 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   // upsert — se o external_id já existir, atualiza em vez de duplicar
-  const { error } = await supabase
+  const { error } = await getSupabaseClient()
     .from("biometric_data")
     .upsert(rows, { onConflict: "external_id" });
 
@@ -689,6 +717,17 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
 async function runSyncLogic(
   context: "foreground" | "background" = "foreground",
 ): Promise<boolean> {
+  // Só perfis "cuidado" enviam os próprios dados. Se for um "aider", nem vale a
+  // pena ler o Health Connect nem tentar escrever — sai já.
+  const { data: authData } = await getSupabaseClient().auth.getUser();
+  const authUserId = authData.user?.id;
+  if (authUserId && (await isAiderProfile(authUserId))) {
+    console.log(
+      "[HealthSync] Perfil 'aider' — sync ignorado (apenas perfis 'cuidado' enviam os próprios dados).",
+    );
+    return false;
+  }
+
   if (context === "background") {
     const hasBackgroundRead = await checkBackgroundReadPermission();
     if (!hasBackgroundRead) {

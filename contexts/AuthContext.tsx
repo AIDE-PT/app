@@ -1,13 +1,13 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import { supabase } from "@/utils/supabase/client";
+import { getSupabaseClient, hasSupabaseConfig } from "@/utils/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "expo-router";
 import React, {
-    createContext,
-    useContext,
-    useEffect,
-    useMemo,
-    useState,
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
 } from "react";
 import { Platform } from "react-native";
 
@@ -84,7 +84,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const syncSession = async () => {
-    if (!supabase) {
+    if (!hasSupabaseConfig) {
       handleSession(null);
       setIsLoading(false);
       return;
@@ -94,11 +94,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       const {
         data: { session: restoredSession },
         error,
-      } = await supabase.auth.getSession();
+      } = await getSupabaseClient().auth.getSession();
 
       if (error) {
         console.error("Supabase session restore failed:", error.message);
-        await supabase.auth.signOut();
+        await getSupabaseClient().auth.signOut();
         handleSession(null);
         return;
       }
@@ -116,11 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   useEffect(() => {
     void syncSession();
 
-    if (!supabase) {
-      return;
-    }
+    if (!hasSupabaseConfig) return;
 
-    const { data: listener } = supabase.auth.onAuthStateChange(
+    const { data: listener } = getSupabaseClient().auth.onAuthStateChange(
       async (event, sessionData) => {
         switch (event) {
           case "SIGNED_OUT":
@@ -135,7 +133,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               const searchParams = new URLSearchParams(
                 typeof window !== "undefined" ? window.location.search : "",
               );
-              const next = searchParams.get("next") ?? DEFAULT_AUTH_REDIRECT;
+              const rawNext = searchParams.get("next") ?? DEFAULT_AUTH_REDIRECT;
+              const isAllowed = PROTECTED_ROUTES.some((r) =>
+                rawNext.startsWith(r),
+              );
+              const next = isAllowed ? rawNext : DEFAULT_AUTH_REDIRECT;
               router.replace(next as any);
             }
             return;
@@ -157,11 +159,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (Platform.OS !== "web" || typeof window === "undefined") return;
 
     const handleStorageEvent = async (event: StorageEvent) => {
-      if (!event.key?.startsWith("sb:") || !supabase) return;
+      if (!event.key?.startsWith("sb:") || !hasSupabaseConfig) return;
 
       const {
         data: { session: restoredSession },
-      } = await supabase.auth.getSession();
+      } = await getSupabaseClient().auth.getSession();
 
       if (!restoredSession) {
         handleSession(null);
@@ -176,19 +178,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [router]);
 
   const signOut = async () => {
-    if (!supabase) {
+    if (!hasSupabaseConfig) {
       handleSession(null);
       router.replace("/login" as any);
       return;
     }
 
     try {
-      const { error } = await supabase.auth.signOut();
+      const { error } = await getSupabaseClient().auth.signOut();
       if (error) {
         throw new Error(error.message);
       }
       handleSession(null);
-      // Explicit logout should not preserve a "next" redirect.
       router.replace("/login" as any);
     } catch (error) {
       console.error("Error signing out:", error);
@@ -197,14 +198,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getCurrentAccessToken = async () => {
-    if (!supabase) {
-      return null;
-    }
+    if (!hasSupabaseConfig) return null;
 
     const {
       data: { session: currentSession },
       error,
-    } = await supabase.auth.getSession();
+    } = await getSupabaseClient().auth.getSession();
 
     if (error) {
       console.error("Error fetching current access token:", error.message);
@@ -230,8 +229,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       headers,
     });
 
-    if (response.status === 401 && supabase) {
-      await supabase.auth.signOut();
+    if (response.status === 401 && hasSupabaseConfig) {
+      await getSupabaseClient().auth.signOut();
       handleSession(null);
       redirectToLoginIfNeeded(currentPath());
     }

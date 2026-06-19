@@ -9,6 +9,8 @@ const DEFAULT_LIGHT_LABEL_COLOR = "rgba(17, 24, 39, 0.92)";
 interface SimpleLineChartProps {
   // Dados e Dimensões
   data?: number[];
+  labels?: string[];
+  showXLabels?: boolean;
   height?: number;
   width?: number;
 
@@ -44,6 +46,8 @@ export default function SimpleLineChart({
     5, 10, 6, 12, 8, 14, 9, 9, 10, 6, 10, 6, 12, 6, 10, 6, 12, 8, 14, 9, 10, 6,
     1,
   ],
+  labels = [],
+  showXLabels = false,
   height = 70,
   width = defaultWidth,
 
@@ -111,7 +115,7 @@ export default function SimpleLineChart({
   return (
     <LineChart
       data={{
-        labels: [],
+        labels: showXLabels ? labels : [],
         datasets: datasets,
       }}
       width={width}
@@ -123,7 +127,7 @@ export default function SimpleLineChart({
       withInnerLines={true}
       withOuterLines={false}
       withHorizontalLabels={showYLabels}
-      withVerticalLabels={false}
+      withVerticalLabels={showXLabels}
       withHorizontalLines={true}
       withVerticalLines={false}
       segments={segments}

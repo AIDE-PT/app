@@ -1,12 +1,8 @@
 import { CalendarButton } from "@/components/buttons/calendarButton";
 import LineChartSlim from "@/components/charts/LineChartSlim";
 import { CalendarModal } from "@/components/modals/CalendarModal";
-import { supabase } from "@/utils/supabase/client";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useQuery,
-} from "@tanstack/react-query";
+import { getSupabaseClient } from "@/utils/supabase/client";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
@@ -77,16 +73,6 @@ type BiometricDataRow = {
   start_time?: string | null;
   end_time?: string | null;
 };
-
-export const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: true,
-    },
-  },
-});
 
 const METRIC_CARDS: MetricCardConfig[] = [
   {
@@ -233,10 +219,13 @@ const fetchMetricsByRange = async (
   const empty = createEmptySeries();
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSupabaseClient().auth.getSession();
 
   const patientId = session?.user?.id;
-  if (!patientId) return empty;
+  if (!patientId) {
+    console.log("[DETALHE HISTORICO] sem sessao/patientId — devolve vazio");
+    return empty;
+  }
 
   const { startMs, endMs, startIso, endIso } = normalizeBounds(range);
 
@@ -254,6 +243,11 @@ const fetchMetricsByRange = async (
     .in("name", allTypeNames);
 
   if (typeError || !Array.isArray(typeRows) || typeRows.length === 0) {
+    console.log("[DETALHE HISTORICO] sem biometric_data_types — devolve vazio", {
+      patientId,
+      typeError: typeError?.message ?? null,
+      typeRowCount: Array.isArray(typeRows) ? typeRows.length : 0,
+    });
     return empty;
   }
 
@@ -333,7 +327,8 @@ const fetchMetricsByRange = async (
       const rawValue = Number(row.value ?? NaN);
       if (!Number.isFinite(rawValue)) return;
 
-      const mappedValue = key === "sleep" ? rawValue / 60 : rawValue;
+      // Sleep is stored in the DB already in hours, so no unit conversion here.
+      const mappedValue = rawValue;
       pointBuckets[key].push({ timestamp, value: mappedValue });
     });
   }
@@ -410,6 +405,17 @@ const fetchMetricsByRange = async (
         latest.displayValue ?? formatDisplayValue(metric.key, latest.value),
       pointCount: sortedPoints.length,
     };
+  });
+
+  METRIC_CARDS.forEach((metric) => {
+    const series = result[metric.key];
+    console.log("[DETALHE HISTORICO]", {
+      metric: metric.key,
+      rangeMode: range.mode,
+      pointCount: series.pointCount,
+      displayValue: series.displayValue,
+      pointsPreview: series.points.slice(0, 6),
+    });
   });
 
   return result;
@@ -599,11 +605,7 @@ const HistoricoDiarioContent = () => {
 };
 
 const HistoricoDiario = () => {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <HistoricoDiarioContent />
-    </QueryClientProvider>
-  );
+  return <HistoricoDiarioContent />;
 };
 
 export default HistoricoDiario;
