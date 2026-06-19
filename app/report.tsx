@@ -1,12 +1,19 @@
 import LightBackground from "@/components/DotBackground";
+import BackButton from "@/components/buttons/backButton";
 import { Button } from "@/components/buttons/button";
 import { ChoseCuidado } from "@/components/buttons/choseCuidado";
+import {
+  getSurfaceStyle,
+  surfaceRadius,
+  surfaceSpacing,
+} from "@/components/surface/surfaceStyles";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import useReportGeneration from "@/hooks/useReportGeneration";
 import { useTheme } from "@/hooks/useTheme";
-import { getSupabaseClient } from "@/utils/supabase/client";
 import { generateReportPdf } from "@/utils/generateReportPdf";
+import { getSupabaseClient } from "@/utils/supabase/client";
+import { Feather } from "@expo/vector-icons";
 import DateTimePicker, {
   type DateTimePickerEvent,
 } from "@react-native-community/datetimepicker";
@@ -125,17 +132,23 @@ export default function ReportScreen() {
       body: {
         color: isDark ? "#FFFFFF" : "#0F172A",
         fontSize: 15,
-        lineHeight: 22,
+        lineHeight: 23,
       },
-      heading1: { color: isDark ? "#FFFFFF" : "#0F172A" },
+      heading1: {
+        color: isDark ? "#FFFFFF" : "#0F172A",
+        fontSize: 22,
+        marginBottom: 10,
+      },
       heading2: {
         color: isDark ? "#FFFFFF" : "#0F172A",
+        fontSize: 18,
         marginTop: 18,
         marginBottom: 8,
       },
       bullet_list: { marginBottom: 12 },
       list_item: { marginBottom: 6 },
       paragraph: { marginBottom: 10 },
+      strong: { color: isDark ? "#FFFFFF" : "#0F172A" },
     }),
     [isDark],
   );
@@ -167,6 +180,27 @@ export default function ReportScreen() {
   const canGenerate =
     profileType !== "aider" ? Boolean(user?.id) : Boolean(selectedPatientId);
 
+  const neutralBorderColor = isDark
+    ? "rgba(255, 255, 255, 0.12)"
+    : "rgba(226, 232, 240, 0.92)";
+  const cardStyle = getSurfaceStyle("elevated", isDark, {
+    borderColor: neutralBorderColor,
+    borderRadius: surfaceRadius.lg,
+  });
+  const fieldStyle = getSurfaceStyle("base", isDark, {
+    borderColor: neutralBorderColor,
+    borderRadius: surfaceRadius.md,
+  });
+  const textMain = isDark ? "text-white" : "text-slate-950";
+  const textMuted = isDark ? "text-white/65" : "text-slate-600";
+  const iconColor = isDark ? "#E5E7EB" : "#475569";
+  const errorStyle = {
+    backgroundColor: isDark ? "rgba(127, 29, 29, 0.22)" : "#FEF2F2",
+    borderColor: isDark ? "rgba(252, 165, 165, 0.3)" : "#FECACA",
+    borderRadius: surfaceRadius.md,
+    borderWidth: 1,
+  };
+
   const downloadPdf = async () => {
     if (!report) return;
     setIsPdfLoading(true);
@@ -190,40 +224,125 @@ export default function ReportScreen() {
 
   return (
     <LightBackground>
-      <SafeAreaView className="flex-1">
-        <ScrollView contentContainerStyle={{ paddingBottom: 40 }}>
-          <View className="px-4 pt-6">
-            <View className="items-center mb-4">
-              <Image
-                source={require("../assets/icon/icon.png")}
-                style={{ width: 72, height: 72, resizeMode: "contain" }}
-              />
-              <Text
-                className={`mt-3 text-2xl font-safiro ${isDark ? "text-white" : "text-slate-950"}`}
+      <View className="flex-1 px-4 pt-10">
+        <SafeAreaView className="flex-1">
+          <View className="mb-4">
+            <BackButton label="Relatorio" dark={isDark} />
+          </View>
+
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 40 }}
+          >
+            <View
+              style={[
+                cardStyle,
+                {
+                  marginBottom: surfaceSpacing.md,
+                  padding: surfaceSpacing.md,
+                },
+              ]}
+            >
+              <View className="flex-row items-center">
+                <View
+                  style={[
+                    fieldStyle,
+                    {
+                      alignItems: "center",
+                      height: 56,
+                      justifyContent: "center",
+                      marginRight: surfaceSpacing.sm,
+                      width: 56,
+                    },
+                  ]}
+                >
+                  <Image
+                    source={require("../assets/icon/icon.png")}
+                    style={{ height: 36, resizeMode: "contain", width: 36 }}
+                  />
+                </View>
+
+                <View className="flex-1">
+                  <Text
+                    className={`text-xs font-bold uppercase ${textMuted}`}
+                    numberOfLines={1}
+                  >
+                    Resumo clinico
+                  </Text>
+                  <Text
+                    className={`mt-1 text-2xl font-safiro ${textMain}`}
+                    numberOfLines={2}
+                  >
+                    {displayPatientName}
+                  </Text>
+                </View>
+              </View>
+
+              <View
+                className="flex-row items-center"
+                style={[
+                  fieldStyle,
+                  {
+                    marginTop: surfaceSpacing.md,
+                    paddingHorizontal: surfaceSpacing.md,
+                    paddingVertical: surfaceSpacing.sm,
+                  },
+                ]}
               >
-                {displayPatientName}
-              </Text>
-              <Text
-                className={`mt-1 text-sm ${isDark ? "text-white/70" : "text-slate-600"}`}
-              >
-                {dateFormatter.format(startDate)} —{" "}
-                {dateFormatter.format(endDate)}
-              </Text>
+                <Feather name="calendar" size={17} color={iconColor} />
+                <Text
+                  className={`ml-2 flex-1 text-sm font-semibold ${textMain}`}
+                  numberOfLines={1}
+                >
+                  {dateFormatter.format(startDate)} -{" "}
+                  {dateFormatter.format(endDate)}
+                </Text>
+              </View>
             </View>
 
             <View
-              className={`rounded-[28px] p-5 mb-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+              style={[
+                cardStyle,
+                {
+                  marginBottom: surfaceSpacing.md,
+                  padding: surfaceSpacing.md,
+                },
+              ]}
             >
-              <Text
-                className={`text-xs uppercase tracking-[0.4px] mb-3 ${isDark ? "text-white/50" : "text-slate-500"}`}
+              <View
+                className="flex-row items-start justify-between"
+                style={{ marginBottom: surfaceSpacing.md }}
               >
-                Intervalo de análise
-              </Text>
+                <View className="flex-1 pr-3">
+                  <Text className={`text-xl font-bold ${textMain}`}>
+                    Configuracao
+                  </Text>
+                  <Text className={`mt-1 text-sm leading-5 ${textMuted}`}>
+                    Escolha o intervalo usado para analisar as notas.
+                  </Text>
+                </View>
+
+                <View
+                  className="flex-row items-center"
+                  style={[
+                    fieldStyle,
+                    {
+                      paddingHorizontal: surfaceSpacing.sm,
+                      paddingVertical: surfaceSpacing.xs,
+                    },
+                  ]}
+                >
+                  <Feather name="file-text" size={14} color={iconColor} />
+                  <Text className={`ml-1 text-xs font-bold ${textMain}`}>
+                    {noteCount}
+                  </Text>
+                </View>
+              </View>
 
               {profileType === "aider" && patients.length > 1 && (
-                <View className="mb-4">
+                <View style={{ marginBottom: surfaceSpacing.md }}>
                   <Text
-                    className={`text-xs uppercase tracking-[0.4px] mb-2 ${isDark ? "text-white/50" : "text-slate-500"}`}
+                    className={`mb-2 text-xs font-bold uppercase ${textMuted}`}
                   >
                     Selecionar paciente
                   </Text>
@@ -241,31 +360,45 @@ export default function ReportScreen() {
 
               {profileType === "aider" && patients.length === 0 ? (
                 <View
-                  className={`rounded-2xl border p-4 mb-4 ${isDark ? "border-white/10 bg-white/5" : "border-slate-200 bg-slate-50"}`}
+                  style={[
+                    fieldStyle,
+                    {
+                      padding: surfaceSpacing.md,
+                    },
+                  ]}
                 >
-                  <Text className={isDark ? "text-white" : "text-slate-950"}>
-                    Ainda não tem pacientes associados. Associe um paciente para
-                    gerar relatórios.
+                  <Text className={`text-sm leading-5 ${textMain}`}>
+                    Ainda nao tem pacientes associados. Associe um paciente para
+                    gerar relatorios.
                   </Text>
                 </View>
               ) : (
                 <>
-                  <View className="flex-row gap-3 mb-4">
+                  <View className="flex-row" style={{ gap: surfaceSpacing.sm }}>
                     <Pressable
                       onPress={() => setActivePicker("start")}
-                      className={`flex-1 rounded-2xl border px-4 py-3 ${
-                        isDark
-                          ? "border-white/10 bg-white/5"
-                          : "border-slate-200 bg-slate-50"
-                      }`}
+                      className="flex-1"
+                      style={[
+                        fieldStyle,
+                        {
+                          paddingHorizontal: surfaceSpacing.md,
+                          paddingVertical: surfaceSpacing.sm,
+                        },
+                      ]}
                     >
+                      <View className="mb-1 flex-row items-center">
+                        <Feather
+                          name="arrow-right"
+                          size={13}
+                          color={iconColor}
+                        />
+                        <Text className={`ml-1 text-xs ${textMuted}`}>
+                          Inicio
+                        </Text>
+                      </View>
                       <Text
-                        className={`text-xs ${isDark ? "text-white/50" : "text-slate-500"}`}
-                      >
-                        Data inicial
-                      </Text>
-                      <Text
-                        className={`mt-1 font-semibold ${isDark ? "text-white" : "text-slate-950"}`}
+                        className={`text-base font-bold ${textMain}`}
+                        numberOfLines={1}
                       >
                         {dateFormatter.format(startDate)}
                       </Text>
@@ -273,100 +406,144 @@ export default function ReportScreen() {
 
                     <Pressable
                       onPress={() => setActivePicker("end")}
-                      className={`flex-1 rounded-2xl border px-4 py-3 ${
-                        isDark
-                          ? "border-white/10 bg-white/5"
-                          : "border-slate-200 bg-slate-50"
-                      }`}
+                      className="flex-1"
+                      style={[
+                        fieldStyle,
+                        {
+                          paddingHorizontal: surfaceSpacing.md,
+                          paddingVertical: surfaceSpacing.sm,
+                        },
+                      ]}
                     >
+                      <View className="mb-1 flex-row items-center">
+                        <Feather name="flag" size={13} color={iconColor} />
+                        <Text className={`ml-1 text-xs ${textMuted}`}>Fim</Text>
+                      </View>
                       <Text
-                        className={`text-xs ${isDark ? "text-white/50" : "text-slate-500"}`}
-                      >
-                        Data final
-                      </Text>
-                      <Text
-                        className={`mt-1 font-semibold ${isDark ? "text-white" : "text-slate-950"}`}
+                        className={`text-base font-bold ${textMain}`}
+                        numberOfLines={1}
                       >
                         {dateFormatter.format(endDate)}
                       </Text>
                     </Pressable>
                   </View>
 
-                  <Button
-                    variant="primary"
-                    label="Gerar Relatório"
-                    onPress={() => {
-                      const patientId =
-                        profileType === "aider" ? selectedPatientId : user?.id;
-                      if (!patientId) return;
-                      void generate(patientId, startDateIso, endDateIso);
-                    }}
-                    loading={isLoading}
-                    disabled={!canGenerate}
-                  />
+                  <View
+                    className="items-center"
+                    style={{ marginTop: surfaceSpacing.md }}
+                  >
+                    <Button
+                      variant="primary"
+                      label="Gerar Relatorio"
+                      onPress={() => {
+                        const patientId =
+                          profileType === "aider"
+                            ? selectedPatientId
+                            : user?.id;
+                        if (!patientId) return;
+                        void generate(patientId, startDateIso, endDateIso);
+                      }}
+                      loading={isLoading}
+                      disabled={!canGenerate}
+                    />
+                  </View>
                 </>
               )}
-
-              <View className="mt-4 flex-row justify-between">
-                <Text
-                  className={`${isDark ? "text-white/70" : "text-slate-600"}`}
-                >
-                  Notas analisadas
-                </Text>
-                <Text
-                  className={`${isDark ? "text-white" : "text-slate-950"} font-bold`}
-                >
-                  {noteCount}
-                </Text>
-              </View>
             </View>
 
             {isLoading && (
-              <View className="items-center py-8">
-                <ActivityIndicator color={isDark ? "#FFFFFF" : "#5061FF"} />
+              <View
+                className="items-center justify-center"
+                style={[
+                  cardStyle,
+                  {
+                    marginBottom: surfaceSpacing.md,
+                    padding: surfaceSpacing.md,
+                  },
+                ]}
+              >
+                <ActivityIndicator color={iconColor} />
+                <Text className={`mt-3 text-sm ${textMuted}`}>
+                  A gerar relatorio...
+                </Text>
               </View>
             )}
 
             {error && (
               <View
-                className={`rounded-[24px] p-4 mb-4 ${isDark ? "bg-red-500/10" : "bg-red-50"}`}
+                style={[
+                  errorStyle,
+                  {
+                    marginBottom: surfaceSpacing.md,
+                    padding: surfaceSpacing.md,
+                  },
+                ]}
               >
-                <Text className={isDark ? "text-red-200" : "text-red-700"}>
-                  {error}
-                </Text>
+                <View className="flex-row items-start">
+                  <Feather
+                    name="alert-circle"
+                    size={18}
+                    color={isDark ? "#FCA5A5" : "#B91C1C"}
+                  />
+                  <Text
+                    className={`ml-2 flex-1 text-sm leading-5 ${isDark ? "text-red-100" : "text-red-700"}`}
+                  >
+                    {error}
+                  </Text>
+                </View>
               </View>
             )}
 
             {!!report && (
               <View
-                className={`rounded-[28px] p-5 mb-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                style={[
+                  cardStyle,
+                  {
+                    marginBottom: surfaceSpacing.md,
+                    padding: surfaceSpacing.md,
+                  },
+                ]}
               >
+                <View className="mb-3 flex-row items-center">
+                  <Feather name="clipboard" size={18} color={iconColor} />
+                  <Text className={`ml-2 text-lg font-bold ${textMain}`}>
+                    Relatorio gerado
+                  </Text>
+                </View>
                 <Markdown style={markdownStyles as any}>{report}</Markdown>
               </View>
             )}
 
             {!!noteTitles.length && (
               <View
-                className={`rounded-[28px] p-5 mb-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                style={[
+                  cardStyle,
+                  {
+                    marginBottom: surfaceSpacing.md,
+                    padding: surfaceSpacing.md,
+                  },
+                ]}
               >
-                <Text
-                  className={`text-lg font-bold mb-3 ${isDark ? "text-white" : "text-slate-950"}`}
-                >
-                  Notas Analisadas
+                <Text className={`mb-3 text-lg font-bold ${textMain}`}>
+                  Notas analisadas
                 </Text>
                 {noteTitles.map((item) => (
-                  <View key={`${item.date}-${item.title}`} className="mb-3">
-                    <Text
-                      className={
-                        isDark
-                          ? "text-white font-semibold"
-                          : "text-slate-950 font-semibold"
-                      }
-                    >
+                  <View
+                    key={`${item.date}-${item.title}`}
+                    style={[
+                      fieldStyle,
+                      {
+                        marginBottom: surfaceSpacing.sm,
+                        padding: surfaceSpacing.md,
+                      },
+                    ]}
+                  >
+                    <Text className={`text-sm font-bold ${textMain}`}>
                       {item.date}
                     </Text>
                     <Text
-                      className={isDark ? "text-white/70" : "text-slate-600"}
+                      className={`mt-1 text-sm leading-5 ${textMuted}`}
+                      numberOfLines={3}
                     >
                       {item.title}
                     </Text>
@@ -376,10 +553,13 @@ export default function ReportScreen() {
             )}
 
             {!!report && (
-              <View className="mt-2 mb-4">
+              <View
+                className="items-center"
+                style={{ marginBottom: surfaceSpacing.md }}
+              >
                 <Button
                   variant="primary"
-                  label={isPdfLoading ? "A gerar PDF…" : "Exportar PDF"}
+                  label={isPdfLoading ? "A gerar PDF..." : "Exportar PDF"}
                   onPress={() => void downloadPdf()}
                   loading={isPdfLoading}
                   disabled={isPdfLoading}
@@ -388,25 +568,23 @@ export default function ReportScreen() {
             )}
 
             {lastGeneratedAt && (
-              <Text
-                className={`text-center text-xs ${isDark ? "text-white/50" : "text-slate-500"}`}
-              >
-                Última geração:{" "}
+              <Text className={`text-center text-xs ${textMuted}`}>
+                Ultima geracao:{" "}
                 {dateTimeFormatter.format(new Date(lastGeneratedAt))}
               </Text>
             )}
-          </View>
-        </ScrollView>
+          </ScrollView>
 
-        {activePicker && (
-          <DateTimePicker
-            value={activePicker === "start" ? startDate : endDate}
-            mode="date"
-            display="default"
-            onChange={handlePickerChange}
-          />
-        )}
-      </SafeAreaView>
+          {activePicker && (
+            <DateTimePicker
+              value={activePicker === "start" ? startDate : endDate}
+              mode="date"
+              display="default"
+              onChange={handlePickerChange}
+            />
+          )}
+        </SafeAreaView>
+      </View>
     </LightBackground>
   );
 }
