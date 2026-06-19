@@ -1,6 +1,6 @@
 import LightBackground from "@/components/DotBackground";
 import { Button } from "@/components/buttons/button";
-import { ChoseCuidado } from "@/components/buttons/choseCuidado";
+import CuidadoModal from "@/components/modals/CuidadoModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import useReportGeneration from "@/hooks/useReportGeneration";
@@ -18,6 +18,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import Markdown from "react-native-markdown-display";
@@ -69,6 +70,7 @@ export default function ReportScreen() {
   const [activePicker, setActivePicker] = useState<"start" | "end" | null>(
     null,
   );
+  const [showPatientModal, setShowPatientModal] = useState(false);
 
   useEffect(() => {
     if (!user?.id || profileType !== "aider") {
@@ -227,14 +229,35 @@ export default function ReportScreen() {
                   >
                     Selecionar paciente
                   </Text>
-                  <ChoseCuidado
+                  <TouchableOpacity
+                    onPress={() => setShowPatientModal(true)}
+                    activeOpacity={0.7}
+                    className={`flex-row items-center justify-between rounded-2xl border px-4 py-3 ${
+                      isDark
+                        ? "border-white/10 bg-white/5"
+                        : "border-slate-200 bg-slate-50"
+                    }`}
+                  >
+                    <Text
+                      className={`font-semibold ${isDark ? "text-white" : "text-slate-950"}`}
+                    >
+                      {patients.find((p) => p.id === selectedPatientId)?.name ??
+                        "Selecionar paciente"}
+                    </Text>
+                    <Text
+                      className={isDark ? "text-white/50" : "text-slate-400"}
+                    >
+                      ▾
+                    </Text>
+                  </TouchableOpacity>
+                  <CuidadoModal
+                    visible={showPatientModal}
+                    onClose={() => setShowPatientModal(false)}
                     cuidados={patients}
-                    selectedCuidado={
-                      patients.find(
-                        (patient) => patient.id === selectedPatientId,
-                      ) ?? undefined
-                    }
-                    onSelect={(patient) => setSelectedPatientId(patient.id)}
+                    onSelect={(patient) => {
+                      setSelectedPatientId(patient.id);
+                      setShowPatientModal(false);
+                    }}
                   />
                 </View>
               )}
