@@ -17,13 +17,16 @@ BEGIN
     JOIN user_types ut ON u.user_type_id = ut.id 
     WHERE u.id = NEW.user_id_pacient;
 
-    -- Validar se o Aider tem o cargo certo (Ajusta 'aider' se no teu DB estiver em PT como 'Cuidador')
-    IF aider_type != 'aider' THEN
+    aider_type := lower(trim(coalesce(aider_type, '')));
+    patient_type := lower(trim(coalesce(patient_type, '')));
+
+    -- Validar se o Aider tem o cargo certo
+    IF aider_type NOT IN ('aider') THEN
         RAISE EXCEPTION 'User assigned as user_id_aider must have the aider type';
     END IF;
 
     -- Validar se o Paciente tem o cargo certo
-    IF patient_type != 'patient' AND patient_type != 'pacient' THEN
+    IF patient_type NOT IN ('cuidado', 'patient', 'pacient', 'paciente') THEN
         RAISE EXCEPTION 'User assigned as user_id_pacient must have the patient type';
     END IF;
 
@@ -38,6 +41,33 @@ DROP TRIGGER IF EXISTS trigger_validate_care_relation_roles ON care_relations;
 CREATE TRIGGER trigger_validate_care_relation_roles
 BEFORE INSERT OR UPDATE ON care_relations
 FOR EACH ROW EXECUTE FUNCTION validate_care_relation_roles();
+
+-- 3. Função de pesquisa de cuidados por email
+CREATE OR REPLACE FUNCTION find_care_by_email(p_email text)
+RETURNS TABLE (
+    id uuid,
+    email text,
+    user_type_id uuid,
+    name text
+)
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+    RETURN QUERY
+    SELECT
+        u.id,
+        u.email,
+        u.user_type_id,
+        u.name
+    FROM users u
+    JOIN user_types ut ON ut.id = u.user_type_id
+    WHERE lower(trim(u.email)) = lower(trim(p_email))
+      AND lower(trim(ut.designation)) = 'cuidado'
+    LIMIT 1;
+END;
+$$;
 
 -- 3. Regra de Segurança (RLS): Aider só vê biometria de quem ele cuida
 ALTER TABLE biometric_data ENABLE ROW LEVEL SECURITY;

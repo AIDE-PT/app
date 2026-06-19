@@ -14,12 +14,14 @@
  */
 
 import { supabase } from "@/utils/supabase/client";
+import { sendLocalDataEntryNotification } from "@/src/services/localNotifications";
 import {
   getGrantedPermissions,
   initialize,
   readRecords,
   type RecordResult,
 } from "react-native-health-connect";
+import { Platform } from "react-native";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
@@ -140,8 +142,6 @@ type SyncedEntryNotification = {
   measuredAt?: string | null;
 };
 
-type BackgroundFetchModule = typeof import("expo-background-fetch");
-type TaskManagerModule = typeof import("expo-task-manager");
 type BackgroundModules = {
   BackgroundFetch: BackgroundFetchModule;
   TaskManager: TaskManagerModule;
@@ -322,6 +322,29 @@ async function getBiometricDataTypeIdByName(name: string): Promise<string> {
 
   biometricTypeIdCache.set(name, data.id);
   return data.id;
+}
+
+async function ensureUserRowExists(
+  userId: string,
+  email?: string | null,
+  name?: string | null,
+): Promise<void> {
+  const { error } = await supabase
+    .from("users")
+    .upsert(
+      {
+        id: userId,
+        email: email ?? null,
+        name: name ?? null,
+      },
+      { onConflict: "id" },
+    )
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    throw error;
+  }
 }
 
 // ─── Leitura do Health Connect ─────────────────────────────────────────────────
@@ -535,6 +558,14 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
     return;
   }
 
+  await ensureUserRowExists(
+    patientId,
+    userData.user.email,
+    typeof userData.user.user_metadata?.name === "string"
+      ? userData.user.user_metadata.name
+      : null,
+  );
+
   const nowIso = new Date().toISOString();
   const rows: BiometricDataInsert[] = [];
   const notificationEntries: SyncedEntryNotification[] = [];
@@ -718,7 +749,7 @@ async function runSyncLogic(
  * Chamar uma vez após o utilizador conceder permissões Health Connect.
  */
 export async function registerHealthBackgroundSync(): Promise<void> {
-  const modules = await ensureTaskIsDefined();
+  const modules = await loadBackgroundModules();
   if (!modules) {
     console.warn("[HealthSync] Background polling indisponivel neste runtime.");
     return;
@@ -727,7 +758,7 @@ export async function registerHealthBackgroundSync(): Promise<void> {
   const { TaskManager, BackgroundFetch } = modules;
 
   try {
-    const { BackgroundFetch, TaskManager } = await ensureTaskDefined();
+    await ensureTaskDefined();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
     if (isRegistered) {
       console.log("[HealthSync] ✅ Task já registada.");
@@ -760,7 +791,7 @@ export async function unregisterHealthBackgroundSync(): Promise<void> {
   const { TaskManager, BackgroundFetch } = modules;
 
   try {
-    const { BackgroundFetch, TaskManager } = await getExpoTaskModules();
+    await getExpoTaskModules();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
     if (isRegistered) {
       await BackgroundFetch.unregisterTaskAsync(TASK_NAME);

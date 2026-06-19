@@ -1,4 +1,5 @@
 import { useTheme } from "@/hooks/useTheme";
+import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
@@ -8,9 +9,6 @@ import AddIcon from "../svg/AdicionarIcon";
 import CalendarIcon from "../svg/HistoricoDiarioIcon";
 import HomeIcon from "../svg/HomeNovoIcon";
 import ProfileIcon from "../svg/PerfilIcon";
-import { useRouter } from "expo-router";
-import { useTheme } from "@/hooks/useTheme";
-import { Feather } from "@expo/vector-icons";
 
 interface navBarProps {
   dark?: boolean;
@@ -102,25 +100,29 @@ const Navbar = ({
             <CalendarIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
 
-            <TouchableOpacity
-              className={`${styleBall} ${buttonBg}`}
-              onPress={() => router.push("/notas" as never)}
-              accessibilityRole="button"
-              accessibilityLabel="Notas"
-              accessibilityHint="Abre as notas colaborativas."
-            >
-              <Feather name="file-text" size={22} color={iconColor} />
-            </TouchableOpacity>
+          <TouchableOpacity
+            className={`${styleBall} ${buttonBg}`}
+            onPress={() => router.push("/notas" as never)}
+            accessibilityRole="button"
+            accessibilityLabel="Notas"
+            accessibilityHint="Abre as notas colaborativas."
+          >
+            <Feather name="file-text" size={22} color={iconColor} />
+          </TouchableOpacity>
 
-            <TouchableOpacity
-              className={`${styleBall} ${buttonBg}`}
-              onPress={() => router.push("/testDashboard")}
-              accessibilityRole="button"
-              accessibilityLabel="Inicio"
-              accessibilityHint="Abre o dashboard principal."
-            >
-              <HomeIcon color={iconColor} />
-            </TouchableOpacity>
+          <TouchableOpacity
+            className={`${styleBall} ${buttonBg}`}
+            onPress={() => router.push("/report" as never)}
+            disabled={disableNavigation}
+            style={disableNavigation ? { opacity: 0.45 } : undefined}
+            accessibilityRole="button"
+            accessibilityLabel="Relatório"
+            accessibilityHint="Abre o gerador de relatórios."
+            accessibilityState={{ disabled: disableNavigation }}
+          >
+            <Feather name="clipboard" size={22} color={iconColor} />
+          </TouchableOpacity>
+
           <TouchableOpacity
             className={`${styleBall} ${buttonBg}`}
             onPress={() => router.push("/testDashboard")}

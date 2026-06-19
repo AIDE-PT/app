@@ -2,6 +2,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/utils/supabase/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 
 type ProfileType = "aider" | "cuidado" | null;
 
@@ -124,7 +125,7 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setIsLoading(true);
 
-      if (!user?.id) {
+      if (!user?.id || !supabase) {
         setProfileTypeState(null);
         setIsLoading(false);
         return;
@@ -211,7 +212,18 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   if (isLoading) {
-    return null;
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        <ActivityIndicator size="large" color="#5061FF" />
+      </View>
+    );
   }
 
   return (
