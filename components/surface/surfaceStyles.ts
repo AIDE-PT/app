@@ -1,6 +1,7 @@
 import { Platform, type ViewStyle } from "react-native";
 
 export type SurfaceLevel = "base" | "elevated" | "highlight";
+export type SurfaceTextTone = "primary" | "support" | "subtle" | "placeholder";
 
 type SurfaceToken = {
   backgroundColor: string;
@@ -83,6 +84,24 @@ const surfaceTokens: Record<
   },
 };
 
+const surfaceTextTokens: Record<
+  "light" | "dark",
+  Record<SurfaceTextTone, string>
+> = {
+  light: {
+    primary: "#0F172A",
+    support: "#334155",
+    subtle: "#475569",
+    placeholder: "#475569",
+  },
+  dark: {
+    primary: "#FFFFFF",
+    support: "rgba(255, 255, 255, 0.78)",
+    subtle: "rgba(255, 255, 255, 0.64)",
+    placeholder: "rgba(255, 255, 255, 0.68)",
+  },
+};
+
 export const surfaceSpacing = {
   xxs: 4,
   xs: 8,
@@ -91,6 +110,13 @@ export const surfaceSpacing = {
   lg: 24,
   xl: 32,
 };
+
+export function getSurfaceTextColor(
+  tone: SurfaceTextTone,
+  isDark: boolean,
+): string {
+  return surfaceTextTokens[isDark ? "dark" : "light"][tone];
+}
 
 export const surfaceRadius = {
   sm: 12,
