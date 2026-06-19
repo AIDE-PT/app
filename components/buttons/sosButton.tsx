@@ -50,7 +50,11 @@ const handleSOS = async () => {
   }
 };
 
-export const SOSButton = () => {
+interface SOSButtonProps {
+  compact?: boolean;
+}
+
+export const SOSButton = ({ compact = false }: SOSButtonProps) => {
   return (
     <TouchableOpacity
       onPress={handleSOS}
@@ -60,7 +64,7 @@ export const SOSButton = () => {
       accessibilityHint="Envia um pedido de socorro."
     >
       <View
-        className="w-64 h-12 p-2 bg-red-600 rounded-[20px] flex-row justify-center items-center gap-4"
+        className={`${compact ? "w-44 gap-2" : "w-64 gap-4"} h-12 p-2 bg-red-600 rounded-[20px] flex-row justify-center items-center`}
         style={
           {
             boxShadow: "inset 0px 0px 50px -25px rgba(255, 127, 129, 1.00)",

@@ -12,7 +12,10 @@ import {
   View,
 } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
-import { getSurfaceStyle } from "@/components/surface/surfaceStyles";
+import {
+  getSurfaceStyle,
+  getSurfaceTextColor,
+} from "@/components/surface/surfaceStyles";
 import CalendarIcon from "../svg/CalendarIcon";
 import EyeIcon from "../svg/EyeIcon";
 
@@ -95,6 +98,11 @@ export const Input = ({
     ? "Toque no icone de informacao ao lado do titulo para ver ajuda."
     : undefined;
   const accessibilityHint = resolvedErrorText || helperText || helperHint;
+  const supportTextColor = getSurfaceTextColor("support", useDarkStyling);
+  const placeholderTextColor = getSurfaceTextColor(
+    "placeholder",
+    useDarkStyling,
+  );
 
   return (
     <View className="w-full">
@@ -140,8 +148,9 @@ export const Input = ({
         >
           <Text
             className={`font-open-sans text-[13px] leading-5 ${
-              useDarkStyling ? "text-white/85" : "text-black/75"
+              useDarkStyling ? "text-white/85" : ""
             }`}
+            style={!useDarkStyling ? { color: supportTextColor } : undefined}
             accessibilityLanguage="pt-PT"
           >
             {helperText}
@@ -163,9 +172,7 @@ export const Input = ({
           className={`flex-1 h-11 text-base ${
             useDarkStyling ? "text-white" : "text-black/90"
           }`}
-          placeholderTextColor={
-            useDarkStyling ? "rgba(255,255,255,0.62)" : "rgba(17,24,39,0.55)"
-          }
+          placeholderTextColor={placeholderTextColor}
           autoCapitalize={isEmail ? "none" : props.autoCapitalize}
           autoCorrect={
             effectiveValidation !== "none" ? false : props.autoCorrect
@@ -194,8 +201,9 @@ export const Input = ({
         {suffix ? (
           <Text
             className={`ml-2 text-base ${
-              useDarkStyling ? "text-white/75" : "text-black/70"
+              useDarkStyling ? "text-white/75" : ""
             }`}
+            style={!useDarkStyling ? { color: supportTextColor } : undefined}
             accessibilityLanguage="pt-PT"
           >
             {suffix}

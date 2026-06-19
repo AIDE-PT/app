@@ -192,7 +192,7 @@ export default function ReportScreen() {
     borderRadius: surfaceRadius.md,
   });
   const textMain = isDark ? "text-white" : "text-slate-950";
-  const textMuted = isDark ? "text-white/65" : "text-slate-600";
+  const textMuted = isDark ? "text-white/65" : "text-slate-700";
   const iconColor = isDark ? "#E5E7EB" : "#475569";
   const errorStyle = {
     backgroundColor: isDark ? "rgba(127, 29, 29, 0.22)" : "#FEF2F2",

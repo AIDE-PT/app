@@ -129,7 +129,7 @@ export default function NotesDashboard() {
     ? "bg-aide-dark-card border-white/10"
     : "bg-white/85 border-white";
   const textMain = isDark ? "text-white" : "text-slate-950";
-  const textMuted = isDark ? "text-slate-300" : "text-slate-600";
+  const textMuted = isDark ? "text-slate-300" : "text-slate-700";
 
   const renderNote = ({ item, index }: { item: Note; index: number }) => {
     const colorIndex = index % NOTE_COLORS.length;

@@ -65,7 +65,10 @@ export const ChoseCuidado = ({
     >
       {/* Placeholder to maintain layout height */}
       <View className="w-full flex-row items-center justify-center px-6 py-3 opacity-0">
-        <Text className="text-xl font-semibold mr-2">
+        <Text
+          className="mr-2 flex-shrink text-xl font-semibold"
+          numberOfLines={1}
+        >
           {selectedCuidado?.name ?? "Selecionar"}
         </Text>
         <ArrowIcon variant="DOWN" dark={isDark} size={20} />
@@ -99,7 +102,8 @@ export const ChoseCuidado = ({
             accessibilityState={{ expanded: isOpen }}
           >
             <Text
-              className={`text-xl font-semibold mr-2 ${isDark ? "text-white" : "text-[#111111]"}`}
+              className={`mr-2 flex-shrink text-xl font-semibold ${isDark ? "text-white" : "text-[#111111]"}`}
+              numberOfLines={1}
             >
               {selectedCuidado?.name ?? "Selecionar"}
             </Text>
@@ -125,7 +129,8 @@ export const ChoseCuidado = ({
                 }}
               >
                 <Text
-                  className={`text-lg font-medium text-center ${selectedCuidado?.id === cuidado.id ? (isDark ? "text-blue-300" : "text-[#5061FF]") : isDark ? "text-white" : "text-[#111111]"}`}
+                  className={`text-center text-lg font-medium ${selectedCuidado?.id === cuidado.id ? (isDark ? "text-blue-300" : "text-[#5061FF]") : isDark ? "text-white" : "text-[#111111]"}`}
+                  numberOfLines={1}
                 >
                   {cuidado.name}
                 </Text>
