@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { useConsentPrivacy } from "@/contexts/ConsentPrivacyContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
@@ -10,6 +11,7 @@ const ONBOARDING_STORAGE_KEY = "@aide_onboarding";
 const DefinicoesLista = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const { isConsentPopupVisible, toggleConsentPopup } = useConsentPrivacy();
 
   const handleResetOnboardingDebug = useCallback(async () => {
     if (!user?.id) {
@@ -58,6 +60,15 @@ const DefinicoesLista = () => {
           }}
         />
       ))}
+
+      <ElementoDefinicao
+        title={
+          isConsentPopupVisible
+            ? "Ocultar Gestão de Consentimento e Privacidade"
+            : "Mostrar Gestão de Consentimento e Privacidade"
+        }
+        onPress={toggleConsentPopup}
+      />
 
       {__DEV__ ? (
         <ElementoDefinicao
