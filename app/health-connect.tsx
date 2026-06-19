@@ -140,6 +140,17 @@ const HealthConnectScreen = () => {
 
   const isAvailable = status?.sdkStatus === HEALTH_CONNECT_SDK_AVAILABLE;
   const hasGrantedPermissions = Boolean(status?.permissionsGranted);
+  const runtimeMessage = status?.runtimeMessage;
+  const runtimeReady = status?.runtimeReady ?? true;
+  const availabilityMessage = !runtimeReady
+    ? runtimeMessage ?? "Health Connect native module is not available."
+    : status?.needsUpdate
+      ? "E necessario atualizar a app Health Connect antes de continuar."
+      : hasGrantedPermissions
+        ? "As permissoes necessarias ja estao ativas neste dispositivo."
+        : isAvailable
+          ? "O dispositivo esta pronto para pedir permissoes."
+          : "O Health Connect nao esta disponivel neste dispositivo neste momento.";
   const statusTone =
     requestState === "success"
       ? colors.semantic.success
@@ -242,15 +253,26 @@ const HealthConnectScreen = () => {
                     <Text
                       className={`mt-1 text-sm font-open-sans ${isDark ? "text-white/70" : "text-black/60"}`}
                     >
-                      {status?.needsUpdate
-                        ? "E necessario atualizar a app Health Connect antes de continuar."
-                        : hasGrantedPermissions
-                          ? "As permissoes necessarias ja estao ativas neste dispositivo."
-                          : isAvailable
-                            ? "O dispositivo esta pronto para pedir permissoes."
-                            : "O Health Connect nao esta disponivel neste dispositivo neste momento."}
+                      {availabilityMessage}
                     </Text>
                   </View>
+
+                  {!runtimeReady && (
+                    <View
+                      className={`rounded-[24px] p-4 border ${isDark ? "border-amber-400/30 bg-amber-500/10" : "border-amber-200 bg-amber-50"}`}
+                    >
+                      <Text
+                        className={`text-xs uppercase font-open-sans font-bold ${isDark ? "text-amber-200" : "text-amber-700"}`}
+                      >
+                        Diagnostico
+                      </Text>
+                      <Text
+                        className={`mt-2 text-sm font-open-sans ${isDark ? "text-amber-100" : "text-amber-900"}`}
+                      >
+                        {runtimeMessage}
+                      </Text>
+                    </View>
+                  )}
 
                   <View
                     className={`rounded-[24px] p-4 ${isDark ? "bg-white/5" : "bg-[#F6F8FF]"}`}

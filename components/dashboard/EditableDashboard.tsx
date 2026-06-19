@@ -6,31 +6,31 @@ import Constants from "expo-constants";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Animated,
-    GestureResponderEvent,
-    LayoutAnimation,
-    LayoutChangeEvent,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    UIManager,
-    View,
+  ActivityIndicator,
+  Animated,
+  GestureResponderEvent,
+  LayoutAnimation,
+  LayoutChangeEvent,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  UIManager,
+  View,
 } from "react-native";
 import {
-    SafeAreaView,
-    useSafeAreaInsets,
+  SafeAreaView,
+  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 import { LightBackground } from "@/components/DotBackground";
 import Navbar from "@/components/navBar/NavBar";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import {
-    DASHBOARD_CONFIG,
-    WidgetVariant,
+  DASHBOARD_CONFIG,
+  WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
@@ -116,8 +116,11 @@ export default function EditableDashboard({
   const [cuidados, setCuidados] = useState<CuidadoOption[]>([]);
   const [selectedCuidado, setSelectedCuidado] = useState<CuidadoOption>();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [topBarOverlayHeight, setTopBarOverlayHeight] = useState(0);
   const metricPatientId =
-    profileType === "aider" ? (selectedCuidado?.id ?? null) : (user?.id ?? null);
+    profileType === "aider"
+      ? (selectedCuidado?.id ?? null)
+      : (user?.id ?? null);
 
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const gridContentRef = useRef<View | null>(null);
@@ -155,44 +158,31 @@ export default function EditableDashboard({
     }
 
     try {
-      const { data: relations, error: relationsError } = await supabase
-        .from("care_relations")
-        .select("user_id_pacient")
-        .eq("user_id_aider", user.id);
-
-      if (relationsError) {
-        console.log(
-          "Erro ao carregar associacoes do aider",
-          relationsError.message,
-        );
-        return;
-      }
-
-      const patientIds = (relations ?? [])
-        .map((relation) => relation.user_id_pacient)
-        .filter((id): id is string => Boolean(id));
-
-      if (patientIds.length === 0) {
-        setCuidados([]);
-        setSelectedCuidado(undefined);
-        return;
-      }
-
-      const { data: patients, error: patientsError } = await supabase
-        .from("users")
-        .select("id, name, email")
-        .in("id", patientIds);
+      const { data: patients, error: patientsError } = await supabase.rpc(
+        "get_patients_for_aider",
+        { p_aider_id: user.id },
+      );
 
       if (patientsError) {
         console.log(
-          "Erro ao carregar dados dos cuidados associados",
+          "Erro ao carregar cuidados associados",
           patientsError.message,
         );
         return;
       }
 
+      if (!patients || patients.length === 0) {
+        setCuidados([]);
+        setSelectedCuidado(undefined);
+        return;
+      }
+
       const mappedCuidados: CuidadoOption[] = (patients ?? []).map(
-        (patient) => ({
+        (patient: {
+          id: string;
+          name: string | null;
+          email: string | null;
+        }) => ({
           id: patient.id,
           name: patient.name?.trim() || patient.email || "Cuidado",
         }),
@@ -307,6 +297,13 @@ export default function EditableDashboard({
     if (authLoading) return;
     loadAssociatedCuidados();
   }, [authLoading, loadAssociatedCuidados]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (authLoading) return;
+      void loadAssociatedCuidados();
+    }, [authLoading, loadAssociatedCuidados]),
+  );
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -597,7 +594,8 @@ export default function EditableDashboard({
     isDashboardLocked && onboardingStep === "health-connect";
   const highlightWidgetStep =
     isDashboardLocked && onboardingStep === "add-widget";
-  const shouldShowOnboardingHero = isOnboardingLoading || isHardOnboardingActive;
+  const shouldShowOnboardingHero =
+    isOnboardingLoading || isHardOnboardingActive;
   const isAndroid = Platform.OS === "android";
 
   const showPopup = useCallback((title: string, message: string) => {
@@ -631,10 +629,7 @@ export default function EditableDashboard({
       return;
     }
 
-    if (
-      !previousOnboardingCompletedRef.current &&
-      onboardingState.completed
-    ) {
+    if (!previousOnboardingCompletedRef.current && onboardingState.completed) {
       showPopup("Parabens!", "Fez o onboarding com sucesso.");
     }
 
@@ -660,10 +655,7 @@ export default function EditableDashboard({
   const TOP_BAR_HEIGHT = 30;
   const TOP_BAR_CONTENT_HEIGHT = 90;
   const heroTopExtension = notEditable ? 0 : insets.top + TOP_BAR_HEIGHT;
-  const onboardingTopPadding = notEditable
-    ? 12
-    : Math.max(topBarOverlayHeight, insets.top + TOP_BAR_CONTENT_HEIGHT) + 12;
-
+ 
   const { data: alerts = [] } = useQuery<Alert[]>({
     queryKey: ["alerts"],
     queryFn: fetchAlerts,
@@ -827,6 +819,54 @@ export default function EditableDashboard({
                   >
                     A sincronizar dados...
                   </Text>
+                </View>
+              </View>
+            )}
+
+            {profileType === "aider" && cuidados.length === 0 && (
+              <View className="px-4 mb-2">
+                <View
+                  className={`rounded-[28px] p-5 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                  style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                >
+                  <View className="flex-row items-center">
+                    <View
+                      className="w-12 h-12 rounded-full items-center justify-center"
+                      style={{
+                        backgroundColor: isDark
+                          ? "rgba(80, 97, 255, 0.18)"
+                          : "rgba(80, 97, 255, 0.1)",
+                      }}
+                    >
+                      <Feather
+                        name="user-plus"
+                        size={20}
+                        color={isDark ? "#A9BDFF" : "#5061FF"}
+                      />
+                    </View>
+                    <View className="flex-1 ml-4">
+                      <Text
+                        className={`text-base font-bold ${isDark ? "text-white" : "text-black"}`}
+                      >
+                        Ainda não tem pacientes associados
+                      </Text>
+                      <Text
+                        className={`mt-1 text-xs ${isDark ? "text-white/60" : "text-slate-600"}`}
+                      >
+                        Adicione um paciente para começar a ver métricas e
+                        notas.
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="mt-4">
+                    <Button
+                      variant="primary"
+                      forceLight={false}
+                      label="Adicionar paciente"
+                      onPress={() => router.push("/associar")}
+                    />
+                  </View>
                 </View>
               </View>
             )}

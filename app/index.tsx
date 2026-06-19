@@ -1,16 +1,16 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Dimensions, Text, View } from "react-native";
+import { ActivityIndicator, Dimensions, Text, View } from "react-native";
 import "react-native-gesture-handler";
 import Animated, {
-  Easing,
-  interpolate,
-  useAnimatedProps,
-  useSharedValue,
-  withDelay,
-  withRepeat,
-  withTiming,
+    Easing,
+    interpolate,
+    useAnimatedProps,
+    useSharedValue,
+    withDelay,
+    withRepeat,
+    withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
@@ -207,7 +207,18 @@ export default function App() {
   }, [isLoading, router, session]);
 
   if (isLoading) {
-    return null;
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        <ActivityIndicator size="large" color="#5061FF" />
+      </View>
+    );
   }
 
   return (

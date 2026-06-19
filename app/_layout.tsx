@@ -9,7 +9,7 @@ import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import "../global.css";
 
 const queryClient = new QueryClient();
@@ -73,7 +73,20 @@ export default function RootLayout() {
     })();
   }, [isLoading, healthConnectStatus?.permissionsGranted]);
 
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        <ActivityIndicator size="large" color="#5061FF" />
+      </View>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>

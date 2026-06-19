@@ -77,6 +77,15 @@ export default function Register() {
   const handleRegister = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
+      if (!supabase) {
+        Alert.alert(
+          "Configuração em falta",
+          "O Supabase não está configurado. Define as variáveis EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY.",
+          [{ text: "OK" }],
+        );
+        return;
+      }
+
       const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,

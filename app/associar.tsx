@@ -6,11 +6,11 @@ import { supabase } from "@/utils/supabase/client";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    Text,
-    View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Text,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
@@ -19,20 +19,13 @@ import { Button } from "../components/buttons/button";
 import { Input } from "../components/input/Input";
 import { QRcode } from "../components/input/QRcode";
 
-const emailSchema = z.string().email({ message: "Email invalido" });
+const emailSchema = z.string().refine((value) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^\+?\d{9,15}$/;
+  const cleanPhone = value.replace(/\s/g, "");
 
-const isCuidadoDesignation = (designation: unknown) => {
-  const normalized = String(designation ?? "")
-    .trim()
-    .toLowerCase();
-
-  return (
-    normalized === "cuidado" ||
-    normalized === "patient" ||
-    normalized === "pacient" ||
-    normalized === "paciente"
-  );
-};
+  return emailRegex.test(value) || phoneRegex.test(cleanPhone);
+}, "Introduza um email ou telemovel valido");
 
 export default function AssociarPage() {
   const { user } = useAuth();
@@ -58,52 +51,36 @@ export default function AssociarPage() {
 
     setIsAssociating(true);
     try {
-      const { data: cuidadoUser, error: cuidadoError } = await supabase
-        .from("users")
-        .select("id, email, user_type_id")
-        .ilike("email", normalizedEmail)
-        .maybeSingle();
+      const { data: cuidadoUser, error: cuidadoError } = await supabase.rpc(
+        "find_care_by_email",
+        { p_email: normalizedEmail },
+      );
 
       if (cuidadoError) {
         setError("Nao foi possivel procurar este cuidado.");
         return;
       }
 
-      if (!cuidadoUser?.id) {
+      console.log("[Associar] cuidadoUser", cuidadoUser);
+
+      const targetCare = Array.isArray(cuidadoUser)
+        ? cuidadoUser[0]
+        : cuidadoUser;
+
+      if (!targetCare?.id) {
         setError("Nao existe nenhum cuidado com esse email.");
         return;
       }
 
-      if (cuidadoUser.id === user.id) {
+      if (targetCare.id === user.id) {
         setError("Nao pode associar a propria conta.");
-        return;
-      }
-
-      if (!cuidadoUser.user_type_id) {
-        setError("A conta indicada nao tem tipo de perfil configurado.");
-        return;
-      }
-
-      const { data: cuidadoType, error: cuidadoTypeError } = await supabase
-        .from("user_types")
-        .select("designation")
-        .eq("id", cuidadoUser.user_type_id)
-        .maybeSingle();
-
-      if (cuidadoTypeError) {
-        setError("Nao foi possivel validar o tipo de perfil do cuidado.");
-        return;
-      }
-
-      if (!isCuidadoDesignation(cuidadoType?.designation)) {
-        setError("A conta indicada nao esta configurada como cuidado.");
         return;
       }
 
       const { data: existingRelation, error: existingError } = await supabase
         .from("care_relations")
         .select("id")
-        .eq("user_id_pacient", cuidadoUser.id)
+        .eq("user_id_pacient", targetCare.id)
         .eq("user_id_aider", user.id)
         .maybeSingle();
 
@@ -116,11 +93,12 @@ export default function AssociarPage() {
         const { error: insertError } = await supabase
           .from("care_relations")
           .insert({
-            user_id_pacient: cuidadoUser.id,
+            user_id_pacient: targetCare.id,
             user_id_aider: user.id,
           });
 
         if (insertError) {
+          console.error("[Associar] insertError", insertError);
           setError("Nao foi possivel concluir a associacao.");
           return;
         }
@@ -233,6 +211,7 @@ export default function AssociarPage() {
                     }}
                     variant="light"
                     helperText="Introduza o email do cuidado que quer associar."
+                    validateAs="emailOrPhone"
                     errorText={error || undefined}
                   />
                 </View>

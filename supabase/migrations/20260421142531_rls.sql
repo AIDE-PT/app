@@ -26,9 +26,24 @@ CREATE POLICY "users: ver o próprio perfil"
   ON users FOR SELECT
   USING (auth.uid() = id);
 
+CREATE POLICY "users: ver contas de cuidado"
+  ON users FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1
+      FROM user_types ut
+      WHERE ut.id = users.user_type_id
+        AND lower(trim(ut.designation)) = 'cuidado'
+    )
+  );
+
 CREATE POLICY "users: editar o próprio perfil"
   ON users FOR UPDATE
   USING (auth.uid() = id);
+
+CREATE POLICY "users: criar o próprio perfil"
+  ON users FOR INSERT
+  WITH CHECK (auth.uid() = id);
 
 -- -----------------------------------------------
 -- CARE_RELATIONS
@@ -160,4 +175,4 @@ USING (
     AND connections.care_receiver_id = profiles.id
   )
   OR id = auth.uid() -- Can always see own profile
-);
+);
