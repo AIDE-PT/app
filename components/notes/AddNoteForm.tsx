@@ -5,6 +5,7 @@ import {
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
@@ -12,9 +13,13 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import DateTimePicker, {
+  type DateTimePickerEvent,
+} from "@react-native-community/datetimepicker";
 
 import LightBackground from "@/components/DotBackground";
 import BackButton from "@/components/buttons/backButton";
+import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/hooks/useTheme";
 import {
   createNote,
@@ -22,16 +27,21 @@ import {
   updateNote,
 } from "@/utils/supabase/notesService";
 
-const DEFAULT_AUTHOR = "frontend-demo-user";
-
 export default function AddNoteForm() {
   const router = useRouter();
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { user } = useAuth();
+  const { id, patientId: patientIdParam } = useLocalSearchParams<{
+    id: string;
+    patientId: string;
+  }>();
   const { isDark } = useTheme();
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [author, setAuthor] = useState(DEFAULT_AUTHOR);
+  const [referenceDate, setReferenceDate] = useState(
+    () => new Date(),
+  );
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
   const isEditing = Boolean(id);
@@ -44,8 +54,10 @@ export default function AddNoteForm() {
         const note = await getNoteById(id);
         if (note) {
           setTitle(note.title);
-          setContent(note.description || "");
-          setAuthor(note.creator_id || DEFAULT_AUTHOR);
+          setContent(note.content || "");
+          if (note.reference_date) {
+            setReferenceDate(new Date(note.reference_date));
+          }
         }
       } catch (error) {
         console.log("Erro ao carregar nota", error);
@@ -55,6 +67,12 @@ export default function AddNoteForm() {
     loadNote();
   }, [id]);
 
+  const handleDateChange = (event: DateTimePickerEvent, selected?: Date) => {
+    if (Platform.OS === "android") setShowDatePicker(false);
+    if (event.type === "dismissed" || !selected) return;
+    setReferenceDate(selected);
+  };
+
   const handleSave = async () => {
     if (!title.trim() && !content.trim()) {
       Alert.alert("Nota vazia", "Adicione um título ou conteúdo.");
@@ -63,28 +81,38 @@ export default function AddNoteForm() {
 
     setIsSaving(true);
     try {
-      // TODO: substituir estes valores pelos IDs reais do paciente/utilizador
-      const patientId = "demo-patient-id";
-      const creatorId = "demo-creator-id";
+      if (!user?.id) {
+        Alert.alert("Sessão inválida", "Inicie sessão novamente.");
+        return;
+      }
+
+      const patientId = patientIdParam ?? user.id;
+      const referenceDateIso = referenceDate.toISOString().slice(0, 10);
 
       if (isEditing && id) {
         await updateNote(id, {
           title: title.trim() || "Sem título",
-          description: content.trim(),
+          content: content.trim(),
         });
       } else {
         await createNote({
           patient_id: patientId,
-          creator_id: creatorId,
+          creator_id: user.id,
           title: title.trim() || "Sem título",
-          description: content.trim(),
+          content: content.trim(),
+          reference_date: referenceDateIso,
         });
       }
 
       router.back();
     } catch (error) {
       console.log("Erro ao guardar nota", error);
-      Alert.alert("Erro", "Não foi possível guardar a nota.");
+      Alert.alert(
+        "Erro",
+        error instanceof Error
+          ? error.message
+          : "Não foi possível guardar a nota.",
+      );
     } finally {
       setIsSaving(false);
     }
@@ -156,20 +184,16 @@ export default function AddNoteForm() {
                 />
 
                 <View className="mt-4 flex-row flex-wrap gap-2">
-                  <View
+                  <Pressable
+                    onPress={() => setShowDatePicker(true)}
                     className={`rounded-full border px-3 py-2 ${inputClass}`}
+                    accessibilityRole="button"
+                    accessibilityLabel="Selecionar data de referência"
                   >
                     <Text className={`text-sm ${textMuted}`}>
-                      Autor: {author}
+                      {format(referenceDate, "dd MMM yyyy")}
                     </Text>
-                  </View>
-                  <View
-                    className={`rounded-full border px-3 py-2 ${inputClass}`}
-                  >
-                    <Text className={`text-sm ${textMuted}`}>
-                      {format(new Date(), "dd MMM yyyy '·' HH:mm")}
-                    </Text>
-                  </View>
+                  </Pressable>
                 </View>
               </View>
 
@@ -197,6 +221,15 @@ export default function AddNoteForm() {
           </View>
         </SafeAreaView>
       </KeyboardAvoidingView>
+
+      {showDatePicker && (
+        <DateTimePicker
+          value={referenceDate}
+          mode="date"
+          display="default"
+          onChange={handleDateChange}
+        />
+      )}
     </LightBackground>
   );
 }
