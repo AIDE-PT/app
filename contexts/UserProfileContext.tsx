@@ -1,5 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/utils/supabase/client";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -30,7 +30,7 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isLoading, setIsLoading] = useState(true);
 
   const resolveUserTypeId = async (type: Exclude<ProfileType, null>) => {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from("user_types")
       .select("id")
       .ilike("designation", type)
@@ -53,7 +53,7 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
     const userTypeId = await resolveUserTypeId(type);
 
     // RLS often permits UPDATE on own row but blocks INSERT, so update first.
-    const { data: updatedRows, error: updateError } = await supabase
+    const { data: updatedRows, error: updateError } = await getSupabaseClient()
       .from("users")
       .update({ user_type_id: userTypeId })
       .eq("id", user.id)
@@ -72,7 +72,7 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // If no row exists yet, try to create it. If policy blocks INSERT, caller may
     // continue with local cache and retry sync in a future session.
-    const { error: insertError } = await supabase.from("users").insert({
+    const { error: insertError } = await getSupabaseClient().from("users").insert({
       id: user.id,
       email: user.email,
       name:
@@ -92,7 +92,7 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
   const fetchProfileTypeFromBackend = async (): Promise<ProfileType> => {
     if (!user?.id) return null;
 
-    const { data: userRow, error: userError } = await supabase
+    const { data: userRow, error: userError } = await getSupabaseClient()
       .from("users")
       .select("user_type_id")
       .eq("id", user.id)
@@ -102,7 +102,7 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
       return null;
     }
 
-    const { data: userType, error: userTypeError } = await supabase
+    const { data: userType, error: userTypeError } = await getSupabaseClient()
       .from("user_types")
       .select("designation")
       .eq("id", userRow.user_type_id)
@@ -125,7 +125,7 @@ export const UserProfileProvider: React.FC<{ children: React.ReactNode }> = ({
 
       setIsLoading(true);
 
-      if (!user?.id || !supabase) {
+      if (!user?.id) {
         setProfileTypeState(null);
         setIsLoading(false);
         return;

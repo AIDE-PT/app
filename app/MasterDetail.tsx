@@ -1,7 +1,11 @@
 import BackButton from "@/components/buttons/backButton";
 import LineChartSlim from "@/components/charts/LineChartSlim";
 import LightBackground from "@/components/DotBackground";
-import { useHealthMetric, useMetricStats } from "@/hooks/useLatestMetric";
+import {
+  useHealthMetric,
+  useMetricHistory,
+  useMetricStats,
+} from "@/hooks/useLatestMetric";
 import { useTheme } from "@/hooks/useTheme";
 import { Feather } from "@expo/vector-icons";
 import { Stack, useLocalSearchParams } from "expo-router";
@@ -85,6 +89,82 @@ const RANGE_TABS: readonly { key: HistoryRange; label: string }[] = [
   { key: "month", label: "Mês" },
 ];
 const RANGE_NAV_PADDING = 4;
+
+// Agrega os pontos {valor, timestamp} em buckets temporais adequados à janela:
+// dia → 24 buckets horários, semana → 7 diários, mês → 30 diários. Alinhados ao
+// tempo real (não por posição). mode "sum" para métricas cumulativas (passos,
+// calorias), "avg" para médias. Buckets vazios: 0 nas cumulativas; nas médias
+// arrasta o último valor conhecido (carry-forward) para a linha não cair a 0.
+// Devolve valores + rótulos em ordem cronológica (antigo → recente).
+const HOUR_MS = 60 * 60 * 1000;
+const DAY_MS = 24 * HOUR_MS;
+const bucketLabel = (t: number, range: HistoryRange) => {
+  const d = new Date(t);
+  if (range === "day") {
+    return new Intl.DateTimeFormat("pt-PT", { hour: "2-digit" }).format(d);
+  }
+  if (range === "week") {
+    return new Intl.DateTimeFormat("pt-PT", { weekday: "short" }).format(d);
+  }
+  return new Intl.DateTimeFormat("pt-PT", {
+    day: "2-digit",
+    month: "2-digit",
+  }).format(d);
+};
+const aggregateByRange = (
+  points: { value: number; t: number }[],
+  range: HistoryRange,
+  mode: "sum" | "avg",
+): { values: number[]; labels: string[] } => {
+  const now = Date.now();
+  const bucketCount = range === "day" ? 24 : range === "week" ? 7 : 30;
+  const bucketMs = range === "day" ? HOUR_MS : DAY_MS;
+  const windowStart = now - bucketCount * bucketMs;
+
+  const sums = new Array(bucketCount).fill(0);
+  const counts = new Array(bucketCount).fill(0);
+  points.forEach((p) => {
+    if (p.t < windowStart || p.t > now) return;
+    const idx = Math.min(
+      bucketCount - 1,
+      Math.max(0, Math.floor((p.t - windowStart) / bucketMs)),
+    );
+    sums[idx] += p.value;
+    counts[idx] += 1;
+  });
+
+  const values: number[] = new Array(bucketCount).fill(0);
+  let lastAvg = 0;
+  let seen = false;
+  for (let i = 0; i < bucketCount; i++) {
+    if (counts[i] > 0) {
+      values[i] = mode === "sum" ? sums[i] : sums[i] / counts[i];
+      if (mode === "avg") {
+        lastAvg = values[i];
+        seen = true;
+      }
+    } else {
+      values[i] = mode === "avg" && seen ? lastAvg : 0;
+    }
+  }
+
+  const labels = values.map((_, i) =>
+    bucketLabel(windowStart + i * bucketMs + bucketMs / 2, range),
+  );
+  return { values, labels };
+};
+
+// Mantém ~6 marcas no eixo X (resto vazio) para não encavalitar os rótulos.
+const thinLabels = (labels: string[]): string[] => {
+  const n = labels.length;
+  if (n < 2) return [];
+  const tickCount = Math.min(6, n);
+  const keep = new Set<number>();
+  for (let i = 0; i < tickCount; i++) {
+    keep.add(Math.round((i * (n - 1)) / (tickCount - 1)));
+  }
+  return labels.map((l, i) => (keep.has(i) ? l : ""));
+};
 
 interface PatternIndicator {
   level: PatternLevel;
@@ -1390,12 +1470,19 @@ function Thermometer({
 }
 
 // ─── CALORIES: Radial sunburst / spoke burst ─────────────────────────────────
-function CalBurst({ value, isDark }: { value: number; isDark: boolean }) {
+function CalBurst({
+  value,
+  goal = 2000,
+  isDark,
+}: {
+  value: number;
+  goal?: number;
+  isDark: boolean;
+}) {
   const size = 220,
     cx = size / 2,
     cy = size / 2;
-  const goal = 2000;
-  const pct = Math.min(value / goal, 1);
+  const pct = goal > 0 ? Math.min(value / goal, 1) : 0;
   const numSpokes = 36;
   const innerR = 42,
     outerR = 88;
@@ -1654,7 +1741,13 @@ const WIDGET_TYPE_ALIAS: Record<string, string> = {
 };
 
 export default function MasterDetail() {
-  const { type } = useLocalSearchParams<{ type: string }>();
+  const { type, patientId } = useLocalSearchParams<{
+    type: string;
+    patientId?: string;
+  }>();
+  // Quando o ecrã é aberto a partir do cartão de um cuidado (modo aider), o
+  // patientId vem nos params. Sem ele, resolve para o utilizador autenticado.
+  const targetPatientId = patientId && patientId.length > 0 ? patientId : undefined;
   const normalizedType = WIDGET_TYPE_ALIAS[type ?? ""] ?? type;
   const resolvedType =
     normalizedType && METRIC_CONFIGS[normalizedType]
@@ -1687,9 +1780,34 @@ export default function MasterDetail() {
       : {}),
   };
 
-  const { data: metricData, isLoading } = useHealthMetric(config.endpoint);
-  const { data: stats } = useMetricStats(config.endpoint);
+  const { data: metricData, isLoading } = useHealthMetric(
+    config.endpoint,
+    config.endpoint === "bloodPressure",
+    targetPatientId,
+  );
+  const { data: stats } = useMetricStats(config.endpoint, targetPatientId);
+
+  useEffect(() => {
+    console.log("[DETALHE MASTER]", {
+      endpoint: config.endpoint,
+      targetPatientId: targetPatientId ?? null,
+      isLoading,
+      hasData: Boolean(metricData),
+      displayValue: metricData?.displayValue ?? null,
+      historyLength: metricData?.history?.length ?? 0,
+      historyPreview: metricData?.history?.slice(0, 6) ?? [],
+      latest: metricData?.latest ?? null,
+      stats: stats ?? null,
+    });
+  }, [metricData, stats, isLoading, config.endpoint, targetPatientId]);
+
   const [selectedRange, setSelectedRange] = useState<HistoryRange>("day");
+  // Série do gráfico filtrada pela janela temporal selecionada (BD, scoped ao paciente).
+  const { data: rangeSeriesData } = useMetricHistory(
+    config.endpoint,
+    selectedRange,
+    targetPatientId,
+  );
   const [rangeNavWidth, setRangeNavWidth] = useState(0);
   const activeRangePillX = useRef(new Animated.Value(0)).current;
   const activeRangeIndex = RANGE_TABS.findIndex(
@@ -1702,20 +1820,54 @@ export default function MasterDetail() {
 
   const currentRaw: number = metricData?.latest?.value ?? 0;
   const history: number[] = metricData?.history ?? [];
-  const rangeSampleCount =
-    selectedRange === "day" ? 24 : selectedRange === "week" ? 7 : 30;
-  const rangeHistory = history.slice(
-    0,
-    Math.min(history.length, rangeSampleCount),
+  // Pontos {valor, timestamp} da janela selecionada (dia/semana/mês), em ordem
+  // cronológica vinda da BD.
+  const rangePoints = rangeSeriesData ?? [];
+  const rangeHistory = rangePoints.map((p) => p.value);
+
+  // Métricas cumulativas (passos, calorias) somam por bucket; as restantes (FC,
+  // SpO2, temperatura, glicemia, pressão, stress, sono) fazem média por bucket.
+  const isCumulativeMetric = ["steps", "cal", "calories"].includes(
+    config.endpoint,
   );
-  const chartData =
-    rangeHistory.length >= 2
-      ? [...rangeHistory].reverse()
-      : history.length >= 2
-        ? [...history.slice(0, 2)].reverse()
-        : [0, 0];
-  const allTimeMin = stats?.min ?? (history.length ? Math.min(...history) : 0);
-  const allTimeMax = stats?.max ?? (history.length ? Math.max(...history) : 0);
+  const bucketed = aggregateByRange(
+    rangePoints,
+    selectedRange,
+    isCumulativeMetric ? "sum" : "avg",
+  );
+  // Buckets em ordem decrescente (recente → antigo) para os componentes que
+  // fazem slice(0,N).reverse() (StepsBars, StressWave).
+  const bucketedDesc = [...bucketed.values].reverse();
+
+  const chartData = bucketed.values.length >= 2 ? bucketed.values : [0, 0];
+  // Escala de tempo do eixo X, adequada à janela (horas/dias/datas).
+  const chartLabels = thinLabels(bucketed.labels);
+
+  // Objetivos CUMULATIVOS escalam com a janela: dia=1, semana=7, mês=30 dias.
+  // Só faz sentido para métricas aditivas (passos, calorias) — não para médias
+  // (FC, SpO2, temperatura, glicemia, pressão, sono). O progresso compara o
+  // TOTAL acumulado no período (soma) com o objetivo escalado.
+  const rangeDays =
+    selectedRange === "day" ? 1 : selectedRange === "week" ? 7 : 30;
+  const periodTotal = rangeHistory.reduce((sum, v) => sum + v, 0);
+  const formatGoal = (n: number) =>
+    new Intl.NumberFormat("pt-PT").format(Math.round(n));
+  const stepsGoal = 10000 * rangeDays;
+  const caloriesGoal = 2000 * rangeDays;
+  const stepsPct = stepsGoal > 0 ? Math.min(periodTotal / stepsGoal, 1) : 0;
+  const caloriesPct =
+    caloriesGoal > 0 ? Math.min(periodTotal / caloriesGoal, 1) : 0;
+  // Estatísticas (mín/máx/média) seguem a janela selecionada (dia/semana/mês).
+  // Usa os dados do período; só recai no all-time (history/stats) se a janela
+  // estiver vazia.
+  const statsBase = rangeHistory.length ? rangeHistory : history;
+  const allTimeMin = statsBase.length
+    ? Math.min(...statsBase)
+    : (stats?.min ?? 0);
+  const allTimeMax = statsBase.length
+    ? Math.max(...statsBase)
+    : (stats?.max ?? 0);
+  const periodAvg = statsBase.length ? calcAvg(statsBase) : 0;
   const dayLabel = new Intl.DateTimeFormat("pt-PT", {
     weekday: "long",
     day: "2-digit",
@@ -1761,6 +1913,16 @@ export default function MasterDetail() {
       lastAnnouncedSummaryRef.current = accessibleSummary.accessibilityLabel;
     });
   }, [isLoading, accessibleSummary.accessibilityLabel]);
+
+  useEffect(() => {
+    console.log("[DETALHE MASTER RANGE]", {
+      endpoint: config.endpoint,
+      selectedRange,
+      targetPatientId: targetPatientId ?? null,
+      points: rangeSeriesData?.length ?? 0,
+      preview: rangeSeriesData?.slice(0, 6).map((p) => p.value) ?? [],
+    });
+  }, [config.endpoint, selectedRange, targetPatientId, rangeSeriesData]);
 
   useEffect(() => {
     if (rangeTabWidth <= 0 || activeRangeIndex < 0) return;
@@ -1847,12 +2009,12 @@ export default function MasterDetail() {
   const spokenUnit =
     config.displayUnit === "%" ? "por cento" : config.displayUnit;
   const spokenCurrent = `${formatNarratorNumber(currentRaw)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
-  const spokenDailyAverage = `${formatNarratorNumber(Math.round(calcAvg(history)))} passos`;
+  const spokenDailyAverage = `${formatNarratorNumber(Math.round(periodAvg))} passos`;
   const spokenMax = `${formatNarratorNumber(allTimeMax)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
   const spokenMin = `${formatNarratorNumber(allTimeMin)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
   const heroAccessibilityLabel =
     resolvedType === "steps"
-      ? `${heroTitle}. Valor atual ${spokenCurrent}. Estado ${config.statusLabel(status)}. Media diaria ${spokenDailyAverage}. Meta 10 mil passos.`
+      ? `${heroTitle}. Valor atual ${spokenCurrent}. Estado ${config.statusLabel(status)}. Media diaria ${spokenDailyAverage}. Meta ${formatGoal(stepsGoal)} passos.`
       : `${heroTitle}. Valor atual ${spokenCurrent}. Estado ${config.statusLabel(status)}. Maximo ${spokenMax}. Minimo ${spokenMin}.`;
   const chartLatest = chartData.length
     ? chartData[chartData.length - 1]
@@ -2110,9 +2272,7 @@ export default function MasterDetail() {
                                   className={`text-2xl font-bold font-open-sans ${tp}`}
                                   accessible={false}
                                 >
-                                  {Math.round(calcAvg(history)).toLocaleString(
-                                    "pt-PT",
-                                  )}
+                                  {Math.round(periodAvg).toLocaleString("pt-PT")}
                                 </Text>
                                 <Text
                                   className={`text-xs ml-1 ${tu}`}
@@ -2136,14 +2296,14 @@ export default function MasterDetail() {
                               className="items-end"
                               accessible
                               accessibilityRole="text"
-                              accessibilityLabel="Meta 10 mil passos."
+                              accessibilityLabel={`Meta ${formatGoal(stepsGoal)} passos.`}
                             >
                               <View className="flex-row items-baseline">
                                 <Text
                                   className={`text-2xl font-bold font-open-sans ${tp}`}
                                   accessible={false}
                                 >
-                                  10 000
+                                  {formatGoal(stepsGoal)}
                                 </Text>
                                 <Text
                                   className={`text-xs ml-1 ${tu}`}
@@ -2304,7 +2464,7 @@ export default function MasterDetail() {
                       >
                         <StressWave
                           value={currentRaw}
-                          history={rangeHistory}
+                          history={bucketedDesc}
                           range={selectedRange}
                           isDark={isDark}
                           indicatorFn={(v) =>
@@ -2501,9 +2661,7 @@ export default function MasterDetail() {
                         importantForAccessibility="no"
                       >
                         <StepsBars
-                          data={
-                            rangeHistory.length >= 2 ? rangeHistory : [0, 0]
-                          }
+                          data={bucketedDesc}
                           range={selectedRange}
                           isDark={isDark}
                           semantic={colors.semantic}
@@ -2521,14 +2679,7 @@ export default function MasterDetail() {
                             className="text-xs font-bold font-open-sans"
                             style={{ color: config.accent }}
                           >
-                            {Math.min(
-                              Math.round(
-                                ((rangeHistory[0] ?? history[0] ?? 0) / 10000) *
-                                  100,
-                              ),
-                              100,
-                            )}
-                            %
+                            {Math.round(stepsPct * 100)}%
                           </Text>
                         </View>
                         <View
@@ -2537,7 +2688,7 @@ export default function MasterDetail() {
                           <View
                             className="h-3 rounded-full"
                             style={{
-                              width: `${Math.min(((rangeHistory[0] ?? history[0] ?? 0) / 10000) * 100, 100)}%`,
+                              width: `${stepsPct * 100}%`,
                               backgroundColor: config.accent,
                             }}
                           />
@@ -2547,7 +2698,7 @@ export default function MasterDetail() {
                             0
                           </Text>
                           <Text className={`text-xs font-open-sans ${ts}`}>
-                            10 000
+                            {formatGoal(stepsGoal)}
                           </Text>
                         </View>
                       </View>
@@ -2654,7 +2805,7 @@ export default function MasterDetail() {
                           Calorias Queimadas
                         </Text>
                         <Text className={`text-xs font-open-sans ${ts}`}>
-                          Meta: 2 000 kcal
+                          Meta: {formatGoal(caloriesGoal)} kcal
                         </Text>
                       </View>
                       <View
@@ -2663,9 +2814,13 @@ export default function MasterDetail() {
                         focusable
                         importantForAccessibility="yes"
                         accessibilityRole="image"
-                        accessibilityLabel={`Grafico de calorias queimadas. Valor atual ${spokenCurrent}. Meta 2 mil kcal.`}
+                        accessibilityLabel={`Grafico de calorias queimadas. Total no periodo ${formatGoal(periodTotal)}. Meta ${formatGoal(caloriesGoal)} kcal.`}
                       >
-                        <CalBurst value={currentRaw} isDark={isDark} />
+                        <CalBurst
+                          value={periodTotal}
+                          goal={caloriesGoal}
+                          isDark={isDark}
+                        />
                       </View>
                       <View
                         className={`h-2 rounded-full mt-2 ${isDark ? "bg-white/15" : "bg-orange-100"}`}
@@ -2673,7 +2828,7 @@ export default function MasterDetail() {
                         <View
                           className="h-2 rounded-full"
                           style={{
-                            width: `${Math.min((currentRaw / 2000) * 100, 100)}%`,
+                            width: `${caloriesPct * 100}%`,
                             backgroundColor: config.accent,
                           }}
                         />
@@ -2683,7 +2838,7 @@ export default function MasterDetail() {
                           0 kcal
                         </Text>
                         <Text className={`text-xs font-open-sans ${ts}`}>
-                          2 000 kcal
+                          {formatGoal(caloriesGoal)} kcal
                         </Text>
                       </View>
                     </View>
@@ -3052,6 +3207,8 @@ export default function MasterDetail() {
                       </View>
                       <LineChartSlim
                         data={chartData}
+                        labels={chartLabels}
+                        showXLabels={chartLabels.length === chartData.length}
                         width={screenWidth - 72}
                         height={180}
                         lineColor={config.lineColor}

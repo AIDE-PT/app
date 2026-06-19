@@ -3,7 +3,7 @@ import {
     readSteps,
     type StepRecord,
 } from "@/src/services/healthConnect";
-import { supabase } from "@/utils/supabase/client";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { Platform } from "react-native";
 
@@ -38,7 +38,7 @@ function normalizeTargetPatientId(
 async function getAuthenticatedUserId() {
   const {
     data: { session },
-  } = await supabase.auth.getSession();
+  } = await getSupabaseClient().auth.getSession();
 
   return session?.user?.id ?? null;
 }
@@ -66,7 +66,7 @@ async function fetchMetricFromSupabaseByTypeNames(
   const patientId = await resolvePatientId(targetPatientId);
   if (!patientId) return null;
 
-  const { data: typeRows, error: typeError } = await supabase
+  const { data: typeRows, error: typeError } = await getSupabaseClient()
     .from("biometric_data_types")
     .select("id,name")
     .in("name", typeNames);
@@ -82,7 +82,7 @@ async function fetchMetricFromSupabaseByTypeNames(
 
   if (!typeIds.length) return null;
 
-  const { data: rows, error } = await supabase
+  const { data: rows, error } = await getSupabaseClient()
     .from("biometric_data")
     .select("value,value_secondary,measured_at,created_at")
     .eq("patient_id", patientId)
@@ -139,23 +139,11 @@ const TYPE_MAP: Record<string, string[]> = {
 };
 
 const BP_ENDPOINTS = new Set(["bloodPressure"]);
-const HEALTH_CONNECT_ENDPOINTS = new Set([
-  "bpm",
-  "steps",
-  "bloodPressure",
-  "temperature",
-  "sleep",
-  "o2",
-  "cal",
-  "calories",
-  "glycemia",
-  "stress",
-]);
 
-function minutesToHoursValue(value: unknown) {
-  const minutes = Number(value ?? 0);
-  if (!Number.isFinite(minutes)) return 0;
-  return minutes / 60;
+function toHoursValue(value: unknown) {
+  const hours = Number(value ?? 0);
+  if (!Number.isFinite(hours)) return 0;
+  return hours;
 }
 
 function formatHours(hours: number) {
@@ -163,16 +151,18 @@ function formatHours(hours: number) {
   return hours < 10 ? hours.toFixed(1) : `${Math.round(hours)}`;
 }
 
+// Sleep is stored in the DB already in hours (see healthBackgroundSync.ts and the
+// 'hours' type seed), so this only formats/rounds — it must NOT convert units.
 function mapMetricToHours(
   metric: MetricQueryData | null,
 ): MetricQueryData | null {
   if (!metric) return null;
-  const latestHours = minutesToHoursValue(metric.latest?.value);
+  const latestHours = toHoursValue(metric.latest?.value);
   return {
     ...metric,
     displayValue: formatHours(latestHours),
     history: metric.history.map((v) => {
-      const hours = minutesToHoursValue(v);
+      const hours = toHoursValue(v);
       return Math.round(hours * 10) / 10;
     }),
     latest: { ...metric.latest, value: latestHours },
@@ -231,7 +221,7 @@ async function fetchStepsFromSupabaseDaily(
   const patientId = await resolvePatientId(targetPatientId);
   if (!patientId) return null;
 
-  const { data: typeRow, error: typeError } = await supabase
+  const { data: typeRow, error: typeError } = await getSupabaseClient()
     .from("biometric_data_types")
     .select("id")
     .eq("name", "steps")
@@ -248,7 +238,7 @@ async function fetchStepsFromSupabaseDaily(
   const startIso = new Date(startMs).toISOString();
   const endIso = new Date(endMs).toISOString();
 
-  const { data: rows, error } = await supabase
+  const { data: rows, error } = await getSupabaseClient()
     .from("biometric_data")
     .select("value,start_time,end_time,measured_at,created_at,source_app")
     .eq("patient_id", patientId)
@@ -767,9 +757,8 @@ export function useMetricStats(
   return useQuery({
     queryKey: [endpoint, "stats", patientScope],
     enabled: !!endpoint && endpoint !== "undefined",
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: "always",
+    staleTime: 30_000,
+    gcTime: 60_000,
     refetchOnReconnect: true,
     queryFn: async () => {
       const normalizedTargetPatientId = normalizeTargetPatientId(targetPatientId);
@@ -781,8 +770,6 @@ export function useMetricStats(
 
       const canUseHealthConnect =
         Platform.OS === "android" && resolvedPatientId === authUserId;
-      const healthConnectOnly =
-        canUseHealthConnect && HEALTH_CONNECT_ENDPOINTS.has(endpoint);
 
       const healthConnectMetric = canUseHealthConnect
         ? endpoint === "steps"
@@ -797,9 +784,8 @@ export function useMetricStats(
         };
       }
 
-      if (healthConnectOnly) return { min: 0, max: 0 };
-
-      // Para todos os outros, calcula min/max a partir da BD
+      // Sem dados do Health Connect (ex.: nada medido hoje) — recorre à BD,
+      // que pode conter histórico gravado. Evita range vazio com dados na BD.
       const typeNames = TYPE_MAP[endpoint];
       if (!typeNames) return { min: 0, max: 0 };
 
@@ -835,9 +821,8 @@ export function useHealthMetric(
   return useQuery({
     queryKey: [endpoint, "latest", patientScope],
     enabled: !!endpoint && endpoint !== "undefined",
-    staleTime: 0,
-    gcTime: 0,
-    refetchOnMount: "always",
+    staleTime: 30_000,
+    gcTime: 60_000,
     refetchOnReconnect: true,
     queryFn: async () => {
       const normalizedTargetPatientId = normalizeTargetPatientId(targetPatientId);
@@ -849,8 +834,6 @@ export function useHealthMetric(
 
       const canUseHealthConnect =
         Platform.OS === "android" && resolvedPatientId === authUserId;
-      const healthConnectOnly =
-        canUseHealthConnect && HEALTH_CONNECT_ENDPOINTS.has(endpoint);
 
       // Passos — Health Connect primeiro (valor diario em tempo real), BD como fallback
       if (endpoint === "steps") {
@@ -859,9 +842,7 @@ export function useHealthMetric(
           : null;
         if (stepsMetric) return stepsMetric;
 
-        return healthConnectOnly
-          ? null
-          : fetchStepsFromSupabaseDaily(resolvedPatientId);
+        return fetchStepsFromSupabaseDaily(resolvedPatientId);
       }
 
       const healthConnectMetric = canUseHealthConnect
@@ -869,8 +850,9 @@ export function useHealthMetric(
         : null;
       if (healthConnectMetric) return healthConnectMetric;
 
-      if (healthConnectOnly) return null;
-
+      // Sem dados do Health Connect (ex.: nada medido hoje) — recorre à BD,
+      // que pode conter histórico gravado. Garante que a dashboard nunca fica
+      // vazia quando os detalhes têm dados.
       // Todos os outros endpoints — BD via Supabase
       const typeNames = TYPE_MAP[endpoint];
       if (!typeNames) {
@@ -888,5 +870,101 @@ export function useHealthMetric(
     },
     refetchInterval: 60000,
     refetchIntervalInBackground: false,
+  });
+}
+
+// ─── Histórico por janela temporal (dia/semana/mês) ───────────────────────────
+
+export type MetricHistoryRange = "day" | "week" | "month";
+
+export type MetricHistoryPoint = { value: number; t: number };
+
+function getRangeWindow(range: MetricHistoryRange) {
+  const end = new Date();
+  const start = new Date(end);
+  if (range === "day") start.setDate(start.getDate() - 1);
+  else if (range === "week") start.setDate(start.getDate() - 7);
+  else start.setDate(start.getDate() - 30);
+  return { startIso: start.toISOString(), endIso: end.toISOString() };
+}
+
+async function fetchMetricHistoryRange(
+  endpoint: string,
+  range: MetricHistoryRange,
+  targetPatientId?: TargetPatientId,
+): Promise<MetricHistoryPoint[]> {
+  const patientId = await resolvePatientId(targetPatientId);
+  if (!patientId) return [];
+
+  const typeNames = TYPE_MAP[endpoint];
+  if (!typeNames) return [];
+
+  const isBP = BP_ENDPOINTS.has(endpoint);
+  const { startIso, endIso } = getRangeWindow(range);
+
+  const { data: typeRows, error: typeError } = await getSupabaseClient()
+    .from("biometric_data_types")
+    .select("id,name")
+    .in("name", typeNames);
+
+  if (typeError) {
+    console.error("[useMetricHistory] type lookup error", typeError);
+    return [];
+  }
+
+  const typeIds = (Array.isArray(typeRows) ? typeRows : [])
+    .map((row: any) => String(row?.id ?? ""))
+    .filter(Boolean);
+  if (!typeIds.length) return [];
+
+  const { data: rows, error } = await getSupabaseClient()
+    .from("biometric_data")
+    .select("value,value_secondary,measured_at,created_at")
+    .eq("patient_id", patientId)
+    .in("biometric_data_type_id", typeIds)
+    .gte("created_at", startIso)
+    .lte("created_at", endIso)
+    .order("measured_at", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: true })
+    .limit(500);
+
+  if (error) {
+    console.error("[useMetricHistory] history query error", error);
+    return [];
+  }
+
+  // Devolve {valor, timestamp} em ordem cronológica (antigo → recente) para o
+  // gráfico — o timestamp permite construir a escala do eixo de tempo.
+  return (Array.isArray(rows) ? (rows as any[]) : [])
+    .map((row): MetricHistoryPoint => {
+      const t = Date.parse(row?.measured_at ?? row?.created_at ?? "");
+      if (isBP) {
+        const sys = Number(row?.value ?? 0);
+        const dia = Number(row?.value_secondary ?? 0);
+        return { value: Math.round((sys + dia) / 2), t };
+      }
+      const value = Number(row?.value ?? 0);
+      return { value: endpoint === "sleep" ? Math.round(value * 10) / 10 : value, t };
+    })
+    .filter((p) => Number.isFinite(p.value) && Number.isFinite(p.t));
+}
+
+export function useMetricHistory(
+  endpoint: string,
+  range: MetricHistoryRange,
+  targetPatientId?: TargetPatientId,
+) {
+  const patientScope =
+    targetPatientId === null
+      ? "none"
+      : normalizeTargetPatientId(targetPatientId) ?? "self";
+
+  return useQuery({
+    queryKey: [endpoint, "history", range, patientScope],
+    enabled: !!endpoint && endpoint !== "undefined",
+    staleTime: 30_000,
+    gcTime: 60_000,
+    refetchOnReconnect: true,
+    queryFn: () => fetchMetricHistoryRange(endpoint, range, targetPatientId),
   });
 }

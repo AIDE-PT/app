@@ -1,0 +1,5 @@
+-- Este ficheiro está intencionalmente vazio.
+-- O schema remoto foi configurado diretamente no painel Supabase antes de
+-- o repositório adoptar migrações versionadas. As migrações subsequentes
+-- (20260421142438_schema.sql e seguintes) contêm o estado actual.
+-- Para capturar o schema remoto: supabase db dump --schema public > este_ficheiro.sql

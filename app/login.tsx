@@ -1,6 +1,6 @@
 import { LightBackground } from "@/components/DotBackground";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/utils/supabase/client";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGlobalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -88,22 +88,10 @@ export default function Login() {
   const handleLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      if (!supabase) {
-        Alert.alert(
-          "Configuração em falta",
-          "O Supabase não está configurado. Define as variáveis EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY.",
-          [{ text: "OK" }],
-        );
-        return;
-      }
-
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await getSupabaseClient().auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
-
-      console.log("ERRO:", JSON.stringify(error));
-      console.log("DATA:", JSON.stringify(data));
 
       if (error) {
         const messages: Record<string, string> = {
