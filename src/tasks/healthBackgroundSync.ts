@@ -41,7 +41,7 @@ const RETRY_DELAY_MS = 2000;
 /** Janela de tempo do primeiro sync (dias atrás).
  *  Mantido curto (1 dia) para evitar que o sync inicial agregue múltiplos dias
  *  numa única linha — o que inflacionaria o total de passos. */
-const INITIAL_SYNC_DAYS = 1;
+const INITIAL_SYNC_DAYS = 30;
 const BACKGROUND_READ_PERMISSION =
   "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND";
 
