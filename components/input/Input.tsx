@@ -12,6 +12,7 @@ import {
   View,
 } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
+import { getSurfaceStyle } from "@/components/surface/surfaceStyles";
 import CalendarIcon from "../svg/CalendarIcon";
 import EyeIcon from "../svg/EyeIcon";
 
@@ -151,12 +152,12 @@ export const Input = ({
       <TouchableOpacity
         activeOpacity={1}
         onPress={() => isDate && setShowDatePicker(true)}
-        className={`w-full flex-row items-center rounded-[20px] px-5 py-0.5 ${
-          resolvedErrorText
-            ? "border border-red-500"
-            : "border border-transparent"
-        } ${useDarkStyling ? "bg-aide-dark-card" : "bg-white/75"}`}
-        style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+        className="w-full flex-row items-center px-5 py-0.5"
+        style={getSurfaceStyle(
+          resolvedErrorText ? "highlight" : "base",
+          useDarkStyling,
+          resolvedErrorText ? { borderColor: "#EF4444" } : {},
+        )}
       >
         <TextInput
           className={`flex-1 h-11 text-base ${

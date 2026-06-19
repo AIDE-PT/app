@@ -4,13 +4,13 @@ import { useEffect } from "react";
 import { ActivityIndicator, Dimensions, Text, View } from "react-native";
 import "react-native-gesture-handler";
 import Animated, {
-    Easing,
-    interpolate,
-    useAnimatedProps,
-    useSharedValue,
-    withDelay,
-    withRepeat,
-    withTiming,
+  Easing,
+  interpolate,
+  useAnimatedProps,
+  useSharedValue,
+  withDelay,
+  withRepeat,
+  withTiming,
 } from "react-native-reanimated";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Circle, Path, Rect } from "react-native-svg";
@@ -18,6 +18,7 @@ import { Button } from "../components/buttons/button";
 import "../global.css";
 
 import LightBackground from "@/components/DotBackground";
+import { getSurfaceShadowStyle } from "@/components/surface/surfaceStyles";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -243,7 +244,7 @@ export default function App() {
           {/* Inner circle with logo */}
           <View
             className={`w-[100px] h-[100px] rounded-full justify-center items-center ${isDark ? "bg-[#5061FF]/50" : "bg-[#9AADE8]"}`}
-            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            style={getSurfaceShadowStyle("elevated", isDark)}
             accessibilityRole="image"
             accessibilityLabel="Logótipo AIDE"
           >

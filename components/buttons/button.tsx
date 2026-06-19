@@ -1,5 +1,6 @@
 import { Text, TouchableOpacity, ActivityIndicator } from "react-native";
 import { useTheme } from "@/hooks/useTheme";
+import { getSurfaceStyle } from "@/components/surface/surfaceStyles";
 
 interface buttonDTO {
   variant: "primary" | "primaryDark" | "list" | "listDark";
@@ -22,11 +23,14 @@ export const Button = ({
   const useDarkMode = !forceLight && isDark;
 
   const containerVariants = {
-    primary: `items-center w-[242px] ${useDarkMode ? "bg-aide-dark-card" : "bg-white/90"}`,
-    primaryDark: " items-center bg-black/60 w-[242px]",
-    list: ` items-start ${useDarkMode ? "bg-aide-dark-card" : "bg-white/90"}`,
-    listDark: "items-start bg-black/60",
+    primary: "items-center w-[242px]",
+    primaryDark: "items-center w-[242px]",
+    list: "items-start",
+    listDark: "items-start",
   };
+
+  const variantUsesDarkSurface =
+    variant === "primaryDark" || variant === "listDark" || useDarkMode;
 
   const textVariants = {
     primary: `font-open-sans text-[20px] font-bold ${useDarkMode ? "text-white" : "text-black/90"}`,
@@ -39,8 +43,9 @@ export const Button = ({
     <TouchableOpacity
       onPress={onPress}
       disabled={disabled || loading}
-      className={`p-3 rounded-[20px] border border-[#5061FF]/20 ${disabled || loading ? "opacity-50" : ""}
+      className={`p-3 ${disabled || loading ? "opacity-50" : ""}
                  ${containerVariants[variant]}`}
+      style={getSurfaceStyle("elevated", variantUsesDarkSurface)}
       accessibilityRole="button"
       accessibilityLabel={label}
       accessibilityLanguage="pt-PT"
