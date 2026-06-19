@@ -3,11 +3,11 @@ import { supabase } from "@/utils/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "expo-router";
 import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
+    createContext,
+    useContext,
+    useEffect,
+    useMemo,
+    useState,
 } from "react";
 import { Platform } from "react-native";
 
@@ -84,6 +84,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const syncSession = async () => {
+    if (!supabase) {
+      handleSession(null);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const {
         data: { session: restoredSession },
@@ -108,7 +114,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   useEffect(() => {
-    syncSession();
+    void syncSession();
+
+    if (!supabase) {
+      return;
+    }
 
     const { data: listener } = supabase.auth.onAuthStateChange(
       async (event, sessionData) => {
@@ -147,7 +157,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     if (Platform.OS !== "web" || typeof window === "undefined") return;
 
     const handleStorageEvent = async (event: StorageEvent) => {
-      if (!event.key?.startsWith("sb:")) return;
+      if (!event.key?.startsWith("sb:") || !supabase) return;
 
       const {
         data: { session: restoredSession },
@@ -166,6 +176,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, [router]);
 
   const signOut = async () => {
+    if (!supabase) {
+      handleSession(null);
+      router.replace("/login" as any);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
@@ -181,6 +197,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getCurrentAccessToken = async () => {
+    if (!supabase) {
+      return null;
+    }
+
     const {
       data: { session: currentSession },
       error,
@@ -210,7 +230,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       headers,
     });
 
-    if (response.status === 401) {
+    if (response.status === 401 && supabase) {
       await supabase.auth.signOut();
       handleSession(null);
       redirectToLoginIfNeeded(currentPath());

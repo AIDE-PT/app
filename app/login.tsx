@@ -13,8 +13,16 @@ import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
 
+const emailOrPhoneSchema = z.string().refine((value) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^\+?\d{9,15}$/;
+  const cleanPhone = value.replace(/\s/g, "");
+
+  return emailRegex.test(value) || phoneRegex.test(cleanPhone);
+}, "Introduza um email ou telemovel valido");
+
 const loginSchema = z.object({
-  email: z.string().min(1, "Email obrigatório").email("Email inválido"),
+  email: emailOrPhoneSchema,
   password: z.string().min(1, "Password obrigatória"),
 });
 
@@ -80,6 +88,15 @@ export default function Login() {
   const handleLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
+      if (!supabase) {
+        Alert.alert(
+          "Configuração em falta",
+          "O Supabase não está configurado. Define as variáveis EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY.",
+          [{ text: "OK" }],
+        );
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
@@ -146,7 +163,6 @@ export default function Login() {
                         ? errors.email?.message
                         : undefined
                     }
-                    validateAs="emailOrPhone"
                     value={value}
                     onBlur={onBlur}
                     onChangeText={onChange}
