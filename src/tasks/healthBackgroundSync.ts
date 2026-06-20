@@ -984,4 +984,68 @@ export async function runSyncNow(): Promise<void> {
   }
 }
 
+/**
+ * Força um sync completo dia a dia dos últimos INITIAL_SYNC_DAYS dias,
+ * ignorando o lastSyncTime guardado. Garante pelo menos 1 snapshot por dia
+ * (janela 00:00–23:59 de cada dia). Os dados existentes na BD são actualizados
+ * via upsert (external_id), sem duplicações.
+ * Útil para repopular dados após limpeza manual no Supabase.
+ */
+export async function forceSyncAll(): Promise<void> {
+  // Verificações de perfil e permissões (mesmas do runSyncLogic)
+  const { data: authData } = await getSupabaseClient().auth.getUser();
+  const authUserId = authData.user?.id;
+  if (authUserId && (await isAiderProfile(authUserId))) {
+    console.log("[HealthSync] forceSyncAll ignorado — perfil 'aider'.");
+    return;
+  }
+
+  const isInitialized = await initialize();
+  if (!isInitialized) {
+    throw new Error("Health Connect não disponível.");
+  }
+
+  const hasPermissions = await checkPermissions();
+  if (!hasPermissions) {
+    throw new Error("Permissões do Health Connect insuficientes.");
+  }
+
+  const now = new Date();
+  let successCount = 0;
+
+  for (let d = INITIAL_SYNC_DAYS; d >= 0; d--) {
+    const dayStart = new Date(now);
+    dayStart.setDate(dayStart.getDate() - d);
+    dayStart.setHours(0, 0, 0, 0);
+    dayStart.setMilliseconds(0);
+
+    const dayEnd = new Date(dayStart);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    // Não ir além do momento actual
+    if (dayEnd > now) dayEnd.setTime(now.getTime());
+
+    try {
+      const snapshot = await collectHealthSnapshot(dayStart, dayEnd);
+      await withRetry(() => sendSnapshotToSupabase(snapshot));
+      successCount++;
+      console.log(
+        `[HealthSync] forceSyncAll ✅ dia ${INITIAL_SYNC_DAYS - d + 1}/${INITIAL_SYNC_DAYS + 1}: ${dayStart.toISOString().slice(0, 10)}`,
+      );
+    } catch (err) {
+      console.warn(
+        `[HealthSync] forceSyncAll ⚠️ falha no dia ${dayStart.toISOString().slice(0, 10)}:`,
+        err,
+      );
+    }
+  }
+
+  // Actualizar lastSyncTime para que o sync incremental continue a partir de agora
+  await setLastSyncEndTime(now.toISOString());
+
+  console.log(
+    `[HealthSync] forceSyncAll concluído — ${successCount}/${INITIAL_SYNC_DAYS + 1} dias sincronizados.`,
+  );
+}
+
 export { TASK_NAME };

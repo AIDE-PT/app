@@ -166,6 +166,29 @@ const thinLabels = (labels: string[]): string[] => {
   return labels.map((l, i) => (keep.has(i) ? l : ""));
 };
 
+type DayGroup = { t: number; avg: number; min: number; max: number; count: number };
+
+function groupByCalendarDay(points: { value: number; t: number }[]): DayGroup[] {
+  const map = new Map<number, number[]>();
+  for (const p of points) {
+    if (!Number.isFinite(p.value) || !Number.isFinite(p.t)) continue;
+    const d = new Date(p.t);
+    d.setHours(0, 0, 0, 0);
+    const key = d.getTime();
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(p.value);
+  }
+  return Array.from(map.entries())
+    .map(([t, values]) => ({
+      t,
+      avg: values.reduce((s, v) => s + v, 0) / values.length,
+      min: Math.min(...values),
+      max: Math.max(...values),
+      count: values.length,
+    }))
+    .sort((a, b) => a.t - b.t);
+}
+
 interface PatternIndicator {
   level: PatternLevel;
   label: string;
@@ -1138,6 +1161,127 @@ function O2RangeColumns({
   );
 }
 
+// ─── GENERIC INTERVAL: Range bar (min→max) + avg dot per bucket ───────────────
+function MetricRangeBars({
+  groups,
+  yMin: yMinProp,
+  yMax: yMaxProp,
+  range,
+  isDark,
+  accentColor,
+}: {
+  groups: DayGroup[];
+  yMin?: number;
+  yMax?: number;
+  range: HistoryRange;
+  isDark: boolean;
+  accentColor: string;
+}) {
+  if (!groups.length) return null;
+  const W = screenWidth - 80;
+  const H = 200;
+  const pL = 36, pR = 10, pT = 14, pB = 32;
+  const cW = W - pL - pR;
+  const cH = H - pT - pB;
+
+  const allMins = groups.map((g) => g.min);
+  const allMaxs = groups.map((g) => g.max);
+  const dataMin = Math.min(...allMins);
+  const dataMax = Math.max(...allMaxs);
+  const padding = Math.max((dataMax - dataMin) * 0.15, 1);
+  const yMin = yMinProp ?? Math.max(0, dataMin - padding);
+  const yMax = yMaxProp ?? dataMax + padding;
+  const yRange = Math.max(yMax - yMin, 1);
+
+  const toY = (v: number) =>
+    pT + cH * (1 - (Math.min(Math.max(v, yMin), yMax) - yMin) / yRange);
+  const toX = (i: number) =>
+    pL + (groups.length > 1 ? (i / (groups.length - 1)) * cW : cW / 2);
+
+  const barW = Math.max(4, (cW / Math.max(groups.length, 1)) * 0.5);
+  const dotR = Math.max(3, barW * 0.5);
+
+  const textColor = isDark ? "rgba(255,255,255,0.62)" : "#6B7280";
+  const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
+
+  const yTickCount = 4;
+  const yTicks = Array.from({ length: yTickCount + 1 }, (_, i) =>
+    yMin + (i / yTickCount) * yRange,
+  );
+  const axisLabels = getRangeAxisLabels(range, groups.length);
+
+  return (
+    <View style={{ width: W, height: H }}>
+      <Svg width={W} height={H}>
+        {yTicks.map((tick, i) => {
+          const y = toY(tick);
+          return (
+            <G key={i}>
+              <Line
+                x1={pL}
+                y1={y}
+                x2={W - pR}
+                y2={y}
+                stroke={gridColor}
+                strokeWidth="1"
+                strokeDasharray="4 4"
+              />
+              <SvgText
+                x={pL - 4}
+                y={y + 4}
+                fontSize="9"
+                fill={textColor}
+                textAnchor="end"
+              >
+                {Math.round(tick)}
+              </SvgText>
+            </G>
+          );
+        })}
+        {groups.map((g, i) => {
+          const x = toX(i);
+          const yHi = toY(g.max);
+          const yLo = toY(g.min);
+          const yAvg = toY(g.avg);
+          const barH = Math.max(2, yLo - yHi);
+          return (
+            <G key={i}>
+              <Rect
+                x={x - barW / 2}
+                y={yHi}
+                width={barW}
+                height={barH}
+                rx={barW / 2}
+                fill={accentColor}
+                opacity={0.3}
+              />
+              <Circle cx={x} cy={yAvg} r={dotR} fill={accentColor} />
+            </G>
+          );
+        })}
+        <SvgText
+          x={pL}
+          y={H - 8}
+          fontSize="9"
+          fill={textColor}
+          textAnchor="start"
+        >
+          {axisLabels.start}
+        </SvgText>
+        <SvgText
+          x={W - pR}
+          y={H - 8}
+          fontSize="9"
+          fill={textColor}
+          textAnchor="end"
+        >
+          {axisLabels.end}
+        </SvgText>
+      </Svg>
+    </View>
+  );
+}
+
 // ─── STEPS: Bar chart + progress line overlay ────────────────────────────────
 function StepsBars({
   data,
@@ -1839,9 +1983,46 @@ export default function MasterDetail() {
   // fazem slice(0,N).reverse() (StepsBars, StressWave).
   const bucketedDesc = [...bucketed.values].reverse();
 
-  const chartData = bucketed.values.length >= 2 ? bucketed.values : [0, 0];
+  // Para métricas de intervalo em vistas semanais/mensais: agrupar pontos raw
+  // por dia de calendário para mostrar avg/min/max por dia.
+  const isSleepMetric = config.endpoint === "sleep";
+  const showGroupedView =
+    !isCumulativeMetric && !isSleepMetric && selectedRange !== "day";
+  const groupedDays: DayGroup[] = showGroupedView
+    ? groupByCalendarDay(rangePoints)
+    : [];
+
+  // Para métricas de intervalo na vista diária: mostrar pontos raw sem bucketing.
+  const intervalDayData =
+    !isCumulativeMetric && !isSleepMetric && selectedRange === "day"
+      ? rangeHistory
+      : null;
+
+  // Dados para o LineChartSlim genérico: raw para intervalo/dia, bucketed no resto.
+  const genericChartData =
+    intervalDayData !== null
+      ? intervalDayData.length >= 2
+        ? intervalDayData
+        : [0, 0]
+      : bucketed.values.length >= 2
+        ? bucketed.values
+        : [0, 0];
+  const chartData = genericChartData;
   // Escala de tempo do eixo X, adequada à janela (horas/dias/datas).
   const chartLabels = thinLabels(bucketed.labels);
+
+  // Estatísticas dos buckets para os cards de resumo.
+  const activeValues = bucketed.values.filter((v) => v > 0);
+  const statsMin = activeValues.length ? Math.min(...activeValues) : 0;
+  const statsMax = activeValues.length ? Math.max(...activeValues) : 0;
+  const statsMinIdx = bucketed.values.findIndex(
+    (v) => v > 0 && v === statsMin,
+  );
+  const statsMaxIdx = bucketed.values.indexOf(statsMax);
+  const statsMinLabel =
+    statsMinIdx >= 0 ? (bucketed.labels[statsMinIdx] ?? "") : "";
+  const statsMaxLabel =
+    statsMaxIdx >= 0 ? (bucketed.labels[statsMaxIdx] ?? "") : "";
 
   // Objetivos CUMULATIVOS escalam com a janela: dia=1, semana=7, mês=30 dias.
   // Só faz sentido para métricas aditivas (passos, calorias) — não para médias
@@ -3205,77 +3386,159 @@ export default function MasterDetail() {
                           {rangeDescription}
                         </Text>
                       </View>
-                      <LineChartSlim
-                        data={chartData}
-                        labels={chartLabels}
-                        showXLabels={chartLabels.length === chartData.length}
-                        width={screenWidth - 72}
-                        height={180}
-                        lineColor={config.lineColor}
-                        gradientFrom={config.gradientColor}
-                        gradientTo={config.gradientColor}
-                        gradientFromOpacity={0.28}
-                        gradientToOpacity={0}
-                        yAxisSuffix={config.yAxisSuffix}
-                        segments={config.segments}
-                        {...(config.yMin !== undefined
-                          ? { yMin: config.yMin }
-                          : {})}
-                        {...(config.yMax !== undefined
-                          ? { yMax: config.yMax }
-                          : {})}
-                      />
+                      {showGroupedView && groupedDays.length > 0 ? (
+                        <>
+                          <View className="items-center">
+                            <MetricRangeBars
+                              groups={groupedDays}
+                              range={selectedRange}
+                              isDark={isDark}
+                              accentColor={config.accent}
+                              {...(config.yMin !== undefined
+                                ? { yMin: config.yMin }
+                                : {})}
+                              {...(config.yMax !== undefined
+                                ? { yMax: config.yMax }
+                                : {})}
+                            />
+                          </View>
+                          <View className="flex-row items-center gap-2 mt-2 justify-center">
+                            <View
+                              className="w-3 h-3 rounded-full opacity-40"
+                              style={{ backgroundColor: config.accent }}
+                            />
+                            <Text className={`text-xs font-open-sans ${ts}`}>
+                              amplitude min–máx
+                            </Text>
+                            <View
+                              className="w-2.5 h-2.5 rounded-full"
+                              style={{ backgroundColor: config.accent }}
+                            />
+                            <Text className={`text-xs font-open-sans ${ts}`}>
+                              média
+                            </Text>
+                          </View>
+                        </>
+                      ) : (
+                        <LineChartSlim
+                          data={chartData}
+                          labels={chartLabels}
+                          showXLabels={chartLabels.length === chartData.length}
+                          width={screenWidth - 72}
+                          height={180}
+                          lineColor={config.lineColor}
+                          gradientFrom={config.gradientColor}
+                          gradientTo={config.gradientColor}
+                          gradientFromOpacity={0.28}
+                          gradientToOpacity={0}
+                          yAxisSuffix={config.yAxisSuffix}
+                          segments={config.segments}
+                          {...(config.yMin !== undefined
+                            ? { yMin: config.yMin }
+                            : {})}
+                          {...(config.yMax !== undefined
+                            ? { yMax: config.yMax }
+                            : {})}
+                        />
+                      )}
                     </View>
                   ) : null}
 
-                  {/* ── Extra Info Cards ──────────────────────────────────── */}
-                  <View className="flex-row flex-wrap gap-3 mb-4">
-                    {extraCards.map((card) => (
+                  {/* ── Stats Cards (Total/Avg · Máximo · Mínimo) ─────────── */}
+                  {activeValues.length > 0 && (
+                    <View className="flex-row flex-wrap gap-3 mb-4">
+                      {/* Total (cumulativo) ou Média (intervalo) */}
                       <View
-                        key={card.label}
                         className={`rounded-2xl p-4 border ${cardBg}`}
-                        style={[
-                          shadow,
-                          { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
-                        ]}
+                        style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
                         accessible
                         accessibilityRole="text"
-                        accessibilityLabel={`${card.label}. ${formatNarratorNumber(Number(card.value.replace(/\s/g, "")) || 0)}${card.unit ? ` ${card.unit === "%" ? "por cento" : card.unit}` : ""}.`}
+                        accessibilityLabel={`${isCumulativeMetric ? "Total" : "Media"}. ${formatNarratorNumber(isCumulativeMetric ? periodTotal : periodAvg)} ${config.displayUnit}.`}
                       >
                         <View className="flex-row items-center gap-2 mb-2">
                           <View
                             className="w-7 h-7 rounded-lg items-center justify-center"
                             style={{ backgroundColor: `${config.accent}20` }}
                           >
-                            <Feather
-                              name={card.icon as any}
-                              size={14}
-                              color={config.accent}
-                              accessible={false}
-                            />
+                            <Feather name="activity" size={14} color={config.accent} accessible={false} />
                           </View>
-                          <Text
-                            className="text-xs font-open-sans"
-                            style={{ color: tAccent }}
-                          >
-                            {card.label}
+                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>
+                            {isCumulativeMetric ? "Total" : "Média"}
                           </Text>
                         </View>
                         <View className="flex-row items-baseline">
-                          <Text
-                            className={`text-2xl font-bold font-safiro ${tp}`}
-                          >
-                            {card.value}
+                          <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                            {isCumulativeMetric
+                              ? Math.round(periodTotal).toLocaleString("pt-PT")
+                              : config.formatValue(periodAvg)}
                           </Text>
-                          {card.unit ? (
-                            <Text className={`text-xs ml-1 ${tu}`}>
-                              {card.unit}
-                            </Text>
+                          {config.displayUnit ? (
+                            <Text className={`text-xs ml-1 ${tu}`}>{config.displayUnit}</Text>
                           ) : null}
                         </View>
                       </View>
-                    ))}
-                  </View>
+
+                      {/* Máximo */}
+                      <View
+                        className={`rounded-2xl p-4 border ${cardBg}`}
+                        style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
+                        accessible
+                        accessibilityRole="text"
+                        accessibilityLabel={`Maximo. ${formatNarratorNumber(statsMax)} ${config.displayUnit}${statsMaxLabel ? `. ${statsMaxLabel}` : ""}.`}
+                      >
+                        <View className="flex-row items-center gap-2 mb-2">
+                          <View
+                            className="w-7 h-7 rounded-lg items-center justify-center"
+                            style={{ backgroundColor: `${config.accent}20` }}
+                          >
+                            <Feather name="trending-up" size={14} color={config.accent} accessible={false} />
+                          </View>
+                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>Máximo</Text>
+                        </View>
+                        <View className="flex-row items-baseline">
+                          <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                            {config.formatValue(statsMax)}
+                          </Text>
+                          {config.displayUnit ? (
+                            <Text className={`text-xs ml-1 ${tu}`}>{config.displayUnit}</Text>
+                          ) : null}
+                        </View>
+                        {statsMaxLabel ? (
+                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>{statsMaxLabel}</Text>
+                        ) : null}
+                      </View>
+
+                      {/* Mínimo */}
+                      <View
+                        className={`rounded-2xl p-4 border ${cardBg}`}
+                        style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
+                        accessible
+                        accessibilityRole="text"
+                        accessibilityLabel={`Minimo. ${formatNarratorNumber(statsMin)} ${config.displayUnit}${statsMinLabel ? `. ${statsMinLabel}` : ""}.`}
+                      >
+                        <View className="flex-row items-center gap-2 mb-2">
+                          <View
+                            className="w-7 h-7 rounded-lg items-center justify-center"
+                            style={{ backgroundColor: `${config.accent}20` }}
+                          >
+                            <Feather name="trending-down" size={14} color={config.accent} accessible={false} />
+                          </View>
+                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>Mínimo</Text>
+                        </View>
+                        <View className="flex-row items-baseline">
+                          <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                            {config.formatValue(statsMin)}
+                          </Text>
+                          {config.displayUnit ? (
+                            <Text className={`text-xs ml-1 ${tu}`}>{config.displayUnit}</Text>
+                          ) : null}
+                        </View>
+                        {statsMinLabel ? (
+                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>{statsMinLabel}</Text>
+                        ) : null}
+                      </View>
+                    </View>
+                  )}
                 </ScrollView>
               </>
             )}
