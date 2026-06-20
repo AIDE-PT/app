@@ -14,7 +14,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import LightBackground from "@/components/DotBackground";
 import BackButton from "@/components/buttons/backButton";
-import { ChoseCuidado } from "@/components/buttons/choseCuidado";
+import CuidadoModal from "@/components/modals/CuidadoModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTheme } from "@/hooks/useTheme";
@@ -44,6 +44,7 @@ export default function NotesDashboard() {
   const [selectedPatient, setSelectedPatient] = useState<
     PatientOption | undefined
   >(undefined);
+  const [showPatientModal, setShowPatientModal] = useState(false);
 
   // For aiders: the selected cuidado's ID (to see and create notes about them)
   // For cuidados: own user.id (to read notes created by aiders about them, read-only)
@@ -236,10 +237,32 @@ export default function NotesDashboard() {
 
           {profileType === "aider" && patients.length > 1 && (
             <View className="mb-4">
-              <ChoseCuidado
+              <TouchableOpacity
+                onPress={() => setShowPatientModal(true)}
+                activeOpacity={0.7}
+                className={`flex-row items-center justify-between rounded-2xl border px-4 py-3 ${
+                  isDark
+                    ? "border-white/10 bg-white/5"
+                    : "border-slate-200 bg-white/80"
+                }`}
+              >
+                <Text
+                  className={`font-semibold ${isDark ? "text-white" : "text-slate-950"}`}
+                >
+                  {selectedPatient?.name ?? "Selecionar paciente"}
+                </Text>
+                <Text className={isDark ? "text-white/50" : "text-slate-400"}>
+                  ▾
+                </Text>
+              </TouchableOpacity>
+              <CuidadoModal
+                visible={showPatientModal}
+                onClose={() => setShowPatientModal(false)}
                 cuidados={patients}
-                selectedCuidado={selectedPatient}
-                onSelect={(patient) => setSelectedPatient(patient)}
+                onSelect={(patient) => {
+                  setSelectedPatient(patient);
+                  setShowPatientModal(false);
+                }}
               />
             </View>
           )}
