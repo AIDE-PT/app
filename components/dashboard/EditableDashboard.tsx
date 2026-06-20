@@ -8,6 +8,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert as RNAlert,
   Animated,
   GestureResponderEvent,
   LayoutAnimation,
@@ -655,7 +656,7 @@ export default function EditableDashboard({
   const TOP_BAR_HEIGHT = 30;
   const TOP_BAR_CONTENT_HEIGHT = 90;
   const heroTopExtension = notEditable ? 0 : insets.top + TOP_BAR_HEIGHT;
- 
+
   const { data: alerts = [] } = useQuery<Alert[]>({
     queryKey: ["alerts"],
     queryFn: fetchAlerts,
@@ -939,196 +940,198 @@ export default function EditableDashboard({
               disabled={isDashboardLocked}
             />
             */}
-            <WidgetGrid
-              contentRef={gridContentRef}
-              onContentLayout={measureGrid}
-              scrollEnabled={false}
-            >
-              {activeWidgets.map((item) => {
-                const isBeingDragged = draggingWidgetId === item.id;
-                const isSizeMenuOpen = openSizeMenuId === item.id;
+            <View style={{ zIndex: 0 }}>
+              <WidgetGrid
+                contentRef={gridContentRef}
+                onContentLayout={measureGrid}
+                scrollEnabled={false}
+              >
+                {activeWidgets.map((item) => {
+                  const isBeingDragged = draggingWidgetId === item.id;
+                  const isSizeMenuOpen = openSizeMenuId === item.id;
 
-                return (
-                  <View
-                    key={item.id}
-                    className="relative"
-                    style={
-                      isSizeMenuOpen
-                        ? {
-                            zIndex: 2000,
-                            elevation: 2000,
-                          }
-                        : undefined
-                    }
-                    onLayout={(event) => registerCardLayout(item.id, event)}
-                  >
-                    <Pressable
-                      onPress={() => handleCardPress(item.id)}
-                      onPressIn={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : measureGrid
+                  return (
+                    <View
+                      key={item.id}
+                      className="relative"
+                      style={
+                        isSizeMenuOpen
+                          ? {
+                              zIndex: 2000,
+                              elevation: 2000,
+                            }
+                          : undefined
                       }
-                      onLongPress={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : (event) => beginDrag(item.id, event)
-                      }
-                      onTouchMove={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : (event) => handleDragMove(item.id, event)
-                      }
-                      onTouchEnd={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : () => finishDrag(item.id)
-                      }
-                      onTouchCancel={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : () => finishDrag(item.id)
-                      }
-                      onPressOut={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : () => finishDrag(item.id)
-                      }
-                      delayLongPress={280}
-                      style={isBeingDragged ? { opacity: 0.1 } : undefined}
+                      onLayout={(event) => registerCardLayout(item.id, event)}
                     >
-                      <DashboardMetricWidget
-                        type={item.type}
-                        endpoint={item.endpoint}
-                        variant={item.variant as WidgetVariant}
-                        iconSize={24}
-                        patientId={metricPatientId}
-                        superSimplified={useSuperSimplifiedWidgets}
-                      />
-                    </Pressable>
-
-                    {!notEditable && !isDashboardLocked && (
-                      <TouchableOpacity
-                        onPress={() => toggleSizeMenuSafe(item.id)}
-                        className={`absolute top-2 right-2 h-7 w-7 rounded-full items-center justify-center z-40 ${isDark ? "bg-aide-dark-card border border-white/20" : "bg-white/90 border border-slate-200"}`}
-                        disabled={Boolean(draggingWidgetId)}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Mais opções para ${item.type}`}
-                        accessibilityHint="Abre opções de tamanho e remoção do widget."
+                      <Pressable
+                        onPress={() => handleCardPress(item.id)}
+                        onPressIn={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : measureGrid
+                        }
+                        onLongPress={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : (event) => beginDrag(item.id, event)
+                        }
+                        onTouchMove={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : (event) => handleDragMove(item.id, event)
+                        }
+                        onTouchEnd={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : () => finishDrag(item.id)
+                        }
+                        onTouchCancel={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : () => finishDrag(item.id)
+                        }
+                        onPressOut={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : () => finishDrag(item.id)
+                        }
+                        delayLongPress={280}
+                        style={isBeingDragged ? { opacity: 0.1 } : undefined}
                       >
-                        <Feather
-                          name="more-vertical"
-                          size={14}
-                          color={isDark ? "#ffffff" : "#1e293b"}
-                          accessible={false}
+                        <DashboardMetricWidget
+                          type={item.type}
+                          endpoint={item.endpoint}
+                          variant={item.variant as WidgetVariant}
+                          iconSize={24}
+                          patientId={metricPatientId}
+                          superSimplified={useSuperSimplifiedWidgets}
                         />
-                      </TouchableOpacity>
-                    )}
+                      </Pressable>
 
-                    {!notEditable && !isDashboardLocked && isSizeMenuOpen && (
-                      <Animated.View
-                        style={{
-                          position: "absolute",
-                          top: 36,
-                          right: 4,
-                          opacity: menuAnimation,
-                          transform: [
-                            { translateY: menuTranslateY },
-                            { scale: menuScale },
-                          ],
-                          zIndex: 999,
-                          elevation: 12,
-                          borderRadius: 20,
-                          overflow: "hidden",
-                          backgroundColor: isDark
-                            ? "rgba(0, 4, 18, 0.95)"
-                            : "#ffffff",
-                          borderWidth: 1,
-                          borderColor: isDark
-                            ? "rgba(80, 97, 255, 0.3)"
-                            : "rgba(80, 97, 255, 0.2)",
-                          minWidth: 140,
-                          boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
-                        }}
-                      >
-                        {SIZE_OPTIONS.map((option) => {
-                          const selected = option.variant === item.variant;
-                          return (
-                            <TouchableOpacity
-                              key={option.variant}
-                              className={`px-4 py-3 flex-row items-center justify-between ${selected ? (isDark ? "bg-blue-900/50" : "bg-blue-50") : isDark ? "bg-transparent" : "bg-white"}`}
-                              onPress={() => {
-                                setSizeSafe(item.id, option.variant);
-                                closeSizeMenu();
-                              }}
-                              accessibilityRole="button"
-                              accessibilityLabel={`Tamanho ${option.label}`}
-                              accessibilityState={{ selected }}
-                            >
-                              <Text
-                                className={`text-sm font-bold ${selected ? (isDark ? "text-blue-300" : "text-blue-700") : isDark ? "text-slate-300" : "text-slate-600"}`}
-                              >
-                                {option.label}
-                              </Text>
-                              {selected && (
-                                <Feather
-                                  name="check"
-                                  size={13}
-                                  color={isDark ? "#93c5fd" : "#1d4ed8"}
-                                  accessible={false}
-                                />
-                              )}
-                            </TouchableOpacity>
-                          );
-                        })}
-                        {/* Delete Option */}
+                      {!notEditable && !isDashboardLocked && (
                         <TouchableOpacity
-                          className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"} border-t ${isDark ? "border-white/10" : "border-slate-100"}`}
-                          onPress={() => {
-                            deleteWidgetSafe(item.id);
-                          }}
+                          onPress={() => toggleSizeMenuSafe(item.id)}
+                          className={`absolute top-2 right-2 h-7 w-7 rounded-full items-center justify-center z-40 ${isDark ? "bg-aide-dark-card border border-white/20" : "bg-white/90 border border-slate-200"}`}
+                          disabled={Boolean(draggingWidgetId)}
                           accessibilityRole="button"
-                          accessibilityLabel={`Eliminar widget ${item.type}`}
+                          accessibilityLabel={`Mais opções para ${item.type}`}
+                          accessibilityHint="Abre opções de tamanho e remoção do widget."
                         >
-                          <Text className="text-xs font-bold text-red-500">
-                            Eliminar
-                          </Text>
                           <Feather
-                            name="trash-2"
-                            size={13}
-                            color="#ef4444"
+                            name="more-vertical"
+                            size={14}
+                            color={isDark ? "#ffffff" : "#1e293b"}
                             accessible={false}
                           />
                         </TouchableOpacity>
-                      </Animated.View>
-                    )}
-                  </View>
-                );
-              })}
+                      )}
 
-              {draggingWidget && (
-                <View
-                  pointerEvents="none"
-                  style={{
-                    position: "absolute",
-                    left: dragPosition.x,
-                    top: dragPosition.y,
-                    zIndex: 120,
-                    opacity: 0.96,
-                    transform: [{ scale: 1.03 }],
-                  }}
-                >
-                  <DashboardMetricWidget
-                    type={draggingWidget.type}
-                    endpoint={draggingWidget.endpoint}
-                    variant={draggingWidget.variant as WidgetVariant}
-                    iconSize={24}
-                    patientId={metricPatientId}
-                    superSimplified={useSuperSimplifiedWidgets}
-                  />
-                </View>
-              )}
-            </WidgetGrid>
+                      {!notEditable && !isDashboardLocked && isSizeMenuOpen && (
+                        <Animated.View
+                          style={{
+                            position: "absolute",
+                            top: 36,
+                            right: 4,
+                            opacity: menuAnimation,
+                            transform: [
+                              { translateY: menuTranslateY },
+                              { scale: menuScale },
+                            ],
+                            zIndex: 999,
+                            elevation: 12,
+                            borderRadius: 20,
+                            overflow: "hidden",
+                            backgroundColor: isDark
+                              ? "rgba(0, 4, 18, 0.95)"
+                              : "#ffffff",
+                            borderWidth: 1,
+                            borderColor: isDark
+                              ? "rgba(80, 97, 255, 0.3)"
+                              : "rgba(80, 97, 255, 0.2)",
+                            minWidth: 140,
+                            boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
+                          }}
+                        >
+                          {SIZE_OPTIONS.map((option) => {
+                            const selected = option.variant === item.variant;
+                            return (
+                              <TouchableOpacity
+                                key={option.variant}
+                                className={`px-4 py-3 flex-row items-center justify-between ${selected ? (isDark ? "bg-blue-900/50" : "bg-blue-50") : isDark ? "bg-transparent" : "bg-white"}`}
+                                onPress={() => {
+                                  setSizeSafe(item.id, option.variant);
+                                  closeSizeMenu();
+                                }}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Tamanho ${option.label}`}
+                                accessibilityState={{ selected }}
+                              >
+                                <Text
+                                  className={`text-sm font-bold ${selected ? (isDark ? "text-blue-300" : "text-blue-700") : isDark ? "text-slate-300" : "text-slate-600"}`}
+                                >
+                                  {option.label}
+                                </Text>
+                                {selected && (
+                                  <Feather
+                                    name="check"
+                                    size={13}
+                                    color={isDark ? "#93c5fd" : "#1d4ed8"}
+                                    accessible={false}
+                                  />
+                                )}
+                              </TouchableOpacity>
+                            );
+                          })}
+                          {/* Delete Option */}
+                          <TouchableOpacity
+                            className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"} border-t ${isDark ? "border-white/10" : "border-slate-100"}`}
+                            onPress={() => {
+                              deleteWidgetSafe(item.id);
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Eliminar widget ${item.type}`}
+                          >
+                            <Text className="text-xs font-bold text-red-500">
+                              Eliminar
+                            </Text>
+                            <Feather
+                              name="trash-2"
+                              size={13}
+                              color="#ef4444"
+                              accessible={false}
+                            />
+                          </TouchableOpacity>
+                        </Animated.View>
+                      )}
+                    </View>
+                  );
+                })}
+
+                {draggingWidget && (
+                  <View
+                    pointerEvents="none"
+                    style={{
+                      position: "absolute",
+                      left: dragPosition.x,
+                      top: dragPosition.y,
+                      zIndex: 120,
+                      opacity: 0.96,
+                      transform: [{ scale: 1.03 }],
+                    }}
+                  >
+                    <DashboardMetricWidget
+                      type={draggingWidget.type}
+                      endpoint={draggingWidget.endpoint}
+                      variant={draggingWidget.variant as WidgetVariant}
+                      iconSize={24}
+                      patientId={metricPatientId}
+                      superSimplified={useSuperSimplifiedWidgets}
+                    />
+                  </View>
+                )}
+              </WidgetGrid>
+            </View>
           </ScrollView>
         </SafeAreaView>
         <Navbar

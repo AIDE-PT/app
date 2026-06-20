@@ -15,6 +15,7 @@
 
 import { getSupabaseClient } from "@/utils/supabase/client";
 import { sendLocalDataEntryNotification } from "@/src/services/localNotifications";
+import { sendHealthDataPushToAiders } from "@/src/services/pushNotifications";
 import {
   getGrantedPermissions,
   initialize,
@@ -630,9 +631,70 @@ function formatEntryValueForNotification(
   return unit ? `${entry.value} ${unit}` : String(entry.value);
 }
 
-async function notifySyncedEntries(
+function formatMeasuredAtForNotification(measuredAt?: string | null): string {
+  if (!measuredAt) return "";
+
+  const date = new Date(measuredAt);
+  if (Number.isNaN(date.getTime())) return "";
+
+  return date.toLocaleTimeString("pt-PT", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+}
+
+async function persistSyncedEntryNotifications(
+  userId: string,
   entries: SyncedEntryNotification[],
 ): Promise<void> {
+  if (entries.length === 0) return;
+
+  const rows = entries.map((entry) => {
+    const metricLabel = METRIC_NOTIFICATION_META[entry.metric].label;
+    const valueText = formatEntryValueForNotification(entry);
+    const measuredAtLabel = formatMeasuredAtForNotification(entry.measuredAt);
+    const measuredAtSuffix = measuredAtLabel ? ` as ${measuredAtLabel}` : "";
+
+    return {
+      user_id: userId,
+      type: "health_data",
+      title: `Novo dado recebido: ${metricLabel}`,
+      content: `Valor: ${valueText}${measuredAtSuffix}.`,
+    };
+  });
+
+  const { error } = await getSupabaseClient()
+    .from("notifications")
+    .insert(rows);
+
+  if (error) {
+    console.warn(
+      "[HealthSync] Falha ao guardar notificacoes no historico:",
+      error.message,
+    );
+  }
+
+  for (const row of rows) {
+    try {
+      await sendHealthDataPushToAiders({
+        title: row.title,
+        body: row.content,
+      });
+    } catch (pushError) {
+      console.warn(
+        "[HealthSync] Falha ao enviar notificacao aos aiders:",
+        pushError,
+      );
+    }
+  }
+}
+
+async function notifySyncedEntries(
+  userId: string,
+  entries: SyncedEntryNotification[],
+): Promise<void> {
+  await persistSyncedEntryNotifications(userId, entries);
+
   let requestPermissionIfNeeded = true;
 
   for (const entry of entries) {
@@ -811,7 +873,7 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
 
   if (error) throw error;
 
-  await notifySyncedEntries(notificationEntries);
+  await notifySyncedEntries(patientId, notificationEntries);
 
   console.log(`[HealthSync] ✅ ${rows.length} registo(s) sincronizado(s).`);
 }
