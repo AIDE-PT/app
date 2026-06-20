@@ -1,3 +1,4 @@
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTheme } from "@/hooks/useTheme";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -33,6 +34,7 @@ const Navbar = ({
   const [isModalVisible, setModalVisible] = useState(false);
   const router = useRouter();
   const { isDark } = useTheme();
+  const { profileType } = useUserProfile();
 
   // Use prop if provided, otherwise use global theme
   const dark = darkProp !== undefined ? darkProp : isDark;
@@ -47,6 +49,7 @@ const Navbar = ({
     borderRadius: surfaceRadius.lg,
     overflow: "hidden",
   });
+  const canUseAiderTools = profileType !== "cuidado";
 
   return (
     <>
@@ -109,32 +112,36 @@ const Navbar = ({
             <CalendarIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => router.push("/notas" as never)}
-            style={[styles.navButton, navButtonSurface]}
-            accessibilityRole="button"
-            accessibilityLabel="Notas"
-            accessibilityHint="Abre as notas colaborativas."
-          >
-            <Feather name="file-text" size={22} color={iconColor} />
-          </TouchableOpacity>
+          {canUseAiderTools && (
+            <TouchableOpacity
+              onPress={() => router.push("/notas" as never)}
+              style={[styles.navButton, navButtonSurface]}
+              accessibilityRole="button"
+              accessibilityLabel="Notas"
+              accessibilityHint="Abre as notas colaborativas."
+            >
+              <Feather name="file-text" size={22} color={iconColor} />
+            </TouchableOpacity>
+          )}
 
-          <TouchableOpacity
-            onPress={() => router.push("/report" as never)}
-            disabled={disableNavigation}
-            style={[
-              styles.navButton,
-              disableNavigation
-                ? [navButtonSurface, { opacity: 0.45 }]
-                : navButtonSurface,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Relatório"
-            accessibilityHint="Abre o gerador de relatórios."
-            accessibilityState={{ disabled: disableNavigation }}
-          >
-            <Feather name="clipboard" size={22} color={iconColor} />
-          </TouchableOpacity>
+          {canUseAiderTools && (
+            <TouchableOpacity
+              onPress={() => router.push("/report" as never)}
+              disabled={disableNavigation}
+              style={[
+                styles.navButton,
+                disableNavigation
+                  ? [navButtonSurface, { opacity: 0.45 }]
+                  : navButtonSurface,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Relatório"
+              accessibilityHint="Abre o gerador de relatórios."
+              accessibilityState={{ disabled: disableNavigation }}
+            >
+              <Feather name="clipboard" size={22} color={iconColor} />
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             onPress={() => router.push("/definicoes")}
