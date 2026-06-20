@@ -5,12 +5,20 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
-import { supabase } from "@/utils/supabase/client";
+import { forceSyncAll } from "@/src/tasks/healthBackgroundSync";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
 
@@ -34,6 +42,7 @@ const GerirPerfil = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const { isDark } = useTheme();
   const { signOut, user } = useAuth();
   const { profileType } = useUserProfile();
@@ -57,7 +66,7 @@ const GerirPerfil = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabaseClient()
           .from("users")
           .select("name, email, phone_number, nif")
           .eq("id", user.id)
@@ -107,7 +116,7 @@ const GerirPerfil = () => {
 
     try {
       setIsSavingProfile(true);
-      const { error } = await supabase
+      const { error } = await getSupabaseClient()
         .from("users")
         .update({
           name: userData.nome.trim() || null,
@@ -320,6 +329,64 @@ const GerirPerfil = () => {
                   </View>
                 </TouchableOpacity>
               </View>
+
+              {Platform.OS === "android" && (
+                <View
+                  className={`p-6 rounded-[32px] mt-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                  style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                >
+                  <View className="flex-row items-center justify-between">
+                    <Text
+                      className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}
+                    >
+                      Sincronização
+                    </Text>
+                    <Ionicons
+                      name="sync-outline"
+                      size={24}
+                      color={isDark ? "#A0AEC0" : "#4A5568"}
+                    />
+                  </View>
+                  <Text
+                    className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}
+                  >
+                    Força a sincronização completa dos últimos 30 dias a partir
+                    do Health Connect, ignorando a última sincronização
+                    guardada.
+                  </Text>
+                  <TouchableOpacity
+                    className="mt-4 py-3 rounded-xl items-center self-center"
+                    disabled={isSyncing}
+                    onPress={async () => {
+                      setIsSyncing(true);
+                      try {
+                        await forceSyncAll();
+                        Alert.alert(
+                          "Sincronização concluída",
+                          "Os dados dos últimos 30 dias foram sincronizados.",
+                        );
+                      } catch {
+                        Alert.alert(
+                          "Erro",
+                          "Não foi possível sincronizar os dados. Tente novamente.",
+                        );
+                      } finally {
+                        setIsSyncing(false);
+                      }
+                    }}
+                  >
+                    <View
+                      className={`py-3 px-8 rounded-xl ${isDark ? "bg-white/10" : "bg-slate-100"} ${isSyncing ? "opacity-60" : ""}`}
+                    >
+                      <Text
+                        className={`font-medium ${isDark ? "text-white" : "text-slate-700"}`}
+                      >
+                        {isSyncing ? "A sincronizar..." : "sync force --all"}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                </View>
+              )}
 
               <View
                 className={`p-6 rounded-[32px] mt-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
