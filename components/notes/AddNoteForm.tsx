@@ -38,9 +38,7 @@ export default function AddNoteForm() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [referenceDate, setReferenceDate] = useState(
-    () => new Date(),
-  );
+  const [referenceDate, setReferenceDate] = useState(() => new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
@@ -122,7 +120,7 @@ export default function AddNoteForm() {
     ? "border-white/10 bg-white/10 text-white"
     : "border-white bg-white/95 text-slate-950";
   const textMain = isDark ? "text-white" : "text-slate-950";
-  const textMuted = isDark ? "text-slate-300" : "text-slate-600";
+  const textMuted = isDark ? "text-slate-300" : "text-slate-700";
 
   return (
     <LightBackground>
@@ -179,7 +177,7 @@ export default function AddNoteForm() {
                   value={title}
                   onChangeText={setTitle}
                   placeholder="Título da nota"
-                  placeholderTextColor={isDark ? "#94A3B8" : "#64748B"}
+                  placeholderTextColor={isDark ? "#94A3B8" : "#475569"}
                   className={`mt-3 rounded-[18px] border px-4 py-4 text-[28px] font-safiro ${inputClass}`}
                 />
 
@@ -211,7 +209,7 @@ export default function AddNoteForm() {
                   value={content}
                   onChangeText={setContent}
                   placeholder="Escreva o conteúdo da nota..."
-                  placeholderTextColor={isDark ? "#94A3B8" : "#64748B"}
+                  placeholderTextColor={isDark ? "#94A3B8" : "#475569"}
                   multiline
                   textAlignVertical="top"
                   className={`mt-2 min-h-[260px] rounded-[18px] border px-4 py-4 text-base leading-6 ${inputClass}`}
