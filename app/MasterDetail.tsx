@@ -166,9 +166,17 @@ const thinLabels = (labels: string[]): string[] => {
   return labels.map((l, i) => (keep.has(i) ? l : ""));
 };
 
-type DayGroup = { t: number; avg: number; min: number; max: number; count: number };
+type DayGroup = {
+  t: number;
+  avg: number;
+  min: number;
+  max: number;
+  count: number;
+};
 
-function groupByCalendarDay(points: { value: number; t: number }[]): DayGroup[] {
+function groupByCalendarDay(
+  points: { value: number; t: number }[],
+): DayGroup[] {
   const map = new Map<number, number[]>();
   for (const p of points) {
     if (!Number.isFinite(p.value) || !Number.isFinite(p.t)) continue;
@@ -1180,7 +1188,10 @@ function MetricRangeBars({
   if (!groups.length) return null;
   const W = screenWidth - 80;
   const H = 200;
-  const pL = 36, pR = 10, pT = 14, pB = 32;
+  const pL = 36,
+    pR = 10,
+    pT = 14,
+    pB = 32;
   const cW = W - pL - pR;
   const cH = H - pT - pB;
 
@@ -1205,8 +1216,9 @@ function MetricRangeBars({
   const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
 
   const yTickCount = 4;
-  const yTicks = Array.from({ length: yTickCount + 1 }, (_, i) =>
-    yMin + (i / yTickCount) * yRange,
+  const yTicks = Array.from(
+    { length: yTickCount + 1 },
+    (_, i) => yMin + (i / yTickCount) * yRange,
   );
   const axisLabels = getRangeAxisLabels(range, groups.length);
 
@@ -1891,7 +1903,8 @@ export default function MasterDetail() {
   }>();
   // Quando o ecrã é aberto a partir do cartão de um cuidado (modo aider), o
   // patientId vem nos params. Sem ele, resolve para o utilizador autenticado.
-  const targetPatientId = patientId && patientId.length > 0 ? patientId : undefined;
+  const targetPatientId =
+    patientId && patientId.length > 0 ? patientId : undefined;
   const normalizedType = WIDGET_TYPE_ALIAS[type ?? ""] ?? type;
   const resolvedType =
     normalizedType && METRIC_CONFIGS[normalizedType]
@@ -2015,9 +2028,7 @@ export default function MasterDetail() {
   const activeValues = bucketed.values.filter((v) => v > 0);
   const statsMin = activeValues.length ? Math.min(...activeValues) : 0;
   const statsMax = activeValues.length ? Math.max(...activeValues) : 0;
-  const statsMinIdx = bucketed.values.findIndex(
-    (v) => v > 0 && v === statsMin,
-  );
+  const statsMinIdx = bucketed.values.findIndex((v) => v > 0 && v === statsMin);
   const statsMaxIdx = bucketed.values.indexOf(statsMax);
   const statsMinLabel =
     statsMinIdx >= 0 ? (bucketed.labels[statsMinIdx] ?? "") : "";
@@ -2030,7 +2041,9 @@ export default function MasterDetail() {
   // TOTAL acumulado no período (soma) com o objetivo escalado.
   const rangeDays =
     selectedRange === "day" ? 1 : selectedRange === "week" ? 7 : 30;
-  const periodTotal = rangeHistory.reduce((sum, v) => sum + v, 0);
+  const periodTotal = isCumulativeMetric
+    ? bucketed.values.reduce((sum, v) => sum + v, 0)
+    : rangeHistory.reduce((sum, v) => sum + v, 0);
   const formatGoal = (n: number) =>
     new Intl.NumberFormat("pt-PT").format(Math.round(n));
   const stepsGoal = 10000 * rangeDays;
@@ -2041,14 +2054,33 @@ export default function MasterDetail() {
   // Estatísticas (mín/máx/média) seguem a janela selecionada (dia/semana/mês).
   // Usa os dados do período; só recai no all-time (history/stats) se a janela
   // estiver vazia.
-  const statsBase = rangeHistory.length ? rangeHistory : history;
+  const cumulativeDailyValues = isCumulativeMetric
+    ? selectedRange === "day"
+      ? periodTotal > 0
+        ? [periodTotal]
+        : []
+      : activeValues
+    : [];
+  const statsBase = isCumulativeMetric
+    ? activeValues.length
+      ? activeValues
+      : history
+    : rangeHistory.length
+      ? rangeHistory
+      : history;
   const allTimeMin = statsBase.length
     ? Math.min(...statsBase)
     : (stats?.min ?? 0);
   const allTimeMax = statsBase.length
     ? Math.max(...statsBase)
     : (stats?.max ?? 0);
-  const periodAvg = statsBase.length ? calcAvg(statsBase) : 0;
+  const periodAvg = isCumulativeMetric
+    ? cumulativeDailyValues.length
+      ? calcAvg(cumulativeDailyValues)
+      : 0
+    : statsBase.length
+      ? calcAvg(statsBase)
+      : 0;
   const dayLabel = new Intl.DateTimeFormat("pt-PT", {
     weekday: "long",
     day: "2-digit",
@@ -2453,7 +2485,9 @@ export default function MasterDetail() {
                                   className={`text-2xl font-bold font-open-sans ${tp}`}
                                   accessible={false}
                                 >
-                                  {Math.round(periodAvg).toLocaleString("pt-PT")}
+                                  {Math.round(periodAvg).toLocaleString(
+                                    "pt-PT",
+                                  )}
                                 </Text>
                                 <Text
                                   className={`text-xs ml-1 ${tu}`}
@@ -3450,7 +3484,10 @@ export default function MasterDetail() {
                       {/* Total (cumulativo) ou Média (intervalo) */}
                       <View
                         className={`rounded-2xl p-4 border ${cardBg}`}
-                        style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
+                        style={[
+                          shadow,
+                          { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
+                        ]}
                         accessible
                         accessibilityRole="text"
                         accessibilityLabel={`${isCumulativeMetric ? "Total" : "Media"}. ${formatNarratorNumber(isCumulativeMetric ? periodTotal : periodAvg)} ${config.displayUnit}.`}
@@ -3460,20 +3497,32 @@ export default function MasterDetail() {
                             className="w-7 h-7 rounded-lg items-center justify-center"
                             style={{ backgroundColor: `${config.accent}20` }}
                           >
-                            <Feather name="activity" size={14} color={config.accent} accessible={false} />
+                            <Feather
+                              name="activity"
+                              size={14}
+                              color={config.accent}
+                              accessible={false}
+                            />
                           </View>
-                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{ color: tAccent }}
+                          >
                             {isCumulativeMetric ? "Total" : "Média"}
                           </Text>
                         </View>
                         <View className="flex-row items-baseline">
-                          <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                          <Text
+                            className={`text-2xl font-bold font-safiro ${tp}`}
+                          >
                             {isCumulativeMetric
                               ? Math.round(periodTotal).toLocaleString("pt-PT")
                               : config.formatValue(periodAvg)}
                           </Text>
                           {config.displayUnit ? (
-                            <Text className={`text-xs ml-1 ${tu}`}>{config.displayUnit}</Text>
+                            <Text className={`text-xs ml-1 ${tu}`}>
+                              {config.displayUnit}
+                            </Text>
                           ) : null}
                         </View>
                       </View>
@@ -3481,7 +3530,10 @@ export default function MasterDetail() {
                       {/* Máximo */}
                       <View
                         className={`rounded-2xl p-4 border ${cardBg}`}
-                        style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
+                        style={[
+                          shadow,
+                          { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
+                        ]}
                         accessible
                         accessibilityRole="text"
                         accessibilityLabel={`Maximo. ${formatNarratorNumber(statsMax)} ${config.displayUnit}${statsMaxLabel ? `. ${statsMaxLabel}` : ""}.`}
@@ -3491,27 +3543,46 @@ export default function MasterDetail() {
                             className="w-7 h-7 rounded-lg items-center justify-center"
                             style={{ backgroundColor: `${config.accent}20` }}
                           >
-                            <Feather name="trending-up" size={14} color={config.accent} accessible={false} />
+                            <Feather
+                              name="trending-up"
+                              size={14}
+                              color={config.accent}
+                              accessible={false}
+                            />
                           </View>
-                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>Máximo</Text>
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{ color: tAccent }}
+                          >
+                            Máximo
+                          </Text>
                         </View>
                         <View className="flex-row items-baseline">
-                          <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                          <Text
+                            className={`text-2xl font-bold font-safiro ${tp}`}
+                          >
                             {config.formatValue(statsMax)}
                           </Text>
                           {config.displayUnit ? (
-                            <Text className={`text-xs ml-1 ${tu}`}>{config.displayUnit}</Text>
+                            <Text className={`text-xs ml-1 ${tu}`}>
+                              {config.displayUnit}
+                            </Text>
                           ) : null}
                         </View>
                         {statsMaxLabel ? (
-                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>{statsMaxLabel}</Text>
+                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>
+                            {statsMaxLabel}
+                          </Text>
                         ) : null}
                       </View>
 
                       {/* Mínimo */}
                       <View
                         className={`rounded-2xl p-4 border ${cardBg}`}
-                        style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
+                        style={[
+                          shadow,
+                          { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
+                        ]}
                         accessible
                         accessibilityRole="text"
                         accessibilityLabel={`Minimo. ${formatNarratorNumber(statsMin)} ${config.displayUnit}${statsMinLabel ? `. ${statsMinLabel}` : ""}.`}
@@ -3521,20 +3592,36 @@ export default function MasterDetail() {
                             className="w-7 h-7 rounded-lg items-center justify-center"
                             style={{ backgroundColor: `${config.accent}20` }}
                           >
-                            <Feather name="trending-down" size={14} color={config.accent} accessible={false} />
+                            <Feather
+                              name="trending-down"
+                              size={14}
+                              color={config.accent}
+                              accessible={false}
+                            />
                           </View>
-                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>Mínimo</Text>
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{ color: tAccent }}
+                          >
+                            Mínimo
+                          </Text>
                         </View>
                         <View className="flex-row items-baseline">
-                          <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                          <Text
+                            className={`text-2xl font-bold font-safiro ${tp}`}
+                          >
                             {config.formatValue(statsMin)}
                           </Text>
                           {config.displayUnit ? (
-                            <Text className={`text-xs ml-1 ${tu}`}>{config.displayUnit}</Text>
+                            <Text className={`text-xs ml-1 ${tu}`}>
+                              {config.displayUnit}
+                            </Text>
                           ) : null}
                         </View>
                         {statsMinLabel ? (
-                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>{statsMinLabel}</Text>
+                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>
+                            {statsMinLabel}
+                          </Text>
                         ) : null}
                       </View>
                     </View>
