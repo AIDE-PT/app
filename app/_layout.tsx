@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ConsentPrivacyProvider } from "@/contexts/ConsentPrivacyContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
@@ -92,11 +93,13 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <UserProfileProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" />
-            </Stack>
-          </UserProfileProvider>
+          <ConsentPrivacyProvider>
+            <UserProfileProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+              </Stack>
+            </UserProfileProvider>
+          </ConsentPrivacyProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

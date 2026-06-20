@@ -5,9 +5,13 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, View } from "react-native";
 import { AddWidgetModal } from "../modals/addWidgetModal";
+import {
+  getSurfaceStyle,
+  surfaceRadius,
+  surfaceSpacing,
+} from "../surface/surfaceStyles";
 import AddIcon from "../svg/AdicionarIcon";
 import CalendarIcon from "../svg/HistoricoDiarioIcon";
-import HomeIcon from "../svg/HomeNovoIcon";
 import ProfileIcon from "../svg/PerfilIcon";
 
 interface navBarProps {
@@ -33,19 +37,22 @@ const Navbar = ({
   // Use prop if provided, otherwise use global theme
   const dark = darkProp !== undefined ? darkProp : isDark;
 
-  const styleBall =
-    "items-center w-[48px] h-[48px] rounded-[100px] justify-center";
-
   // Colors for dark mode
   const iconColor = dark ? "white" : "#191915";
-  const buttonBg = dark ? "bg-[#131632]" : "bg-white";
   const navIconSize = 20;
+  const navButtonSurface = getSurfaceStyle("elevated", dark, {
+    borderRadius: surfaceRadius.lg,
+  });
+  const navPillSurface = getSurfaceStyle("base", dark, {
+    borderRadius: surfaceRadius.lg,
+    overflow: "hidden",
+  });
 
   return (
     <>
       <View className="w-200" />
-      <View className="absolute bottom-6 w-full items-center">
-        <View style={styles.pill}>
+      <View style={styles.navLayer}>
+        <View style={[styles.pill, navPillSurface]}>
           <BlurView
             intensity={60}
             tint={dark ? "dark" : "light"}
@@ -55,30 +62,28 @@ const Navbar = ({
             style={[
               StyleSheet.absoluteFillObject,
               {
-                backgroundColor: dark
-                  ? "rgba(0,4,18,0.55)"
-                  : "rgba(219,237,248,0.75)",
+                backgroundColor: navPillSurface.backgroundColor,
               },
             ]}
           />
           <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
             onPress={
               notEditable && !disableAddAction
                 ? () => setModalVisible(true)
                 : () => {}
             }
             disabled={disableAddAction}
-            style={
+            style={[
+              styles.navButton,
               disableAddAction
-                ? { opacity: 0.45 }
+                ? [navButtonSurface, { opacity: 0.45 }]
                 : highlightAddButton
-                  ? {
+                  ? getSurfaceStyle("highlight", dark, {
+                      borderRadius: surfaceRadius.lg,
                       borderWidth: 2,
-                      borderColor: "#5061FF",
-                    }
-                  : undefined
-            }
+                    })
+                  : navButtonSurface,
+            ]}
             accessibilityRole="button"
             accessibilityLabel="Adicionar"
             accessibilityHint="Abre a lista de widgets disponíveis."
@@ -88,10 +93,14 @@ const Navbar = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
             onPress={() => router.push("/historicoDiario")}
             disabled={disableNavigation}
-            style={disableNavigation ? { opacity: 0.45 } : undefined}
+            style={[
+              styles.navButton,
+              disableNavigation
+                ? [navButtonSurface, { opacity: 0.45 }]
+                : navButtonSurface,
+            ]}
             accessibilityRole="button"
             accessibilityLabel="Historico"
             accessibilityHint="Abre o histórico diário."
@@ -101,8 +110,8 @@ const Navbar = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
             onPress={() => router.push("/notas" as never)}
+            style={[styles.navButton, navButtonSurface]}
             accessibilityRole="button"
             accessibilityLabel="Notas"
             accessibilityHint="Abre as notas colaborativas."
@@ -111,10 +120,14 @@ const Navbar = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
             onPress={() => router.push("/report" as never)}
             disabled={disableNavigation}
-            style={disableNavigation ? { opacity: 0.45 } : undefined}
+            style={[
+              styles.navButton,
+              disableNavigation
+                ? [navButtonSurface, { opacity: 0.45 }]
+                : navButtonSurface,
+            ]}
             accessibilityRole="button"
             accessibilityLabel="Relatório"
             accessibilityHint="Abre o gerador de relatórios."
@@ -124,23 +137,14 @@ const Navbar = ({
           </TouchableOpacity>
 
           <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
-            onPress={() => router.push("/testDashboard")}
-            disabled={disableNavigation}
-            style={disableNavigation ? { opacity: 0.45 } : undefined}
-            accessibilityRole="button"
-            accessibilityLabel="Inicio"
-            accessibilityHint="Abre o dashboard principal."
-            accessibilityState={{ disabled: disableNavigation }}
-          >
-            <HomeIcon color={iconColor} size={navIconSize} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            className={`${styleBall} ${buttonBg}`}
             onPress={() => router.push("/definicoes")}
             disabled={disableNavigation}
-            style={disableNavigation ? { opacity: 0.45 } : undefined}
+            style={[
+              styles.navButton,
+              disableNavigation
+                ? [navButtonSurface, { opacity: 0.45 }]
+                : navButtonSurface,
+            ]}
             accessibilityRole="button"
             accessibilityLabel="Perfil"
             accessibilityHint="Abre o perfil e definições."
@@ -164,12 +168,24 @@ const Navbar = ({
 export default Navbar;
 
 const styles = StyleSheet.create({
+  navLayer: {
+    alignItems: "center",
+    bottom: surfaceSpacing.lg,
+    position: "absolute",
+    width: "100%",
+  },
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 7,
-    gap: 14,
-    borderRadius: 100,
+    padding: surfaceSpacing.xs,
+    gap: surfaceSpacing.sm,
+    borderRadius: surfaceRadius.lg,
     overflow: "hidden",
+  },
+  navButton: {
+    alignItems: "center",
+    height: 48,
+    justifyContent: "center",
+    width: 48,
   },
 });
