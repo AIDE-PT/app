@@ -13,6 +13,8 @@ import React, { useEffect, useState } from "react";
 import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
+import { File, Paths } from "expo-file-system";
+import * as Sharing from "expo-sharing";
 
 type UserFormData = {
   nome: string;
@@ -129,6 +131,56 @@ const GerirPerfil = () => {
       setIsSavingProfile(false);
     }
   };
+
+  const handleExportData = async () => {
+    try {
+      const xmlData = `<?xml version="1.0" encoding="UTF-8"?>
+<UserData>
+  <Nome>${userData.nome || ""}</Nome>
+  <Email>${userData.email || ""}</Email>
+  <Contacto>${userData.contacto || ""}</Contacto>
+  <NIF>${userData.nif || ""}</NIF>
+</UserData>`;
+
+      const file = new File(Paths.document, "dados_pessoais.xml");
+      file.write(xmlData);
+
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(file.uri);
+      } else {
+        Alert.alert("Erro", "A partilha não está disponível neste dispositivo.");
+      }
+    } catch (error) {
+      console.error("Erro ao exportar dados:", error);
+      Alert.alert("Erro", "Não foi possível exportar os dados.");
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    Alert.alert(
+      "Atenção",
+      "Tem a certeza de que deseja apagar a sua conta? Todos os seus dados serão perdidos.",
+      [
+        { text: "Cancelar", style: "cancel" },
+        {
+          text: "Apagar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const { error } = await supabase.rpc("delete_user");
+              if (error) throw error;
+              await signOut();
+              Alert.alert("Sucesso", "A sua conta foi apagada.");
+            } catch (error) {
+              console.error("Erro ao apagar conta:", error);
+              Alert.alert("Erro", "Não foi possível apagar a conta.");
+            }
+          },
+        },
+      ]
+    );
+  };
+
 
   const handleLogout = async () => {
     if (isSigningOut) return;
@@ -247,7 +299,7 @@ const GerirPerfil = () => {
                 </Text>
                 <TouchableOpacity
                   className="mt-4 py-3 rounded-xl items-center self-center"
-                  onPress={() => console.log("Apagar conta")}
+                  onPress={handleDeleteAccount}
                 >
                   <View
                     className={`py-3 px-8 rounded-xl ${isDark ? "bg-red-500/20" : "bg-red-100"}`}
@@ -338,7 +390,7 @@ const GerirPerfil = () => {
                 </Text>
                 <TouchableOpacity
                   className="mt-4 py-3 rounded-xl items-center self-center"
-                  onPress={() => console.log("Extrair dados")}
+                  onPress={handleExportData}
                 >
                   <View
                     className={`py-3 px-8 rounded-xl ${isDark ? "bg-blue-500/20" : "bg-blue-100"}`}

@@ -1,0 +1,7 @@
+CREATE OR REPLACE FUNCTION delete_user()
+RETURNS void
+LANGUAGE sql
+SECURITY DEFINER
+AS $$
+  DELETE FROM auth.users WHERE id = auth.uid();
+$$;

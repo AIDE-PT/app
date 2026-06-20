@@ -8,7 +8,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "channel": "development",
-      "credentialsSource": "local",
+      "credentialsSource": "remote",
       "ios": {
         "buildConfiguration": "Debug"
       },
@@ -20,7 +20,7 @@
       "autoIncrement": true,
       "distribution": "store",
       "channel": "production",
-      "credentialsSource": "local",
+      "credentialsSource": "remote",
       "ios": {
         "buildConfiguration": "Release"
       },
