@@ -130,7 +130,7 @@ export default function NotesDashboard() {
     ? "bg-aide-dark-card border-white/10"
     : "bg-white/85 border-white";
   const textMain = isDark ? "text-white" : "text-slate-950";
-  const textMuted = isDark ? "text-slate-300" : "text-slate-600";
+  const textMuted = isDark ? "text-slate-300" : "text-slate-700";
 
   const renderNote = ({ item, index }: { item: Note; index: number }) => {
     const colorIndex = index % NOTE_COLORS.length;
@@ -145,8 +145,9 @@ export default function NotesDashboard() {
         className="mb-3 w-[48.5%]"
       >
         <View
-          className={`rounded-[20px] border p-4 min-h-[130px] justify-between ${isDark ? "bg-[#131632] border-white/10" : "bg-white border-white/90"
-            }`}
+          className={`rounded-[20px] border p-4 min-h-[130px] justify-between ${
+            isDark ? "bg-[#131632] border-white/10" : "bg-white border-white/90"
+          }`}
           style={{
             backgroundColor: isDark
               ? "rgba(19,22,50,0.92)"
@@ -186,16 +187,17 @@ export default function NotesDashboard() {
   return (
     <LightBackground>
       <SafeAreaView className="flex-1">
-        <View className="flex-1 px-4 pt-6">
+        <View className="flex-1 px-4 pt-10">
           <View className="mb-5 flex-row items-center justify-between">
             <BackButton label="Notas" dark={isDark} />
             <View className="flex-row gap-2">
               <TouchableOpacity
                 onPress={() => router.push("/report" as never)}
-                className={`h-11 items-center justify-center rounded-full border px-4 ${isDark
+                className={`h-11 items-center justify-center rounded-full border px-4 ${
+                  isDark
                     ? "border-white/15 bg-white/10"
                     : "border-white bg-white/90"
-                  }`}
+                }`}
                 accessibilityRole="button"
                 accessibilityLabel="Abrir relatório"
               >
@@ -214,10 +216,11 @@ export default function NotesDashboard() {
                     )
                   }
                   disabled={!selectedPatient}
-                  className={`h-11 w-11 items-center justify-center rounded-full border ${isDark
+                  className={`h-11 w-11 items-center justify-center rounded-full border ${
+                    isDark
                       ? "border-white/15 bg-white/10"
                       : "border-white bg-white/90"
-                    }`}
+                  }`}
                   style={!selectedPatient ? { opacity: 0.4 } : undefined}
                   accessibilityRole="button"
                   accessibilityLabel="Criar nota"

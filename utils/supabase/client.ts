@@ -7,8 +7,21 @@ const supabaseKey = process.env.EXPO_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY;
 
 export const hasSupabaseConfig = Boolean(supabaseUrl && supabaseKey);
 
+const isNodeRuntime =
+  typeof globalThis !== "undefined" &&
+  typeof (globalThis as { process?: { versions?: { node?: string } } }).process
+    ?.versions?.node === "string";
+
 const getStorage = () => {
-  if (Platform.OS === "web") return localStorage;
+  if (isNodeRuntime) return undefined;
+
+  if (Platform.OS === "web") {
+    const webStorage =
+      typeof globalThis !== "undefined" ? globalThis.localStorage : undefined;
+
+    if (webStorage) return webStorage;
+  }
+
   return AsyncStorage;
 };
 
@@ -16,9 +29,9 @@ export const supabase = hasSupabaseConfig
   ? createClient(supabaseUrl!, supabaseKey!, {
       auth: {
         storage: getStorage(),
-        autoRefreshToken: true,
-        persistSession: true,
-        detectSessionInUrl: Platform.OS === "web",
+        autoRefreshToken: !isNodeRuntime,
+        persistSession: !isNodeRuntime,
+        detectSessionInUrl: Platform.OS === "web" && !isNodeRuntime,
       },
     })
   : null;
