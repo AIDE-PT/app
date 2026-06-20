@@ -77,29 +77,7 @@ const TopBar = ({
       style={[...topBarLayoutStyle, backgroundSurface, topBarLayerStyle]}
     >
       {profileType === "cuidado" ? (
-        <>
-          <SOSButton />
-
-          <TouchableOpacity
-            style={[styles.actionButton, actionSurface]}
-            onPress={onNotificationPress}
-            accessibilityRole="button"
-            accessibilityLabel="Abrir notificações"
-            accessibilityHint="Mostra os alertas e notificações."
-          >
-            <NotificationBell color={iconColor} size={21} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.actionButton, actionSurface]}
-            onPress={onSettingsPress}
-            accessibilityRole="button"
-            accessibilityLabel="Abrir definições"
-            accessibilityHint="Abre as definições da aplicação."
-          >
-            <SettingsIcon color={iconColor} size={21} />
-          </TouchableOpacity>
-        </>
+        <SOSButton fullWidth />
       ) : (
         <>
           <TouchableOpacity

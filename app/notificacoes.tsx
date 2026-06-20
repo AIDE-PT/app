@@ -1,8 +1,8 @@
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import axios from "axios";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
@@ -17,66 +17,79 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
 
-import { LOCAL_API_BASE as API_BASE } from "@/constants/api";
+type NotificationSeverity = "high" | "medium" | "low";
 
-// Types
-interface Alert {
+interface AppNotification {
   id: string;
   type: string;
-  message: string;
-  severity: "high" | "medium" | "low";
+  title: string;
+  content: string;
+  severity: NotificationSeverity;
   timestamp: string;
-  read: boolean;
 }
 
-// Fetchers
-const fetchAlerts = async (): Promise<Alert[]> => {
-  const response = await axios.get(`${API_BASE}/alerts`);
-  const data = response.data;
-  if (Array.isArray(data) && data.length > 0) {
-    // Sort descending by timestamp (newest first)
-    data.sort(
-      (a: any, b: any) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-    );
-    return data;
-  }
-  return [];
+const getNotificationSeverity = (
+  type?: string | null,
+): NotificationSeverity => {
+  if (type === "sos" || type === "alert") return "high";
+  if (type === "warning") return "medium";
+  return "low";
 };
 
-const clearAllAlerts = async (): Promise<void> => {
-  // Get all alerts first
-  const response = await axios.get(`${API_BASE}/alerts`);
-  const data = response.data;
+const fetchNotifications = async (): Promise<AppNotification[]> => {
+  const { data, error } = await getSupabaseClient()
+    .from("notifications")
+    .select("id,type,title,content,created_at")
+    .order("created_at", { ascending: false });
 
-  if (Array.isArray(data)) {
-    // Delete each alert one by one
-    for (const alert of data) {
-      await axios.delete(`${API_BASE}/alerts/${alert.id}`);
-    }
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return (data ?? []).map((notification) => ({
+    id: String(notification.id),
+    type: String(notification.type ?? "info"),
+    title: String(notification.title ?? "Notificacao"),
+    content: String(notification.content ?? ""),
+    severity: getNotificationSeverity(notification.type),
+    timestamp: String(notification.created_at ?? new Date().toISOString()),
+  }));
+};
+
+const clearAllNotifications = async (): Promise<void> => {
+  const {
+    data: { user },
+    error: userError,
+  } = await getSupabaseClient().auth.getUser();
+
+  if (userError) throw new Error(userError.message);
+  if (!user?.id) return;
+
+  const { error } = await getSupabaseClient()
+    .from("notifications")
+    .delete()
+    .eq("user_id", user.id);
+
+  if (error) {
+    throw new Error(error.message);
   }
 };
 
 const NotificationItem = ({
+  title,
   message,
   timestamp,
   severity,
   isDark,
   semantic,
 }: {
+  title: string;
   message: string;
   timestamp: string;
-  severity: "high" | "medium" | "low";
+  severity: NotificationSeverity;
   isDark: boolean;
   semantic: { success: string; warning: string; danger: string };
 }) => {
-  const severityLabel =
-    severity === "high"
-      ? "Alerta crítico"
-      : severity === "medium"
-        ? "Aviso"
-        : "Informação";
-
   const getSeverityColors = () => {
     switch (severity) {
       case "high":
@@ -105,7 +118,7 @@ const NotificationItem = ({
 
   const colors = getSeverityColors();
   const dateObj = new Date(timestamp);
-  const timeString = dateObj.toLocaleTimeString([], {
+  const timeString = dateObj.toLocaleTimeString("pt-PT", {
     hour: "2-digit",
     minute: "2-digit",
   });
@@ -114,12 +127,7 @@ const NotificationItem = ({
     month: "2-digit",
     year: "numeric",
   });
-  const spokenDate = dateObj.toLocaleDateString("pt-PT", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-  const accessibilityLabel = `${severityLabel}. ${message}. ${spokenDate}, ${timeString}.`;
+  const accessibilityLabel = `${title}. ${message}. ${dateString}, ${timeString}.`;
 
   return (
     <View
@@ -139,7 +147,7 @@ const NotificationItem = ({
       }}
     >
       <View
-        className={`flex-row p-4 items-start`}
+        className="flex-row p-4 items-start"
         importantForAccessibility="no-hide-descendants"
       >
         <View
@@ -157,7 +165,7 @@ const NotificationItem = ({
             className={`font-bold text-base mb-1 ${isDark ? "text-white" : "text-gray-900"}`}
             accessible={false}
           >
-            {severityLabel}
+            {title}
           </Text>
           <Text
             className={`text-base mb-2 ${isDark ? "text-gray-300" : "text-gray-600"}`}
@@ -169,7 +177,7 @@ const NotificationItem = ({
             className={`text-xs ${isDark ? "text-gray-500" : "text-gray-400"}`}
             accessible={false}
           >
-            {dateString} at {timeString}
+            {dateString} as {timeString}
           </Text>
         </View>
       </View>
@@ -181,29 +189,27 @@ const NotificationsContent = () => {
   const { isDark, colors } = useTheme();
   const [showClearModal, setShowClearModal] = useState(false);
 
-  // Fetch alerts from server
   const {
-    data: alerts,
+    data: notifications,
     isLoading,
     refetch,
     isFetching,
   } = useQuery({
-    queryKey: ["alerts"],
-    queryFn: fetchAlerts,
+    queryKey: ["notifications"],
+    queryFn: fetchNotifications,
     refetchInterval: 10000,
   });
 
-  // Mutation to clear alerts
-  const clearAlertsMutation = useMutation({
-    mutationFn: clearAllAlerts,
+  const clearNotificationsMutation = useMutation({
+    mutationFn: clearAllNotifications,
     onSuccess: () => {
       refetch();
     },
   });
 
-  const handleClearAlerts = () => {
+  const handleClearNotifications = () => {
     setShowClearModal(false);
-    clearAlertsMutation.mutate();
+    clearNotificationsMutation.mutate();
   };
 
   return (
@@ -212,11 +218,11 @@ const NotificationsContent = () => {
         <SafeAreaView className="flex-1">
           <View className="px-4 mb-4 flex-row items-center justify-between">
             <BackButton
-              label="Notificações"
+              label="Notificacoes"
               dark={isDark}
               onPress={() => router.back()}
             />
-            {alerts && alerts.length > 0 && (
+            {notifications && notifications.length > 0 && (
               <Pressable
                 onPress={() => setShowClearModal(true)}
                 className={`px-4 py-2 rounded-lg ${isDark ? "bg-red-500/20" : "bg-red-100"}`}
@@ -244,11 +250,11 @@ const NotificationsContent = () => {
               <ActivityIndicator
                 size="large"
                 color={isDark ? "#ffffff" : "#0000ff"}
-                accessibilityLabel="A carregar notificações"
+                accessibilityLabel="A carregar notificacoes"
               />
             )}
 
-            {!isLoading && (!alerts || alerts.length === 0) && (
+            {!isLoading && (!notifications || notifications.length === 0) && (
               <View className="items-center justify-center py-20">
                 <Ionicons
                   name="notifications-off-outline"
@@ -259,38 +265,36 @@ const NotificationsContent = () => {
                 <Text
                   className={`mt-4 text-center text-lg ${isDark ? "text-gray-500" : "text-gray-400"}`}
                 >
-                  Nenhum alerta de saúde registado.
+                  Nenhuma notificacao registada.
                 </Text>
                 <Text
                   className={`mt-2 text-center text-sm ${isDark ? "text-gray-600" : "text-gray-500"}`}
                 >
-                  Os alertas serão mostrados aqui quando forem detetados valores
-                  inseguros.
+                  Atualizacoes de dados e alertas SOS vao aparecer aqui.
                 </Text>
               </View>
             )}
 
-            {alerts &&
-              alerts.map((alert) => (
-                <NotificationItem
-                  key={alert.id}
-                  message={alert.message}
-                  severity={alert.severity}
-                  timestamp={alert.timestamp}
-                  isDark={isDark}
-                  semantic={colors.semantic}
-                />
-              ))}
+            {notifications?.map((notification) => (
+              <NotificationItem
+                key={notification.id}
+                title={notification.title}
+                message={notification.content}
+                severity={notification.severity}
+                timestamp={notification.timestamp}
+                isDark={isDark}
+                semantic={colors.semantic}
+              />
+            ))}
 
             <Text
               className={`mt-8 text-center text-xs ${isDark ? "text-white/30" : "text-gray-400"}`}
             >
-              Os alertas são guardados permanentemente e não desaparecem.
+              As notificacoes sao guardadas ate serem limpas.
             </Text>
           </ScrollView>
         </SafeAreaView>
 
-        {/* Clear Confirmation Modal */}
         <Modal
           visible={showClearModal}
           transparent
@@ -304,13 +308,13 @@ const NotificationsContent = () => {
               <Text
                 className={`text-xl font-bold mb-4 text-center ${isDark ? "text-white" : "text-gray-900"}`}
               >
-                Limpar Notificações
+                Limpar Notificacoes
               </Text>
               <Text
                 className={`text-base mb-6 text-center ${isDark ? "text-gray-300" : "text-gray-600"}`}
               >
-                Tem a certeza que deseja limpar todas as notificações? Esta ação
-                não pode ser desfeita.
+                Tem a certeza que deseja limpar todas as notificacoes? Esta acao
+                nao pode ser desfeita.
               </Text>
               <View className="flex-row justify-between gap-3">
                 <Pressable
@@ -324,7 +328,7 @@ const NotificationsContent = () => {
                   </Text>
                 </Pressable>
                 <Pressable
-                  onPress={handleClearAlerts}
+                  onPress={handleClearNotifications}
                   className="flex-1 py-3 rounded-xl bg-red-500"
                 >
                   <Text className="text-center font-medium text-white">
