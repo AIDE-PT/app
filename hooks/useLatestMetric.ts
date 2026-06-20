@@ -1,7 +1,7 @@
 import {
-    getHealthConnectStatus,
-    readSteps,
-    type StepRecord,
+  getHealthConnectStatus,
+  readSteps,
+  type StepRecord,
 } from "@/src/services/healthConnect";
 import { getSupabaseClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
@@ -9,6 +9,8 @@ import { Platform } from "react-native";
 
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
+const MAX_DAILY_RECORD_MS = 26 * HOUR_MS;
+const MAX_REASONABLE_DAILY_STEPS = 100_000;
 
 type ApiMetricRecord = {
   timestamp?: string;
@@ -192,7 +194,9 @@ function aggregateStepsByHour(
 ) {
   const buckets = Array.from({ length: 24 }, () => 0);
 
-  records.forEach((record) => {
+  const nonOverlappingRecords = getNonOverlappingStepRecords(records);
+
+  nonOverlappingRecords.forEach((record) => {
     const recordStart = Math.max(record.startTime, startMs);
     const recordEnd = Math.min(record.endTime, endMs);
 
@@ -213,6 +217,56 @@ function aggregateStepsByHour(
   });
 
   return buckets.map((value) => Math.max(0, Math.round(value)));
+}
+
+function getNonOverlappingStepRecords(
+  records: (StepRecord | HealthConnectFallbackRecord)[],
+): HealthConnectFallbackRecord[] {
+  const intervals = records
+    .map((record) => ({
+      startTime: record.startTime,
+      endTime: record.endTime,
+      count: record.count,
+      sourceApp: "sourceApp" in record ? record.sourceApp : null,
+    }))
+    .filter(
+      (record) =>
+        Number.isFinite(record.startTime) &&
+        Number.isFinite(record.endTime) &&
+        record.endTime > record.startTime &&
+        Number.isFinite(record.count) &&
+        record.count > 0 &&
+        record.count <= MAX_REASONABLE_DAILY_STEPS,
+    )
+    .sort((a, b) =>
+      a.startTime !== b.startTime
+        ? a.startTime - b.startTime
+        : a.endTime - a.startTime - (b.endTime - b.startTime),
+    );
+
+  const deduped: HealthConnectFallbackRecord[] = [];
+  let coveredUpTo = -Infinity;
+
+  for (const record of intervals) {
+    if (record.startTime >= coveredUpTo) {
+      deduped.push(record);
+      coveredUpTo = record.endTime;
+      continue;
+    }
+
+    if (record.endTime <= coveredUpTo) continue;
+
+    const uncoveredFraction =
+      (record.endTime - coveredUpTo) / (record.endTime - record.startTime);
+    deduped.push({
+      ...record,
+      startTime: coveredUpTo,
+      count: Math.round(record.count * uncoveredFraction),
+    });
+    coveredUpTo = record.endTime;
+  }
+
+  return deduped;
 }
 
 async function fetchStepsFromSupabaseDaily(
@@ -282,11 +336,9 @@ async function fetchStepsFromSupabaseDaily(
   const shortWindowRecords = records.filter(
     (record) => record.endTime - record.startTime <= SHORT_WINDOW_MAX_MS,
   );
-  const recordsToAggregate = shortWindowRecords.length
-    ? shortWindowRecords
-    : [...records].sort((a, b) => b.endTime - a.endTime).slice(0, 1);
+  if (!shortWindowRecords.length) return null;
 
-  const hourly = aggregateStepsByHour(recordsToAggregate, startMs, endMs);
+  const hourly = aggregateStepsByHour(shortWindowRecords, startMs, endMs);
   const totalSteps = hourly.reduce((sum, value) => sum + value, 0);
 
   return {
@@ -752,7 +804,7 @@ export function useMetricStats(
   const patientScope =
     targetPatientId === null
       ? "none"
-      : normalizeTargetPatientId(targetPatientId) ?? "self";
+      : (normalizeTargetPatientId(targetPatientId) ?? "self");
 
   return useQuery({
     queryKey: [endpoint, "stats", patientScope],
@@ -761,11 +813,14 @@ export function useMetricStats(
     gcTime: 60_000,
     refetchOnReconnect: true,
     queryFn: async () => {
-      const normalizedTargetPatientId = normalizeTargetPatientId(targetPatientId);
+      const normalizedTargetPatientId =
+        normalizeTargetPatientId(targetPatientId);
       if (normalizedTargetPatientId === null) return { min: 0, max: 0 };
 
       const authUserId = await getAuthenticatedUserId();
-      const resolvedPatientId = await resolvePatientId(normalizedTargetPatientId);
+      const resolvedPatientId = await resolvePatientId(
+        normalizedTargetPatientId,
+      );
       if (!resolvedPatientId) return { min: 0, max: 0 };
 
       const canUseHealthConnect =
@@ -816,7 +871,7 @@ export function useHealthMetric(
   const patientScope =
     targetPatientId === null
       ? "none"
-      : normalizeTargetPatientId(targetPatientId) ?? "self";
+      : (normalizeTargetPatientId(targetPatientId) ?? "self");
 
   return useQuery({
     queryKey: [endpoint, "latest", patientScope],
@@ -825,11 +880,14 @@ export function useHealthMetric(
     gcTime: 60_000,
     refetchOnReconnect: true,
     queryFn: async () => {
-      const normalizedTargetPatientId = normalizeTargetPatientId(targetPatientId);
+      const normalizedTargetPatientId =
+        normalizeTargetPatientId(targetPatientId);
       if (normalizedTargetPatientId === null) return null;
 
       const authUserId = await getAuthenticatedUserId();
-      const resolvedPatientId = await resolvePatientId(normalizedTargetPatientId);
+      const resolvedPatientId = await resolvePatientId(
+        normalizedTargetPatientId,
+      );
       if (!resolvedPatientId) return null;
 
       const canUseHealthConnect =
@@ -885,7 +943,128 @@ function getRangeWindow(range: MetricHistoryRange) {
   if (range === "day") start.setDate(start.getDate() - 1);
   else if (range === "week") start.setDate(start.getDate() - 7);
   else start.setDate(start.getDate() - 30);
-  return { startIso: start.toISOString(), endIso: end.toISOString() };
+  return {
+    startIso: start.toISOString(),
+    endIso: end.toISOString(),
+    startMs: start.getTime(),
+    endMs: end.getTime(),
+  };
+}
+
+function parseTimestamp(value: unknown): number | null {
+  const parsed = Date.parse(String(value ?? ""));
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function timestampInRange(t: number | null, startMs: number, endMs: number) {
+  return t !== null && t >= startMs && t <= endMs;
+}
+
+function getHistoryPointTimestamp(
+  row: any,
+  endpoint: string,
+  startMs: number,
+  endMs: number,
+): number | null {
+  const measuredAt = parseTimestamp(row?.measured_at);
+  const startTime = parseTimestamp(row?.start_time);
+  const endTime = parseTimestamp(row?.end_time);
+  const createdAt = parseTimestamp(row?.created_at);
+
+  if (endpoint === "steps" || endpoint === "cal" || endpoint === "calories") {
+    return startTime ?? measuredAt ?? createdAt;
+  }
+
+  if (timestampInRange(measuredAt, startMs, endMs)) return measuredAt;
+  if (timestampInRange(endTime, startMs, endMs)) return endTime;
+  if (timestampInRange(startTime, startMs, endMs)) return startTime;
+  return measuredAt ?? endTime ?? startTime ?? createdAt;
+}
+
+function isCumulativeEndpoint(endpoint: string) {
+  return endpoint === "steps" || endpoint === "cal" || endpoint === "calories";
+}
+
+function getNonOverlappingCumulativeRows(
+  rows: any[],
+  endpoint: string,
+  startMs: number,
+  endMs: number,
+) {
+  const intervals = rows
+    .map((row) => {
+      const startTime = parseTimestamp(row?.start_time);
+      const endTime = parseTimestamp(row?.end_time);
+      const value = Number(row?.value ?? NaN);
+      return { row, startTime, endTime, value };
+    })
+    .filter(
+      (
+        item,
+      ): item is {
+        row: any;
+        startTime: number;
+        endTime: number;
+        value: number;
+      } =>
+        item.startTime !== null &&
+        item.endTime !== null &&
+        item.endTime > item.startTime &&
+        item.endTime - item.startTime <= MAX_DAILY_RECORD_MS &&
+        item.endTime >= startMs &&
+        item.startTime <= endMs &&
+        Number.isFinite(item.value) &&
+        isReasonableCumulativeValue(endpoint, item.value),
+    )
+    .sort((a, b) =>
+      a.startTime !== b.startTime
+        ? a.startTime - b.startTime
+        : a.endTime - a.startTime - (b.endTime - b.startTime),
+    );
+
+  const deduped: any[] = [];
+  let coveredUpTo = -Infinity;
+
+  for (const interval of intervals) {
+    if (interval.startTime >= coveredUpTo) {
+      deduped.push(interval.row);
+      coveredUpTo = interval.endTime;
+      continue;
+    }
+
+    if (interval.endTime <= coveredUpTo) continue;
+
+    const uncoveredFraction =
+      (interval.endTime - coveredUpTo) /
+      (interval.endTime - interval.startTime);
+    deduped.push({
+      ...interval.row,
+      start_time: new Date(coveredUpTo).toISOString(),
+      value: Math.round(interval.value * uncoveredFraction),
+    });
+    coveredUpTo = interval.endTime;
+  }
+
+  const intervalIds = new Set(deduped.map((row) => row?.id).filter(Boolean));
+  const pointRows = rows.filter((row) => {
+    if (row?.id && intervalIds.has(row.id)) return false;
+    const startTime = parseTimestamp(row?.start_time);
+    const endTime = parseTimestamp(row?.end_time);
+    if (startTime !== null || endTime !== null) return false;
+    if (!isReasonableCumulativeValue(endpoint, Number(row?.value ?? NaN))) {
+      return false;
+    }
+    const t = parseTimestamp(row?.measured_at ?? row?.created_at);
+    return timestampInRange(t, startMs, endMs);
+  });
+
+  return [...deduped, ...pointRows];
+}
+
+function isReasonableCumulativeValue(endpoint: string, value: number) {
+  if (!Number.isFinite(value) || value <= 0) return false;
+  if (endpoint === "steps") return value <= MAX_REASONABLE_DAILY_STEPS;
+  return true;
 }
 
 async function fetchMetricHistoryRange(
@@ -900,7 +1079,7 @@ async function fetchMetricHistoryRange(
   if (!typeNames) return [];
 
   const isBP = BP_ENDPOINTS.has(endpoint);
-  const { startIso, endIso } = getRangeWindow(range);
+  const { startIso, endIso, startMs, endMs } = getRangeWindow(range);
 
   const { data: typeRows, error: typeError } = await getSupabaseClient()
     .from("biometric_data_types")
@@ -917,36 +1096,95 @@ async function fetchMetricHistoryRange(
     .filter(Boolean);
   if (!typeIds.length) return [];
 
-  const { data: rows, error } = await getSupabaseClient()
+  const intervalQuery = await getSupabaseClient()
     .from("biometric_data")
-    .select("value,value_secondary,measured_at,created_at")
+    .select(
+      "id,value,value_secondary,start_time,end_time,measured_at,created_at",
+    )
     .eq("patient_id", patientId)
     .in("biometric_data_type_id", typeIds)
-    .gte("created_at", startIso)
-    .lte("created_at", endIso)
+    .lt("start_time", endIso)
+    .gt("end_time", startIso)
+    .order("start_time", { ascending: true, nullsFirst: false })
     .order("measured_at", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true })
     .limit(500);
 
-  if (error) {
-    console.error("[useMetricHistory] history query error", error);
+  if (intervalQuery.error) {
+    console.error(
+      "[useMetricHistory] interval history query error",
+      intervalQuery.error,
+    );
     return [];
   }
 
+  const measuredQuery = await getSupabaseClient()
+    .from("biometric_data")
+    .select(
+      "id,value,value_secondary,start_time,end_time,measured_at,created_at",
+    )
+    .eq("patient_id", patientId)
+    .in("biometric_data_type_id", typeIds)
+    .gte("measured_at", startIso)
+    .lte("measured_at", endIso)
+    .order("measured_at", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: true })
+    .limit(500);
+
+  if (measuredQuery.error) {
+    console.error(
+      "[useMetricHistory] measured history query error",
+      measuredQuery.error,
+    );
+    return [];
+  }
+
+  const rowsById = new Map<string, any>();
+  [...(intervalQuery.data ?? []), ...(measuredQuery.data ?? [])].forEach(
+    (row: any, index) => {
+      rowsById.set(String(row?.id ?? `row-${index}`), row);
+    },
+  );
+  const rows = Array.from(rowsById.values());
+  const historyRows = isCumulativeEndpoint(endpoint)
+    ? getNonOverlappingCumulativeRows(rows, endpoint, startMs, endMs)
+    : rows;
+
   // Devolve {valor, timestamp} em ordem cronológica (antigo → recente) para o
   // gráfico — o timestamp permite construir a escala do eixo de tempo.
-  return (Array.isArray(rows) ? (rows as any[]) : [])
+  return historyRows
     .map((row): MetricHistoryPoint => {
-      const t = Date.parse(row?.measured_at ?? row?.created_at ?? "");
+      const t = getHistoryPointTimestamp(row, endpoint, startMs, endMs);
       if (isBP) {
         const sys = Number(row?.value ?? 0);
         const dia = Number(row?.value_secondary ?? 0);
-        return { value: Math.round((sys + dia) / 2), t };
+        return { value: Math.round((sys + dia) / 2), t: t ?? NaN };
       }
       const value = Number(row?.value ?? 0);
-      return { value: endpoint === "sleep" ? Math.round(value * 10) / 10 : value, t };
+      return {
+        value: endpoint === "sleep" ? Math.round(value * 10) / 10 : value,
+        t: t ?? NaN,
+      };
     })
-    .filter((p) => Number.isFinite(p.value) && Number.isFinite(p.t));
+    .filter((p, index) => {
+      if (!Number.isFinite(p.value) || !Number.isFinite(p.t)) return false;
+      if (!isCumulativeEndpoint(endpoint)) {
+        return p.t >= startMs && p.t <= endMs;
+      }
+
+      const row = historyRows[index];
+      const startTime = parseTimestamp(row?.start_time);
+      const endTime = parseTimestamp(row?.end_time);
+      if (
+        startTime !== null &&
+        endTime !== null &&
+        endTime - startTime > MAX_DAILY_RECORD_MS
+      ) {
+        return false;
+      }
+      return p.t >= startMs && p.t <= endMs;
+    })
+    .sort((a, b) => a.t - b.t);
 }
 
 export function useMetricHistory(
@@ -957,7 +1195,7 @@ export function useMetricHistory(
   const patientScope =
     targetPatientId === null
       ? "none"
-      : normalizeTargetPatientId(targetPatientId) ?? "self";
+      : (normalizeTargetPatientId(targetPatientId) ?? "self");
 
   return useQuery({
     queryKey: [endpoint, "history", range, patientScope],
