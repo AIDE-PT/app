@@ -13,7 +13,9 @@ import {
 } from "../surface/surfaceStyles";
 import AddIcon from "../svg/AdicionarIcon";
 import CalendarIcon from "../svg/HistoricoDiarioIcon";
+import NotificationBell from "../svg/NotificationBell";
 import ProfileIcon from "../svg/PerfilIcon";
+import SettingsIcon from "../svg/Settings";
 
 interface navBarProps {
   dark?: boolean;
@@ -50,6 +52,7 @@ const Navbar = ({
     overflow: "hidden",
   });
   const canUseAiderTools = profileType !== "cuidado";
+  const isCuidado = profileType === "cuidado";
 
   return (
     <>
@@ -143,6 +146,25 @@ const Navbar = ({
             </TouchableOpacity>
           )}
 
+          {isCuidado && (
+            <TouchableOpacity
+              onPress={() => router.push("/notificacoes")}
+              disabled={disableNavigation}
+              style={[
+                styles.navButton,
+                disableNavigation
+                  ? [navButtonSurface, { opacity: 0.45 }]
+                  : navButtonSurface,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Notificacoes"
+              accessibilityHint="Abre a lista de notificacoes."
+              accessibilityState={{ disabled: disableNavigation }}
+            >
+              <NotificationBell color={iconColor} size={navIconSize} />
+            </TouchableOpacity>
+          )}
+
           <TouchableOpacity
             onPress={() => router.push("/definicoes")}
             disabled={disableNavigation}
@@ -153,11 +175,19 @@ const Navbar = ({
                 : navButtonSurface,
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Perfil"
-            accessibilityHint="Abre o perfil e definições."
+            accessibilityLabel={isCuidado ? "Definicoes" : "Perfil"}
+            accessibilityHint={
+              isCuidado
+                ? "Abre as definições da aplicação."
+                : "Abre o perfil e definições."
+            }
             accessibilityState={{ disabled: disableNavigation }}
           >
-            <ProfileIcon color={iconColor} size={navIconSize} />
+            {isCuidado ? (
+              <SettingsIcon color={iconColor} size={navIconSize} />
+            ) : (
+              <ProfileIcon color={iconColor} size={navIconSize} />
+            )}
           </TouchableOpacity>
         </View>
       </View>
