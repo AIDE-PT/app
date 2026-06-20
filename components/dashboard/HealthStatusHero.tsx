@@ -186,7 +186,7 @@ export default function HealthStatusHero({
     outputRange: [-waveWidth, 0],
   });
 
-  const CARD_HEIGHT = 300;
+  const CARD_HEIGHT = 340;
 
   // badge shift = half of (button width + gap) so badge appears centered when button is hidden
   // button (~170px) + gap (16px) = 186px → half = 93px
@@ -412,12 +412,14 @@ const styles = StyleSheet.create({
   container: {
     marginHorizontal: 0,
     marginTop: 32,
-    marginBottom: 12,
+    marginBottom: 28,
+    zIndex: 1,
   },
   card: {
     borderRadius: 0,
     overflow: "hidden",
     position: "relative",
+    zIndex: 1,
   },
   waveContainerTop: {
     position: "absolute",

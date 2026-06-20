@@ -1,3 +1,4 @@
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTheme } from "@/hooks/useTheme";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
@@ -12,7 +13,9 @@ import {
 } from "../surface/surfaceStyles";
 import AddIcon from "../svg/AdicionarIcon";
 import CalendarIcon from "../svg/HistoricoDiarioIcon";
+import NotificationBell from "../svg/NotificationBell";
 import ProfileIcon from "../svg/PerfilIcon";
+import SettingsIcon from "../svg/Settings";
 
 interface navBarProps {
   dark?: boolean;
@@ -33,6 +36,7 @@ const Navbar = ({
   const [isModalVisible, setModalVisible] = useState(false);
   const router = useRouter();
   const { isDark } = useTheme();
+  const { profileType } = useUserProfile();
 
   // Use prop if provided, otherwise use global theme
   const dark = darkProp !== undefined ? darkProp : isDark;
@@ -47,6 +51,8 @@ const Navbar = ({
     borderRadius: surfaceRadius.lg,
     overflow: "hidden",
   });
+  const canUseAiderTools = profileType !== "cuidado";
+  const isCuidado = profileType === "cuidado";
 
   return (
     <>
@@ -109,32 +115,55 @@ const Navbar = ({
             <CalendarIcon color={iconColor} size={navIconSize} />
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={() => router.push("/notas" as never)}
-            style={[styles.navButton, navButtonSurface]}
-            accessibilityRole="button"
-            accessibilityLabel="Notas"
-            accessibilityHint="Abre as notas colaborativas."
-          >
-            <Feather name="file-text" size={22} color={iconColor} />
-          </TouchableOpacity>
+          {canUseAiderTools && (
+            <TouchableOpacity
+              onPress={() => router.push("/notas" as never)}
+              style={[styles.navButton, navButtonSurface]}
+              accessibilityRole="button"
+              accessibilityLabel="Notas"
+              accessibilityHint="Abre as notas colaborativas."
+            >
+              <Feather name="file-text" size={22} color={iconColor} />
+            </TouchableOpacity>
+          )}
 
-          <TouchableOpacity
-            onPress={() => router.push("/report" as never)}
-            disabled={disableNavigation}
-            style={[
-              styles.navButton,
-              disableNavigation
-                ? [navButtonSurface, { opacity: 0.45 }]
-                : navButtonSurface,
-            ]}
-            accessibilityRole="button"
-            accessibilityLabel="Relatório"
-            accessibilityHint="Abre o gerador de relatórios."
-            accessibilityState={{ disabled: disableNavigation }}
-          >
-            <Feather name="clipboard" size={22} color={iconColor} />
-          </TouchableOpacity>
+          {canUseAiderTools && (
+            <TouchableOpacity
+              onPress={() => router.push("/report" as never)}
+              disabled={disableNavigation}
+              style={[
+                styles.navButton,
+                disableNavigation
+                  ? [navButtonSurface, { opacity: 0.45 }]
+                  : navButtonSurface,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Relatório"
+              accessibilityHint="Abre o gerador de relatórios."
+              accessibilityState={{ disabled: disableNavigation }}
+            >
+              <Feather name="clipboard" size={22} color={iconColor} />
+            </TouchableOpacity>
+          )}
+
+          {isCuidado && (
+            <TouchableOpacity
+              onPress={() => router.push("/notificacoes")}
+              disabled={disableNavigation}
+              style={[
+                styles.navButton,
+                disableNavigation
+                  ? [navButtonSurface, { opacity: 0.45 }]
+                  : navButtonSurface,
+              ]}
+              accessibilityRole="button"
+              accessibilityLabel="Notificacoes"
+              accessibilityHint="Abre a lista de notificacoes."
+              accessibilityState={{ disabled: disableNavigation }}
+            >
+              <NotificationBell color={iconColor} size={navIconSize} />
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             onPress={() => router.push("/definicoes")}
@@ -146,11 +175,19 @@ const Navbar = ({
                 : navButtonSurface,
             ]}
             accessibilityRole="button"
-            accessibilityLabel="Perfil"
-            accessibilityHint="Abre o perfil e definições."
+            accessibilityLabel={isCuidado ? "Definicoes" : "Perfil"}
+            accessibilityHint={
+              isCuidado
+                ? "Abre as definições da aplicação."
+                : "Abre o perfil e definições."
+            }
             accessibilityState={{ disabled: disableNavigation }}
           >
-            <ProfileIcon color={iconColor} size={navIconSize} />
+            {isCuidado ? (
+              <SettingsIcon color={iconColor} size={navIconSize} />
+            ) : (
+              <ProfileIcon color={iconColor} size={navIconSize} />
+            )}
           </TouchableOpacity>
         </View>
       </View>

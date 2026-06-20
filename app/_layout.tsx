@@ -1,8 +1,9 @@
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ConsentPrivacyProvider } from "@/contexts/ConsentPrivacyContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
+import { registerDevicePushToken } from "@/src/services/pushNotifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { useFonts } from "expo-font";
@@ -27,6 +28,23 @@ Notifications.setNotificationHandler({
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Ignore race-condition errors if splash is already hidden.
 });
+
+function PushNotificationRegistration() {
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (isLoading || !user?.id) return;
+
+    registerDevicePushToken(user.id).catch((error) => {
+      console.warn(
+        "[PushNotifications] Failed to register device token",
+        error,
+      );
+    });
+  }, [isLoading, user?.id]);
+
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -93,6 +111,7 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
+          <PushNotificationRegistration />
           <ConsentPrivacyProvider>
             <UserProfileProvider>
               <Stack screenOptions={{ headerShown: false }}>

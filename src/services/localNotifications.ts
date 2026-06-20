@@ -1,7 +1,7 @@
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
+import { ensureSOSNotificationChannel } from "./pushNotifications";
 
-const SOS_CHANNEL_ID = "sos-alerts";
 const DATA_ENTRY_CHANNEL_ID = "health-data-entry";
 
 async function ensureAndroidChannel(
@@ -16,7 +16,6 @@ async function ensureAndroidChannel(
     importance,
     vibrationPattern: [0, 200, 100, 200],
     lockscreenVisibility: Notifications.AndroidNotificationVisibility.PUBLIC,
-    sound: "default",
   });
 }
 
@@ -50,17 +49,12 @@ export async function sendLocalSOSNotification() {
     throw new Error("Notifications permission denied.");
   }
 
-  await ensureAndroidChannel(
-    SOS_CHANNEL_ID,
-    "SOS Alerts",
-    Notifications.AndroidImportance.MAX,
-  );
+  await ensureSOSNotificationChannel();
 
   await Notifications.scheduleNotificationAsync({
     content: {
       title: "SOS Ativado",
       body: "Pedido de socorro enviado a partir deste dispositivo.",
-      sound: "default",
       priority: Notifications.AndroidNotificationPriority.MAX,
     },
     trigger: null,
@@ -113,7 +107,6 @@ export async function sendLocalDataEntryNotification({
     content: {
       title: `Novo dado recebido: ${metricLabel}`,
       body: `Valor: ${valueText}${measuredAtSuffix}.`,
-      sound: "default",
       priority: Notifications.AndroidNotificationPriority.HIGH,
     },
     trigger: null,
