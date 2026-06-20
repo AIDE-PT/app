@@ -1241,6 +1241,7 @@ export function WidgetWrapper({
     const simpleCopy = getSuperSimpleCopy(metricType, status);
     const compactStatusLabel = getCompactStatusLabel(status);
     const meterTrack = isDark ? "rgba(255,255,255,0.14)" : "#E2E8F0";
+    const resizeControlInset = 34;
 
     if (is11) {
       return (
@@ -1297,7 +1298,10 @@ export function WidgetWrapper({
           ]}
           className={`${bgColor} rounded-[20px] p-3 border ${borderColor} overflow-hidden`}
         >
-          <View className="flex-row items-center justify-between">
+          <View
+            className="flex-row items-center justify-between"
+            style={{ paddingRight: resizeControlInset }}
+          >
             <View className="flex-row items-center gap-1.5 flex-1">
               {icon}
               <Text
@@ -1361,7 +1365,10 @@ export function WidgetWrapper({
         ]}
         className={`${bgColor} rounded-[20px] p-3 border ${borderColor} overflow-hidden`}
       >
-        <View className="flex-row items-center justify-between">
+        <View
+          className="flex-row items-center justify-between"
+          style={{ paddingRight: resizeControlInset }}
+        >
           <View className="flex-row items-center gap-1.5">
             {icon}
             <Text

@@ -8,6 +8,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
+  Alert as RNAlert,
   Animated,
   GestureResponderEvent,
   LayoutAnimation,
@@ -655,7 +656,7 @@ export default function EditableDashboard({
   const TOP_BAR_HEIGHT = 30;
   const TOP_BAR_CONTENT_HEIGHT = 90;
   const heroTopExtension = notEditable ? 0 : insets.top + TOP_BAR_HEIGHT;
- 
+
   const { data: alerts = [] } = useQuery<Alert[]>({
     queryKey: ["alerts"],
     queryFn: fetchAlerts,
