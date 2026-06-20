@@ -38,9 +38,6 @@ const MAX_RETRIES = 3;
 /** Espera entre tentativas em ms. */
 const RETRY_DELAY_MS = 2000;
 
-/** Janela de tempo do primeiro sync (dias atrás).
- *  Mantido curto (1 dia) para evitar que o sync inicial agregue múltiplos dias
- *  numa única linha — o que inflacionaria o total de passos. */
 const INITIAL_SYNC_DAYS = 30;
 const BACKGROUND_READ_PERMISSION =
   "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND";
@@ -373,11 +370,7 @@ async function isAiderProfile(userId: string): Promise<boolean> {
     .eq("id", userRow.user_type_id)
     .maybeSingle();
 
-  return (
-    String(userType?.designation ?? "")
-      .trim()
-      .toLowerCase() === "aider"
-  );
+  return String(userType?.designation ?? "").trim().toLowerCase() === "aider";
 }
 
 // ─── Leitura do Health Connect ─────────────────────────────────────────────────
@@ -415,76 +408,27 @@ async function readHealthRecords(
       }
 
       case "SleepSession": {
-        // Multiple apps (Samsung Health, Garmin, etc.) can record the same
-        // sleep period independently — naive sum would show 16h for one 8h night.
-        // Non-overlapping sweep: prefer shorter sessions (more granular stages).
-        type SleepInterval = { startTime: number; endTime: number };
-        const sessions: SleepInterval[] = (
-          records as RecordResult<"SleepSession">[]
-        )
-          .map((r) => ({
-            startTime: new Date(r.startTime).getTime(),
-            endTime: new Date(r.endTime).getTime(),
-          }))
-          .filter((r) => r.endTime > r.startTime);
-        if (sessions.length === 0) return null;
-        sessions.sort((a, b) =>
-          a.startTime !== b.startTime
-            ? a.startTime - b.startTime
-            : a.endTime - a.startTime - (b.endTime - b.startTime),
+        console.log(
+          "[HealthSync] SleepSession records[0]:",
+          JSON.stringify(records[0], null, 2),
         );
-        let coveredUpTo = -Infinity;
-        let totalMs = 0;
-        for (const s of sessions) {
-          if (s.startTime >= coveredUpTo) {
-            totalMs += s.endTime - s.startTime;
-            coveredUpTo = s.endTime;
-          } else if (s.endTime > coveredUpTo) {
-            totalMs += s.endTime - coveredUpTo;
-            coveredUpTo = s.endTime;
-          }
-        }
-        const hours = Math.round((totalMs / (1000 * 60 * 60)) * 10) / 10;
-        return hours > 0 ? { duration: hours, count: sessions.length } : null;
+        const total = records.reduce((sum, r) => {
+          const s = r as RecordResult<"SleepSession">;
+          console.log("[HealthSync] sleep record:", JSON.stringify(s, null, 2));
+          const start = new Date(s.startTime).getTime();
+          const end = new Date(s.endTime).getTime();
+          return sum + (end - start) / (1000 * 60 * 60);
+        }, 0);
+        return total > 0
+          ? { duration: Math.round(total * 10) / 10, count: records.length }
+          : null;
       }
       case "Steps": {
-        // Health Connect returns records from ALL sources (phone, watch, 3rd-party apps).
-        // These overlap in time, so a naive sum massively overcounts.
-        // Fix: sort by startTime then by window size (shortest first = most granular),
-        // then sweep and only count time segments not already covered.
-        type StepInterval = {
-          startTime: number;
-          endTime: number;
-          count: number;
-        };
-        const intervals: StepInterval[] = (records as RecordResult<"Steps">[])
-          .map((r) => ({
-            startTime: new Date(r.startTime).getTime(),
-            endTime: new Date(r.endTime).getTime(),
-            count: r.count || 0,
-          }))
-          .filter((r) => r.endTime > r.startTime && r.count > 0);
-        if (intervals.length === 0) return null;
-        intervals.sort((a, b) =>
-          a.startTime !== b.startTime
-            ? a.startTime - b.startTime
-            : a.endTime - a.startTime - (b.endTime - b.startTime),
+        const total = records.reduce(
+          (sum, r) => sum + ((r as RecordResult<"Steps">).count || 0),
+          0,
         );
-        let coveredUpTo = -Infinity;
-        let total = 0;
-        for (const r of intervals) {
-          if (r.startTime >= coveredUpTo) {
-            total += r.count;
-            coveredUpTo = r.endTime;
-          } else if (r.endTime > coveredUpTo) {
-            const uncoveredFraction =
-              (r.endTime - coveredUpTo) / (r.endTime - r.startTime);
-            total += Math.round(r.count * uncoveredFraction);
-            coveredUpTo = r.endTime;
-          }
-          // else: fully contained in covered range → skip
-        }
-        return total > 0 ? { total, days: intervals.length } : null;
+        return total > 0 ? { total, days: records.length } : null;
       }
 
       case "BloodPressure": {
@@ -521,44 +465,16 @@ async function readHealthRecords(
       }
 
       case "TotalCaloriesBurned": {
-        // Same overlap problem as Steps: multiple sources (phone, watch, apps)
-        // can each record calories for the same time interval.
-        // Non-overlapping sweep to avoid double-counting.
-        type CalInterval = {
-          startTime: number;
-          endTime: number;
-          kcal: number;
-        };
-        const intervals: CalInterval[] = (
-          records as RecordResult<"TotalCaloriesBurned">[]
-        )
-          .map((r) => ({
-            startTime: new Date(r.startTime).getTime(),
-            endTime: new Date(r.endTime).getTime(),
-            kcal: r.energy?.inKilocalories || 0,
-          }))
-          .filter((r) => r.endTime > r.startTime && r.kcal > 0);
-        if (intervals.length === 0) return null;
-        intervals.sort((a, b) =>
-          a.startTime !== b.startTime
-            ? a.startTime - b.startTime
-            : a.endTime - a.startTime - (b.endTime - b.startTime),
+        const total = records.reduce(
+          (sum, r) =>
+            sum +
+            ((r as RecordResult<"TotalCaloriesBurned">).energy
+              ?.inKilocalories || 0),
+          0,
         );
-        let coveredUpTo = -Infinity;
-        let total = 0;
-        for (const r of intervals) {
-          if (r.startTime >= coveredUpTo) {
-            total += r.kcal;
-            coveredUpTo = r.endTime;
-          } else if (r.endTime > coveredUpTo) {
-            const uncoveredFraction =
-              (r.endTime - coveredUpTo) / (r.endTime - r.startTime);
-            total += r.kcal * uncoveredFraction;
-            coveredUpTo = r.endTime;
-          }
-        }
-        const rounded = Math.round(total);
-        return rounded > 0 ? { total: rounded, days: intervals.length } : null;
+        return total > 0
+          ? { total: Math.round(total), days: records.length }
+          : null;
       }
 
       default:
@@ -684,7 +600,6 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   const pushRow = async (
     metric: HealthRecordType,
     row: Omit<BiometricDataInsert, "patient_id" | "biometric_data_type_id">,
-    externalIdOverride?: string,
   ) => {
     const metricName = BIOMETRIC_TYPE_NAMES[metric];
     const biometricDataTypeId = await getBiometricDataTypeIdByName(metricName);
@@ -692,9 +607,7 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
       patient_id: patientId,
       biometric_data_type_id: biometricDataTypeId,
       source_app: "health_connect",
-      external_id:
-        externalIdOverride ??
-        buildExternalId(metricName, patientId, snapshot.window),
+      external_id: buildExternalId(metricName, patientId, snapshot.window),
       last_modified: nowIso,
       ...row,
     });
@@ -717,19 +630,12 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   if (snapshot.steps) {
-    // Use a day-keyed external_id so each calendar day has exactly one row.
-    // Consecutive syncs on the same day upsert the row instead of creating duplicates.
-    const dayKey = snapshot.window.end.slice(0, 10); // "YYYY-MM-DD"
-    await pushRow(
-      "Steps",
-      {
-        value: snapshot.steps.total,
-        measured_at: snapshot.timestamp,
-        start_time: `${dayKey}T00:00:00.000Z`,
-        end_time: `${dayKey}T23:59:59.999Z`,
-      },
-      `health_connect:${patientId}:steps:daily:${dayKey}`,
-    );
+    await pushRow("Steps", {
+      value: snapshot.steps.total,
+      measured_at: snapshot.timestamp,
+      start_time: snapshot.window.start,
+      end_time: snapshot.window.end,
+    });
   }
 
   if (
@@ -764,32 +670,21 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   if (snapshot.calories) {
-    const dayKey = snapshot.window.end.slice(0, 10);
-    await pushRow(
-      "TotalCaloriesBurned",
-      {
-        value: snapshot.calories.total,
-        measured_at: snapshot.timestamp,
-        start_time: `${dayKey}T00:00:00.000Z`,
-        end_time: `${dayKey}T23:59:59.999Z`,
-      },
-      `health_connect:${patientId}:calories:daily:${dayKey}`,
-    );
+    await pushRow("TotalCaloriesBurned", {
+      value: snapshot.calories.total,
+      measured_at: snapshot.timestamp,
+      start_time: snapshot.window.start,
+      end_time: snapshot.window.end,
+    });
   }
 
   if (snapshot.sleep) {
-    // Use the start day as the night key (a session beginning on day X belongs to night X).
-    const nightKey = snapshot.window.start.slice(0, 10);
-    await pushRow(
-      "SleepSession",
-      {
-        value: snapshot.sleep.duration,
-        measured_at: snapshot.timestamp,
-        start_time: snapshot.window.start,
-        end_time: snapshot.window.end,
-      },
-      `health_connect:${patientId}:sleep:daily:${nightKey}`,
-    );
+    await pushRow("SleepSession", {
+      value: snapshot.sleep.duration, // horas dormidas
+      measured_at: snapshot.timestamp,
+      start_time: snapshot.window.start,
+      end_time: snapshot.window.end,
+    });
   }
 
   if (snapshot.sleep) {
