@@ -22,29 +22,22 @@ export default function DashboardMetricWidget({
 }: Props) {
   const isBP = type === "bloodPressure";
   const { data, isLoading } = useHealthMetric(endpoint, isBP, patientId);
-  const isStepsWidget = type === "steps";
 
   const styles = METRIC_STYLES[type];
 
   useEffect(() => {
-    if (!isStepsWidget) return;
-
-    console.log("[StepsWidget] state", {
+    console.log("[DASHBOARD CARD]", {
       endpoint,
+      type,
       variant,
       isLoading,
       hasData: Boolean(data),
+      displayValue: data?.displayValue ?? null,
+      historyLength: data?.history?.length ?? 0,
+      historyPreview: data?.history?.slice(0, 6) ?? [],
+      latest: data?.latest ?? null,
     });
-
-    if (!data) return;
-
-    console.log("[StepsWidget] payload", {
-      displayValue: data.displayValue,
-      historyLength: data.history.length,
-      latest: data.latest,
-      latestBucketsPreview: data.history.slice(0, 6),
-    });
-  }, [data, endpoint, isLoading, isStepsWidget, variant]);
+  }, [data, endpoint, type, isLoading, variant]);
 
   // 1. Enquanto carrega
   if (isLoading) {

@@ -1,8 +1,8 @@
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTheme } from "@/hooks/useTheme";
-import React from "react";
-import { Platform, StyleSheet, TouchableOpacity, View } from "react-native";
-import ChoseCuidado from "../buttons/choseCuidado";
+import React, { useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import CuidadoModal from "../modals/CuidadoModal";
 import SOSButton from "../buttons/sosButton";
 import {
   getSurfaceStyle,
@@ -38,6 +38,7 @@ const TopBar = ({
 }: TopBarProps) => {
   const { isDark } = useTheme();
   const { profileType } = useUserProfile();
+  const [showModal, setShowModal] = useState(false);
 
   const iconColor = isDark ? "white" : "#000000";
   const topBarLayoutStyle = [
@@ -95,13 +96,33 @@ const TopBar = ({
         </>
       ) : (
         <>
-          <View className="flex-1" style={styles.selectorLayer}>
-            <ChoseCuidado
-              cuidados={cuidados}
-              selectedCuidado={selectedCuidado}
-              onSelect={onSelectCuidado}
-            />
-          </View>
+          <TouchableOpacity
+            onPress={() => setShowModal(true)}
+            activeOpacity={0.7}
+            className={`flex-1 mr-4 flex-row items-center justify-between rounded-2xl px-4 py-3 ${
+              isDark ? "bg-white/10" : "bg-white/70"
+            }`}
+            style={{ boxShadow: "0 1px 4px 0 rgba(0,0,0,0.08)" }}
+          >
+            <Text
+              className={`font-semibold flex-1 ${isDark ? "text-white" : "text-slate-900"}`}
+              numberOfLines={1}
+            >
+              {selectedCuidado?.name ?? "Selecionar paciente"}
+            </Text>
+            <Text className={isDark ? "text-white/50" : "text-slate-400"}>
+              ▾
+            </Text>
+          </TouchableOpacity>
+          <CuidadoModal
+            visible={showModal}
+            onClose={() => setShowModal(false)}
+            cuidados={cuidados}
+            onSelect={(c) => {
+              onSelectCuidado(c);
+              setShowModal(false);
+            }}
+          />
 
           <View style={styles.actions}>
             <TouchableOpacity

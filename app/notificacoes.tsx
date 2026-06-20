@@ -1,19 +1,13 @@
 import LightBackground from "@/components/DotBackground";
 import { useTheme } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
-import {
-  QueryClient,
-  QueryClientProvider,
-  useMutation,
-  useQuery,
-} from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axios from "axios";
 import { router } from "expo-router";
 import React, { useState } from "react";
 import {
   ActivityIndicator,
   Modal,
-  Platform,
   Pressable,
   RefreshControl,
   ScrollView,
@@ -23,12 +17,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
 
-// API Configuration
-const queryClient = new QueryClient();
-const API_BASE = Platform.select({
-  android: "http://10.0.2.2:3000",
-  default: "http://localhost:3000",
-});
+import { LOCAL_API_BASE as API_BASE } from "@/constants/api";
 
 // Types
 interface Alert {
@@ -352,9 +341,5 @@ const NotificationsContent = () => {
 };
 
 export default function NotificationsPage() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <NotificationsContent />
-    </QueryClientProvider>
-  );
+  return <NotificationsContent />;
 }

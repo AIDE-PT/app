@@ -13,7 +13,7 @@
  * de qualquer rendering ocorrer.
  */
 
-import { supabase } from "@/utils/supabase/client";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { sendLocalDataEntryNotification } from "@/src/services/localNotifications";
 import {
   getGrantedPermissions,
@@ -21,7 +21,7 @@ import {
   readRecords,
   type RecordResult,
 } from "react-native-health-connect";
-import { Platform } from "react-native";
+import { Platform, PermissionsAndroid } from "react-native";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
@@ -38,7 +38,9 @@ const MAX_RETRIES = 3;
 /** Espera entre tentativas em ms. */
 const RETRY_DELAY_MS = 2000;
 
-/** Janela de tempo do primeiro sync (dias atrás). */
+/** Janela de tempo do primeiro sync (dias atrás).
+ *  Mantido curto (1 dia) para evitar que o sync inicial agregue múltiplos dias
+ *  numa única linha — o que inflacionaria o total de passos. */
 const INITIAL_SYNC_DAYS = 30;
 const BACKGROUND_READ_PERMISSION =
   "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND";
@@ -260,11 +262,9 @@ async function checkPermissions(): Promise<boolean> {
 }
 
 async function checkBackgroundReadPermission(): Promise<boolean> {
+  if (Platform.OS !== "android") return false;
   try {
-    const granted = await getGrantedPermissions();
-    return Array.from(granted as unknown as Iterable<string>).includes(
-      BACKGROUND_READ_PERMISSION,
-    );
+    return await PermissionsAndroid.check(BACKGROUND_READ_PERMISSION as never);
   } catch {
     return false;
   }
@@ -305,7 +305,7 @@ async function getBiometricDataTypeIdByName(name: string): Promise<string> {
   const cached = biometricTypeIdCache.get(name);
   if (cached) return cached;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("biometric_data_types")
     .select("id")
     .eq("name", name)
@@ -329,7 +329,7 @@ async function ensureUserRowExists(
   email?: string | null,
   name?: string | null,
 ): Promise<void> {
-  const { error } = await supabase
+  const { error } = await getSupabaseClient()
     .from("users")
     .upsert(
       {
@@ -343,8 +343,41 @@ async function ensureUserRowExists(
     .maybeSingle();
 
   if (error) {
-    throw error;
+    // A linha do utilizador já é criada pelo trigger handle_new_user no signup,
+    // por isso este upsert é apenas best-effort. Se falhar (ex.: RLS sem política
+    // de INSERT neste ambiente), NÃO é fatal: a linha existe na mesma e o FK do
+    // biometric_data fica satisfeito. Não bloquear o sync por causa disto.
+    console.warn(
+      "[HealthSync] ensureUserRowExists ignorado (linha já existe via trigger):",
+      error.message,
+    );
   }
+}
+
+// Só perfis "cuidado" geram/enviam os próprios dados biométricos. Um "aider"
+// monitoriza pacientes e não deve sincronizar Health Connect próprio.
+// Devolve true apenas quando o perfil é POSITIVAMENTE "aider"; se o tipo for
+// desconhecido (user_type_id nulo), devolve false para não bloquear cuidados.
+async function isAiderProfile(userId: string): Promise<boolean> {
+  const { data: userRow, error: userError } = await getSupabaseClient()
+    .from("users")
+    .select("user_type_id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (userError || !userRow?.user_type_id) return false;
+
+  const { data: userType } = await getSupabaseClient()
+    .from("user_types")
+    .select("designation")
+    .eq("id", userRow.user_type_id)
+    .maybeSingle();
+
+  return (
+    String(userType?.designation ?? "")
+      .trim()
+      .toLowerCase() === "aider"
+  );
 }
 
 // ─── Leitura do Health Connect ─────────────────────────────────────────────────
@@ -382,27 +415,76 @@ async function readHealthRecords(
       }
 
       case "SleepSession": {
-        console.log(
-          "[HealthSync] SleepSession records[0]:",
-          JSON.stringify(records[0], null, 2),
+        // Multiple apps (Samsung Health, Garmin, etc.) can record the same
+        // sleep period independently — naive sum would show 16h for one 8h night.
+        // Non-overlapping sweep: prefer shorter sessions (more granular stages).
+        type SleepInterval = { startTime: number; endTime: number };
+        const sessions: SleepInterval[] = (
+          records as RecordResult<"SleepSession">[]
+        )
+          .map((r) => ({
+            startTime: new Date(r.startTime).getTime(),
+            endTime: new Date(r.endTime).getTime(),
+          }))
+          .filter((r) => r.endTime > r.startTime);
+        if (sessions.length === 0) return null;
+        sessions.sort((a, b) =>
+          a.startTime !== b.startTime
+            ? a.startTime - b.startTime
+            : a.endTime - a.startTime - (b.endTime - b.startTime),
         );
-        const total = records.reduce((sum, r) => {
-          const s = r as RecordResult<"SleepSession">;
-          console.log("[HealthSync] sleep record:", JSON.stringify(s, null, 2));
-          const start = new Date(s.startTime).getTime();
-          const end = new Date(s.endTime).getTime();
-          return sum + (end - start) / (1000 * 60 * 60);
-        }, 0);
-        return total > 0
-          ? { duration: Math.round(total * 10) / 10, count: records.length }
-          : null;
+        let coveredUpTo = -Infinity;
+        let totalMs = 0;
+        for (const s of sessions) {
+          if (s.startTime >= coveredUpTo) {
+            totalMs += s.endTime - s.startTime;
+            coveredUpTo = s.endTime;
+          } else if (s.endTime > coveredUpTo) {
+            totalMs += s.endTime - coveredUpTo;
+            coveredUpTo = s.endTime;
+          }
+        }
+        const hours = Math.round((totalMs / (1000 * 60 * 60)) * 10) / 10;
+        return hours > 0 ? { duration: hours, count: sessions.length } : null;
       }
       case "Steps": {
-        const total = records.reduce(
-          (sum, r) => sum + ((r as RecordResult<"Steps">).count || 0),
-          0,
+        // Health Connect returns records from ALL sources (phone, watch, 3rd-party apps).
+        // These overlap in time, so a naive sum massively overcounts.
+        // Fix: sort by startTime then by window size (shortest first = most granular),
+        // then sweep and only count time segments not already covered.
+        type StepInterval = {
+          startTime: number;
+          endTime: number;
+          count: number;
+        };
+        const intervals: StepInterval[] = (records as RecordResult<"Steps">[])
+          .map((r) => ({
+            startTime: new Date(r.startTime).getTime(),
+            endTime: new Date(r.endTime).getTime(),
+            count: r.count || 0,
+          }))
+          .filter((r) => r.endTime > r.startTime && r.count > 0);
+        if (intervals.length === 0) return null;
+        intervals.sort((a, b) =>
+          a.startTime !== b.startTime
+            ? a.startTime - b.startTime
+            : a.endTime - a.startTime - (b.endTime - b.startTime),
         );
-        return total > 0 ? { total, days: records.length } : null;
+        let coveredUpTo = -Infinity;
+        let total = 0;
+        for (const r of intervals) {
+          if (r.startTime >= coveredUpTo) {
+            total += r.count;
+            coveredUpTo = r.endTime;
+          } else if (r.endTime > coveredUpTo) {
+            const uncoveredFraction =
+              (r.endTime - coveredUpTo) / (r.endTime - r.startTime);
+            total += Math.round(r.count * uncoveredFraction);
+            coveredUpTo = r.endTime;
+          }
+          // else: fully contained in covered range → skip
+        }
+        return total > 0 ? { total, days: intervals.length } : null;
       }
 
       case "BloodPressure": {
@@ -439,16 +521,44 @@ async function readHealthRecords(
       }
 
       case "TotalCaloriesBurned": {
-        const total = records.reduce(
-          (sum, r) =>
-            sum +
-            ((r as RecordResult<"TotalCaloriesBurned">).energy
-              ?.inKilocalories || 0),
-          0,
+        // Same overlap problem as Steps: multiple sources (phone, watch, apps)
+        // can each record calories for the same time interval.
+        // Non-overlapping sweep to avoid double-counting.
+        type CalInterval = {
+          startTime: number;
+          endTime: number;
+          kcal: number;
+        };
+        const intervals: CalInterval[] = (
+          records as RecordResult<"TotalCaloriesBurned">[]
+        )
+          .map((r) => ({
+            startTime: new Date(r.startTime).getTime(),
+            endTime: new Date(r.endTime).getTime(),
+            kcal: r.energy?.inKilocalories || 0,
+          }))
+          .filter((r) => r.endTime > r.startTime && r.kcal > 0);
+        if (intervals.length === 0) return null;
+        intervals.sort((a, b) =>
+          a.startTime !== b.startTime
+            ? a.startTime - b.startTime
+            : a.endTime - a.startTime - (b.endTime - b.startTime),
         );
-        return total > 0
-          ? { total: Math.round(total), days: records.length }
-          : null;
+        let coveredUpTo = -Infinity;
+        let total = 0;
+        for (const r of intervals) {
+          if (r.startTime >= coveredUpTo) {
+            total += r.kcal;
+            coveredUpTo = r.endTime;
+          } else if (r.endTime > coveredUpTo) {
+            const uncoveredFraction =
+              (r.endTime - coveredUpTo) / (r.endTime - r.startTime);
+            total += r.kcal * uncoveredFraction;
+            coveredUpTo = r.endTime;
+          }
+        }
+        const rounded = Math.round(total);
+        return rounded > 0 ? { total: rounded, days: intervals.length } : null;
       }
 
       default:
@@ -549,7 +659,8 @@ async function notifySyncedEntries(
 }
 
 async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const { data: userData, error: userError } =
+    await getSupabaseClient().auth.getUser();
   if (userError) throw userError;
 
   const patientId = userData.user?.id;
@@ -573,6 +684,7 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   const pushRow = async (
     metric: HealthRecordType,
     row: Omit<BiometricDataInsert, "patient_id" | "biometric_data_type_id">,
+    externalIdOverride?: string,
   ) => {
     const metricName = BIOMETRIC_TYPE_NAMES[metric];
     const biometricDataTypeId = await getBiometricDataTypeIdByName(metricName);
@@ -580,7 +692,9 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
       patient_id: patientId,
       biometric_data_type_id: biometricDataTypeId,
       source_app: "health_connect",
-      external_id: buildExternalId(metricName, patientId, snapshot.window),
+      external_id:
+        externalIdOverride ??
+        buildExternalId(metricName, patientId, snapshot.window),
       last_modified: nowIso,
       ...row,
     });
@@ -603,12 +717,19 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   if (snapshot.steps) {
-    await pushRow("Steps", {
-      value: snapshot.steps.total,
-      measured_at: snapshot.timestamp,
-      start_time: snapshot.window.start,
-      end_time: snapshot.window.end,
-    });
+    // Use a day-keyed external_id so each calendar day has exactly one row.
+    // Consecutive syncs on the same day upsert the row instead of creating duplicates.
+    const dayKey = snapshot.window.end.slice(0, 10); // "YYYY-MM-DD"
+    await pushRow(
+      "Steps",
+      {
+        value: snapshot.steps.total,
+        measured_at: snapshot.timestamp,
+        start_time: `${dayKey}T00:00:00.000Z`,
+        end_time: `${dayKey}T23:59:59.999Z`,
+      },
+      `health_connect:${patientId}:steps:daily:${dayKey}`,
+    );
   }
 
   if (
@@ -643,21 +764,32 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   if (snapshot.calories) {
-    await pushRow("TotalCaloriesBurned", {
-      value: snapshot.calories.total,
-      measured_at: snapshot.timestamp,
-      start_time: snapshot.window.start,
-      end_time: snapshot.window.end,
-    });
+    const dayKey = snapshot.window.end.slice(0, 10);
+    await pushRow(
+      "TotalCaloriesBurned",
+      {
+        value: snapshot.calories.total,
+        measured_at: snapshot.timestamp,
+        start_time: `${dayKey}T00:00:00.000Z`,
+        end_time: `${dayKey}T23:59:59.999Z`,
+      },
+      `health_connect:${patientId}:calories:daily:${dayKey}`,
+    );
   }
 
   if (snapshot.sleep) {
-    await pushRow("SleepSession", {
-      value: snapshot.sleep.duration, // horas dormidas
-      measured_at: snapshot.timestamp,
-      start_time: snapshot.window.start,
-      end_time: snapshot.window.end,
-    });
+    // Use the start day as the night key (a session beginning on day X belongs to night X).
+    const nightKey = snapshot.window.start.slice(0, 10);
+    await pushRow(
+      "SleepSession",
+      {
+        value: snapshot.sleep.duration,
+        measured_at: snapshot.timestamp,
+        start_time: snapshot.window.start,
+        end_time: snapshot.window.end,
+      },
+      `health_connect:${patientId}:sleep:daily:${nightKey}`,
+    );
   }
 
   if (snapshot.sleep) {
@@ -673,7 +805,7 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   // upsert — se o external_id já existir, atualiza em vez de duplicar
-  const { error } = await supabase
+  const { error } = await getSupabaseClient()
     .from("biometric_data")
     .upsert(rows, { onConflict: "external_id" });
 
@@ -689,6 +821,17 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
 async function runSyncLogic(
   context: "foreground" | "background" = "foreground",
 ): Promise<boolean> {
+  // Só perfis "cuidado" enviam os próprios dados. Se for um "aider", nem vale a
+  // pena ler o Health Connect nem tentar escrever — sai já.
+  const { data: authData } = await getSupabaseClient().auth.getUser();
+  const authUserId = authData.user?.id;
+  if (authUserId && (await isAiderProfile(authUserId))) {
+    console.log(
+      "[HealthSync] Perfil 'aider' — sync ignorado (apenas perfis 'cuidado' enviam os próprios dados).",
+    );
+    return false;
+  }
+
   if (context === "background") {
     const hasBackgroundRead = await checkBackgroundReadPermission();
     if (!hasBackgroundRead) {
@@ -839,6 +982,70 @@ export async function runSyncNow(): Promise<void> {
     console.error("[HealthSync] ❌ Erro no sync Automatico:", err);
     throw err;
   }
+}
+
+/**
+ * Força um sync completo dia a dia dos últimos INITIAL_SYNC_DAYS dias,
+ * ignorando o lastSyncTime guardado. Garante pelo menos 1 snapshot por dia
+ * (janela 00:00–23:59 de cada dia). Os dados existentes na BD são actualizados
+ * via upsert (external_id), sem duplicações.
+ * Útil para repopular dados após limpeza manual no Supabase.
+ */
+export async function forceSyncAll(): Promise<void> {
+  // Verificações de perfil e permissões (mesmas do runSyncLogic)
+  const { data: authData } = await getSupabaseClient().auth.getUser();
+  const authUserId = authData.user?.id;
+  if (authUserId && (await isAiderProfile(authUserId))) {
+    console.log("[HealthSync] forceSyncAll ignorado — perfil 'aider'.");
+    return;
+  }
+
+  const isInitialized = await initialize();
+  if (!isInitialized) {
+    throw new Error("Health Connect não disponível.");
+  }
+
+  const hasPermissions = await checkPermissions();
+  if (!hasPermissions) {
+    throw new Error("Permissões do Health Connect insuficientes.");
+  }
+
+  const now = new Date();
+  let successCount = 0;
+
+  for (let d = INITIAL_SYNC_DAYS; d >= 0; d--) {
+    const dayStart = new Date(now);
+    dayStart.setDate(dayStart.getDate() - d);
+    dayStart.setHours(0, 0, 0, 0);
+    dayStart.setMilliseconds(0);
+
+    const dayEnd = new Date(dayStart);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    // Não ir além do momento actual
+    if (dayEnd > now) dayEnd.setTime(now.getTime());
+
+    try {
+      const snapshot = await collectHealthSnapshot(dayStart, dayEnd);
+      await withRetry(() => sendSnapshotToSupabase(snapshot));
+      successCount++;
+      console.log(
+        `[HealthSync] forceSyncAll ✅ dia ${INITIAL_SYNC_DAYS - d + 1}/${INITIAL_SYNC_DAYS + 1}: ${dayStart.toISOString().slice(0, 10)}`,
+      );
+    } catch (err) {
+      console.warn(
+        `[HealthSync] forceSyncAll ⚠️ falha no dia ${dayStart.toISOString().slice(0, 10)}:`,
+        err,
+      );
+    }
+  }
+
+  // Actualizar lastSyncTime para que o sync incremental continue a partir de agora
+  await setLastSyncEndTime(now.toISOString());
+
+  console.log(
+    `[HealthSync] forceSyncAll concluído — ${successCount}/${INITIAL_SYNC_DAYS + 1} dias sincronizados.`,
+  );
 }
 
 export { TASK_NAME };
