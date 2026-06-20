@@ -1,6 +1,7 @@
 import BackButton from "@/components/buttons/backButton";
 import { Button } from "@/components/buttons/button";
 import LightBackground from "@/components/DotBackground";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTheme } from "@/hooks/useTheme";
 import {
   getHealthConnectStatus,
@@ -10,6 +11,7 @@ import {
   type HealthConnectStatus,
 } from "@/src/services/healthConnect";
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -25,6 +27,14 @@ type RequestState = "idle" | "pending" | "success" | "denied" | "error";
 
 const HealthConnectScreen = () => {
   const { isDark, colors } = useTheme();
+  const { profileType } = useUserProfile();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (profileType === "aider") {
+      router.replace("/testDashboard");
+    }
+  }, [profileType, router]);
   const [status, setStatus] = useState<HealthConnectStatus | null>(null);
   const [isLoadingStatus, setIsLoadingStatus] = useState(true);
   const [isRequesting, setIsRequesting] = useState(false);

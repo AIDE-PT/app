@@ -1,7 +1,13 @@
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTheme } from "@/hooks/useTheme";
 import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import CuidadoModal from "../modals/CuidadoModal";
 import SOSButton from "../buttons/sosButton";
 import {

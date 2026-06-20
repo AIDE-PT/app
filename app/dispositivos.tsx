@@ -1,3 +1,4 @@
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import React, { useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -79,6 +80,9 @@ const ALL_DEVICES: Device[] = [
 ];
 
 export default function DispositivosPage() {
+  const { profileType } = useUserProfile();
+  const isAider = profileType === "aider";
+
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [connectionModalVisible, setConnectionModalVisible] = useState(false);
   const [managementModalVisible, setManagementModalVisible] = useState(false);
@@ -102,8 +106,14 @@ export default function DispositivosPage() {
     { id: "fitbit", name: "Fitbit", isDataSharingEnabled: true },
   ]);
 
+  const visibleDevices = isAider
+    ? addedDevices.filter((d) => d.id !== "health-connect")
+    : addedDevices;
+
   const availableDevices = ALL_DEVICES.filter(
-    (device) => !addedDevices.find((added) => added.id === device.id),
+    (device) =>
+      !addedDevices.find((added) => added.id === device.id) &&
+      !(isAider && device.id === "health-connect"),
   );
 
   const { isDark, colors } = useTheme();
@@ -172,7 +182,7 @@ export default function DispositivosPage() {
 
             {/* Grid */}
             <View className="flex-row flex-wrap justify-between">
-              {addedDevices.map((device) => {
+              {visibleDevices.map((device) => {
                 return (
                   <TouchableOpacity
                     key={device.id}
