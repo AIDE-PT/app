@@ -1,8 +1,9 @@
 import LightBackground from "@/components/DotBackground";
+import InAppPopup from "@/components/feedback/InAppPopup";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTheme } from "@/hooks/useTheme";
-import { supabase } from "@/utils/supabase/client";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -34,6 +35,7 @@ export default function AssociarPage() {
   const [error, setError] = useState("");
   const [, setLastScan] = useState("");
   const [isAssociating, setIsAssociating] = useState(false);
+  const [successPopupVisible, setSuccessPopupVisible] = useState(false);
   const { isDark } = useTheme();
 
   const associateByEmail = async (rawEmail: string) => {
@@ -51,6 +53,7 @@ export default function AssociarPage() {
 
     setIsAssociating(true);
     try {
+      const supabase = getSupabaseClient();
       const { data: cuidadoUser, error: cuidadoError } = await supabase.rpc(
         "find_care_by_email",
         { p_email: normalizedEmail },
@@ -105,7 +108,7 @@ export default function AssociarPage() {
       }
 
       setError("");
-      router.push("/testDashboard");
+      setSuccessPopupVisible(true);
     } catch (associationError) {
       console.error("Erro na associacao:", associationError);
       setError("Erro inesperado ao associar contas.");
@@ -229,6 +232,17 @@ export default function AssociarPage() {
           </ScrollView>
         </KeyboardAvoidingView>
       </SafeAreaView>
+      <InAppPopup
+        visible={successPopupVisible}
+        title="Associacao concluida"
+        message="O cuidado ficou ligado a esta conta Aider com sucesso."
+        buttonLabel="Continuar"
+        isDark={isDark}
+        onClose={() => {
+          setSuccessPopupVisible(false);
+          router.push("/testDashboard");
+        }}
+      />
     </LightBackground>
   );
 }

@@ -66,6 +66,8 @@ type DataEntryNotificationOptions = {
   valueText: string;
   measuredAt?: string | null;
   requestPermissionIfNeeded?: boolean;
+  title?: string;
+  body?: string;
 };
 
 function formatMeasuredAt(measuredAt?: string | null): string {
@@ -85,6 +87,8 @@ export async function sendLocalDataEntryNotification({
   valueText,
   measuredAt,
   requestPermissionIfNeeded = true,
+  title,
+  body,
 }: DataEntryNotificationOptions) {
   const hasPermission = await ensureNotificationPermission({
     requestIfNeeded: requestPermissionIfNeeded,
@@ -105,8 +109,8 @@ export async function sendLocalDataEntryNotification({
 
   await Notifications.scheduleNotificationAsync({
     content: {
-      title: `Novo dado recebido: ${metricLabel}`,
-      body: `Valor: ${valueText}${measuredAtSuffix}.`,
+      title: title ?? `Novo dado recebido: ${metricLabel}`,
+      body: body ?? `Valor: ${valueText}${measuredAtSuffix}.`,
       priority: Notifications.AndroidNotificationPriority.HIGH,
     },
     trigger: null,

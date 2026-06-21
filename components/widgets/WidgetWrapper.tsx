@@ -1,7 +1,7 @@
 import { useTheme } from "@/hooks/useTheme";
 import { Feather } from "@expo/vector-icons";
 import React, { ReactNode } from "react";
-import { Dimensions, Text, View, ViewStyle } from "react-native";
+import { Dimensions, Text, TextStyle, View, ViewStyle } from "react-native";
 import Svg, {
   Circle,
   Defs,
@@ -21,6 +21,8 @@ const GRID_GAP = 12;
 const availableWidth = screenWidth - GRID_PADDING * 2;
 const COLUMN_WIDTH = (availableWidth - GRID_GAP * 2) / 3;
 const BRAND_BLUE = "#7C89FF";
+const WIDGET_TITLE_LIGHT = "#1A1A2E";
+const WIDGET_TITLE_DARK = "#FFFFFF";
 const DEFAULT_SEMANTIC = {
   success: "#4CD964",
   warning: "#FFCC00",
@@ -1230,6 +1232,11 @@ export function WidgetWrapper({
   const bgColor = bg || (isDark ? "bg-aide-dark-card" : "bg-white/90");
   const borderColor = isDark ? "border-white/10" : "border-gray-100";
   const textColor = isDark ? "#FFFFFF" : "#000746";
+  const widgetTitleColor = isDark ? WIDGET_TITLE_DARK : WIDGET_TITLE_LIGHT;
+  const widgetTitleStyle: TextStyle = {
+    color: widgetTitleColor,
+    fontWeight: isDark ? "600" : "700",
+  };
 
   const statusPalette = buildStatusPalette(colors.semantic, isDark);
   const status = metricType
@@ -1255,7 +1262,8 @@ export function WidgetWrapper({
           <View className="flex-row items-center gap-1.5">
             {icon}
             <Text
-              className={`flex-1 text-sm font-open-sans-semibold ${isDark ? "text-white/70" : "text-slate-500"}`}
+              className="flex-1 text-sm font-open-sans-semibold"
+              style={widgetTitleStyle}
               numberOfLines={1}
             >
               {title}
@@ -1305,7 +1313,8 @@ export function WidgetWrapper({
             <View className="flex-row items-center gap-1.5 flex-1">
               {icon}
               <Text
-                className={`text-sm font-open-sans-semibold ${isDark ? "text-white" : "text-slate-800"}`}
+                className="text-sm font-open-sans-semibold"
+                style={widgetTitleStyle}
                 numberOfLines={1}
               >
                 {title}
@@ -1372,7 +1381,8 @@ export function WidgetWrapper({
           <View className="flex-row items-center gap-1.5">
             {icon}
             <Text
-              className={`text-sm font-open-sans-semibold ${isDark ? "text-white" : "text-slate-800"}`}
+              className="text-sm font-open-sans-semibold"
+              style={widgetTitleStyle}
               numberOfLines={1}
             >
               {title}
@@ -1533,7 +1543,8 @@ export function WidgetWrapper({
         <View className="flex-row items-center gap-1 mb-1">
           {icon}
           <Text
-            className="text-aide-light-blue flex-1 text-sm font-open-sans-semibold tracking-wide"
+            className="flex-1 text-sm font-open-sans-semibold tracking-wide"
+            style={widgetTitleStyle}
             numberOfLines={1}
           >
             {title}
@@ -1583,7 +1594,8 @@ export function WidgetWrapper({
         <View className="flex-row items-center gap-1">
           {icon}
           <Text
-            className="text-aide-light-blue text-base font-open-sans-semibold tracking-wide"
+            className="text-base font-open-sans-semibold tracking-wide"
+            style={widgetTitleStyle}
             numberOfLines={1}
           >
             {title}
