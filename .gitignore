@@ -5,6 +5,11 @@
 # dependencies
 node_modules/
 
+# firebase credentials (never commit)
+google-services.json
+*firebase-adminsdk*.json
+
+
 # Expo
 .expo/
 dist/
@@ -34,6 +39,10 @@ yarn-error.*
 
 # local env files
 .env*.local
+
+# Firebase credentials (never commit)
+google-services.json
+*firebase-adminsdk*.json
 
 # typescript
 *.tsbuildinfo
