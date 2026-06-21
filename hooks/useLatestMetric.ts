@@ -11,6 +11,7 @@ const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 const MAX_DAILY_RECORD_MS = 26 * HOUR_MS;
 const MAX_REASONABLE_DAILY_STEPS = 100_000;
+const HISTORY_QUERY_LIMIT = 5000;
 
 type ApiMetricRecord = {
   timestamp?: string;
@@ -64,6 +65,7 @@ async function fetchMetricFromSupabaseByTypeNames(
   typeNames: string[],
   isBP: boolean,
   targetPatientId?: TargetPatientId,
+  endpoint?: string,
 ): Promise<MetricQueryData | null> {
   const patientId = await resolvePatientId(targetPatientId);
   if (!patientId) return null;
@@ -86,19 +88,22 @@ async function fetchMetricFromSupabaseByTypeNames(
 
   const { data: rows, error } = await getSupabaseClient()
     .from("biometric_data")
-    .select("value,value_secondary,measured_at,created_at")
+    .select("value,value_secondary,start_time,end_time,measured_at,created_at")
     .eq("patient_id", patientId)
     .in("biometric_data_type_id", typeIds)
     .order("measured_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false })
-    .limit(20);
+    .limit(100);
 
   if (error) {
     console.error("[useLatestMetric] metric query error", error);
     return null;
   }
 
-  const dataRows = Array.isArray(rows) ? (rows as any[]) : [];
+  const dataRows = (Array.isArray(rows) ? (rows as any[]) : [])
+    .filter((row) => isUsableMetricRow(row, endpoint))
+    .sort((a, b) => getLatestMetricTimestamp(b) - getLatestMetricTimestamp(a))
+    .slice(0, 20);
   if (!dataRows.length) return null;
 
   const latest = dataRows[0];
@@ -108,17 +113,22 @@ async function fetchMetricFromSupabaseByTypeNames(
       const dia = Number(row?.value_secondary ?? 0);
       return Math.round((sys + dia) / 2);
     }
-    return Number(row?.value ?? 0);
+    return normalizeMetricRowValue(endpoint, row);
   });
+
+  const latestValue = normalizeMetricRowValue(endpoint, latest);
 
   return {
     displayValue: isBP
       ? `${latest?.value ?? "--"}/${latest?.value_secondary ?? "--"}`
-      : `${latest?.value ?? 0}`,
+      : `${latestValue}`,
     history,
     latest: {
-      timestamp: latest?.measured_at ?? latest?.created_at ?? undefined,
-      value: latest?.value ?? undefined,
+      timestamp:
+        getMetricTimestampIso(latest, "latest") ??
+        latest?.created_at ??
+        undefined,
+      value: latestValue,
       systolic: isBP ? (latest?.value ?? undefined) : undefined,
       diastolic: isBP ? (latest?.value_secondary ?? undefined) : undefined,
     },
@@ -151,6 +161,103 @@ function toHoursValue(value: unknown) {
 function formatHours(hours: number) {
   if (!Number.isFinite(hours) || hours <= 0) return "--";
   return hours < 10 ? hours.toFixed(1) : `${Math.round(hours)}`;
+}
+
+function normalizeMetricValue(endpoint: string | undefined, value: unknown) {
+  const parsed = Number(value ?? 0);
+  if (!Number.isFinite(parsed)) return 0;
+  if (endpoint === "o2") {
+    const percentage = parsed <= 1 ? parsed * 100 : parsed;
+    return Math.round(percentage * 10) / 10;
+  }
+  if (endpoint === "sleep") return Math.round(parsed * 10) / 10;
+  return parsed;
+}
+
+function isReasonableMetricValue(endpoint: string | undefined, value: unknown) {
+  const parsed = normalizeMetricValue(endpoint, value);
+  if (!Number.isFinite(parsed)) return false;
+  if (endpoint === "bpm") return parsed >= 20 && parsed <= 240;
+  if (endpoint === "o2") return parsed >= 50 && parsed <= 100;
+  if (endpoint === "sleep") return parsed > 0 && parsed <= 24;
+  if (endpoint === "stress") return parsed >= 0 && parsed <= 100;
+  return true;
+}
+
+function getMetricIntervalDaySpan(row: any) {
+  const interval = getMetricInterval(row);
+  if (!interval) return 1;
+  return Math.max(1, Math.round(interval.durationMs / DAY_MS));
+}
+
+function normalizeMetricRowValue(endpoint: string | undefined, row: any) {
+  const parsed = Number(row?.value ?? 0);
+  if (
+    endpoint === "sleep" &&
+    Number.isFinite(parsed) &&
+    getMetricIntervalDaySpan(row) > 1
+  ) {
+    return Math.round((parsed / getMetricIntervalDaySpan(row)) * 10) / 10;
+  }
+
+  return normalizeMetricValue(endpoint, row?.value);
+}
+
+function isReasonableMetricRow(endpoint: string | undefined, row: any) {
+  const parsed = normalizeMetricRowValue(endpoint, row);
+  if (!Number.isFinite(parsed)) return false;
+  if (endpoint === "bpm") return parsed >= 20 && parsed <= 240;
+  if (endpoint === "o2") return parsed >= 50 && parsed <= 100;
+  if (endpoint === "sleep") return parsed > 0 && parsed <= 24;
+  if (endpoint === "stress") return parsed >= 0 && parsed <= 100;
+  return true;
+}
+
+function getMetricInterval(row: any) {
+  const startTime = parseTimestamp(row?.start_time);
+  const endTime = parseTimestamp(row?.end_time);
+  if (startTime === null || endTime === null || endTime <= startTime) {
+    return null;
+  }
+
+  return {
+    startTime,
+    endTime,
+    durationMs: endTime - startTime,
+  };
+}
+
+function isUsableMetricRow(row: any, endpoint?: string) {
+  return isReasonableMetricRow(endpoint, row);
+}
+
+function getMetricTimestampMs(
+  row: any,
+  mode: "history" | "latest" = "history",
+) {
+  const interval = getMetricInterval(row);
+  if (interval && interval.durationMs <= MAX_DAILY_RECORD_MS) {
+    return mode === "latest" ? interval.endTime : interval.startTime;
+  }
+
+  return (
+    parseTimestamp(row?.measured_at) ??
+    parseTimestamp(row?.created_at) ??
+    Number.NaN
+  );
+}
+
+function getMetricTimestampIso(
+  row: any,
+  mode: "history" | "latest" = "history",
+) {
+  const timestamp = getMetricTimestampMs(row, mode);
+  return Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : null;
+}
+
+function getLatestMetricTimestamp(row: any) {
+  const timestamp = getMetricTimestampMs(row, "latest");
+  return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
 // Sleep is stored in the DB already in hours (see healthBackgroundSync.ts and the
@@ -552,6 +659,19 @@ function mapBpmToStressScore(bpm: number): number {
   return clamp(Math.round((bpm - 45) * 1.2), 0, 100);
 }
 
+function mapMetricToStress(metric: MetricQueryData | null) {
+  if (!metric) return null;
+  const latestStress = mapBpmToStressScore(Number(metric.latest?.value ?? 0));
+  return {
+    displayValue: `${latestStress}`,
+    history: metric.history.map((value) => mapBpmToStressScore(value)),
+    latest: {
+      ...metric.latest,
+      value: latestStress,
+    },
+  };
+}
+
 async function fetchHealthConnectMetricDaily(
   endpoint: string,
 ): Promise<MetricQueryData | null> {
@@ -849,8 +969,24 @@ export function useMetricStats(
         typeNames,
         isBP,
         resolvedPatientId,
+        endpoint,
       );
-      const data = endpoint === "sleep" ? mapMetricToHours(dataRaw) : dataRaw;
+      const fallbackRaw =
+        endpoint === "stress" && !dataRaw?.history?.length
+          ? await fetchMetricFromSupabaseByTypeNames(
+              TYPE_MAP["bpm"],
+              false,
+              resolvedPatientId,
+              "bpm",
+            )
+          : null;
+      const stressData = fallbackRaw ? mapMetricToStress(fallbackRaw) : null;
+      const data =
+        endpoint === "sleep"
+          ? mapMetricToHours(dataRaw)
+          : endpoint === "stress"
+            ? (dataRaw ?? stressData)
+            : dataRaw;
       if (!data?.history?.length) return { min: 0, max: 0 };
 
       return {
@@ -923,8 +1059,19 @@ export function useHealthMetric(
         typeNames,
         useBP,
         resolvedPatientId,
+        endpoint,
       );
-      return endpoint === "sleep" ? mapMetricToHours(dataRaw) : dataRaw;
+      if (endpoint === "sleep") return mapMetricToHours(dataRaw);
+      if (endpoint === "stress" && !dataRaw) {
+        const bpmMetric = await fetchMetricFromSupabaseByTypeNames(
+          TYPE_MAP["bpm"],
+          false,
+          resolvedPatientId,
+          "bpm",
+        );
+        return mapMetricToStress(bpmMetric);
+      }
+      return dataRaw;
     },
     refetchInterval: 60000,
     refetchIntervalInBackground: false,
@@ -966,6 +1113,16 @@ function getHistoryPointTimestamp(
   startMs: number,
   endMs: number,
 ): number | null {
+  const interval = getMetricInterval(row);
+  if (
+    interval &&
+    interval.durationMs <= MAX_DAILY_RECORD_MS &&
+    interval.endTime >= startMs &&
+    interval.startTime <= endMs
+  ) {
+    return interval.startTime;
+  }
+
   const measuredAt = parseTimestamp(row?.measured_at);
   const startTime = parseTimestamp(row?.start_time);
   const endTime = parseTimestamp(row?.end_time);
@@ -975,10 +1132,10 @@ function getHistoryPointTimestamp(
     return startTime ?? measuredAt ?? createdAt;
   }
 
-  if (timestampInRange(measuredAt, startMs, endMs)) return measuredAt;
-  if (timestampInRange(endTime, startMs, endMs)) return endTime;
   if (timestampInRange(startTime, startMs, endMs)) return startTime;
-  return measuredAt ?? endTime ?? startTime ?? createdAt;
+  if (timestampInRange(endTime, startMs, endMs)) return endTime;
+  if (timestampInRange(measuredAt, startMs, endMs)) return measuredAt;
+  return startTime ?? endTime ?? measuredAt ?? createdAt;
 }
 
 function isCumulativeEndpoint(endpoint: string) {
@@ -1094,7 +1251,20 @@ async function fetchMetricHistoryRange(
   const typeIds = (Array.isArray(typeRows) ? typeRows : [])
     .map((row: any) => String(row?.id ?? ""))
     .filter(Boolean);
-  if (!typeIds.length) return [];
+  if (!typeIds.length) {
+    if (endpoint === "stress") {
+      const bpmPoints = await fetchMetricHistoryRange(
+        "bpm",
+        range,
+        targetPatientId,
+      );
+      return bpmPoints.map((point) => ({
+        ...point,
+        value: mapBpmToStressScore(point.value),
+      }));
+    }
+    return [];
+  }
 
   const intervalQuery = await getSupabaseClient()
     .from("biometric_data")
@@ -1108,7 +1278,7 @@ async function fetchMetricHistoryRange(
     .order("start_time", { ascending: true, nullsFirst: false })
     .order("measured_at", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true })
-    .limit(500);
+    .limit(HISTORY_QUERY_LIMIT);
 
   if (intervalQuery.error) {
     console.error(
@@ -1129,7 +1299,7 @@ async function fetchMetricHistoryRange(
     .lte("measured_at", endIso)
     .order("measured_at", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true })
-    .limit(500);
+    .limit(HISTORY_QUERY_LIMIT);
 
   if (measuredQuery.error) {
     console.error(
@@ -1139,20 +1309,42 @@ async function fetchMetricHistoryRange(
     return [];
   }
 
+  const createdQuery = await getSupabaseClient()
+    .from("biometric_data")
+    .select(
+      "id,value,value_secondary,start_time,end_time,measured_at,created_at",
+    )
+    .eq("patient_id", patientId)
+    .in("biometric_data_type_id", typeIds)
+    .gte("created_at", startIso)
+    .lte("created_at", endIso)
+    .order("created_at", { ascending: true })
+    .limit(HISTORY_QUERY_LIMIT);
+
+  if (createdQuery.error) {
+    console.error(
+      "[useMetricHistory] created_at history query error",
+      createdQuery.error,
+    );
+    return [];
+  }
+
   const rowsById = new Map<string, any>();
-  [...(intervalQuery.data ?? []), ...(measuredQuery.data ?? [])].forEach(
-    (row: any, index) => {
-      rowsById.set(String(row?.id ?? `row-${index}`), row);
-    },
-  );
+  [
+    ...(intervalQuery.data ?? []),
+    ...(measuredQuery.data ?? []),
+    ...(createdQuery.data ?? []),
+  ].forEach((row: any, index) => {
+    rowsById.set(String(row?.id ?? `row-${index}`), row);
+  });
   const rows = Array.from(rowsById.values());
   const historyRows = isCumulativeEndpoint(endpoint)
     ? getNonOverlappingCumulativeRows(rows, endpoint, startMs, endMs)
-    : rows;
+    : rows.filter((row) => isUsableMetricRow(row, endpoint));
 
   // Devolve {valor, timestamp} em ordem cronológica (antigo → recente) para o
   // gráfico — o timestamp permite construir a escala do eixo de tempo.
-  return historyRows
+  const points = historyRows
     .map((row): MetricHistoryPoint => {
       const t = getHistoryPointTimestamp(row, endpoint, startMs, endMs);
       if (isBP) {
@@ -1160,9 +1352,9 @@ async function fetchMetricHistoryRange(
         const dia = Number(row?.value_secondary ?? 0);
         return { value: Math.round((sys + dia) / 2), t: t ?? NaN };
       }
-      const value = Number(row?.value ?? 0);
+      const value = normalizeMetricRowValue(endpoint, row);
       return {
-        value: endpoint === "sleep" ? Math.round(value * 10) / 10 : value,
+        value,
         t: t ?? NaN,
       };
     })
@@ -1185,6 +1377,20 @@ async function fetchMetricHistoryRange(
       return p.t >= startMs && p.t <= endMs;
     })
     .sort((a, b) => a.t - b.t);
+
+  if (endpoint === "stress" && !points.length) {
+    const bpmPoints = await fetchMetricHistoryRange(
+      "bpm",
+      range,
+      targetPatientId,
+    );
+    return bpmPoints.map((point) => ({
+      ...point,
+      value: mapBpmToStressScore(point.value),
+    }));
+  }
+
+  return points;
 }
 
 export function useMetricHistory(

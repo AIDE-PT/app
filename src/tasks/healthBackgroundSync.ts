@@ -518,7 +518,11 @@ async function readHealthRecords(
           .filter((v) => v != null);
         if (vals.length === 0) return null;
         const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-        return { average: Math.round(avg * 10) / 10, count: vals.length };
+        const percentage = avg <= 1 ? avg * 100 : avg;
+        return {
+          average: Math.round(percentage * 10) / 10,
+          count: vals.length,
+        };
       }
 
       case "TotalCaloriesBurned": {
