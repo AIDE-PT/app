@@ -1,16 +1,15 @@
 import { CalendarButton } from "@/components/buttons/calendarButton";
-import LineChartSlim from "@/components/charts/LineChartSlim";
 import { CalendarModal } from "@/components/modals/CalendarModal";
 import { getSupabaseClient } from "@/utils/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import React, { useMemo, useState } from "react";
 import {
-  ActivityIndicator,
-  Dimensions,
-  ScrollView,
-  Text,
-  View,
+    ActivityIndicator,
+    Dimensions,
+    ScrollView,
+    Text,
+    View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import BackButton from "../components/buttons/backButton";
@@ -22,7 +21,7 @@ import { format } from "date-fns";
 const { width: screenWidth } = Dimensions.get("window");
 const GRID_GAP = 10;
 const CARD_WIDTH = screenWidth - 32;
-const CARD_HEIGHT = 220;
+const CARD_HEIGHT = 170;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MAX_DAILY_RECORD_MS = 26 * 60 * 60 * 1000;
 const MAX_REASONABLE_DAILY_STEPS = 100_000;
@@ -32,12 +31,9 @@ type CalendarMode = "day" | "period";
 type MetricKey =
   | "heartRate"
   | "bloodPressure"
-  | "temp"
   | "steps"
   | "sleep"
-  | "o2"
-  | "cal"
-  | "stress";
+  | "o2";
 
 type RangeSelection = {
   mode: CalendarMode;
@@ -46,21 +42,16 @@ type RangeSelection = {
 };
 
 type MetricSeries = {
-  points: number[];
-  displayValue: string;
+  minValue: string;
+  avgValue: string;
+  maxValue: string;
   pointCount: number;
-  summaryLabel: string;
 };
 
 type MetricCardConfig = {
   key: MetricKey;
   label: string;
   unit: string;
-  color: string;
-  segments: number;
-  yAxisSuffix: string;
-  yMin?: number;
-  yMax?: number;
   typeNames: string[];
 };
 
@@ -85,79 +76,31 @@ const METRIC_CARDS: MetricCardConfig[] = [
     key: "heartRate",
     label: "Batimentos",
     unit: "bpm",
-    color: "#7C89FF",
-    segments: 4,
-    yAxisSuffix: "",
     typeNames: ["heart_rate", "Batimento Cardíaco"],
   },
   {
     key: "bloodPressure",
     label: "Tensão",
     unit: "mmHg",
-    color: "#7C89FF",
-    segments: 4,
-    yAxisSuffix: "",
     typeNames: ["blood_pressure", "Pressão Arterial"],
-  },
-  {
-    key: "temp",
-    label: "Temperatura",
-    unit: "ºC",
-    color: "#7C89FF",
-    segments: 5,
-    yAxisSuffix: "",
-    yMin: 35,
-    yMax: 40,
-    typeNames: ["body_temperature", "Temperatura Corporal"],
   },
   {
     key: "steps",
     label: "Passos",
     unit: "",
-    color: "#7C89FF",
-    segments: 4,
-    yAxisSuffix: "",
     typeNames: ["steps"],
   },
   {
     key: "sleep",
     label: "Sono",
     unit: "h",
-    color: "#7C89FF",
-    segments: 4,
-    yAxisSuffix: "",
     typeNames: ["sleep"],
   },
   {
     key: "o2",
     label: "Oxigénio",
     unit: "%",
-    color: "#7C89FF",
-    segments: 4,
-    yAxisSuffix: "",
-    yMin: 88,
-    yMax: 100,
     typeNames: ["oxygen_saturation", "Saturação de Oxigénio"],
-  },
-  {
-    key: "cal",
-    label: "Calorias",
-    unit: "kcal",
-    color: "#7C89FF",
-    segments: 4,
-    yAxisSuffix: "",
-    typeNames: ["total_calories_burned", "calories"],
-  },
-  {
-    key: "stress",
-    label: "Stress",
-    unit: "",
-    color: "#7C89FF",
-    segments: 4,
-    yAxisSuffix: "",
-    yMin: 0,
-    yMax: 100,
-    typeNames: ["stress"],
   },
 ];
 
@@ -165,10 +108,10 @@ const createEmptySeries = (): Record<MetricKey, MetricSeries> =>
   METRIC_CARDS.reduce(
     (acc, metric) => {
       acc[metric.key] = {
-        points: [],
-        displayValue: "--",
+        minValue: "--",
+        avgValue: "--",
+        maxValue: "--",
         pointCount: 0,
-        summaryLabel: "Sem dados",
       };
       return acc;
     },
@@ -206,10 +149,10 @@ const formatDisplayValue = (key: MetricKey, value: number) => {
 
   switch (key) {
     case "steps":
-    case "cal":
       return Math.round(value).toLocaleString("pt-PT");
-    case "temp":
     case "sleep":
+      return value.toFixed(1);
+    case "o2":
       return value.toFixed(1);
     default:
       return `${Math.round(value)}`;
@@ -218,7 +161,7 @@ const formatDisplayValue = (key: MetricKey, value: number) => {
 
 const normalizeSeriesPoint = (key: MetricKey, value: number) => {
   if (!Number.isFinite(value)) return 0;
-  if (key === "temp" || key === "sleep") {
+  if (key === "sleep") {
     return Math.round(value * 10) / 10;
   }
   if (key === "o2") {
@@ -234,7 +177,7 @@ type MetricPoint = {
   displayValue?: string;
 };
 
-const isCumulativeMetric = (key: MetricKey) => key === "steps" || key === "cal";
+const isCumulativeMetric = (key: MetricKey) => key === "steps";
 
 const getMetricInterval = (row: BiometricDataRow) => {
   const startTime = toEpoch(row.start_time);
@@ -320,9 +263,7 @@ const isReasonablePointValue = (key: MetricKey, value: number) => {
   if (key === "heartRate") return value >= 20 && value <= 240;
   if (key === "o2") return value >= 50 && value <= 100;
   if (key === "sleep") return value > 0 && value <= 24;
-  if (key === "stress") return value >= 0 && value <= 100;
   if (key === "steps") return value > 0 && value <= MAX_REASONABLE_DAILY_STEPS;
-  if (key === "cal") return value > 0;
   return true;
 };
 
@@ -415,61 +356,46 @@ const aggregateDailyPoints = (key: MetricKey, points: MetricPoint[]) => {
 const buildMetricSeries = (
   metric: MetricCardConfig,
   rawPoints: MetricPoint[],
-  range: RangeSelection,
 ): MetricSeries => {
   const sortedPoints = [...rawPoints].sort((a, b) => a.timestamp - b.timestamp);
   if (!sortedPoints.length) {
-    return { points: [], displayValue: "--", pointCount: 0, summaryLabel: "Sem dados" };
+    return {
+      minValue: "--",
+      avgValue: "--",
+      maxValue: "--",
+      pointCount: 0,
+    };
   }
 
   const dailyPoints = aggregateDailyPoints(metric.key, sortedPoints);
-  const chartBase =
-    range.mode === "period" || isCumulativeMetric(metric.key) || metric.key === "sleep"
-      ? dailyPoints
-      : sortedPoints;
-  const chartPoints = chartBase.map((point) =>
-    normalizeSeriesPoint(metric.key, point.value),
-  );
-
   const valuesForSummary =
-    isCumulativeMetric(metric.key) || metric.key === "sleep"
+    isCumulativeMetric(metric.key)
       ? dailyPoints.map((point) => point.value)
       : sortedPoints.map((point) => point.value);
+  const normalizedValues = valuesForSummary
+    .map((value) => normalizeSeriesPoint(metric.key, value))
+    .filter((value) => Number.isFinite(value));
 
-  let summaryValue: number;
-  let summaryLabel: string;
-
-  if (isCumulativeMetric(metric.key)) {
-    summaryValue = valuesForSummary.reduce((sum, value) => sum + value, 0);
-    summaryLabel = "Total";
-  } else if (metric.key === "sleep") {
-    summaryValue =
-      range.mode === "period"
-        ? valuesForSummary.reduce((sum, value) => sum + value, 0) /
-          valuesForSummary.length
-        : valuesForSummary[valuesForSummary.length - 1];
-    summaryLabel = range.mode === "period" ? "Média/noite" : "Sono";
-  } else if (metric.key === "bloodPressure") {
-    const latest = sortedPoints[sortedPoints.length - 1];
+  if (!normalizedValues.length) {
     return {
-      points: chartPoints,
-      displayValue:
-        latest.displayValue ?? formatDisplayValue(metric.key, latest.value),
+      minValue: "--",
+      avgValue: "--",
+      maxValue: "--",
       pointCount: sortedPoints.length,
-      summaryLabel: "Última",
     };
-  } else {
-    summaryValue =
-      valuesForSummary.reduce((sum, value) => sum + value, 0) /
-      valuesForSummary.length;
-    summaryLabel = "Média";
   }
 
+  const min = Math.min(...normalizedValues);
+  const max = Math.max(...normalizedValues);
+  const avg =
+    normalizedValues.reduce((sum, value) => sum + value, 0) /
+    normalizedValues.length;
+
   return {
-    points: chartPoints,
-    displayValue: formatDisplayValue(metric.key, summaryValue),
+    minValue: formatDisplayValue(metric.key, min),
+    avgValue: formatDisplayValue(metric.key, avg),
+    maxValue: formatDisplayValue(metric.key, max),
     pointCount: sortedPoints.length,
-    summaryLabel,
   };
 };
 
@@ -639,7 +565,6 @@ const fetchMetricsByRange = async (
     result[metric.key] = buildMetricSeries(
       metric,
       pointBuckets[metric.key],
-      range,
     );
   });
 
@@ -649,8 +574,9 @@ const fetchMetricsByRange = async (
       metric: metric.key,
       rangeMode: range.mode,
       pointCount: series.pointCount,
-      displayValue: series.displayValue,
-      pointsPreview: series.points.slice(0, 6),
+      minValue: series.minValue,
+      avgValue: series.avgValue,
+      maxValue: series.maxValue,
     });
   });
 
@@ -762,17 +688,11 @@ const HistoricoDiarioContent = () => {
               >
                 {METRIC_CARDS.map((metric) => {
                   const data = metricSeries?.[metric.key] ?? {
-                    points: [],
-                    displayValue: "--",
+                    minValue: "--",
+                    avgValue: "--",
+                    maxValue: "--",
                     pointCount: 0,
-                    summaryLabel: "Sem dados",
                   };
-                  const chartData =
-                    data.points.length > 1
-                      ? data.points
-                      : data.points.length === 1
-                        ? [data.points[0], data.points[0]]
-                        : [0, 0];
 
                   return (
                     <View
@@ -790,52 +710,37 @@ const HistoricoDiarioContent = () => {
                         >
                           {metric.label}
                         </Text>
-                        <Text
-                          className={`text-base font-bold font-safiro ${isDark ? "text-white" : "text-black"}`}
-                        >
-                          {data.displayValue}
-                          {metric.unit ? ` ${metric.unit}` : ""}
-                        </Text>
                       </View>
                       <Text
-                        className={`mb-1 text-xs font-open-sans ${isDark ? "text-white/55" : "text-black/50"}`}
+                        className={`mb-3 text-xs font-open-sans ${isDark ? "text-white/55" : "text-black/50"}`}
                       >
-                        {data.summaryLabel} · {data.pointCount}{" "}
+                        Overview do intervalo · {data.pointCount}{" "}
                         {data.pointCount === 1 ? "registo" : "registos"}
                       </Text>
 
-                      <View className="flex-1 justify-end">
-                        {data.pointCount > 0 ? (
-                          <LineChartSlim
-                            data={chartData}
-                            width={CARD_WIDTH - 24}
-                            height={120}
-                            lineColor={metric.color}
-                            gradientFrom={metric.color}
-                            gradientTo={metric.color}
-                            gradientFromOpacity={0.26}
-                            gradientToOpacity={0}
-                            yAxisSuffix={metric.yAxisSuffix}
-                            segments={metric.segments}
-                            showYLabels={false}
-                            showDots={selectedRange.mode === "period"}
-                            fromZero={metric.key === "steps" || metric.key === "cal"}
-                            {...(metric.yMin !== undefined
-                              ? { yMin: metric.yMin }
-                              : {})}
-                            {...(metric.yMax !== undefined
-                              ? { yMax: metric.yMax }
-                              : {})}
-                          />
-                        ) : (
-                          <View className="h-[120px] items-center justify-center rounded-2xl bg-black/5">
+                      <View className="flex-row" style={{ gap: 10 }}>
+                        {[
+                          { label: "Máx", value: data.maxValue },
+                          { label: "Média", value: data.avgValue },
+                          { label: "Mín", value: data.minValue },
+                        ].map((item) => (
+                          <View
+                            key={item.label}
+                            className={`flex-1 rounded-2xl border p-3 ${isDark ? "border-white/10 bg-white/5" : "border-gray-100 bg-gray-50"}`}
+                          >
                             <Text
-                              className={`text-xs ${isDark ? "text-white/60" : "text-black/55"}`}
+                              className={`mb-1 text-[11px] font-open-sans ${isDark ? "text-white/60" : "text-black/50"}`}
                             >
-                              Sem dados neste intervalo
+                              {item.label}
+                            </Text>
+                            <Text
+                              className={`text-base font-bold font-safiro ${isDark ? "text-white" : "text-black"}`}
+                            >
+                              {item.value}
+                              {metric.unit ? ` ${metric.unit}` : ""}
                             </Text>
                           </View>
-                        )}
+                        ))}
                       </View>
                     </View>
                   );
