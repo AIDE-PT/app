@@ -922,8 +922,8 @@ async function fetchMetricHistoryRange(
     .select("value,value_secondary,measured_at,created_at")
     .eq("patient_id", patientId)
     .in("biometric_data_type_id", typeIds)
-    .gte("created_at", startIso)
-    .lte("created_at", endIso)
+    .gte("measured_at", startIso)
+    .lte("measured_at", endIso)
     .order("measured_at", { ascending: true, nullsFirst: false })
     .order("created_at", { ascending: true })
     .limit(500);

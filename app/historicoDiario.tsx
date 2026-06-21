@@ -291,8 +291,8 @@ const fetchMetricsByRange = async (
       )
       .eq("patient_id", patientId)
       .in("biometric_data_type_id", nonStepTypeIds)
-      .gte("created_at", startIso)
-      .lte("created_at", endIso)
+      .gte("measured_at", startIso)
+      .lte("measured_at", endIso)
       .order("measured_at", { ascending: true, nullsFirst: false })
       .order("created_at", { ascending: true });
 
@@ -354,8 +354,9 @@ const fetchMetricsByRange = async (
         .select("value,start_time,end_time,measured_at,created_at")
         .eq("patient_id", patientId)
         .eq("biometric_data_type_id", stepsTypeId)
-        .gte("created_at", startIso)
-        .lte("created_at", endIso)
+        .gte("measured_at", startIso)
+        .lte("measured_at", endIso)
+        .order("measured_at", { ascending: true, nullsFirst: false })
         .order("created_at", { ascending: true });
 
       normalizedStepRows = Array.isArray(fallbackStepRows)

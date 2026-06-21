@@ -587,6 +587,7 @@ export default function EditableDashboard({
     userId: user?.id,
     healthConnectGranted: hasHealthConnectPermissions,
     hasAtLeastOneWidget: activeWidgets.length > 0,
+    isAider: profileType === "aider",
   });
   const isHardOnboardingActive = !isOnboardingLoading && isOnboardingActive;
   const isDashboardLocked =
@@ -872,7 +873,8 @@ export default function EditableDashboard({
               </View>
             )}
 
-            {!isLoadingHealthConnect &&
+            {profileType !== "aider" &&
+              !isLoadingHealthConnect &&
               healthConnectStatus &&
               !healthConnectStatus.permissionsGranted && (
                 <View className="px-4 mb-2">
