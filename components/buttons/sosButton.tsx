@@ -27,6 +27,12 @@ const SOSSvg = () => (
   </Svg>
 );
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Erro desconhecido.";
+};
+
 const handleSOS = async () => {
   let sosResult: SosPushResult | undefined;
   let sosError: unknown = null;
@@ -65,8 +71,8 @@ const handleSOS = async () => {
 
   if (sosError) {
     Alert.alert(
-      "SOS ativado localmente",
-      "Nao foi possivel enviar o alerta aos aiders associados. Verifique a ligacao e tente novamente.",
+      "SOS nao registado na app",
+      `Nao foi possivel gravar/enviar o alerta aos aiders associados.\n\nDetalhe: ${getErrorMessage(sosError)}`,
     );
     return;
   }

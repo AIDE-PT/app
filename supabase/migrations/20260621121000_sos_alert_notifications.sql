@@ -30,6 +30,7 @@ BEGIN
     SELECT cr.user_id_aider AS user_id
     FROM care_relations cr
     WHERE cr.user_id_pacient = patient_id
+      AND cr.user_id_aider IS NOT NULL
   ) target;
 
   RETURN QUERY
@@ -39,6 +40,7 @@ BEGIN
   FROM care_relations cr
   LEFT JOIN push_tokens pt
     ON pt.user_id = cr.user_id_aider
-  WHERE cr.user_id_pacient = patient_id;
+  WHERE cr.user_id_pacient = patient_id
+    AND cr.user_id_aider IS NOT NULL;
 END;
 $$;
