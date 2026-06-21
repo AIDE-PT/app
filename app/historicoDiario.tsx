@@ -23,6 +23,10 @@ const { width: screenWidth } = Dimensions.get("window");
 const GRID_GAP = 10;
 const CARD_WIDTH = screenWidth - 32;
 const CARD_HEIGHT = 220;
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MAX_DAILY_RECORD_MS = 26 * 60 * 60 * 1000;
+const MAX_REASONABLE_DAILY_STEPS = 100_000;
+const HISTORY_QUERY_LIMIT = 5000;
 
 type CalendarMode = "day" | "period";
 type MetricKey =
@@ -45,6 +49,7 @@ type MetricSeries = {
   points: number[];
   displayValue: string;
   pointCount: number;
+  summaryLabel: string;
 };
 
 type MetricCardConfig = {
@@ -65,6 +70,7 @@ type BiometricTypeRow = {
 };
 
 type BiometricDataRow = {
+  id?: string | number | null;
   biometric_data_type_id: string | number;
   value: number | string | null;
   value_secondary?: number | string | null;
@@ -158,7 +164,12 @@ const METRIC_CARDS: MetricCardConfig[] = [
 const createEmptySeries = (): Record<MetricKey, MetricSeries> =>
   METRIC_CARDS.reduce(
     (acc, metric) => {
-      acc[metric.key] = { points: [], displayValue: "--", pointCount: 0 };
+      acc[metric.key] = {
+        points: [],
+        displayValue: "--",
+        pointCount: 0,
+        summaryLabel: "Sem dados",
+      };
       return acc;
     },
     {} as Record<MetricKey, MetricSeries>,
@@ -210,16 +221,266 @@ const normalizeSeriesPoint = (key: MetricKey, value: number) => {
   if (key === "temp" || key === "sleep") {
     return Math.round(value * 10) / 10;
   }
+  if (key === "o2") {
+    const percentage = value <= 1 ? value * 100 : value;
+    return Math.round(percentage * 10) / 10;
+  }
   return Math.round(value);
+};
+
+type MetricPoint = {
+  timestamp: number;
+  value: number;
+  displayValue?: string;
+};
+
+const isCumulativeMetric = (key: MetricKey) => key === "steps" || key === "cal";
+
+const getMetricInterval = (row: BiometricDataRow) => {
+  const startTime = toEpoch(row.start_time);
+  const endTime = toEpoch(row.end_time);
+  if (startTime === null || endTime === null || endTime <= startTime) {
+    return null;
+  }
+  return {
+    startTime,
+    endTime,
+    durationMs: endTime - startTime,
+  };
+};
+
+const getIntervalDaySpan = (row: BiometricDataRow) => {
+  const interval = getMetricInterval(row);
+  if (!interval) return 1;
+  return Math.max(1, Math.round(interval.durationMs / DAY_MS));
+};
+
+const getHistoryTimestamp = (
+  key: MetricKey,
+  row: BiometricDataRow,
+  startMs: number,
+  endMs: number,
+) => {
+  const interval = getMetricInterval(row);
+  const measuredAt = toEpoch(row.measured_at);
+  const createdAt = toEpoch(row.created_at);
+
+  if (
+    key === "sleep" &&
+    interval &&
+    interval.endTime >= startMs &&
+    interval.startTime <= endMs
+  ) {
+    return interval.endTime;
+  }
+
+  if (
+    interval &&
+    interval.durationMs <= MAX_DAILY_RECORD_MS &&
+    interval.endTime >= startMs &&
+    interval.startTime <= endMs
+  ) {
+    return interval.startTime;
+  }
+
+  const startTime = toEpoch(row.start_time);
+  const endTime = toEpoch(row.end_time);
+  const inRange = (timestamp: number | null) =>
+    timestamp !== null && timestamp >= startMs && timestamp <= endMs;
+
+  if (isCumulativeMetric(key)) return startTime ?? measuredAt ?? createdAt;
+  if (inRange(startTime)) return startTime;
+  if (inRange(endTime)) return endTime;
+  if (inRange(measuredAt)) return measuredAt;
+  return startTime ?? endTime ?? measuredAt ?? createdAt;
+};
+
+const normalizeRowValue = (key: MetricKey, row: BiometricDataRow) => {
+  const rawValue = Number(row.value ?? NaN);
+  if (!Number.isFinite(rawValue)) return null;
+
+  if (key === "bloodPressure") {
+    const diastolic = Number(row.value_secondary ?? NaN);
+    return Number.isFinite(diastolic) ? (rawValue + diastolic) / 2 : rawValue;
+  }
+
+  if (key === "o2") return normalizeSeriesPoint(key, rawValue);
+
+  if (key === "sleep") {
+    const value =
+      getIntervalDaySpan(row) > 1 ? rawValue / getIntervalDaySpan(row) : rawValue;
+    return Math.round(value * 10) / 10;
+  }
+
+  return rawValue;
+};
+
+const isReasonablePointValue = (key: MetricKey, value: number) => {
+  if (!Number.isFinite(value)) return false;
+  if (key === "heartRate") return value >= 20 && value <= 240;
+  if (key === "o2") return value >= 50 && value <= 100;
+  if (key === "sleep") return value > 0 && value <= 24;
+  if (key === "stress") return value >= 0 && value <= 100;
+  if (key === "steps") return value > 0 && value <= MAX_REASONABLE_DAILY_STEPS;
+  if (key === "cal") return value > 0;
+  return true;
+};
+
+const getNonOverlappingCumulativeRows = (
+  rows: BiometricDataRow[],
+  key: MetricKey,
+  startMs: number,
+  endMs: number,
+) => {
+  const intervals = rows
+    .map((row) => {
+      const interval = getMetricInterval(row);
+      const value = Number(row.value ?? NaN);
+      return { row, interval, value };
+    })
+    .filter(
+      (
+        item,
+      ): item is {
+        row: BiometricDataRow;
+        interval: { startTime: number; endTime: number; durationMs: number };
+        value: number;
+      } =>
+        !!item.interval &&
+        item.interval.durationMs <= MAX_DAILY_RECORD_MS &&
+        item.interval.endTime >= startMs &&
+        item.interval.startTime <= endMs &&
+        isReasonablePointValue(key, item.value),
+    )
+    .sort((a, b) =>
+      a.interval.startTime !== b.interval.startTime
+        ? a.interval.startTime - b.interval.startTime
+        : a.interval.durationMs - b.interval.durationMs,
+    );
+
+  const deduped: BiometricDataRow[] = [];
+  let coveredUpTo = -Infinity;
+
+  for (const interval of intervals) {
+    if (interval.interval.startTime >= coveredUpTo) {
+      deduped.push(interval.row);
+      coveredUpTo = interval.interval.endTime;
+      continue;
+    }
+
+    if (interval.interval.endTime <= coveredUpTo) continue;
+
+    const uncoveredFraction =
+      (interval.interval.endTime - coveredUpTo) / interval.interval.durationMs;
+    deduped.push({
+      ...interval.row,
+      start_time: new Date(coveredUpTo).toISOString(),
+      value: Math.round(interval.value * uncoveredFraction),
+    });
+    coveredUpTo = interval.interval.endTime;
+  }
+
+  return deduped;
+};
+
+const getLocalDayKey = (timestamp: number) => {
+  const day = new Date(timestamp);
+  day.setHours(0, 0, 0, 0);
+  return day.getTime();
+};
+
+const aggregateDailyPoints = (key: MetricKey, points: MetricPoint[]) => {
+  const buckets = new Map<number, MetricPoint[]>();
+  points.forEach((point) => {
+    const dayKey = getLocalDayKey(point.timestamp);
+    const bucket = buckets.get(dayKey) ?? [];
+    bucket.push(point);
+    buckets.set(dayKey, bucket);
+  });
+
+  return Array.from(buckets.entries())
+    .map(([timestamp, bucket]) => {
+      const values = bucket.map((point) => point.value);
+      const value = isCumulativeMetric(key)
+        ? values.reduce((sum, current) => sum + current, 0)
+        : key === "sleep"
+          ? Math.max(...values)
+          : values.reduce((sum, current) => sum + current, 0) / values.length;
+
+      return { timestamp, value };
+    })
+    .sort((a, b) => a.timestamp - b.timestamp);
+};
+
+const buildMetricSeries = (
+  metric: MetricCardConfig,
+  rawPoints: MetricPoint[],
+  range: RangeSelection,
+): MetricSeries => {
+  const sortedPoints = [...rawPoints].sort((a, b) => a.timestamp - b.timestamp);
+  if (!sortedPoints.length) {
+    return { points: [], displayValue: "--", pointCount: 0, summaryLabel: "Sem dados" };
+  }
+
+  const dailyPoints = aggregateDailyPoints(metric.key, sortedPoints);
+  const chartBase =
+    range.mode === "period" || isCumulativeMetric(metric.key) || metric.key === "sleep"
+      ? dailyPoints
+      : sortedPoints;
+  const chartPoints = chartBase.map((point) =>
+    normalizeSeriesPoint(metric.key, point.value),
+  );
+
+  const valuesForSummary =
+    isCumulativeMetric(metric.key) || metric.key === "sleep"
+      ? dailyPoints.map((point) => point.value)
+      : sortedPoints.map((point) => point.value);
+
+  let summaryValue: number;
+  let summaryLabel: string;
+
+  if (isCumulativeMetric(metric.key)) {
+    summaryValue = valuesForSummary.reduce((sum, value) => sum + value, 0);
+    summaryLabel = "Total";
+  } else if (metric.key === "sleep") {
+    summaryValue =
+      range.mode === "period"
+        ? valuesForSummary.reduce((sum, value) => sum + value, 0) /
+          valuesForSummary.length
+        : valuesForSummary[valuesForSummary.length - 1];
+    summaryLabel = range.mode === "period" ? "Média/noite" : "Sono";
+  } else if (metric.key === "bloodPressure") {
+    const latest = sortedPoints[sortedPoints.length - 1];
+    return {
+      points: chartPoints,
+      displayValue:
+        latest.displayValue ?? formatDisplayValue(metric.key, latest.value),
+      pointCount: sortedPoints.length,
+      summaryLabel: "Última",
+    };
+  } else {
+    summaryValue =
+      valuesForSummary.reduce((sum, value) => sum + value, 0) /
+      valuesForSummary.length;
+    summaryLabel = "Média";
+  }
+
+  return {
+    points: chartPoints,
+    displayValue: formatDisplayValue(metric.key, summaryValue),
+    pointCount: sortedPoints.length,
+    summaryLabel,
+  };
 };
 
 const fetchMetricsByRange = async (
   range: RangeSelection,
 ): Promise<Record<MetricKey, MetricSeries>> => {
   const empty = createEmptySeries();
+  const supabase = getSupabaseClient();
   const {
     data: { session },
-  } = await getSupabaseClient().auth.getSession();
+  } = await supabase.auth.getSession();
 
   const patientId = session?.user?.id;
   if (!patientId) {
@@ -252,159 +513,134 @@ const fetchMetricsByRange = async (
   }
 
   const typeIdToMetric = new Map<string, MetricKey>();
-  let stepsTypeId: string | null = null;
-
   (typeRows as BiometricTypeRow[]).forEach((row) => {
     const key = typeNameToMetric.get(String(row.name));
-    if (!key) return;
-    const id = String(row.id);
-    typeIdToMetric.set(id, key);
-    if (key === "steps" && !stepsTypeId) {
-      stepsTypeId = id;
-    }
+    if (key) typeIdToMetric.set(String(row.id), key);
+  });
+
+  const typeIds = Array.from(typeIdToMetric.keys());
+  if (!typeIds.length) return empty;
+
+  const rowSelect =
+    "id,biometric_data_type_id,value,value_secondary,start_time,end_time,measured_at,created_at";
+
+  const [intervalQuery, measuredQuery, createdQuery] = await Promise.all([
+    supabase
+      .from("biometric_data")
+      .select(rowSelect)
+      .eq("patient_id", patientId)
+      .in("biometric_data_type_id", typeIds)
+      .lt("start_time", endIso)
+      .gt("end_time", startIso)
+      .order("start_time", { ascending: true, nullsFirst: false })
+      .limit(HISTORY_QUERY_LIMIT),
+    supabase
+      .from("biometric_data")
+      .select(rowSelect)
+      .eq("patient_id", patientId)
+      .in("biometric_data_type_id", typeIds)
+      .gte("measured_at", startIso)
+      .lte("measured_at", endIso)
+      .order("measured_at", { ascending: true, nullsFirst: false })
+      .limit(HISTORY_QUERY_LIMIT),
+    supabase
+      .from("biometric_data")
+      .select(rowSelect)
+      .eq("patient_id", patientId)
+      .in("biometric_data_type_id", typeIds)
+      .gte("created_at", startIso)
+      .lte("created_at", endIso)
+      .order("created_at", { ascending: true })
+      .limit(HISTORY_QUERY_LIMIT),
+  ]);
+
+  const queryError =
+    intervalQuery.error ?? measuredQuery.error ?? createdQuery.error;
+  if (queryError) {
+    console.log("[DETALHE HISTORICO] erro ao carregar biometric_data", {
+      patientId,
+      error: queryError.message,
+    });
+    return empty;
+  }
+
+  const rowsById = new Map<string, BiometricDataRow>();
+  [
+    ...(intervalQuery.data ?? []),
+    ...(measuredQuery.data ?? []),
+    ...(createdQuery.data ?? []),
+  ].forEach((row, index) => {
+    const typedRow = row as BiometricDataRow;
+    rowsById.set(String(typedRow.id ?? `row-${index}`), typedRow);
+  });
+
+  const rowsByMetric = METRIC_CARDS.reduce(
+    (acc, metric) => {
+      acc[metric.key] = [] as BiometricDataRow[];
+      return acc;
+    },
+    {} as Record<MetricKey, BiometricDataRow[]>,
+  );
+
+  Array.from(rowsById.values()).forEach((row) => {
+    const key = typeIdToMetric.get(String(row.biometric_data_type_id));
+    if (key) rowsByMetric[key].push(row);
   });
 
   const pointBuckets = METRIC_CARDS.reduce(
     (acc, metric) => {
-      acc[metric.key] = [] as {
-        timestamp: number;
-        value: number;
-        displayValue?: string;
-      }[];
+      acc[metric.key] = [] as MetricPoint[];
       return acc;
     },
-    {} as Record<
-      MetricKey,
-      { timestamp: number; value: number; displayValue?: string }[]
-    >,
+    {} as Record<MetricKey, MetricPoint[]>,
   );
 
-  const nonStepTypeIds = Array.from(typeIdToMetric.entries())
-    .filter(([, key]) => key !== "steps")
-    .map(([id]) => id);
+  METRIC_CARDS.forEach((metric) => {
+    const candidateRows = isCumulativeMetric(metric.key)
+      ? getNonOverlappingCumulativeRows(
+          rowsByMetric[metric.key],
+          metric.key,
+          startMs,
+          endMs,
+        )
+      : rowsByMetric[metric.key];
 
-  if (nonStepTypeIds.length > 0) {
-    const { data: rows } = await supabase
-      .from("biometric_data")
-      .select(
-        "biometric_data_type_id,value,value_secondary,measured_at,created_at",
-      )
-      .eq("patient_id", patientId)
-      .in("biometric_data_type_id", nonStepTypeIds)
-      .gte("created_at", startIso)
-      .lte("created_at", endIso)
-      .order("measured_at", { ascending: true, nullsFirst: false })
-      .order("created_at", { ascending: true });
-
-    (Array.isArray(rows) ? (rows as BiometricDataRow[]) : []).forEach((row) => {
-      const key = typeIdToMetric.get(String(row.biometric_data_type_id));
-      if (!key || key === "steps") return;
-
-      const timestamp = toEpoch(row.measured_at ?? row.created_at);
-      if (timestamp === null || timestamp < startMs || timestamp > endMs) {
-        return;
-      }
-
-      if (key === "bloodPressure") {
-        const systolic = Number(row.value ?? NaN);
-        const diastolic = Number(row.value_secondary ?? NaN);
-        if (!Number.isFinite(systolic)) return;
-
-        const value = Number.isFinite(diastolic)
-          ? (systolic + diastolic) / 2
-          : systolic;
-
-        pointBuckets[key].push({
-          timestamp,
-          value,
-          displayValue: Number.isFinite(diastolic)
-            ? `${Math.round(systolic)}/${Math.round(diastolic)}`
-            : `${Math.round(systolic)}`,
-        });
-        return;
-      }
-
-      const rawValue = Number(row.value ?? NaN);
-      if (!Number.isFinite(rawValue)) return;
-
-      // Sleep is stored in the DB already in hours, so no unit conversion here.
-      const mappedValue = rawValue;
-      pointBuckets[key].push({ timestamp, value: mappedValue });
-    });
-  }
-
-  if (stepsTypeId) {
-    const { data: stepRows } = await supabase
-      .from("biometric_data")
-      .select("value,start_time,end_time,measured_at,created_at")
-      .eq("patient_id", patientId)
-      .eq("biometric_data_type_id", stepsTypeId)
-      .lt("start_time", endIso)
-      .gt("end_time", startIso)
-      .order("start_time", { ascending: true, nullsFirst: false })
-      .order("created_at", { ascending: true });
-
-    let normalizedStepRows = Array.isArray(stepRows)
-      ? (stepRows as BiometricDataRow[])
-      : [];
-
-    if (normalizedStepRows.length === 0) {
-      const { data: fallbackStepRows } = await supabase
-        .from("biometric_data")
-        .select("value,start_time,end_time,measured_at,created_at")
-        .eq("patient_id", patientId)
-        .eq("biometric_data_type_id", stepsTypeId)
-        .gte("created_at", startIso)
-        .lte("created_at", endIso)
-        .order("created_at", { ascending: true });
-
-      normalizedStepRows = Array.isArray(fallbackStepRows)
-        ? (fallbackStepRows as BiometricDataRow[])
-        : [];
-    }
-
-    normalizedStepRows.forEach((row) => {
-      const startTime = toEpoch(
-        row.start_time ?? row.measured_at ?? row.created_at,
-      );
-      const endTime = toEpoch(
-        row.end_time ?? row.start_time ?? row.measured_at ?? row.created_at,
-      );
-      const value = Number(row.value ?? NaN);
-
+    candidateRows.forEach((row) => {
+      const timestamp = getHistoryTimestamp(metric.key, row, startMs, endMs);
+      const value = normalizeRowValue(metric.key, row);
       if (
-        startTime === null ||
-        endTime === null ||
-        !Number.isFinite(value) ||
-        endTime < startMs ||
-        startTime > endMs
+        timestamp === null ||
+        timestamp < startMs ||
+        timestamp > endMs ||
+        value === null ||
+        !isReasonablePointValue(metric.key, value)
       ) {
         return;
       }
 
-      pointBuckets.steps.push({ timestamp: startTime, value });
+      const displayValue =
+        metric.key === "bloodPressure"
+          ? (() => {
+              const systolic = Number(row.value ?? NaN);
+              const diastolic = Number(row.value_secondary ?? NaN);
+              if (!Number.isFinite(systolic)) return undefined;
+              return Number.isFinite(diastolic)
+                ? `${Math.round(systolic)}/${Math.round(diastolic)}`
+                : `${Math.round(systolic)}`;
+            })()
+          : undefined;
+
+      pointBuckets[metric.key].push({ timestamp, value, displayValue });
     });
-  }
+  });
 
   const result = createEmptySeries();
   METRIC_CARDS.forEach((metric) => {
-    const sortedPoints = [...pointBuckets[metric.key]].sort(
-      (a, b) => a.timestamp - b.timestamp,
+    result[metric.key] = buildMetricSeries(
+      metric,
+      pointBuckets[metric.key],
+      range,
     );
-
-    if (sortedPoints.length === 0) return;
-
-    const points = sortedPoints.map((point) =>
-      normalizeSeriesPoint(metric.key, point.value),
-    );
-    const latest = sortedPoints[sortedPoints.length - 1];
-
-    result[metric.key] = {
-      points,
-      displayValue:
-        latest.displayValue ?? formatDisplayValue(metric.key, latest.value),
-      pointCount: sortedPoints.length,
-    };
   });
 
   METRIC_CARDS.forEach((metric) => {
@@ -529,6 +765,7 @@ const HistoricoDiarioContent = () => {
                     points: [],
                     displayValue: "--",
                     pointCount: 0,
+                    summaryLabel: "Sem dados",
                   };
                   const chartData =
                     data.points.length > 1
@@ -560,6 +797,12 @@ const HistoricoDiarioContent = () => {
                           {metric.unit ? ` ${metric.unit}` : ""}
                         </Text>
                       </View>
+                      <Text
+                        className={`mb-1 text-xs font-open-sans ${isDark ? "text-white/55" : "text-black/50"}`}
+                      >
+                        {data.summaryLabel} · {data.pointCount}{" "}
+                        {data.pointCount === 1 ? "registo" : "registos"}
+                      </Text>
 
                       <View className="flex-1 justify-end">
                         {data.pointCount > 0 ? (
@@ -575,6 +818,8 @@ const HistoricoDiarioContent = () => {
                             yAxisSuffix={metric.yAxisSuffix}
                             segments={metric.segments}
                             showYLabels={false}
+                            showDots={selectedRange.mode === "period"}
+                            fromZero={metric.key === "steps" || metric.key === "cal"}
                             {...(metric.yMin !== undefined
                               ? { yMin: metric.yMin }
                               : {})}
