@@ -144,9 +144,13 @@ export async function sendSOSPushToAiders(): Promise<SosPushResult> {
 }
 
 export async function sendHealthDataPushToAiders({
+  patientId,
+  type,
   title,
   body,
 }: {
+  patientId: string;
+  type: "warning" | "alert";
   title: string;
   body: string;
 }): Promise<SosPushResult> {
@@ -155,8 +159,10 @@ export async function sendHealthDataPushToAiders({
   }
 
   const { data, error } = await getSupabaseClient().rpc(
-    "dispatch_health_data_notification",
+    "dispatch_metric_alert_notification",
     {
+      p_patient_id: patientId,
+      p_type: type,
       p_title: title,
       p_content: body,
     },

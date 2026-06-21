@@ -19,6 +19,7 @@ import DateTimePicker, {
 
 import LightBackground from "@/components/DotBackground";
 import BackButton from "@/components/buttons/backButton";
+import InAppPopup from "@/components/feedback/InAppPopup";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/hooks/useTheme";
 import {
@@ -41,6 +42,7 @@ export default function AddNoteForm() {
   const [referenceDate, setReferenceDate] = useState(() => new Date());
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [successPopupVisible, setSuccessPopupVisible] = useState(false);
 
   const isEditing = Boolean(id);
 
@@ -102,7 +104,7 @@ export default function AddNoteForm() {
         });
       }
 
-      router.back();
+      setSuccessPopupVisible(true);
     } catch (error) {
       console.log("Erro ao guardar nota", error);
       Alert.alert(
@@ -228,6 +230,21 @@ export default function AddNoteForm() {
           onChange={handleDateChange}
         />
       )}
+      <InAppPopup
+        visible={successPopupVisible}
+        title={isEditing ? "Nota atualizada" : "Nota criada"}
+        message={
+          isEditing
+            ? "As alteracoes da nota foram guardadas com sucesso."
+            : "A nota foi criada e ja esta disponivel na lista."
+        }
+        buttonLabel="Continuar"
+        isDark={isDark}
+        onClose={() => {
+          setSuccessPopupVisible(false);
+          router.back();
+        }}
+      />
     </LightBackground>
   );
 }

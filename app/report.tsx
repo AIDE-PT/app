@@ -1,7 +1,7 @@
 import LightBackground from "@/components/DotBackground";
 import BackButton from "@/components/buttons/backButton";
 import { Button } from "@/components/buttons/button";
-import { ChoseCuidado } from "@/components/buttons/choseCuidado";
+import InAppPopup from "@/components/feedback/InAppPopup";
 import CuidadoModal from "@/components/modals/CuidadoModal";
 import {
   getSurfaceStyle,
@@ -79,6 +79,7 @@ export default function ReportScreen() {
     null,
   );
   const [showPatientModal, setShowPatientModal] = useState(false);
+  const [successPopupVisible, setSuccessPopupVisible] = useState(false);
 
   useEffect(() => {
     if (!user?.id || profileType !== "aider") {
@@ -222,6 +223,16 @@ export default function ReportScreen() {
       console.error("[PDF] generation error:", e);
     } finally {
       setIsPdfLoading(false);
+    }
+  };
+
+  const handleGenerateReport = async () => {
+    const patientId = profileType === "aider" ? selectedPatientId : user?.id;
+    if (!patientId) return;
+
+    const generated = await generate(patientId, startDateIso, endDateIso);
+    if (generated) {
+      setSuccessPopupVisible(true);
     }
   };
 
@@ -459,14 +470,7 @@ export default function ReportScreen() {
                     <Button
                       variant="primary"
                       label="Gerar Relatorio"
-                      onPress={() => {
-                        const patientId =
-                          profileType === "aider"
-                            ? selectedPatientId
-                            : user?.id;
-                        if (!patientId) return;
-                        void generate(patientId, startDateIso, endDateIso);
-                      }}
+                      onPress={() => void handleGenerateReport()}
                       loading={isLoading}
                       disabled={!canGenerate}
                     />
@@ -607,6 +611,14 @@ export default function ReportScreen() {
               onChange={handlePickerChange}
             />
           )}
+          <InAppPopup
+            visible={successPopupVisible}
+            title="Analise concluida"
+            message="A analise com IA foi concluida e o relatorio ja esta pronto."
+            buttonLabel="Ver relatorio"
+            isDark={isDark}
+            onClose={() => setSuccessPopupVisible(false)}
+          />
         </SafeAreaView>
       </View>
     </LightBackground>
