@@ -98,13 +98,14 @@ const RANGE_NAV_PADDING = 4;
 // Devolve valores + rótulos em ordem cronológica (antigo → recente).
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
+const WEEKDAY_SHORT_PT = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const bucketLabel = (t: number, range: HistoryRange) => {
   const d = new Date(t);
   if (range === "day") {
     return new Intl.DateTimeFormat("pt-PT", { hour: "2-digit" }).format(d);
   }
   if (range === "week") {
-    return new Intl.DateTimeFormat("pt-PT", { weekday: "short" }).format(d);
+    return WEEKDAY_SHORT_PT[d.getDay()];
   }
   return new Intl.DateTimeFormat("pt-PT", {
     day: "2-digit",
@@ -115,7 +116,13 @@ const aggregateByRange = (
   points: { value: number; t: number }[],
   range: HistoryRange,
   mode: "sum" | "avg",
-): { values: number[]; labels: string[] } => {
+): {
+  values: number[];
+  labels: string[];
+  counts: number[];
+  mins: number[];
+  maxs: number[];
+} => {
   const now = Date.now();
   const bucketCount = range === "day" ? 24 : range === "week" ? 7 : 30;
   const bucketMs = range === "day" ? HOUR_MS : DAY_MS;
@@ -123,6 +130,8 @@ const aggregateByRange = (
 
   const sums = new Array(bucketCount).fill(0);
   const counts = new Array(bucketCount).fill(0);
+  const mins = new Array(bucketCount).fill(Number.NaN);
+  const maxs = new Array(bucketCount).fill(Number.NaN);
   points.forEach((p) => {
     if (p.t < windowStart || p.t > now) return;
     const idx = Math.min(
@@ -131,6 +140,12 @@ const aggregateByRange = (
     );
     sums[idx] += p.value;
     counts[idx] += 1;
+    mins[idx] = Number.isFinite(mins[idx])
+      ? Math.min(mins[idx], p.value)
+      : p.value;
+    maxs[idx] = Number.isFinite(maxs[idx])
+      ? Math.max(maxs[idx], p.value)
+      : p.value;
   });
 
   const values: number[] = new Array(bucketCount).fill(0);
@@ -151,13 +166,14 @@ const aggregateByRange = (
   const labels = values.map((_, i) =>
     bucketLabel(windowStart + i * bucketMs + bucketMs / 2, range),
   );
-  return { values, labels };
+  return { values, labels, counts, mins, maxs };
 };
 
 // Mantém ~6 marcas no eixo X (resto vazio) para não encavalitar os rótulos.
-const thinLabels = (labels: string[]): string[] => {
+const thinLabels = (labels: string[], range?: HistoryRange): string[] => {
   const n = labels.length;
   if (n < 2) return [];
+  if (range === "week") return labels;
   const tickCount = Math.min(6, n);
   const keep = new Set<number>();
   for (let i = 0; i < tickCount; i++) {
@@ -166,9 +182,17 @@ const thinLabels = (labels: string[]): string[] => {
   return labels.map((l, i) => (keep.has(i) ? l : ""));
 };
 
-type DayGroup = { t: number; avg: number; min: number; max: number; count: number };
+type DayGroup = {
+  t: number;
+  avg: number;
+  min: number;
+  max: number;
+  count: number;
+};
 
-function groupByCalendarDay(points: { value: number; t: number }[]): DayGroup[] {
+function groupByCalendarDay(
+  points: { value: number; t: number }[],
+): DayGroup[] {
   const map = new Map<number, number[]>();
   for (const p of points) {
     if (!Number.isFinite(p.value) || !Number.isFinite(p.t)) continue;
@@ -708,6 +732,7 @@ const buildStatusPalette = (
 function getStandardizedMetricScale(
   type: string,
   semantic: { success: string; warning: string; danger: string },
+  rangeDays: number = 1,
 ): MetricScale {
   switch (type) {
     case "heart":
@@ -732,13 +757,29 @@ function getStandardizedMetricScale(
         ],
       };
     case "steps":
+      const stepScaleDays = Math.max(1, rangeDays);
       return {
         min: 0,
-        max: 14000,
+        max: 14000 * stepScaleDays,
         bands: [
-          { label: "Abaixo", min: 0, max: 7000, color: semantic.warning },
-          { label: "Na Meta", min: 7000, max: 10000, color: semantic.success },
-          { label: "Acima", min: 10000, max: 14000, color: "#93C5FD" },
+          {
+            label: "Abaixo",
+            min: 0,
+            max: 7000 * stepScaleDays,
+            color: semantic.warning,
+          },
+          {
+            label: "Na Meta",
+            min: 7000 * stepScaleDays,
+            max: 10000 * stepScaleDays,
+            color: semantic.success,
+          },
+          {
+            label: "Acima",
+            min: 10000 * stepScaleDays,
+            max: 14000 * stepScaleDays,
+            color: "#93C5FD",
+          },
         ],
       };
     case "temp":
@@ -942,51 +983,52 @@ function HeartTripleRings({
 
 // ─── O2: Semi-circle gauge with colored zones ─────────────────────────────────
 function O2RangeColumns({
-  history,
-  currentValue,
+  values,
+  mins,
+  maxs,
+  counts,
   range,
   isDark,
   semantic,
 }: {
-  history: number[];
-  currentValue: number;
+  values: number[];
+  mins: number[];
+  maxs: number[];
+  counts: number[];
   range: HistoryRange;
   isDark: boolean;
   semantic: { success: string; warning: string; danger: string };
 }) {
-  const W = screenWidth - 80;
+  const W = screenWidth - 56;
   const H = 220;
-  const pL = 34,
-    pR = 10,
+  const pL = 58,
+    pR = 22,
     pT = 12,
-    pB = 32;
+    pB = range === "week" ? 38 : 32;
   const cW = W - pL - pR;
   const cH = H - pT - pB;
   const yMin = 85,
     yMax = 100;
 
-  // Build buckets from the selected range.
-  const raw =
-    history.length >= 2
-      ? [...history].reverse()
-      : Array(range === "day" ? 24 : range === "week" ? 7 : 30).fill(
-          currentValue,
-        );
-  const bucketCount = Math.min(
-    raw.length,
-    range === "day" ? 24 : range === "week" ? 7 : 30,
-  );
-  const bucketSize = Math.max(1, Math.floor(raw.length / bucketCount));
+  const bucketCount = range === "day" ? 24 : range === "week" ? 7 : 30;
   const buckets = Array.from({ length: bucketCount }, (_, i) => {
-    const slice = raw.slice(i * bucketSize, i * bucketSize + bucketSize);
-    const lo = Math.min(...slice);
-    const hi = Math.max(...slice);
-    return { lo, hi, single: lo === hi };
+    const measured = (counts[i] ?? 0) > 0;
+    const avg = values[i] ?? Number.NaN;
+    const lo = Number.isFinite(mins[i]) ? mins[i] : avg;
+    const hi = Number.isFinite(maxs[i]) ? maxs[i] : avg;
+    return {
+      lo,
+      hi,
+      measured,
+      single: Math.abs(hi - lo) < 0.1,
+    };
   });
+  const hasMeasuredBuckets = buckets.some((bucket) => bucket.measured);
 
   const toY = (v: number) =>
     pT + cH * (1 - (Math.min(Math.max(v, yMin), yMax) - yMin) / (yMax - yMin));
-  const toX = (i: number) => pL + (i / (bucketCount - 1)) * cW;
+  const toX = (i: number) =>
+    pL + (bucketCount > 1 ? (i / (bucketCount - 1)) * cW : cW / 2);
 
   const barW = Math.max(3, (cW / bucketCount) * 0.55);
   const dotR = Math.max(2.5, barW * 0.55);
@@ -997,6 +1039,25 @@ function O2RangeColumns({
   const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
   const barColor = "#7C89FF";
   const axisLabels = getRangeAxisLabels(range, bucketCount);
+  const xLabels =
+    range === "week"
+      ? Array.from({ length: bucketCount }, (_, i) =>
+          bucketLabel(Date.now() - (bucketCount - 1 - i) * DAY_MS, range),
+        )
+      : null;
+
+  if (!hasMeasuredBuckets) {
+    return (
+      <View
+        style={{ width: W, height: H }}
+        className="items-center justify-center"
+      >
+        <Text className="text-sm font-open-sans" style={{ color: textColor }}>
+          Sem dados neste intervalo
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <View style={{ width: W, height: H, position: "relative" }}>
@@ -1016,9 +1077,9 @@ function O2RangeColumns({
                 strokeDasharray="4 4"
               />
               <SvgText
-                x={pL - 4}
+                x={pL - 16}
                 y={y + 4}
-                fontSize="9"
+                fontSize="8.5"
                 fill={textColor}
                 textAnchor="end"
               >
@@ -1029,6 +1090,7 @@ function O2RangeColumns({
         })}
         {/* Range columns */}
         {buckets.map((b, i) => {
+          if (!b.measured) return null;
           const x = toX(i);
           const yLo = toY(b.lo);
           const yHi = toY(b.hi);
@@ -1073,28 +1135,45 @@ function O2RangeColumns({
           stroke={gridColor}
           strokeWidth="1"
         />
-        {/* X labels: first and last */}
-        <SvgText
-          x={pL}
-          y={H - pB + 14}
-          fontSize="9"
-          fill={textColor}
-          textAnchor="start"
-        >
-          {axisLabels.start}
-        </SvgText>
-        <SvgText
-          x={W - pR}
-          y={H - pB + 14}
-          fontSize="9"
-          fill={textColor}
-          textAnchor="end"
-        >
-          {axisLabels.end}
-        </SvgText>
+        {xLabels ? (
+          xLabels.map((label, i) => (
+            <SvgText
+              key={`${label}-${i}`}
+              x={toX(i)}
+              y={H - pB + 16}
+              fontSize="8.5"
+              fill={textColor}
+              textAnchor="middle"
+            >
+              {label}
+            </SvgText>
+          ))
+        ) : (
+          <>
+            <SvgText
+              x={pL}
+              y={H - pB + 14}
+              fontSize="9"
+              fill={textColor}
+              textAnchor="start"
+            >
+              {axisLabels.start}
+            </SvgText>
+            <SvgText
+              x={W - pR}
+              y={H - pB + 14}
+              fontSize="9"
+              fill={textColor}
+              textAnchor="end"
+            >
+              {axisLabels.end}
+            </SvgText>
+          </>
+        )}
       </Svg>
 
       {buckets.map((b, i) => {
+        if (!b.measured) return null;
         const x = toX(i);
         const yLo = toY(b.lo);
         const yHi = toY(b.hi);
@@ -1132,6 +1211,7 @@ function O2RangeColumns({
       })}
 
       {buckets.map((b, i) => {
+        if (!b.measured) return null;
         const x = toX(i);
         const yHi = toY(b.hi);
         const indicator = getO2PatternIndicator((b.lo + b.hi) / 2, semantic);
@@ -1181,7 +1261,10 @@ function MetricRangeBars({
   if (!groups.length) return null;
   const W = screenWidth - 80;
   const H = 200;
-  const pL = 36, pR = 10, pT = 14, pB = 32;
+  const pL = 36,
+    pR = 10,
+    pT = 14,
+    pB = 32;
   const cW = W - pL - pR;
   const cH = H - pT - pB;
 
@@ -1206,8 +1289,9 @@ function MetricRangeBars({
   const gridColor = isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
 
   const yTickCount = 4;
-  const yTicks = Array.from({ length: yTickCount + 1 }, (_, i) =>
-    yMin + (i / yTickCount) * yRange,
+  const yTicks = Array.from(
+    { length: yTickCount + 1 },
+    (_, i) => yMin + (i / yTickCount) * yRange,
   );
   const axisLabels = getRangeAxisLabels(range, groups.length);
 
@@ -1892,7 +1976,8 @@ export default function MasterDetail() {
   }>();
   // Quando o ecrã é aberto a partir do cartão de um cuidado (modo aider), o
   // patientId vem nos params. Sem ele, resolve para o utilizador autenticado.
-  const targetPatientId = patientId && patientId.length > 0 ? patientId : undefined;
+  const targetPatientId =
+    patientId && patientId.length > 0 ? patientId : undefined;
   const normalizedType = WIDGET_TYPE_ALIAS[type ?? ""] ?? type;
   const resolvedType =
     normalizedType && METRIC_CONFIGS[normalizedType]
@@ -2010,15 +2095,19 @@ export default function MasterDetail() {
         : [0, 0];
   const chartData = genericChartData;
   // Escala de tempo do eixo X, adequada à janela (horas/dias/datas).
-  const chartLabels = thinLabels(bucketed.labels);
+  const chartLabels = thinLabels(bucketed.labels, selectedRange);
+  const weeklyMeasuredDotIndexes =
+    selectedRange === "week"
+      ? bucketed.counts
+          .map((count, index) => (count > 0 ? -1 : index))
+          .filter((index) => index >= 0)
+      : [];
 
   // Estatísticas dos buckets para os cards de resumo.
   const activeValues = bucketed.values.filter((v) => v > 0);
   const statsMin = activeValues.length ? Math.min(...activeValues) : 0;
   const statsMax = activeValues.length ? Math.max(...activeValues) : 0;
-  const statsMinIdx = bucketed.values.findIndex(
-    (v) => v > 0 && v === statsMin,
-  );
+  const statsMinIdx = bucketed.values.findIndex((v) => v > 0 && v === statsMin);
   const statsMaxIdx = bucketed.values.indexOf(statsMax);
   const statsMinLabel =
     statsMinIdx >= 0 ? (bucketed.labels[statsMinIdx] ?? "") : "";
@@ -2031,7 +2120,9 @@ export default function MasterDetail() {
   // TOTAL acumulado no período (soma) com o objetivo escalado.
   const rangeDays =
     selectedRange === "day" ? 1 : selectedRange === "week" ? 7 : 30;
-  const periodTotal = rangeHistory.reduce((sum, v) => sum + v, 0);
+  const periodTotal = isCumulativeMetric
+    ? bucketed.values.reduce((sum, v) => sum + v, 0)
+    : rangeHistory.reduce((sum, v) => sum + v, 0);
   const formatGoal = (n: number) =>
     new Intl.NumberFormat("pt-PT").format(Math.round(n));
   const stepsGoal = 10000 * rangeDays;
@@ -2042,14 +2133,33 @@ export default function MasterDetail() {
   // Estatísticas (mín/máx/média) seguem a janela selecionada (dia/semana/mês).
   // Usa os dados do período; só recai no all-time (history/stats) se a janela
   // estiver vazia.
-  const statsBase = rangeHistory.length ? rangeHistory : history;
+  const cumulativeDailyValues = isCumulativeMetric
+    ? selectedRange === "day"
+      ? periodTotal > 0
+        ? [periodTotal]
+        : []
+      : activeValues
+    : [];
+  const statsBase = isCumulativeMetric
+    ? activeValues.length
+      ? activeValues
+      : history
+    : rangeHistory.length
+      ? rangeHistory
+      : history;
   const allTimeMin = statsBase.length
     ? Math.min(...statsBase)
     : (stats?.min ?? 0);
   const allTimeMax = statsBase.length
     ? Math.max(...statsBase)
     : (stats?.max ?? 0);
-  const periodAvg = statsBase.length ? calcAvg(statsBase) : 0;
+  const periodAvg = isCumulativeMetric
+    ? cumulativeDailyValues.length
+      ? calcAvg(cumulativeDailyValues)
+      : 0
+    : statsBase.length
+      ? calcAvg(statsBase)
+      : 0;
   const dayLabel = new Intl.DateTimeFormat("pt-PT", {
     weekday: "long",
     day: "2-digit",
@@ -2066,14 +2176,75 @@ export default function MasterDetail() {
         ? "Última semana"
         : `Mês atual: ${monthLabel}`;
 
-  const status = config.getStatus(currentRaw);
+  const sleepRangeAverage =
+    config.endpoint === "sleep" &&
+    selectedRange !== "day" &&
+    rangeHistory.length > 0 &&
+    periodAvg > 0
+      ? periodAvg
+      : null;
+  const heartRangeAverage =
+    config.endpoint === "bpm" &&
+    selectedRange !== "day" &&
+    rangeHistory.length > 0 &&
+    periodAvg > 0
+      ? periodAvg
+      : null;
+  const o2RangeAverage =
+    config.endpoint === "o2" &&
+    selectedRange !== "day" &&
+    rangeHistory.length > 0 &&
+    periodAvg > 0
+      ? periodAvg
+      : null;
+  const stepsRangeTotal =
+    config.endpoint === "steps" && selectedRange !== "day" && periodTotal > 0
+      ? periodTotal
+      : null;
+  const contextualCurrent =
+    stepsRangeTotal ??
+    sleepRangeAverage ??
+    heartRangeAverage ??
+    o2RangeAverage ??
+    currentRaw;
+  const contextualValueLabel = stepsRangeTotal
+    ? "total do período"
+    : sleepRangeAverage
+      ? "média do período"
+      : heartRangeAverage
+        ? "média do período"
+        : o2RangeAverage
+          ? "média do período"
+          : "valor atual";
+  const stepGoalRatio =
+    config.endpoint === "steps" && stepsGoal > 0
+      ? contextualCurrent / stepsGoal
+      : null;
+  const status =
+    stepGoalRatio === null
+      ? config.getStatus(contextualCurrent)
+      : stepGoalRatio < 0.7
+        ? "warning"
+        : "normal";
+  const statusLabelText =
+    stepGoalRatio === null
+      ? config.statusLabel(status)
+      : stepGoalRatio < 0.7
+        ? "Abaixo"
+        : stepGoalRatio < 1
+          ? "Na Meta"
+          : "Acima";
   const palette = buildStatusPalette(colors.semantic, isDark)[status];
-  const extraCards = config.extraCards(history, stats ?? null, currentRaw);
+  const extraCards = config.extraCards(
+    history,
+    stats ?? null,
+    contextualCurrent,
+  );
   const accessibleSummary = buildAccessibleSummary({
     type: resolvedType,
     config,
-    current: currentRaw,
-    statusLabel: config.statusLabel(status),
+    current: contextualCurrent,
+    statusLabel: statusLabelText,
     history,
     allTimeMin,
     allTimeMax,
@@ -2125,8 +2296,8 @@ export default function MasterDetail() {
   const tAccent = config.accent;
   const heroTitle =
     resolvedType === "heart" ? "Batimentos Cardíacos" : config.label;
-  const heroValue = config.formatValue(currentRaw);
-  const heroDigits = `${Math.abs(Math.trunc(currentRaw))}`.length;
+  const heroValue = config.formatValue(contextualCurrent);
+  const heroDigits = `${Math.abs(Math.trunc(contextualCurrent))}`.length;
   const heroFontSize =
     resolvedType === "steps"
       ? heroDigits >= 6
@@ -2146,9 +2317,10 @@ export default function MasterDetail() {
   const standardizedScale = getStandardizedMetricScale(
     resolvedType,
     colors.semantic,
+    resolvedType === "steps" ? rangeDays : 1,
   );
   const clampedCurrent = Math.min(
-    Math.max(currentRaw, standardizedScale.min),
+    Math.max(contextualCurrent, standardizedScale.min),
     standardizedScale.max,
   );
   const activeBand =
@@ -2190,21 +2362,28 @@ export default function MasterDetail() {
   };
   const spokenUnit =
     config.displayUnit === "%" ? "por cento" : config.displayUnit;
-  const spokenCurrent = `${formatNarratorNumber(currentRaw)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
+  const spokenCurrent = `${formatNarratorNumber(contextualCurrent)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
   const spokenDailyAverage = `${formatNarratorNumber(Math.round(periodAvg))} passos`;
   const spokenMax = `${formatNarratorNumber(allTimeMax)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
   const spokenMin = `${formatNarratorNumber(allTimeMin)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
   const heroAccessibilityLabel =
     resolvedType === "steps"
-      ? `${heroTitle}. Valor atual ${spokenCurrent}. Estado ${config.statusLabel(status)}. Media diaria ${spokenDailyAverage}. Meta ${formatGoal(stepsGoal)} passos.`
-      : `${heroTitle}. Valor atual ${spokenCurrent}. Estado ${config.statusLabel(status)}. Maximo ${spokenMax}. Minimo ${spokenMin}.`;
+      ? `${heroTitle}. ${contextualValueLabel} ${spokenCurrent}. Estado ${statusLabelText}. Media diaria ${spokenDailyAverage}. Meta ${formatGoal(stepsGoal)} passos.`
+      : `${heroTitle}. ${contextualValueLabel} ${spokenCurrent}. Estado ${statusLabelText}. Maximo ${spokenMax}. Minimo ${spokenMin}.`;
   const chartLatest = chartData.length
     ? chartData[chartData.length - 1]
     : currentRaw;
   const spokenChartLatest = `${formatNarratorNumber(chartLatest)}${spokenUnit ? ` ${spokenUnit}` : ""}`;
-  const heartAvg = chartData.length ? calcAvg(chartData) : null;
-  const heartHighs = chartData.filter((v) => v > 100);
-  const heartLows = chartData.filter((v) => v < 60);
+  const heartPatternValues = rangeHistory.length
+    ? rangeHistory
+    : history.length
+      ? history
+      : chartData;
+  const heartAvg = heartPatternValues.length
+    ? calcAvg(heartPatternValues)
+    : null;
+  const heartHighs = heartPatternValues.filter((v) => v > 100);
+  const heartLows = heartPatternValues.filter((v) => v < 60);
   const heartAvgHigh = heartHighs.length ? calcAvg(heartHighs) : null;
   const heartAvgLow = heartLows.length ? calcAvg(heartLows) : null;
 
@@ -2433,7 +2612,7 @@ export default function MasterDetail() {
                             className="text-xs font-bold font-open-sans"
                             style={{ color: palette.text }}
                           >
-                            {config.statusLabel(status)}
+                            {statusLabelText}
                           </Text>
                         </View>
                       </View>
@@ -2454,7 +2633,9 @@ export default function MasterDetail() {
                                   className={`text-2xl font-bold font-open-sans ${tp}`}
                                   accessible={false}
                                 >
-                                  {Math.round(periodAvg).toLocaleString("pt-PT")}
+                                  {Math.round(periodAvg).toLocaleString(
+                                    "pt-PT",
+                                  )}
                                 </Text>
                                 <Text
                                   className={`text-xs ml-1 ${tu}`}
@@ -2645,7 +2826,7 @@ export default function MasterDetail() {
                         importantForAccessibility="no"
                       >
                         <StressWave
-                          value={currentRaw}
+                          value={contextualCurrent}
                           history={bucketedDesc}
                           range={selectedRange}
                           isDark={isDark}
@@ -2757,31 +2938,51 @@ export default function MasterDetail() {
                           className="text-base font-safiro"
                           style={{ color: config.accent }}
                         >
-                          Saturação Atual
+                          {selectedRange === "day"
+                            ? "Saturação Atual"
+                            : "Saturação Média"}
                         </Text>
                         <Text className={`text-xs font-open-sans ${ts}`}>
                           {rangeDescription}
                         </Text>
                       </View>
-                      <View className="flex-row items-baseline gap-1 mb-3">
-                        <Text
-                          style={{
-                            color: isDark ? "#FFF" : "#111827",
-                            fontSize: 28,
-                            fontWeight: "800",
-                          }}
-                          className="font-open-sans"
-                        >
-                          {allTimeMin}–{allTimeMax}
-                        </Text>
-                        <Text className={`text-sm font-open-sans ${tu}`}>
-                          %
-                        </Text>
+                      <View className="mb-3">
+                        <View className="flex-row items-baseline gap-1">
+                          <Text
+                            style={{
+                              color: isDark ? "#FFF" : "#111827",
+                              fontSize: 28,
+                              fontWeight: "800",
+                            }}
+                            className="font-open-sans"
+                          >
+                            {config.formatValue(contextualCurrent)}
+                          </Text>
+                          <Text className={`text-sm font-open-sans ${tu}`}>
+                            %
+                          </Text>
+                          <Text className={`text-xs font-open-sans ml-1 ${ts}`}>
+                            {contextualValueLabel}
+                          </Text>
+                        </View>
+                        {rangeHistory.length > 0 ? (
+                          <Text className={`text-xs font-open-sans ${ts}`}>
+                            Intervalo observado:{" "}
+                            {config.formatValue(allTimeMin)}–
+                            {config.formatValue(allTimeMax)}%
+                          </Text>
+                        ) : null}
                       </View>
-                      <View accessible={false} importantForAccessibility="no">
+                      <View
+                        className="items-center"
+                        accessible={false}
+                        importantForAccessibility="no"
+                      >
                         <O2RangeColumns
-                          history={rangeHistory}
-                          currentValue={currentRaw}
+                          values={bucketed.values}
+                          mins={bucketed.mins}
+                          maxs={bucketed.maxs}
+                          counts={bucketed.counts}
                           range={selectedRange}
                           isDark={isDark}
                           semantic={colors.semantic}
@@ -3145,13 +3346,13 @@ export default function MasterDetail() {
 
                     <View className="flex-row items-baseline gap-1 mb-4">
                       <Text className={`text-2xl font-bold font-safiro ${tp}`}>
-                        {config.formatValue(currentRaw)}
+                        {config.formatValue(contextualCurrent)}
                       </Text>
                       <Text className={`text-sm font-open-sans ${tu}`}>
                         {config.displayUnit}
                       </Text>
                       <Text className={`text-xs font-open-sans ml-1 ${ts}`}>
-                        valor atual
+                        {contextualValueLabel}
                       </Text>
                     </View>
 
@@ -3230,12 +3431,12 @@ export default function MasterDetail() {
                           Médias
                         </Text>
                         <Text className={`text-xs font-open-sans ${ts}`}>
-                          Análise de padrões
+                          {rangeDescription}
                         </Text>
                       </View>
                       {/* Average Visualization */}
                       {(() => {
-                        const h = chartData || [];
+                        const h = heartPatternValues;
                         if (!h.length) {
                           return (
                             <View className="items-center justify-center py-8">
@@ -3425,6 +3626,8 @@ export default function MasterDetail() {
                           data={chartData}
                           labels={chartLabels}
                           showXLabels={chartLabels.length === chartData.length}
+                          showDots={selectedRange === "week"}
+                          hideDotsAtIndex={weeklyMeasuredDotIndexes}
                           width={screenWidth - 72}
                           height={180}
                           lineColor={config.lineColor}
@@ -3434,6 +3637,7 @@ export default function MasterDetail() {
                           gradientToOpacity={0}
                           yAxisSuffix={config.yAxisSuffix}
                           segments={config.segments}
+                          fromZero={isCumulativeMetric}
                           {...(config.yMin !== undefined
                             ? { yMin: config.yMin }
                             : {})}
@@ -3451,7 +3655,10 @@ export default function MasterDetail() {
                       {/* Total (cumulativo) ou Média (intervalo) */}
                       <View
                         className={`rounded-2xl p-4 border ${cardBg}`}
-                        style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
+                        style={[
+                          shadow,
+                          { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
+                        ]}
                         accessible
                         accessibilityRole="text"
                         accessibilityLabel={`${isCumulativeMetric ? "Total" : "Media"}. ${formatNarratorNumber(isCumulativeMetric ? periodTotal : periodAvg)} ${config.displayUnit}.`}
@@ -3461,20 +3668,32 @@ export default function MasterDetail() {
                             className="w-7 h-7 rounded-lg items-center justify-center"
                             style={{ backgroundColor: `${config.accent}20` }}
                           >
-                            <Feather name="activity" size={14} color={config.accent} accessible={false} />
+                            <Feather
+                              name="activity"
+                              size={14}
+                              color={config.accent}
+                              accessible={false}
+                            />
                           </View>
-                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{ color: tAccent }}
+                          >
                             {isCumulativeMetric ? "Total" : "Média"}
                           </Text>
                         </View>
                         <View className="flex-row items-baseline">
-                          <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                          <Text
+                            className={`text-2xl font-bold font-safiro ${tp}`}
+                          >
                             {isCumulativeMetric
                               ? Math.round(periodTotal).toLocaleString("pt-PT")
                               : config.formatValue(periodAvg)}
                           </Text>
                           {config.displayUnit ? (
-                            <Text className={`text-xs ml-1 ${tu}`}>{config.displayUnit}</Text>
+                            <Text className={`text-xs ml-1 ${tu}`}>
+                              {config.displayUnit}
+                            </Text>
                           ) : null}
                         </View>
                       </View>
@@ -3482,7 +3701,10 @@ export default function MasterDetail() {
                       {/* Máximo */}
                       <View
                         className={`rounded-2xl p-4 border ${cardBg}`}
-                        style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
+                        style={[
+                          shadow,
+                          { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
+                        ]}
                         accessible
                         accessibilityRole="text"
                         accessibilityLabel={`Maximo. ${formatNarratorNumber(statsMax)} ${config.displayUnit}${statsMaxLabel ? `. ${statsMaxLabel}` : ""}.`}
@@ -3492,27 +3714,46 @@ export default function MasterDetail() {
                             className="w-7 h-7 rounded-lg items-center justify-center"
                             style={{ backgroundColor: `${config.accent}20` }}
                           >
-                            <Feather name="trending-up" size={14} color={config.accent} accessible={false} />
+                            <Feather
+                              name="trending-up"
+                              size={14}
+                              color={config.accent}
+                              accessible={false}
+                            />
                           </View>
-                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>Máximo</Text>
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{ color: tAccent }}
+                          >
+                            Máximo
+                          </Text>
                         </View>
                         <View className="flex-row items-baseline">
-                          <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                          <Text
+                            className={`text-2xl font-bold font-safiro ${tp}`}
+                          >
                             {config.formatValue(statsMax)}
                           </Text>
                           {config.displayUnit ? (
-                            <Text className={`text-xs ml-1 ${tu}`}>{config.displayUnit}</Text>
+                            <Text className={`text-xs ml-1 ${tu}`}>
+                              {config.displayUnit}
+                            </Text>
                           ) : null}
                         </View>
                         {statsMaxLabel ? (
-                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>{statsMaxLabel}</Text>
+                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>
+                            {statsMaxLabel}
+                          </Text>
                         ) : null}
                       </View>
 
                       {/* Mínimo */}
                       <View
                         className={`rounded-2xl p-4 border ${cardBg}`}
-                        style={[shadow, { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 }]}
+                        style={[
+                          shadow,
+                          { minWidth: (screenWidth - 56) / 2 - 6, flex: 1 },
+                        ]}
                         accessible
                         accessibilityRole="text"
                         accessibilityLabel={`Minimo. ${formatNarratorNumber(statsMin)} ${config.displayUnit}${statsMinLabel ? `. ${statsMinLabel}` : ""}.`}
@@ -3522,20 +3763,36 @@ export default function MasterDetail() {
                             className="w-7 h-7 rounded-lg items-center justify-center"
                             style={{ backgroundColor: `${config.accent}20` }}
                           >
-                            <Feather name="trending-down" size={14} color={config.accent} accessible={false} />
+                            <Feather
+                              name="trending-down"
+                              size={14}
+                              color={config.accent}
+                              accessible={false}
+                            />
                           </View>
-                          <Text className="text-xs font-open-sans" style={{ color: tAccent }}>Mínimo</Text>
+                          <Text
+                            className="text-xs font-open-sans"
+                            style={{ color: tAccent }}
+                          >
+                            Mínimo
+                          </Text>
                         </View>
                         <View className="flex-row items-baseline">
-                          <Text className={`text-2xl font-bold font-safiro ${tp}`}>
+                          <Text
+                            className={`text-2xl font-bold font-safiro ${tp}`}
+                          >
                             {config.formatValue(statsMin)}
                           </Text>
                           {config.displayUnit ? (
-                            <Text className={`text-xs ml-1 ${tu}`}>{config.displayUnit}</Text>
+                            <Text className={`text-xs ml-1 ${tu}`}>
+                              {config.displayUnit}
+                            </Text>
                           ) : null}
                         </View>
                         {statsMinLabel ? (
-                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>{statsMinLabel}</Text>
+                          <Text className={`text-xs mt-1 font-open-sans ${ts}`}>
+                            {statsMinLabel}
+                          </Text>
                         ) : null}
                       </View>
                     </View>
