@@ -148,11 +148,13 @@ export async function sendHealthDataPushToAiders({
   type,
   title,
   body,
+  eventAt,
 }: {
   patientId: string;
   type: "warning" | "alert";
   title: string;
   body: string;
+  eventAt?: string | null;
 }): Promise<SosPushResult> {
   if (!hasSupabaseConfig) {
     return { aiderCount: 0, sentPushCount: 0 };
@@ -165,6 +167,7 @@ export async function sendHealthDataPushToAiders({
       p_type: type,
       p_title: title,
       p_content: body,
+      p_event_at: eventAt ?? new Date().toISOString(),
     },
   );
 

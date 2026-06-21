@@ -675,7 +675,7 @@ function buildConcerningNotificationCopy(entry: ConcerningEntryNotification) {
   const metricLabel = METRIC_NOTIFICATION_META[entry.metric].label;
   const valueText = formatEntryValueForNotification(entry);
   const measuredAtLabel = formatMeasuredAtForNotification(entry.measuredAt);
-  const measuredAtSuffix = measuredAtLabel ? ` as ${measuredAtLabel}` : "";
+  const measuredAtSuffix = measuredAtLabel ? ` em ${measuredAtLabel}` : "";
   const titlePrefix = entry.status === "alert" ? "Alerta" : "Atenção";
 
   return {
@@ -690,10 +690,17 @@ function formatMeasuredAtForNotification(measuredAt?: string | null): string {
   const date = new Date(measuredAt);
   if (Number.isNaN(date.getTime())) return "";
 
-  return date.toLocaleTimeString("pt-PT", {
+  const dateLabel = date.toLocaleDateString("pt-PT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const timeLabel = date.toLocaleTimeString("pt-PT", {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  return `${dateLabel} as ${timeLabel}`;
 }
 
 async function persistSyncedEntryNotifications(
@@ -711,6 +718,7 @@ async function persistSyncedEntryNotifications(
         type: entry.status,
         title: copy.title,
         body: copy.content,
+        eventAt: entry.measuredAt,
       });
     } catch (pushError) {
       console.warn(

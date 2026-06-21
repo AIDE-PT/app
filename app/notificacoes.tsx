@@ -39,7 +39,8 @@ const getNotificationSeverity = (
 const fetchNotifications = async (): Promise<AppNotification[]> => {
   const { data, error } = await getSupabaseClient()
     .from("notifications")
-    .select("id,type,title,content,created_at")
+    .select("id,type,title,content,event_at,created_at")
+    .order("event_at", { ascending: false, nullsFirst: false })
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -52,7 +53,11 @@ const fetchNotifications = async (): Promise<AppNotification[]> => {
     title: String(notification.title ?? "Notificacao"),
     content: String(notification.content ?? ""),
     severity: getNotificationSeverity(notification.type),
-    timestamp: String(notification.created_at ?? new Date().toISOString()),
+    timestamp: String(
+      notification.event_at ??
+        notification.created_at ??
+        new Date().toISOString(),
+    ),
   }));
 };
 
