@@ -51,6 +51,7 @@ expo-troubleshooting.md
 # generated native folders
 /ios
 /android/*
+!/android/build.gradle
 !/android/app/
 /android/app/*
 !/android/app/build.gradle
