@@ -34,7 +34,8 @@
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.cbl2025.aide"
+      "package": "com.cbl2025.aide",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
