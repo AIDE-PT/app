@@ -462,7 +462,11 @@ async function readHealthRecords(
           .filter((v) => v != null);
         if (vals.length === 0) return null;
         const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-        return { average: Math.round(avg * 10) / 10, count: vals.length };
+        const percentage = avg <= 1 ? avg * 100 : avg;
+        return {
+          average: Math.round(percentage * 10) / 10,
+          count: vals.length,
+        };
       }
 
       case "TotalCaloriesBurned": {
@@ -514,7 +518,7 @@ async function collectHealthSnapshot(
   ]);
 
   return {
-    timestamp: new Date().toISOString(),
+    timestamp: endCopy.toISOString(),
     window: { start: startCopy.toISOString(), end: endCopy.toISOString() },
     heartRate: heartRate as HealthSnapshot["heartRate"],
     steps: steps as HealthSnapshot["steps"],
@@ -534,6 +538,44 @@ function buildExternalId(
   window: { start: string; end: string },
 ) {
   return `health_connect:${patientId}:${metricName}:${window.start}:${window.end}`;
+}
+
+function formatLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function isLocalDayStart(date: Date): boolean {
+  return (
+    date.getHours() === 0 &&
+    date.getMinutes() === 0 &&
+    date.getSeconds() === 0 &&
+    date.getMilliseconds() === 0
+  );
+}
+
+function getNextLocalMidnight(date: Date): Date {
+  const next = new Date(date);
+  next.setHours(24, 0, 0, 0);
+  return next;
+}
+
+function splitWindowByLocalDay(start: Date, end: Date) {
+  const windows: { start: Date; end: Date }[] = [];
+  let cursor = new Date(start);
+
+  while (cursor < end) {
+    const nextMidnight = getNextLocalMidnight(cursor);
+    const windowEnd = nextMidnight < end ? nextMidnight : new Date(end);
+    if (windowEnd > cursor) {
+      windows.push({ start: new Date(cursor), end: new Date(windowEnd) });
+    }
+    cursor = new Date(windowEnd);
+  }
+
+  return windows;
 }
 
 function formatEntryValueForNotification(
@@ -692,12 +734,22 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   if (snapshot.steps) {
-    await pushRow("Steps", {
-      value: snapshot.steps.total,
-      measured_at: snapshot.timestamp,
-      start_time: snapshot.window.start,
-      end_time: snapshot.window.end,
-    });
+    // Use a day-keyed external_id so each calendar day has exactly one row.
+    // Consecutive syncs on the same day upsert the row instead of creating duplicates.
+    const windowStart = new Date(snapshot.window.start);
+    const dayKey = formatLocalDateKey(windowStart);
+    await pushRow(
+      "Steps",
+      {
+        value: snapshot.steps.total,
+        measured_at: snapshot.timestamp,
+        start_time: snapshot.window.start,
+        end_time: snapshot.window.end,
+      },
+      isLocalDayStart(windowStart)
+        ? `health_connect:${patientId}:steps:daily:${dayKey}`
+        : undefined,
+    );
   }
 
   if (
@@ -732,21 +784,35 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   if (snapshot.calories) {
-    await pushRow("TotalCaloriesBurned", {
-      value: snapshot.calories.total,
-      measured_at: snapshot.timestamp,
-      start_time: snapshot.window.start,
-      end_time: snapshot.window.end,
-    });
+    const windowStart = new Date(snapshot.window.start);
+    const dayKey = formatLocalDateKey(windowStart);
+    await pushRow(
+      "TotalCaloriesBurned",
+      {
+        value: snapshot.calories.total,
+        measured_at: snapshot.timestamp,
+        start_time: snapshot.window.start,
+        end_time: snapshot.window.end,
+      },
+      isLocalDayStart(windowStart)
+        ? `health_connect:${patientId}:calories:daily:${dayKey}`
+        : undefined,
+    );
   }
 
   if (snapshot.sleep) {
-    await pushRow("SleepSession", {
-      value: snapshot.sleep.duration, // horas dormidas
-      measured_at: snapshot.timestamp,
-      start_time: snapshot.window.start,
-      end_time: snapshot.window.end,
-    });
+    // Use the start day as the night key (a session beginning on day X belongs to night X).
+    const nightKey = formatLocalDateKey(new Date(snapshot.window.start));
+    await pushRow(
+      "SleepSession",
+      {
+        value: snapshot.sleep.duration,
+        measured_at: snapshot.timestamp,
+        start_time: snapshot.window.start,
+        end_time: snapshot.window.end,
+      },
+      `health_connect:${patientId}:sleep:daily:${nightKey}`,
+    );
   }
 
   if (snapshot.sleep) {
@@ -824,21 +890,28 @@ async function runSyncLogic(
     (() => {
       const fallback = new Date(end);
       fallback.setDate(fallback.getDate() - INITIAL_SYNC_DAYS);
+      fallback.setHours(0, 0, 0, 0);
       return fallback;
     })();
 
   console.log(
     `[HealthSync] 📅 Janela: ${start.toISOString()} → ${end.toISOString()}`,
   );
-  console.log("[HealthSync] 6. A recolher snapshot...");
+  const windows = splitWindowByLocalDay(start, end);
+  for (const [index, window] of windows.entries()) {
+    console.log(
+      `[HealthSync] 6. A recolher snapshot ${index + 1}/${windows.length}: ${window.start.toISOString()} -> ${window.end.toISOString()}`,
+    );
 
-  const snapshot = await collectHealthSnapshot(start, end);
-  console.log("[HealthSync] 7. Snapshot:", JSON.stringify(snapshot, null, 2));
+    const snapshot = await collectHealthSnapshot(window.start, window.end);
+    console.log("[HealthSync] 7. Snapshot:", JSON.stringify(snapshot, null, 2));
 
-  console.log("[HealthSync] 8. A enviar para Supabase...");
-  await withRetry(() => sendSnapshotToSupabase(snapshot));
+    console.log("[HealthSync] 8. A enviar para Supabase...");
+    await withRetry(() => sendSnapshotToSupabase(snapshot));
+  }
+
   console.log("[HealthSync] 9. Enviado!");
-  await setLastSyncEndTime(snapshot.window.end);
+  await setLastSyncEndTime(end.toISOString());
   return true;
 }
 
