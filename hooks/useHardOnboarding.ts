@@ -52,12 +52,14 @@ type UseHardOnboardingParams = {
   userId?: string;
   healthConnectGranted: boolean;
   hasAtLeastOneWidget: boolean;
+  isAider?: boolean;
 };
 
 export function useHardOnboarding({
   userId,
   healthConnectGranted,
   hasAtLeastOneWidget,
+  isAider = false,
 }: UseHardOnboardingParams) {
   const [state, setState] = useState<HardOnboardingState>(
     DEFAULT_ONBOARDING_STATE,
@@ -108,7 +110,7 @@ export function useHardOnboarding({
 
     const nextState: HardOnboardingState = {
       ...state,
-      healthConnectDone: state.healthConnectDone || healthConnectGranted,
+      healthConnectDone: isAider || state.healthConnectDone || healthConnectGranted,
       firstWidgetAddedDone: state.firstWidgetAddedDone || hasAtLeastOneWidget,
     };
 

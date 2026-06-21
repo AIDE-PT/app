@@ -304,7 +304,7 @@ function getZoneSummary(type: string, value: number) {
     case "steps":
       return "Objetivo diario recomendado: 10 000 passos.";
     case "glycemia":
-      return "Meta diaria de calorias: 2 000 kcal.";
+      return "Referencia: glicemia em jejum normal entre 70 e 99 mg/dL.";
     default:
       return "";
   }
@@ -555,32 +555,32 @@ const METRIC_CONFIGS: Record<string, MetricConfig> = {
     extraCards: (h) => [],
   },
   glycemia: {
-    label: "Calorias",
+    label: "Glicemia",
     endpoint: "glycemia",
-    displayUnit: "kcal",
-    lineColor: "#7C89FF",
-    gradientColor: "#7C89FF",
+    displayUnit: "mg/dL",
+    lineColor: "#F59E0B",
+    gradientColor: "#F59E0B",
     yAxisSuffix: "",
     segments: 4,
-    accent: "#7C89FF",
-    accentLight: "#E8EAFF",
+    yMin: 50,
+    yMax: 350,
+    accent: "#F59E0B",
+    accentLight: "#FEF3C7",
     formatValue: (v) => Math.round(v).toString(),
-    getStatus: (v) => (v < 1500 ? "warning" : v <= 2200 ? "normal" : "alert"),
+    getStatus: (v) =>
+      v < 70 || v > 125 ? "alert" : v >= 100 ? "warning" : "normal",
     statusLabel: (s) =>
-      s === "normal" ? "Na Meta" : s === "warning" ? "Abaixo" : "Acima",
+      s === "normal"
+        ? "Normal"
+        : s === "warning"
+          ? "Pré-Diabético"
+          : "Crítico",
     extraCards: (h) => [
       {
-        label: "Queimadas",
+        label: "Média",
         value: Math.round(calcAvg(h)).toString(),
-        unit: "kcal",
-        icon: "zap",
-      },
-      { label: "Meta", value: "2 000", unit: "kcal", icon: "flag" },
-      {
-        label: "Progresso",
-        value: `${Math.min(Math.round((calcAvg(h) / 2000) * 100), 100)}`,
-        unit: "%",
-        icon: "percent",
+        unit: "mg/dL",
+        icon: "activity",
       },
     ],
   },
@@ -804,12 +804,13 @@ function getStandardizedMetricScale(
       };
     case "glycemia":
       return {
-        min: 0,
-        max: 2600,
+        min: 50,
+        max: 350,
         bands: [
-          { label: "Abaixo", min: 0, max: 1500, color: semantic.warning },
-          { label: "Na Meta", min: 1500, max: 2200, color: semantic.success },
-          { label: "Acima", min: 2200, max: 2600, color: semantic.danger },
+          { label: "Hipoglicemia", min: 50, max: 70, color: semantic.danger },
+          { label: "Normal", min: 70, max: 100, color: semantic.success },
+          { label: "Pré-Diabético", min: 100, max: 126, color: semantic.warning },
+          { label: "Diabético", min: 126, max: 350, color: semantic.danger },
         ],
       };
     case "bloodPressure":
@@ -2002,9 +2003,9 @@ export default function MasterDetail() {
       : {}),
     ...(resolvedType === "glycemia"
       ? {
-          lineColor: colors.semantic.danger,
-          gradientColor: colors.semantic.danger,
-          accent: colors.semantic.danger,
+          lineColor: "#F59E0B",
+          gradientColor: "#F59E0B",
+          accent: "#F59E0B",
         }
       : {}),
   };
@@ -3174,7 +3175,7 @@ export default function MasterDetail() {
                   )}
 
                   {/* ── CALORIES: Sunburst ────────────────────────────────── */}
-                  {resolvedType === "glycemia" && (
+                  {resolvedType === "cal" && (
                     <View
                       className={`rounded-3xl p-5 border mb-5 ${cardBg}`}
                       style={shadow}
