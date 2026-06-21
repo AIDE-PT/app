@@ -6,7 +6,6 @@
 node_modules/
 
 # firebase credentials (never commit)
-google-services.json
 *firebase-adminsdk*.json
 
 
@@ -41,7 +40,6 @@ yarn-error.*
 .env*.local
 
 # Firebase credentials (never commit)
-google-services.json
 *firebase-adminsdk*.json
 
 # typescript
@@ -56,6 +54,7 @@ expo-troubleshooting.md
 !/android/app/
 /android/app/*
 !/android/app/build.gradle
+!/android/app/google-services.json
 !/android/app/src/
 /android/app/src/*
 !/android/app/src/main/
