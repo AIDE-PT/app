@@ -142,6 +142,13 @@ type SyncedEntryNotification = {
   measuredAt?: string | null;
 };
 
+type MetricNotificationStatus = "normal" | "warning" | "alert";
+
+type ConcerningEntryNotification = SyncedEntryNotification & {
+  status: Exclude<MetricNotificationStatus, "normal">;
+  statusLabel: string;
+};
+
 type BackgroundModules = {
   BackgroundFetch: BackgroundFetchModule;
   TaskManager: TaskManagerModule;
@@ -188,7 +195,6 @@ const REQUIRED_PERMISSIONS: {
 
 let cachedBackgroundModulesPromise: Promise<BackgroundModules | null> | null =
   null;
-let taskDefined = false;
 
 async function loadBackgroundModules(): Promise<BackgroundModules | null> {
   if (Platform.OS !== "android") return null;
@@ -371,7 +377,11 @@ async function isAiderProfile(userId: string): Promise<boolean> {
     .eq("id", userRow.user_type_id)
     .maybeSingle();
 
-  return String(userType?.designation ?? "").trim().toLowerCase() === "aider";
+  return (
+    String(userType?.designation ?? "")
+      .trim()
+      .toLowerCase() === "aider"
+  );
 }
 
 // ─── Leitura do Health Connect ─────────────────────────────────────────────────
@@ -589,58 +599,130 @@ function formatEntryValueForNotification(
   return unit ? `${entry.value} ${unit}` : String(entry.value);
 }
 
+function getMetricNotificationStatus(entry: SyncedEntryNotification): {
+  status: MetricNotificationStatus;
+  label: string;
+} {
+  const value = entry.value;
+  const secondary = entry.valueSecondary;
+
+  switch (entry.metric) {
+    case "HeartRate":
+      if (value >= 120) return { status: "alert", label: "elevada" };
+      if (value > 100) return { status: "warning", label: "acelerada" };
+      if (value < 50) return { status: "warning", label: "baixa" };
+      return { status: "normal", label: "normal" };
+
+    case "BloodPressure":
+      if (
+        value < 90 ||
+        value >= 140 ||
+        (secondary != null && secondary >= 90)
+      ) {
+        return { status: "alert", label: "critica" };
+      }
+      if (value >= 120 || (secondary != null && secondary >= 80)) {
+        return { status: "warning", label: "a subir" };
+      }
+      return { status: "normal", label: "normal" };
+
+    case "BodyTemperature":
+      if (value >= 38) return { status: "alert", label: "febre" };
+      if (value > 37.5) return { status: "warning", label: "a subir" };
+      if (value < 35.5) return { status: "warning", label: "baixa" };
+      return { status: "normal", label: "normal" };
+
+    case "OxygenSaturation":
+      if (value < 92) return { status: "alert", label: "critica" };
+      if (value < 95) return { status: "warning", label: "baixa" };
+      return { status: "normal", label: "normal" };
+
+    case "SleepSession":
+      if (value >= 7 && value <= 9) {
+        return { status: "normal", label: "bom" };
+      }
+      if ((value >= 6 && value < 7) || (value > 9 && value <= 10)) {
+        return { status: "warning", label: "irregular" };
+      }
+      return { status: "alert", label: "insuficiente" };
+
+    // Passos e calorias são cumulativos e dependem muito da hora do dia.
+    // Evitamos avisos automáticos para não gerar falsos positivos.
+    case "Steps":
+    case "TotalCaloriesBurned":
+      return { status: "normal", label: "normal" };
+
+    default:
+      return { status: "normal", label: "normal" };
+  }
+}
+
+function getConcerningEntry(
+  entry: SyncedEntryNotification,
+): ConcerningEntryNotification | null {
+  const status = getMetricNotificationStatus(entry);
+
+  if (status.status === "normal") return null;
+
+  return {
+    ...entry,
+    status: status.status,
+    statusLabel: status.label,
+  };
+}
+
+function buildConcerningNotificationCopy(entry: ConcerningEntryNotification) {
+  const metricLabel = METRIC_NOTIFICATION_META[entry.metric].label;
+  const valueText = formatEntryValueForNotification(entry);
+  const measuredAtLabel = formatMeasuredAtForNotification(entry.measuredAt);
+  const measuredAtSuffix = measuredAtLabel ? ` em ${measuredAtLabel}` : "";
+  const titlePrefix = entry.status === "alert" ? "Alerta" : "Atenção";
+
+  return {
+    title: `${titlePrefix}: ${metricLabel}`,
+    content: `${metricLabel} ${entry.statusLabel}. Valor: ${valueText}${measuredAtSuffix}.`,
+  };
+}
+
 function formatMeasuredAtForNotification(measuredAt?: string | null): string {
   if (!measuredAt) return "";
 
   const date = new Date(measuredAt);
   if (Number.isNaN(date.getTime())) return "";
 
-  return date.toLocaleTimeString("pt-PT", {
+  const dateLabel = date.toLocaleDateString("pt-PT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const timeLabel = date.toLocaleTimeString("pt-PT", {
     hour: "2-digit",
     minute: "2-digit",
   });
+
+  return `${dateLabel} as ${timeLabel}`;
 }
 
 async function persistSyncedEntryNotifications(
   userId: string,
-  entries: SyncedEntryNotification[],
+  entries: ConcerningEntryNotification[],
 ): Promise<void> {
   if (entries.length === 0) return;
 
-  const rows = entries.map((entry) => {
-    const metricLabel = METRIC_NOTIFICATION_META[entry.metric].label;
-    const valueText = formatEntryValueForNotification(entry);
-    const measuredAtLabel = formatMeasuredAtForNotification(entry.measuredAt);
-    const measuredAtSuffix = measuredAtLabel ? ` as ${measuredAtLabel}` : "";
+  for (const entry of entries) {
+    const copy = buildConcerningNotificationCopy(entry);
 
-    return {
-      user_id: userId,
-      type: "health_data",
-      title: `Novo dado recebido: ${metricLabel}`,
-      content: `Valor: ${valueText}${measuredAtSuffix}.`,
-    };
-  });
-
-  const { error } = await getSupabaseClient()
-    .from("notifications")
-    .insert(rows);
-
-  if (error) {
-    console.warn(
-      "[HealthSync] Falha ao guardar notificacoes no historico:",
-      error.message,
-    );
-  }
-
-  for (const row of rows) {
     try {
       await sendHealthDataPushToAiders({
-        title: row.title,
-        body: row.content,
+        patientId: userId,
+        type: entry.status,
+        title: copy.title,
+        body: copy.content,
+        eventAt: entry.measuredAt,
       });
     } catch (pushError) {
       console.warn(
-        "[HealthSync] Falha ao enviar notificacao aos aiders:",
+        "[HealthSync] Falha ao guardar/enviar notificacao aos aiders:",
         pushError,
       );
     }
@@ -651,17 +733,27 @@ async function notifySyncedEntries(
   userId: string,
   entries: SyncedEntryNotification[],
 ): Promise<void> {
-  await persistSyncedEntryNotifications(userId, entries);
+  const concerningEntries = entries
+    .map(getConcerningEntry)
+    .filter((entry): entry is ConcerningEntryNotification => Boolean(entry));
+
+  if (concerningEntries.length === 0) return;
+
+  await persistSyncedEntryNotifications(userId, concerningEntries);
 
   let requestPermissionIfNeeded = true;
 
-  for (const entry of entries) {
+  for (const entry of concerningEntries) {
+    const copy = buildConcerningNotificationCopy(entry);
+
     try {
       await sendLocalDataEntryNotification({
         metricLabel: METRIC_NOTIFICATION_META[entry.metric].label,
         valueText: formatEntryValueForNotification(entry),
         measuredAt: entry.measuredAt,
         requestPermissionIfNeeded,
+        title: copy.title,
+        body: copy.content,
       });
       requestPermissionIfNeeded = false;
     } catch (error) {
@@ -704,6 +796,7 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   const pushRow = async (
     metric: HealthRecordType,
     row: Omit<BiometricDataInsert, "patient_id" | "biometric_data_type_id">,
+    externalId?: string,
   ) => {
     const metricName = BIOMETRIC_TYPE_NAMES[metric];
     const biometricDataTypeId = await getBiometricDataTypeIdByName(metricName);
@@ -711,7 +804,8 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
       patient_id: patientId,
       biometric_data_type_id: biometricDataTypeId,
       source_app: "health_connect",
-      external_id: buildExternalId(metricName, patientId, snapshot.window),
+      external_id:
+        externalId ?? buildExternalId(metricName, patientId, snapshot.window),
       last_modified: nowIso,
       ...row,
     });

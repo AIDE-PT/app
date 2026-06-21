@@ -29,16 +29,9 @@ type UseReportGenerationResult = {
     patientId: string,
     startDate: string,
     endDate: string,
-  ) => Promise<void>;
+  ) => Promise<boolean>;
   lastGeneratedAt: string | null;
 };
-
-type StoredReport = {
-  timestamp: string;
-  noteCount: number;
-};
-
-const DAY_IN_MS = 24 * 60 * 60 * 1000;
 
 const getLastReportKey = (patientId: string) => `last_report_${patientId}`;
 
@@ -105,6 +98,7 @@ export default function useReportGeneration(): UseReportGenerationResult {
           lastReportKey,
           JSON.stringify({ timestamp: nowIso, noteCount: data.noteCount }),
         );
+        return true;
       } catch (generationError) {
         console.error("[Report] generation error:", generationError);
         // Extract HTTP status + body from FunctionsHttpError for easier diagnosis
@@ -129,6 +123,7 @@ export default function useReportGeneration(): UseReportGenerationResult {
             ? generationError.message
             : "Não foi possível gerar o relatório.";
         setError(message);
+        return false;
       } finally {
         setIsLoading(false);
       }

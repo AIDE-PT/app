@@ -144,21 +144,30 @@ export async function sendSOSPushToAiders(): Promise<SosPushResult> {
 }
 
 export async function sendHealthDataPushToAiders({
+  patientId,
+  type,
   title,
   body,
+  eventAt,
 }: {
+  patientId: string;
+  type: "warning" | "alert";
   title: string;
   body: string;
+  eventAt?: string | null;
 }): Promise<SosPushResult> {
   if (!hasSupabaseConfig) {
     return { aiderCount: 0, sentPushCount: 0 };
   }
 
   const { data, error } = await getSupabaseClient().rpc(
-    "dispatch_health_data_notification",
+    "dispatch_metric_alert_notification",
     {
+      p_patient_id: patientId,
+      p_type: type,
       p_title: title,
       p_content: body,
+      p_event_at: eventAt ?? new Date().toISOString(),
     },
   );
 

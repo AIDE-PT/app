@@ -1,6 +1,6 @@
 import BackButton from "@/components/buttons/backButton";
-import { Button } from "@/components/buttons/button";
 import LightBackground from "@/components/DotBackground";
+import InAppPopup from "@/components/feedback/InAppPopup";
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTheme } from "@/hooks/useTheme";
 import {
@@ -16,6 +16,7 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   AppState,
+  Pressable,
   ScrollView,
   Text,
   View,
@@ -40,16 +41,28 @@ const HealthConnectScreen = () => {
   const [isRequesting, setIsRequesting] = useState(false);
   const [requestState, setRequestState] = useState<RequestState>("idle");
   const [feedbackMessage, setFeedbackMessage] = useState<string>("");
+  const [successPopupVisible, setSuccessPopupVisible] = useState(false);
   const [isAwaitingSettingsReturn, setIsAwaitingSettingsReturn] =
     useState(false);
 
-  const loadStatus = async (options?: { preserveFeedback?: boolean }) => {
+  const loadStatus = async (options?: {
+    preserveFeedback?: boolean;
+    showSuccessIfGranted?: boolean;
+  }) => {
     console.log("[HealthConnectScreen] loadStatus:start", options);
     setIsLoadingStatus(true);
     try {
       const nextStatus = await getHealthConnectStatus();
       console.log("[HealthConnectScreen] loadStatus:success", nextStatus);
       setStatus(nextStatus);
+      if (options?.showSuccessIfGranted && nextStatus.permissionsGranted) {
+        setRequestState("success");
+        setFeedbackMessage(
+          "Permissoes concedidas para ler passos, frequencia cardiaca, tensao arterial, oxigenio, temperatura, sono, calorias e stress.",
+        );
+        setSuccessPopupVisible(true);
+        return;
+      }
       if (!options?.preserveFeedback) {
         setFeedbackMessage("");
       }
@@ -84,7 +97,10 @@ const HealthConnectScreen = () => {
           setFeedbackMessage(
             "Regressou do Health Connect. Confirme que as permissoes foram ativadas e toque novamente para continuar, se necessario.",
           );
-          void loadStatus({ preserveFeedback: true });
+          void loadStatus({
+            preserveFeedback: true,
+            showSuccessIfGranted: true,
+          });
         }
       },
     );
@@ -111,6 +127,7 @@ const HealthConnectScreen = () => {
         setFeedbackMessage(
           "Permissoes concedidas para ler passos, frequencia cardiaca, tensao arterial, oxigenio, temperatura, sono, calorias e stress.",
         );
+        setSuccessPopupVisible(true);
       } else if (permissionResult.opened) {
         setIsAwaitingSettingsReturn(true);
         setRequestState("pending");
@@ -123,7 +140,10 @@ const HealthConnectScreen = () => {
           "O acesso foi recusado. Pode voltar a tentar quando estiver pronto.",
         );
       }
-      await loadStatus({ preserveFeedback: true });
+      await loadStatus({
+        preserveFeedback: true,
+        showSuccessIfGranted: permissionResult.opened,
+      });
     } catch (error) {
       console.log(
         "[HealthConnectScreen] handleRequestPermissions:error",
@@ -153,7 +173,7 @@ const HealthConnectScreen = () => {
   const runtimeMessage = status?.runtimeMessage;
   const runtimeReady = status?.runtimeReady ?? true;
   const availabilityMessage = !runtimeReady
-    ? runtimeMessage ?? "Health Connect native module is not available."
+    ? (runtimeMessage ?? "Health Connect native module is not available.")
     : status?.needsUpdate
       ? "E necessario atualizar a app Health Connect antes de continuar."
       : hasGrantedPermissions
@@ -167,6 +187,22 @@ const HealthConnectScreen = () => {
       : requestState === "denied" || requestState === "pending"
         ? colors.semantic.warning
         : colors.semantic.danger;
+  const actionLabel = hasGrantedPermissions
+    ? "Permissões ligadas"
+    : isAvailable
+      ? "Pedir permissões"
+      : "Verificar disponibilidade";
+  const handleActionPress = hasGrantedPermissions
+    ? () => void loadStatus({ preserveFeedback: true })
+    : isAvailable
+      ? handleRequestPermissions
+      : () => void loadStatus();
+  const actionDisabled = isLoadingStatus || isRequesting;
+  const actionColor = hasGrantedPermissions
+    ? colors.semantic.success
+    : isDark
+      ? "#C9D0FF"
+      : "#5061FF";
 
   return (
     <LightBackground>
@@ -308,26 +344,29 @@ const HealthConnectScreen = () => {
               )}
             </View>
 
-            <View className="items-center mb-5">
-              <Button
-                variant="primary"
-                label={
-                  hasGrantedPermissions
-                    ? "Permissoes ativas"
-                    : isAvailable
-                      ? "Pedir permissoes"
-                      : "Verificar disponibilidade"
-                }
-                onPress={
-                  hasGrantedPermissions
-                    ? () => void loadStatus({ preserveFeedback: true })
-                    : isAvailable
-                      ? handleRequestPermissions
-                      : () => void loadStatus()
-                }
-                disabled={isLoadingStatus}
-                loading={isRequesting}
-              />
+            <View className="mb-5 items-center">
+              <Pressable
+                onPress={handleActionPress}
+                disabled={actionDisabled}
+                accessibilityRole="button"
+                accessibilityLabel={actionLabel}
+                className={`min-w-[230px] items-center rounded-[24px] px-8 py-4 ${
+                  isDark ? "bg-aide-dark-card" : "bg-white"
+                } ${actionDisabled ? "opacity-70" : ""}`}
+                style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+              >
+                {isRequesting ? (
+                  <ActivityIndicator color={actionColor} />
+                ) : (
+                  <Text
+                    className={`text-[18px] font-open-sans font-bold ${
+                      isDark ? "text-white" : "text-black"
+                    }`}
+                  >
+                    {actionLabel}
+                  </Text>
+                )}
+              </Pressable>
             </View>
 
             {(feedbackMessage || requestState !== "idle") && (
@@ -368,6 +407,14 @@ const HealthConnectScreen = () => {
               </View>
             )}
           </ScrollView>
+          <InAppPopup
+            visible={successPopupVisible}
+            title="Health Connect ligado"
+            message="As permissoes foram ativadas e a AIDE ja pode ler os dados de saude permitidos."
+            buttonLabel="Continuar"
+            isDark={isDark}
+            onClose={() => setSuccessPopupVisible(false)}
+          />
         </SafeAreaView>
       </View>
     </LightBackground>
