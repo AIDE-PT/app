@@ -2,6 +2,7 @@ import LightBackground from "@/components/DotBackground";
 import BackButton from "@/components/buttons/backButton";
 import { Button } from "@/components/buttons/button";
 import { ChoseCuidado } from "@/components/buttons/choseCuidado";
+import CuidadoModal from "@/components/modals/CuidadoModal";
 import {
   getSurfaceStyle,
   surfaceRadius,
