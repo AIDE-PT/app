@@ -6,6 +6,10 @@
 node_modules/
 
 # firebase credentials (never commit)
+<<<<<<< fix/agoraoununca
+=======
+google-services.json
+>>>>>>> dev
 *firebase-adminsdk*.json
 
 
@@ -40,6 +44,10 @@ yarn-error.*
 .env*.local
 
 # Firebase credentials (never commit)
+<<<<<<< fix/agoraoununca
+=======
+google-services.json
+>>>>>>> dev
 *firebase-adminsdk*.json
 
 # typescript

@@ -23,6 +23,7 @@
           "other_platform_oauth_client": []
         }
       }
+<<<<<<< fix/agoraoununca
     },
     {
       "client_info": {
@@ -42,6 +43,8 @@
           "other_platform_oauth_client": []
         }
       }
+=======
+>>>>>>> dev
     }
   ],
   "configuration_version": "1"

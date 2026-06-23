@@ -45,8 +45,12 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.cbl2025.aide",
+<<<<<<< fix/agoraoununca
       "googleServicesFile": "./google-services.json",
       "runtimeVersion": "1.0.0"
+=======
+      "googleServicesFile": "./google-services.json"
+>>>>>>> dev
     },
     "web": {
       "output": "static",
