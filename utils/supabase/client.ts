@@ -32,6 +32,7 @@ export const supabase = hasSupabaseConfig
         autoRefreshToken: !isNodeRuntime,
         persistSession: !isNodeRuntime,
         detectSessionInUrl: Platform.OS === "web" && !isNodeRuntime,
+        flowType: "pkce",
       },
     })
   : null;
