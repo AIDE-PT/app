@@ -23,7 +23,29 @@ const PROTECTED_ROUTES = [
   "/terms-of-service",
 ];
 
+const ONBOARDING_ROUTE = "/terms-of-service?fromStart=true";
+
 const stripQueryString = (path: string) => path.split("?")[0];
+
+// Um utilizador é considerado novo enquanto não tiver row/tipo de perfil na
+// tabela `users`. Falha "aberto" (sem onboarding) para nunca prender utilizadores
+// existentes num loop de onboarding por causa de um erro transitório.
+const needsOnboarding = async (userId?: string | null) => {
+  if (!userId) return false;
+
+  const { data, error } = await getSupabaseClient()
+    .from("users")
+    .select("user_type_id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Onboarding check failed:", error.message);
+    return false;
+  }
+
+  return !data?.user_type_id;
+};
 
 interface AuthContextType {
   session: Session | null;
@@ -130,6 +152,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           case "TOKEN_REFRESHED":
             handleSession(sessionData ?? null);
             if (event === "SIGNED_IN") {
+              // Utilizadores novos (ex.: primeiro login com Google) ainda não
+              // passaram pelo registo, por isso seguem para o onboarding.
+              if (await needsOnboarding(sessionData?.user?.id)) {
+                router.replace(ONBOARDING_ROUTE as any);
+                return;
+              }
+
               const searchParams = new URLSearchParams(
                 typeof window !== "undefined" ? window.location.search : "",
               );
