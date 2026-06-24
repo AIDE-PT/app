@@ -10,15 +10,34 @@ export default function AuthCallback() {
   useEffect(() => {
     if (!code) return;
 
-    getSupabaseClient()
-      .auth.exchangeCodeForSession(code as string)
-      .then(({ error }) => {
-        if (error) {
-          console.error("Erro ao trocar code:", error);
-          router.replace("/login");
-        }
-        // O AuthContext deteta SIGNED_IN e redireciona automaticamente
-      });
+    const handleCallback = async () => {
+      const { data, error } = await getSupabaseClient().auth.exchangeCodeForSession(
+        code as string,
+      );
+
+      if (error) {
+        console.error("Erro ao trocar code:", error);
+        router.replace("/login");
+        return;
+      }
+
+      // Utilizador novo (sem user_type_id na tabela users) segue para o
+      // onboarding. Caso contrário, deixa o AuthContext tratar do redirect normal.
+      const userId = data.session?.user?.id;
+      if (!userId) return;
+
+      const { data: userRow, error: userError } = await getSupabaseClient()
+        .from("users")
+        .select("user_type_id")
+        .eq("id", userId)
+        .maybeSingle();
+
+      if (!userError && !userRow?.user_type_id) {
+        router.replace("/terms-of-service?fromStart=true");
+      }
+    };
+
+    void handleCallback();
   }, [code]);
 
   return (
