@@ -1,6 +1,9 @@
+import LightBackground from "@/components/DotBackground";
+import { useAuth } from "@/contexts/AuthContext";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { useRouter } from "expo-router";
 import { useState } from "react";
-import { Text, TouchableOpacity, View } from "react-native";
+import { Alert, Text, TouchableOpacity, View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -11,7 +14,7 @@ import Svg, { Path } from "react-native-svg";
 import { z, ZodError } from "zod";
 import { Button } from "../components/buttons/button";
 import { Input } from "../components/input/Input";
-import LightBackground from "@/components/DotBackground";
+import { KeyboardAwareScrollView } from "../components/layout/KeyboardAwareScrollView";
 import "../global.css";
 
 const extraDataSchema = z.object({
@@ -156,25 +159,48 @@ const GenderSelector = ({
 
 export default function ExtraData() {
   const router = useRouter();
+  const { user } = useAuth();
   const isDark = false;
   const [idade, setIdade] = useState("");
   const [peso, setPeso] = useState("");
   const [altura, setAltura] = useState("");
   const [genero, setGenero] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isSaving, setIsSaving] = useState(false);
 
-  const handleAdvance = () => {
+  const handleAdvance = async () => {
     try {
-      extraDataSchema.parse({
+      const parsed = extraDataSchema.parse({
         idade,
         peso,
         altura,
         genero,
       });
+
+      if (!user?.id) {
+        Alert.alert("Erro", "Sessao invalida. Inicie sessao novamente.");
+        return;
+      }
+
+      setIsSaving(true);
+
+      const { error } = await getSupabaseClient()
+        .from("users")
+        .update({
+          age: parsed.idade,
+          weight: parsed.peso,
+          height: parsed.altura,
+          gender: parsed.genero,
+          profile_completed_at: new Date().toISOString(),
+        })
+        .eq("id", user.id);
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
       setErrors({});
-      router.push({
-        pathname: "/selectConditions" as any,
-      });
+      router.replace("/testDashboard" as any);
     } catch (err) {
       if (err instanceof ZodError) {
         const newErrors: Record<string, string> = {};
@@ -184,7 +210,16 @@ export default function ExtraData() {
           }
         });
         setErrors(newErrors);
+        return;
       }
+
+      console.error("Erro ao guardar dados adicionais:", err);
+      Alert.alert(
+        "Erro",
+        "Nao foi possivel guardar os dados adicionais. Tente novamente.",
+      );
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -192,97 +227,102 @@ export default function ExtraData() {
     <LightBackground forceLight>
       <View className="flex-1 bg-transparent px-4 pt-10">
         <SafeAreaView className="flex-1">
-          <View className="mb-8 mt-12">
-            <Text
-              className={`font-safiro text-3xl ${
-                isDark ? "text-white/90" : "text-black/90"
-              }`}
-            >
-              So mais uma coisa...
-            </Text>
-          </View>
-
-          <View className="gap-4">
-            <Input
-              variant="light"
-              forceLight
-              label="Idade"
-              placeholder="Idade"
-              value={idade}
-              onChangeText={setIdade}
-              keyboardType="numeric"
-              helperText="Indique a idade em anos."
-              errorText={errors.idade}
-            />
-
-            <Input
-              variant="light"
-              forceLight
-              label="Peso"
-              placeholder="Peso"
-              value={peso}
-              onChangeText={setPeso}
-              keyboardType="numeric"
-              suffix="kg"
-              helperText="Introduza o peso atual."
-              errorText={errors.peso}
-            />
-
-            <Input
-              variant="light"
-              forceLight
-              label="Altura"
-              placeholder="Altura"
-              value={altura}
-              onChangeText={setAltura}
-              keyboardType="numeric"
-              suffix="m"
-              helperText="Introduza a altura em metros."
-              errorText={errors.altura}
-            />
-
-            <View>
+          <KeyboardAwareScrollView bottomPadding={40}>
+            <View className="mb-8 mt-12">
               <Text
-                className={`mb-2 ml-1 text-sm font-semibold ${
-                  isDark ? "text-white" : "text-black/80"
+                className={`font-safiro text-3xl ${
+                  isDark ? "text-white/90" : "text-black/90"
                 }`}
               >
-                Genero
+                So mais uma coisa...
               </Text>
-              <GenderSelector
-                selected={genero}
-                onSelect={setGenero}
-                isDark={isDark}
+            </View>
+
+            <View className="gap-4">
+              <Input
+                variant="light"
+                forceLight
+                label="Idade"
+                placeholder="Idade"
+                value={idade}
+                onChangeText={setIdade}
+                keyboardType="numeric"
+                helperText="Indique a idade em anos."
+                errorText={errors.idade}
               />
-              {errors.genero ? (
-                <View
-                  className={`mt-2 rounded-2xl px-3 py-3 ${
-                    isDark ? "bg-[#4A1D24]" : "bg-[#FFF1F2]"
+
+              <Input
+                variant="light"
+                forceLight
+                label="Peso"
+                placeholder="Peso"
+                value={peso}
+                onChangeText={setPeso}
+                keyboardType="numeric"
+                suffix="kg"
+                helperText="Introduza o peso atual."
+                errorText={errors.peso}
+              />
+
+              <Input
+                variant="light"
+                forceLight
+                label="Altura"
+                placeholder="Altura"
+                value={altura}
+                onChangeText={setAltura}
+                keyboardType="numeric"
+                suffix="m"
+                helperText="Introduza a altura em metros."
+                errorText={errors.altura}
+              />
+
+              <View>
+                <Text
+                  className={`mb-2 ml-1 text-sm font-semibold ${
+                    isDark ? "text-white" : "text-black/80"
                   }`}
                 >
-                  <Text
-                    className={`text-xs ${
-                      isDark ? "text-red-100" : "text-red-700"
+                  Genero
+                </Text>
+                <GenderSelector
+                  selected={genero}
+                  onSelect={setGenero}
+                  isDark={isDark}
+                />
+                {errors.genero ? (
+                  <View
+                    className={`mt-2 rounded-2xl px-3 py-3 ${
+                      isDark ? "bg-[#4A1D24]" : "bg-[#FFF1F2]"
                     }`}
                   >
-                    Corrija este campo: {errors.genero}. Selecione uma opcao
-                    para continuar.
-                  </Text>
-                </View>
-              ) : null}
+                    <Text
+                      className={`text-xs ${
+                        isDark ? "text-red-100" : "text-red-700"
+                      }`}
+                    >
+                      Corrija este campo: {errors.genero}. Selecione uma opcao
+                      para continuar.
+                    </Text>
+                  </View>
+                ) : null}
+              </View>
             </View>
-          </View>
 
-          <View className="flex-1" />
+            <View className="flex-1" />
 
-          <View className="mb-8 items-center">
-            <Button
-              variant="primary"
-              forceLight
-              label="Avancar"
-              onPress={handleAdvance}
-            />
-          </View>
+            <View className="mb-8 items-center">
+              <Button
+                variant="primary"
+                forceLight
+                label={isSaving ? "A guardar..." : "Avancar"}
+                onPress={() => {
+                  void handleAdvance();
+                }}
+                loading={isSaving}
+              />
+            </View>
+          </KeyboardAwareScrollView>
         </SafeAreaView>
       </View>
     </LightBackground>

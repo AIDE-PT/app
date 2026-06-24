@@ -80,10 +80,14 @@ const HealthConnectScreen = () => {
   };
 
   useEffect(() => {
+    if (profileType !== "cuidado") return;
+
     void loadStatus();
-  }, []);
+  }, [profileType]);
 
   useEffect(() => {
+    if (profileType !== "cuidado") return;
+
     const subscription = AppState.addEventListener(
       "change",
       (nextAppState: AppStateStatus) => {
@@ -108,7 +112,7 @@ const HealthConnectScreen = () => {
     return () => {
       subscription.remove();
     };
-  }, [isAwaitingSettingsReturn]);
+  }, [isAwaitingSettingsReturn, profileType]);
 
   const handleRequestPermissions = async () => {
     console.log("[HealthConnectScreen] handleRequestPermissions:start");

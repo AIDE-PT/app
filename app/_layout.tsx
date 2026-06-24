@@ -1,7 +1,10 @@
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ConsentPrivacyProvider } from "@/contexts/ConsentPrivacyContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { UserProfileProvider } from "@/contexts/UserProfileContext";
+import {
+  UserProfileProvider,
+  useUserProfile,
+} from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { registerDevicePushToken } from "@/src/services/pushNotifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -46,23 +49,10 @@ function PushNotificationRegistration() {
   return null;
 }
 
-export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
-  });
-
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [fontsLoaded]);
-
+function CuidadoHealthConnectSyncRegistration() {
   const { status: healthConnectStatus, isLoading } = useHealthConnectStatus();
   const hasStartedHealthSync = useRef(false);
 
-  // Regista a task e faz 1 sync imediato quando as permissões ficam prontas.
   useEffect(() => {
     if (isLoading) return;
     if (!healthConnectStatus?.permissionsGranted) return;
@@ -92,6 +82,30 @@ export default function RootLayout() {
     })();
   }, [isLoading, healthConnectStatus?.permissionsGranted]);
 
+  return null;
+}
+
+function HealthConnectSyncRegistration() {
+  const { profileType } = useUserProfile();
+
+  if (profileType !== "cuidado") return null;
+
+  return <CuidadoHealthConnectSyncRegistration />;
+}
+
+export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded]);
+
   if (!fontsLoaded) {
     return (
       <View
@@ -114,6 +128,7 @@ export default function RootLayout() {
           <PushNotificationRegistration />
           <ConsentPrivacyProvider>
             <UserProfileProvider>
+              <HealthConnectSyncRegistration />
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
               </Stack>

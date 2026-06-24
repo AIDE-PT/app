@@ -1,6 +1,7 @@
 import { LightBackground } from "@/components/DotBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { getSupabaseClient } from "@/utils/supabase/client";
+import { resolveAuthenticatedEntryRoute } from "@/utils/auth/postAuthRedirect";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGlobalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -9,6 +10,7 @@ import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 import { Button } from "../components/buttons/button";
+import { KeyboardAwareScrollView } from "../components/layout/KeyboardAwareScrollView";
 import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
@@ -63,7 +65,13 @@ export default function Login() {
 
   useEffect(() => {
     if (!authLoading && session) {
-      router.replace(nextRoute as any);
+      void (async () => {
+        const resolvedRoute = await resolveAuthenticatedEntryRoute(
+          session,
+          nextRoute,
+        );
+        router.replace(resolvedRoute as any);
+      })();
     }
   }, [authLoading, nextRoute, router, session]);
 
@@ -104,7 +112,14 @@ export default function Login() {
         const msg = messages[error.message] ?? error.message;
         Alert.alert("Erro no Login", msg, [{ text: "OK" }]);
       } else {
-        router.replace(nextRoute as any);
+        const {
+          data: { session },
+        } = await getSupabaseClient().auth.getSession();
+        const resolvedRoute = await resolveAuthenticatedEntryRoute(
+          session,
+          nextRoute,
+        );
+        router.replace(resolvedRoute as any);
       }
     } finally {
       setIsLoading(false);
@@ -123,126 +138,128 @@ export default function Login() {
     <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10">
         <SafeAreaView className="flex-1">
-          <View className="flex-1">
-            <View className="mb-8 mt-12">
-              <Text
-                className={`font-safiro text-[32px] ${
-                  isDark ? "text-white" : "text-[#1A1A2E]"
-                }`}
-              >
-                Login
-              </Text>
-            </View>
-
-            <View className="mb-4 gap-4">
-              <Controller
-                control={control}
-                name="email"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    variant="light"
-                    forceLight
-                    type="email"
-                    label="Email ou telemovel"
-                    placeholder="Email/telemovel"
-                    helperText="Introduza o email ou numero usado no registo."
-                    errorText={
-                      shouldShowFieldError("email")
-                        ? errors.email?.message
-                        : undefined
-                    }
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                  />
-                )}
-              />
-
-              <Controller
-                control={control}
-                name="password"
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <Input
-                    variant="light"
-                    forceLight
-                    type="password"
-                    label="Password"
-                    placeholder="Password"
-                    helperText="Escreva a password da sua conta."
-                    errorText={
-                      shouldShowFieldError("password")
-                        ? errors.password?.message
-                        : undefined
-                    }
-                    value={value}
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                  />
-                )}
-              />
-            </View>
-
-            <DividerWithText text="Ou" isDark={isDark} />
-
-            <View className="mb-10 gap-3">
-              <SocialButton
-                provider="google"
-                onPress={handleGoogleLogin}
-                forceLight
-              />
-              <SocialButton
-                provider="apple"
-                onPress={handleAppleLogin}
-                forceLight
-              />
-            </View>
-
-            <View className="flex-1" />
-
-            <View className="mb-10 items-center">
-              <Button
-                variant="primary"
-                forceLight
-                label="Avancar"
-                onPress={handleSubmit(handleLogin)}
-                loading={isLoading}
-              />
-
-              <View className="mt-6 flex-row">
+          <KeyboardAwareScrollView bottomPadding={40}>
+            <View className="flex-1">
+              <View className="mb-8 mt-12">
                 <Text
-                  className={`font-open-sans-semibold text-[14px] ${
-                    isDark ? "text-white/60" : "text-[#6B7280]"
+                  className={`font-safiro text-[32px] ${
+                    isDark ? "text-white" : "text-[#1A1A2E]"
                   }`}
                 >
-                  Nao tem uma conta?{" "}
+                  Login
                 </Text>
-                <TouchableOpacity
-                  onPress={() => router.push("/register" as any)}
-                >
-                  <Text className="font-open-sans-semibold text-[14px] text-[#5C6CFF]">
-                    Regista-te
-                  </Text>
-                </TouchableOpacity>
               </View>
 
-              <View className="mt-3 flex-row">
-                <Text
-                  className={`font-open-sans-semibold text-[14px] ${
-                    isDark ? "text-white/60" : "text-[#6B7280]"
-                  }`}
-                >
-                  Nao te lembras da tua password?{" "}
-                </Text>
-                <TouchableOpacity
-                  onPress={() => router.push("/recover-password" as any)}
-                >
-                  <Text className="font-open-sans-semibold text-[14px] text-[#5C6CFF]">
-                    Recupera-a
+              <View className="mb-4 gap-4">
+                <Controller
+                  control={control}
+                  name="email"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input
+                      variant="light"
+                      forceLight
+                      type="email"
+                      label="Email ou telemovel"
+                      placeholder="Email/telemovel"
+                      helperText="Introduza o email ou numero usado no registo."
+                      errorText={
+                        shouldShowFieldError("email")
+                          ? errors.email?.message
+                          : undefined
+                      }
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+
+                <Controller
+                  control={control}
+                  name="password"
+                  render={({ field: { onChange, onBlur, value } }) => (
+                    <Input
+                      variant="light"
+                      forceLight
+                      type="password"
+                      label="Password"
+                      placeholder="Password"
+                      helperText="Escreva a password da sua conta."
+                      errorText={
+                        shouldShowFieldError("password")
+                          ? errors.password?.message
+                          : undefined
+                      }
+                      value={value}
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                    />
+                  )}
+                />
+              </View>
+
+              <DividerWithText text="Ou" isDark={isDark} />
+
+              <View className="mb-10 gap-3">
+                <SocialButton
+                  provider="google"
+                  onPress={handleGoogleLogin}
+                  forceLight
+                />
+                <SocialButton
+                  provider="apple"
+                  onPress={handleAppleLogin}
+                  forceLight
+                />
+              </View>
+
+              <View className="flex-1" />
+
+              <View className="mb-10 items-center">
+                <Button
+                  variant="primary"
+                  forceLight
+                  label="Avancar"
+                  onPress={handleSubmit(handleLogin)}
+                  loading={isLoading}
+                />
+
+                <View className="mt-6 flex-row">
+                  <Text
+                    className={`font-open-sans-semibold text-[14px] ${
+                      isDark ? "text-white/60" : "text-[#6B7280]"
+                    }`}
+                  >
+                    Nao tem uma conta?{" "}
                   </Text>
-                </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => router.push("/register" as any)}
+                  >
+                    <Text className="font-open-sans-semibold text-[14px] text-[#5C6CFF]">
+                      Regista-te
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View className="mt-3 flex-row">
+                  <Text
+                    className={`font-open-sans-semibold text-[14px] ${
+                      isDark ? "text-white/60" : "text-[#6B7280]"
+                    }`}
+                  >
+                    Nao te lembras da tua password?{" "}
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => router.push("/recover-password" as any)}
+                  >
+                    <Text className="font-open-sans-semibold text-[14px] text-[#5C6CFF]">
+                      Recupera-a
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </View>
-          </View>
+          </KeyboardAwareScrollView>
         </SafeAreaView>
       </View>
     </LightBackground>

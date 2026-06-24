@@ -1,5 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useConsentPrivacy } from "@/contexts/ConsentPrivacyContext";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useCallback } from "react";
@@ -11,6 +12,7 @@ const ONBOARDING_STORAGE_KEY = "@aide_onboarding";
 const DefinicoesLista = () => {
   const router = useRouter();
   const { user } = useAuth();
+  const { profileType } = useUserProfile();
   const { isConsentPopupVisible, toggleConsentPopup } = useConsentPrivacy();
 
   const handleResetOnboardingDebug = useCallback(async () => {
@@ -34,16 +36,20 @@ const DefinicoesLista = () => {
     }
   }, [user?.id]);
 
-  const menuDefinicoes: { label: string; href?: string }[] = [
+  const menuDefinicoesBase: { label: string; href?: string }[] = [
     { label: "Gerir Aiders", href: "/associar" },
     { label: "Gerir Dispositivos (sensores)", href: "/dispositivos" },
     { label: "Temas e Cores", href: "/personalizacao" },
-    { label: "Gerir dados", href: "/healthData" },
     { label: "Gerir perfil", href: "/gerir_perfil" },
     { label: "Termos e Condições", href: "/terms-of-service" },
     { label: "Politica de Privacidade", href: "/privacidade" },
     { label: "Sobre", href: "/sobre" },
   ];
+
+  const menuDefinicoes =
+    profileType === "cuidado"
+      ? menuDefinicoesBase
+      : menuDefinicoesBase.filter((item) => item.href !== "/dispositivos");
 
   return (
     <View className="w-full mt-2">

@@ -5,12 +5,19 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 
-export function useHealthConnectStatus() {
+export function useHealthConnectStatus(enabled = true) {
   const [status, setStatus] = useState<HealthConnectStatus | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(enabled);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const loadStatus = useCallback(async () => {
+    if (!enabled) {
+      setStatus(null);
+      setErrorMessage(null);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     try {
       const nextStatus = await getHealthConnectStatus();
@@ -25,13 +32,15 @@ export function useHealthConnectStatus() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [enabled]);
 
   useEffect(() => {
     void loadStatus();
   }, [loadStatus]);
 
   useEffect(() => {
+    if (!enabled) return;
+
     const subscription = AppState.addEventListener(
       "change",
       (nextAppState: AppStateStatus) => {
@@ -44,7 +53,7 @@ export function useHealthConnectStatus() {
     return () => {
       subscription.remove();
     };
-  }, [loadStatus]);
+  }, [enabled, loadStatus]);
 
   return {
     status,
