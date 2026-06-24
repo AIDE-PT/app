@@ -1,7 +1,10 @@
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ConsentPrivacyProvider } from "@/contexts/ConsentPrivacyContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
-import { UserProfileProvider } from "@/contexts/UserProfileContext";
+import {
+  UserProfileProvider,
+  useUserProfile,
+} from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { registerDevicePushToken } from "@/src/services/pushNotifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -46,24 +49,16 @@ function PushNotificationRegistration() {
   return null;
 }
 
-export default function RootLayout() {
-  const [fontsLoaded] = useFonts({
-    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
-    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
-    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
-  });
-
-  useEffect(() => {
-    if (fontsLoaded) {
-      SplashScreen.hideAsync().catch(() => {});
-    }
-  }, [fontsLoaded]);
-
+// Regista a task e faz 1 sync imediato quando as permissões ficam prontas.
+// Vive dentro do UserProfileProvider para ter acesso ao profileType: o aider
+// não envia dados de saúde, por isso o sync nunca corre para ele.
+function HealthSyncBootstrap() {
+  const { profileType } = useUserProfile();
   const { status: healthConnectStatus, isLoading } = useHealthConnectStatus();
   const hasStartedHealthSync = useRef(false);
 
-  // Regista a task e faz 1 sync imediato quando as permissões ficam prontas.
   useEffect(() => {
+    if (profileType === "aider") return;
     if (isLoading) return;
     if (!healthConnectStatus?.permissionsGranted) return;
     if (hasStartedHealthSync.current) return;
@@ -78,8 +73,9 @@ export default function RootLayout() {
 
     void (async () => {
       try {
-        const { registerHealthBackgroundSync, runSyncNow } =
-          await import("@/src/tasks/healthBackgroundSync");
+        const { registerHealthBackgroundSync, runSyncNow } = await import(
+          "@/src/tasks/healthBackgroundSync"
+        );
         await registerHealthBackgroundSync();
         await runSyncNow();
       } catch (error) {
@@ -90,7 +86,23 @@ export default function RootLayout() {
         hasStartedHealthSync.current = false;
       }
     })();
-  }, [isLoading, healthConnectStatus?.permissionsGranted]);
+  }, [isLoading, healthConnectStatus?.permissionsGranted, profileType]);
+
+  return null;
+}
+
+export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded]);
 
   if (!fontsLoaded) {
     return (
@@ -114,6 +126,7 @@ export default function RootLayout() {
           <PushNotificationRegistration />
           <ConsentPrivacyProvider>
             <UserProfileProvider>
+              <HealthSyncBootstrap />
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="index" />
               </Stack>

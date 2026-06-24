@@ -570,7 +570,6 @@ export default function EditableDashboard({
   const useSuperSimplifiedWidgets = widgetView === "simplificada";
   const {
     status: healthConnectStatus,
-    isLoading: isLoadingHealthConnect,
     refresh: refreshHealthConnectStatus,
   } = useHealthConnectStatus();
   const hasHealthConnectPermissions = Boolean(
@@ -578,29 +577,18 @@ export default function EditableDashboard({
   );
   const {
     state: onboardingState,
-    currentStep: onboardingStep,
     isLoading: isOnboardingLoading,
     skipOnboarding,
-    completeHealthConnectStep,
-    isActive: isOnboardingActive,
   } = useHardOnboarding({
     userId: user?.id,
     healthConnectGranted: hasHealthConnectPermissions,
     hasAtLeastOneWidget: activeWidgets.length > 0,
     isAider: profileType === "aider",
   });
-  const isHardOnboardingActive = !isOnboardingLoading && isOnboardingActive;
-  const isDashboardLocked =
-    isHardOnboardingActive && onboardingStep !== "completed";
-  const highlightHealthConnectStep =
-    isDashboardLocked && onboardingStep === "health-connect";
-  const highlightWidgetStep =
-    isDashboardLocked && onboardingStep === "add-widget";
-  const shouldShowOnboardingHero =
-    isOnboardingLoading || isHardOnboardingActive;
-  const isAndroid = Platform.OS === "android";
-
-  const showPopup = useCallback((title: string, message: string) => {
+  const isDashboardLocked = false;
+  const highlightWidgetStep = false;
+  const shouldShowOnboardingHero = false;
+const showPopup = useCallback((title: string, message: string) => {
     if (Platform.OS === "web" && typeof globalThis.alert === "function") {
       globalThis.alert(`${title}\n\n${message}`);
       return;
@@ -609,21 +597,7 @@ export default function EditableDashboard({
     RNAlert.alert(title, message);
   }, []);
 
-  const handleHealthConnectPress = useCallback(async () => {
-    await completeHealthConnectStep();
-
-    if (isAndroid) {
-      router.push("/health-connect");
-      return;
-    }
-
-    showPopup(
-      "Health Connect indisponivel",
-      "Esta funcionalidade esta disponivel apenas em Android.",
-    );
-  }, [completeHealthConnectStep, isAndroid, router, showPopup]);
-
-  useEffect(() => {
+useEffect(() => {
     if (isOnboardingLoading) return;
 
     if (previousOnboardingCompletedRef.current === null) {
@@ -858,6 +832,13 @@ export default function EditableDashboard({
                         Adicione um paciente para começar a ver métricas e
                         notas.
                       </Text>
+                      {isDashboardLocked && (
+                        <Text
+                          className={`mt-2 text-xs font-bold ${isDark ? "text-[#A9BDFF]" : "text-[#5061FF]"}`}
+                        >
+                          Tem de associar um paciente para desbloquear a app.
+                        </Text>
+                      )}
                     </View>
                   </View>
 
@@ -873,24 +854,15 @@ export default function EditableDashboard({
               </View>
             )}
 
-            {profileType !== "aider" &&
-              !isLoadingHealthConnect &&
-              healthConnectStatus &&
-              !healthConnectStatus.permissionsGranted && (
+
+            {profileType === "cuidado" &&
+              !healthConnectStatus?.permissionsGranted && (
                 <View className="px-4 mb-2">
                   <TouchableOpacity
                     activeOpacity={0.9}
-                    onPress={() => void handleHealthConnectPress()}
+                    onPress={() => router.push("/health-connect")}
                     className={`rounded-[28px] p-5 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
-                    style={{
-                      boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
-                      borderWidth: highlightHealthConnectStep ? 1.8 : 0,
-                      borderColor: highlightHealthConnectStep
-                        ? isDark
-                          ? "#93c5fd"
-                          : "#1d4ed8"
-                        : "transparent",
-                    }}
+                    style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
                     accessibilityRole="button"
                     accessibilityLabel="Abrir Health Connect"
                     accessibilityHint="Abre a pagina do Health Connect para concluir a ligacao."

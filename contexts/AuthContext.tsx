@@ -119,8 +119,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } = await getSupabaseClient().auth.getSession();
 
       if (error) {
-        console.error("Supabase session restore failed:", error.message);
-        await getSupabaseClient().auth.signOut();
+        // Não fazer signOut aqui — um erro transiente (rede, token expirado)
+        // apagaria o AsyncStorage e o utilizador teria de fazer login de novo.
+        // O onAuthStateChange trata de SIGNED_OUT quando o refresh falhar de
+        // forma definitiva no servidor.
+        console.warn("Supabase session restore failed:", error.message);
         handleSession(null);
         return;
       }
@@ -146,6 +149,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           case "SIGNED_OUT":
             handleSession(null);
             redirectToLoginIfNeeded(currentPath());
+            return;
+          case "INITIAL_SESSION":
+            // Sessão restaurada do AsyncStorage no arranque — apenas actualizar
+            // o estado sem fazer redirect (syncSession trata disso).
+            handleSession(sessionData ?? null);
             return;
           case "SIGNED_IN":
           case "USER_UPDATED":
@@ -213,17 +221,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
+    // Limpar sessão local — nunca falha mesmo sem rede.
     try {
-      const { error } = await getSupabaseClient().auth.signOut();
-      if (error) {
-        throw new Error(error.message);
-      }
-      handleSession(null);
-      router.replace("/login" as any);
-    } catch (error) {
-      console.error("Error signing out:", error);
-      throw error;
+      await getSupabaseClient().auth.signOut({ scope: "local" });
+    } catch (err) {
+      console.warn("Local signout error (ignored):", err);
     }
+
+    handleSession(null);
+    router.replace("/login" as any);
+
+    // Revogar token no servidor em background (best-effort, sem bloquear).
+    getSupabaseClient()
+      .auth.signOut({ scope: "global" })
+      .catch((err) => console.warn("Server-side signout failed:", err));
   };
 
   const getCurrentAccessToken = async () => {

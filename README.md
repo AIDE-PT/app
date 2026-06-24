@@ -48,6 +48,7 @@ npm run web                # versão web
 - [Scripts disponíveis](#scripts-disponíveis)
 - [Testes e qualidade](#testes-e-qualidade)
 - [Backend (Supabase)](#backend-supabase)
+- [Primeira utilização (desbloquear o dashboard)](#primeira-utilização-desbloquear-o-dashboard)
 - [Resolução de problemas](#resolução-de-problemas)
 - [Contribuir](#contribuir)
 
@@ -280,8 +281,27 @@ npx supabase functions serve generate-report
 
 ---
 
+## Primeira utilização (desbloquear o dashboard)
+
+> ⚠️ **Não é um bug:** num registo/instalação novos, o dashboard arranca **trancado** (botões, cards e topbar não respondem) até o utilizador completar o onboarding obrigatório. É intencional, para garantir que a conta fica pronta a usar.
+
+Requisitos para **desbloquear a app** consoante o tipo de perfil:
+
+| Perfil | Para desbloquear é preciso |
+|---|---|
+| **Cuidado** (gera dados) | 1) Conceder permissões do **Health Connect**; 2) **Adicionar ≥1 widget** ao dashboard |
+| **Aider** (cuidador) | 1) **Associar ≥1 paciente** (cuidado); 2) **Adicionar ≥1 widget**. *Não* precisa de Health Connect — só o cuidado envia dados |
+
+Notas:
+- O estado do onboarding é guardado **por utilizador** (AsyncStorage, chave `@aide_onboarding:<userId>`). Uma conta nova ou uma reinstalação volta a arrancar trancada.
+- Enquanto estiver trancado, o cartão de associação mostra o aviso *"Tem de associar um paciente para desbloquear a app."* (desaparece quando o onboarding fica completo).
+- Em ambiente de desenvolvimento o dashboard pode parecer já desbloqueado porque o estado de onboarding ficou guardado de sessões anteriores no mesmo dispositivo.
+
+---
+
 ## Resolução de problemas
 
+- **Botões/topbar/cards não respondem após login** → o dashboard está **trancado pelo onboarding** (ver [Primeira utilização](#primeira-utilização-desbloquear-o-dashboard)); completa os passos do perfil para desbloquear. Não é um bug.
 - **Login com Google abre a versão web em vez de voltar à app nativa** → falta adicionar `aide://auth/callback` (e `aide://**`) aos Redirect URLs no Supabase; sem isso o Supabase faz fallback para o Site URL (web).
 - **Health Connect não funciona** → só funciona em Android com development build (não em Expo Go/web) e requer a app Health Connect instalada e permissões concedidas.
 - **App não arranca / Supabase indefinido** → confirmar que o `.env` está preenchido e reiniciar o Metro com cache limpa: `npx expo start -c`.
