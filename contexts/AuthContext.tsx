@@ -28,7 +28,29 @@ const PROTECTED_ROUTES = [
   "/associar",
 ];
 
+const ONBOARDING_ROUTE = "/terms-of-service?fromStart=true";
+
 const stripQueryString = (path: string) => path.split("?")[0];
+
+// Um utilizador é considerado novo enquanto não tiver row/tipo de perfil na
+// tabela `users`. Falha "aberto" (sem onboarding) para nunca prender utilizadores
+// existentes num loop de onboarding por causa de um erro transitório.
+const needsOnboarding = async (userId?: string | null) => {
+  if (!userId) return false;
+
+  const { data, error } = await getSupabaseClient()
+    .from("users")
+    .select("user_type_id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("Onboarding check failed:", error.message);
+    return false;
+  }
+
+  return !data?.user_type_id;
+};
 
 interface AuthContextType {
   session: Session | null;
@@ -106,8 +128,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       } = await getSupabaseClient().auth.getSession();
 
       if (error) {
-        console.error("Supabase session restore failed:", error.message);
-        await getSupabaseClient().auth.signOut();
+        // Não fazer signOut aqui — um erro transiente (rede, token expirado)
+        // apagaria o AsyncStorage e o utilizador teria de fazer login de novo.
+        // O onAuthStateChange trata de SIGNED_OUT quando o refresh falhar de
+        // forma definitiva no servidor.
+        console.warn("Supabase session restore failed:", error.message);
         handleSession(null);
         return;
       }
@@ -134,11 +159,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             handleSession(null);
             redirectToLoginIfNeeded(currentPath());
             return;
+          case "INITIAL_SESSION":
+            // Sessão restaurada do AsyncStorage no arranque — apenas actualizar
+            // o estado sem fazer redirect (syncSession trata disso).
+            handleSession(sessionData ?? null);
+            return;
           case "SIGNED_IN":
           case "USER_UPDATED":
           case "TOKEN_REFRESHED":
             handleSession(sessionData ?? null);
             if (event === "SIGNED_IN") {
+              // Utilizadores novos (ex.: primeiro login com Google) ainda não
+              // passaram pelo registo, por isso seguem para o onboarding.
+              if (await needsOnboarding(sessionData?.user?.id)) {
+                router.replace(ONBOARDING_ROUTE as any);
+                return;
+              }
+
               const searchParams = new URLSearchParams(
                 typeof window !== "undefined" ? window.location.search : "",
               );
@@ -224,17 +261,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       return;
     }
 
+    // Limpar sessão local — nunca falha mesmo sem rede.
     try {
-      const { error } = await getSupabaseClient().auth.signOut();
-      if (error) {
-        throw new Error(error.message);
-      }
-      handleSession(null);
-      router.replace("/login" as any);
-    } catch (error) {
-      console.error("Error signing out:", error);
-      throw error;
+      await getSupabaseClient().auth.signOut({ scope: "local" });
+    } catch (err) {
+      console.warn("Local signout error (ignored):", err);
     }
+
+    handleSession(null);
+    router.replace("/login" as any);
+
+    // Revogar token no servidor em background (best-effort, sem bloquear).
+    getSupabaseClient()
+      .auth.signOut({ scope: "global" })
+      .catch((err) => console.warn("Server-side signout failed:", err));
   };
 
   const getCurrentAccessToken = async () => {

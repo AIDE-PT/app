@@ -110,7 +110,7 @@ export function useHardOnboarding({
 
     const nextState: HardOnboardingState = {
       ...state,
-      healthConnectDone: isAider || state.healthConnectDone || healthConnectGranted,
+      healthConnectDone: true,
       firstWidgetAddedDone: state.firstWidgetAddedDone || hasAtLeastOneWidget,
     };
 
@@ -131,6 +131,7 @@ export function useHardOnboarding({
   }, [
     hasAtLeastOneWidget,
     healthConnectGranted,
+    isAider,
     isLoading,
     persistState,
     state,
@@ -168,10 +169,9 @@ export function useHardOnboarding({
 
   const currentStep: HardOnboardingStep = useMemo(() => {
     if (state.completed) return "completed";
-    if (!state.healthConnectDone) return "health-connect";
     if (!state.firstWidgetAddedDone) return "add-widget";
     return "completed";
-  }, [state.completed, state.firstWidgetAddedDone, state.healthConnectDone]);
+  }, [state.completed, state.firstWidgetAddedDone]);
 
   return {
     state,
