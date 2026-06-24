@@ -1,17 +1,27 @@
 import LightBackground from "@/components/DotBackground";
 import BackButton from "@/components/buttons/backButton";
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import React from "react";
+import React, { useEffect } from "react";
 import { ActivityIndicator, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function DispositivosPage() {
   const { isDark, colors } = useTheme();
-  const { status: healthConnectStatus, isLoading } = useHealthConnectStatus();
+  const { profileType } = useUserProfile();
+  const { status: healthConnectStatus, isLoading } = useHealthConnectStatus(
+    profileType === "cuidado",
+  );
   const isConnected = Boolean(healthConnectStatus?.permissionsGranted);
+
+  useEffect(() => {
+    if (profileType === "aider") {
+      router.replace("/testDashboard");
+    }
+  }, [profileType]);
 
   const statusColor = isConnected
     ? colors.semantic.success

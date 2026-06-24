@@ -133,6 +133,7 @@ export default function EditableDashboard({
   const queryClient = useQueryClient();
 
   const handleManualSync = useCallback(async () => {
+    if (profileType !== "cuidado") return;
     if (Platform.OS !== "android") return;
     if (Constants.executionEnvironment === "storeClient") {
       console.warn("[HealthSync] Manual sync is unavailable in Expo Go.");
@@ -145,7 +146,7 @@ export default function EditableDashboard({
     } catch (error) {
       console.warn("[HealthSync] Failed to run manual sync", error);
     }
-  }, []);
+  }, [profileType]);
 
   const loadAssociatedCuidados = useCallback(async () => {
     if (!user?.id || profileType !== "aider") {
@@ -571,7 +572,7 @@ export default function EditableDashboard({
   const {
     status: healthConnectStatus,
     refresh: refreshHealthConnectStatus,
-  } = useHealthConnectStatus();
+  } = useHealthConnectStatus(profileType === "cuidado");
   const hasHealthConnectPermissions = Boolean(
     healthConnectStatus?.permissionsGranted,
   );

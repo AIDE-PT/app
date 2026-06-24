@@ -1,4 +1,6 @@
+import { useUserProfile } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
+import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
@@ -46,6 +48,8 @@ interface MetricProps {
 }
 
 export default function HealthSummary() {
+  const router = useRouter();
+  const { profileType } = useUserProfile();
   const [loading, setLoading] = useState(true);
   const [data, setData] = useState<HealthData>({
     heartRate: null,
@@ -58,10 +62,17 @@ export default function HealthSummary() {
   const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
   const { status: healthConnectStatus, isLoading: isLoadingStatus } =
-    useHealthConnectStatus();
+    useHealthConnectStatus(profileType === "cuidado");
 
   const appState = useRef(AppState.currentState);
   const syncIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  useEffect(() => {
+    if (profileType !== "aider") return;
+
+    setLoading(false);
+    router.replace("/testDashboard");
+  }, [profileType, router]);
 
   // Inicializar dados quando Health Connect está pronto
   useEffect(() => {

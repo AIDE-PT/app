@@ -1,5 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { getSupabaseClient, hasSupabaseConfig } from "@/utils/supabase/client";
+import {
+  isOnboardingRoute,
+  resolveAuthenticatedEntryRoute,
+} from "@/utils/auth/postAuthRedirect";
 import type { Session, User } from "@supabase/supabase-js";
 import { usePathname, useRouter } from "expo-router";
 import React, {
@@ -19,8 +23,9 @@ const PROTECTED_ROUTES = [
   "/definicoes",
   "/gerir_perfil",
   "/historicoDiario",
-  "/recommendations",
   "/terms-of-service",
+  "/extraData",
+  "/associar",
 ];
 
 const ONBOARDING_ROUTE = "/terms-of-service?fromStart=true";
@@ -96,12 +101,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const redirectToAuthHomeIfNeeded = (
+  const redirectToAuthHomeIfNeeded = async (
     path: string,
     activeSession: Session | null = session,
   ) => {
     if (activeSession && isPublicAuthRoute(path)) {
-      router.replace(DEFAULT_AUTH_REDIRECT as any);
+      const nextRoute = await resolveAuthenticatedEntryRoute(
+        activeSession,
+        DEFAULT_AUTH_REDIRECT,
+      );
+      router.replace(nextRoute as any);
     }
   };
 
@@ -129,7 +138,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       handleSession(restoredSession);
-      redirectToAuthHomeIfNeeded(currentPath(), restoredSession);
+      await redirectToAuthHomeIfNeeded(currentPath(), restoredSession);
     } catch (error) {
       console.error("Unexpected session restore error:", error);
       handleSession(null);
@@ -174,7 +183,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               const isAllowed = PROTECTED_ROUTES.some((r) =>
                 rawNext.startsWith(r),
               );
-              const next = isAllowed ? rawNext : DEFAULT_AUTH_REDIRECT;
+              const requestedRoute = isAllowed
+                ? rawNext
+                : DEFAULT_AUTH_REDIRECT;
+              const next = await resolveAuthenticatedEntryRoute(
+                sessionData ?? null,
+                requestedRoute,
+              );
               router.replace(next as any);
             }
             return;
@@ -191,6 +206,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       listener.subscription.unsubscribe();
     };
   }, [router]);
+
+  useEffect(() => {
+    if (isLoading) return;
+
+    const path = currentPath();
+
+    if (!session) {
+      redirectToLoginIfNeeded(path);
+      return;
+    }
+
+    if (isPublicAuthRoute(path)) {
+      void redirectToAuthHomeIfNeeded(path, session);
+      return;
+    }
+
+    if (isProtectedRoute(path) && !isOnboardingRoute(path)) {
+      void (async () => {
+        const nextRoute = await resolveAuthenticatedEntryRoute(session, path);
+        if (stripQueryString(nextRoute) !== stripQueryString(path)) {
+          router.replace(nextRoute as any);
+        }
+      })();
+    }
+  }, [isLoading, pathname, session?.user?.id]);
 
   useEffect(() => {
     if (Platform.OS !== "web" || typeof window === "undefined") return;

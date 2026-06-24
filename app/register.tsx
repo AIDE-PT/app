@@ -7,6 +7,7 @@ import {
   registerSchema,
 } from "@/schemas/register";
 import { supabase } from "@/utils/supabase/client";
+import { resolveAuthenticatedEntryRoute } from "@/utils/auth/postAuthRedirect";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
@@ -21,6 +22,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
+import { KeyboardAwareScrollView } from "../components/layout/KeyboardAwareScrollView";
 import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
@@ -72,7 +74,10 @@ export default function Register() {
 
   useEffect(() => {
     if (!authLoading && session) {
-      router.replace("/testDashboard" as any);
+      void (async () => {
+        const nextRoute = await resolveAuthenticatedEntryRoute(session);
+        router.replace(nextRoute as any);
+      })();
     }
   }, [authLoading, router, session]);
 
@@ -146,11 +151,7 @@ export default function Register() {
     <LightBackground forceLight>
       <View className="flex-1 px-4 pt-10">
         <SafeAreaView className="flex-1">
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ flexGrow: 1, paddingBottom: 24 }}
-          >
+          <KeyboardAwareScrollView bottomPadding={40}>
             <View className="flex-1">
               <View className="mb-8 mt-12">
                 <Text
@@ -302,7 +303,7 @@ export default function Register() {
                 </View>
               </View>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </SafeAreaView>
       </View>
     </LightBackground>

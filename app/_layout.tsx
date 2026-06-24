@@ -104,6 +104,30 @@ export default function RootLayout() {
     }
   }, [fontsLoaded]);
 
+  return null;
+}
+
+function HealthConnectSyncRegistration() {
+  const { profileType } = useUserProfile();
+
+  if (profileType !== "cuidado") return null;
+
+  return <CuidadoHealthConnectSyncRegistration />;
+}
+
+export default function RootLayout() {
+  const [fontsLoaded] = useFonts({
+    "Safiro-Medium": require("../assets/fonts/safiro/safiro-medium-webfont.ttf"),
+    "OpenSans-Regular": require("../assets/fonts/open-sans/OpenSans-Regular.ttf"),
+    "OpenSans-SemiBold": require("../assets/fonts/open-sans/OpenSans-SemiBold.ttf"),
+  });
+
+  useEffect(() => {
+    if (fontsLoaded) {
+      SplashScreen.hideAsync().catch(() => {});
+    }
+  }, [fontsLoaded]);
+
   if (!fontsLoaded) {
     return (
       <View
