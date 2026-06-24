@@ -9,16 +9,10 @@ import { getSupabaseClient } from "@/utils/supabase/client";
 import { Ionicons } from "@expo/vector-icons";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Platform,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, Platform, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
+import { KeyboardAwareScrollView } from "../components/layout/KeyboardAwareScrollView";
 
 type UserFormData = {
   nome: string;
@@ -159,9 +153,9 @@ const GerirPerfil = () => {
           <View className="mb-4">
             <BackButton label="Gerir Perfil" dark={isDark} />
           </View>
-          <ScrollView
-            contentContainerStyle={{ paddingBottom: 40 }}
-            showsVerticalScrollIndicator={false}
+          <KeyboardAwareScrollView
+            bottomPadding={40}
+            keyboardVerticalOffset={24}
           >
             {/* Foto de Perfil */}
             <View className="items-center my-6">
@@ -266,7 +260,7 @@ const GerirPerfil = () => {
                 </TouchableOpacity>
               </View>
 
-              {Platform.OS === "android" && (
+              {Platform.OS === "android" && profileType === "cuidado" && (
                 <View
                   className={`p-6 rounded-[32px] mt-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
                   style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
@@ -373,7 +367,7 @@ const GerirPerfil = () => {
                 </TouchableOpacity>
               </View>
             </View>
-          </ScrollView>
+          </KeyboardAwareScrollView>
         </SafeAreaView>
       </View>
     </LightBackground>

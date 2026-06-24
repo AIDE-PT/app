@@ -1,4 +1,5 @@
 import { useAuth } from "@/contexts/AuthContext";
+import { resolveAuthenticatedEntryRoute } from "@/utils/auth/postAuthRedirect";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator, Dimensions, Text, View } from "react-native";
@@ -203,7 +204,10 @@ export default function App() {
 
   useEffect(() => {
     if (!isLoading && session) {
-      router.replace("/testDashboard" as any);
+      void (async () => {
+        const nextRoute = await resolveAuthenticatedEntryRoute(session);
+        router.replace(nextRoute as any);
+      })();
     }
   }, [isLoading, router, session]);
 
