@@ -50,28 +50,13 @@ expo-troubleshooting.md
 
 # generated native folders
 /ios
-/android/*
-!/android/build.gradle
-!/android/app/
-/android/app/*
-!/android/app/build.gradle
-!/android/app/google-services.json
-!/android/app/src/
-/android/app/src/*
-!/android/app/src/main/
-/android/app/src/main/*
-!/android/app/src/main/AndroidManifest.xml
-!/android/app/src/main/java/
-/android/app/src/main/java/*
-!/android/app/src/main/java/com/
-/android/app/src/main/java/com/*
-!/android/app/src/main/java/com/cbl2025/
-/android/app/src/main/java/com/cbl2025/*
-!/android/app/src/main/java/com/cbl2025/aide/
-/android/app/src/main/java/com/cbl2025/aide/*
-!/android/app/src/main/java/com/cbl2025/aide/MainApplication.kt
-!/android/app/src/main/java/com/cbl2025/aide/HealthConnectModule.kt
-!/android/app/src/main/java/com/cbl2025/aide/HealthConnectPackage.kt
-!/android/app/src/main/java/com/cbl2025/aide/HealthConnectPermissionsActivity.kt
+
+# Android native project: o projeto é commitado por inteiro (build "bare" no EAS,
+# preserva o módulo nativo Health Connect). Ignorar apenas artefactos de build
+# e ficheiros específicos da máquina.
 /android/.gradle/
+/android/.idea/
+/android/local.properties
 /android/**/build/
+/android/app/release/
+.cxx/
