@@ -70,7 +70,8 @@
       ],
       "@react-native-community/datetimepicker",
       "react-native-health-connect",
-      "expo-asset"
+      "expo-asset",
+      "expo-web-browser"
     ],
     "locales": {
       "pt-PT": "./locales/pt-PT.json"

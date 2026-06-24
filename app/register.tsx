@@ -1,5 +1,6 @@
 import { LightBackground } from "@/components/DotBackground";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 import {
   registerFieldCopy,
   RegisterFormData,
@@ -11,7 +12,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
 import { KeyboardAwareScrollView } from "../components/layout/KeyboardAwareScrollView";
@@ -46,8 +54,23 @@ const DividerWithText = ({
 export default function Register() {
   const router = useRouter();
   const { session, isLoading: authLoading } = useAuth();
+  const {
+    signInWithGoogle,
+    loading: googleLoading,
+    error: googleError,
+  } = useGoogleAuth();
   const isDark = false;
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!googleError) return;
+
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      window.alert(`Erro no Registo com Google: ${googleError}`);
+    } else {
+      Alert.alert("Erro no Registo com Google", googleError, [{ text: "OK" }]);
+    }
+  }, [googleError]);
 
   useEffect(() => {
     if (!authLoading && session) {
@@ -116,8 +139,8 @@ export default function Register() {
       setIsLoading(false);
     }
   };
-  const handleGoogleRegister = () => {
-    console.log("Register with Google");
+  const handleGoogleRegister = async () => {
+    await signInWithGoogle();
   };
 
   const handleAppleRegister = () => {
@@ -242,6 +265,7 @@ export default function Register() {
               <View className="mb-6 gap-3">
                 <SocialButton
                   provider="google"
+                  label={googleLoading ? "A entrar..." : undefined}
                   onPress={handleGoogleRegister}
                   forceLight
                 />

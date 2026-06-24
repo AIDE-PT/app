@@ -1,12 +1,13 @@
 import { LightBackground } from "@/components/DotBackground";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 import { getSupabaseClient } from "@/utils/supabase/client";
 import { resolveAuthenticatedEntryRoute } from "@/utils/auth/postAuthRedirect";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGlobalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 import { Button } from "../components/buttons/button";
@@ -58,6 +59,11 @@ export default function Login() {
   const router = useRouter();
   const params = useGlobalSearchParams<{ next?: string }>();
   const { session, isLoading: authLoading } = useAuth();
+  const {
+    signInWithGoogle,
+    loading: googleLoading,
+    error: googleError,
+  } = useGoogleAuth();
   const nextRoute =
     typeof params.next === "string" ? params.next : "/testDashboard";
   const isDark = false;
@@ -126,9 +132,19 @@ export default function Login() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Login with Google");
+  const handleGoogleLogin = async () => {
+    await signInWithGoogle();
   };
+
+  useEffect(() => {
+    if (!googleError) return;
+
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      window.alert(`Erro no Login com Google: ${googleError}`);
+    } else {
+      Alert.alert("Erro no Login com Google", googleError, [{ text: "OK" }]);
+    }
+  }, [googleError]);
 
   const handleAppleLogin = () => {
     console.log("Login with Apple");
@@ -174,29 +190,21 @@ export default function Login() {
                   )}
                 />
 
-                <Controller
-                  control={control}
-                  name="password"
-                  render={({ field: { onChange, onBlur, value } }) => (
-                    <Input
-                      variant="light"
-                      forceLight
-                      type="password"
-                      label="Password"
-                      placeholder="Password"
-                      helperText="Escreva a password da sua conta."
-                      errorText={
-                        shouldShowFieldError("password")
-                          ? errors.password?.message
-                          : undefined
-                      }
-                      value={value}
-                      onBlur={onBlur}
-                      onChangeText={onChange}
-                    />
-                  )}
-                />
-              </View>
+            <DividerWithText text="Ou" isDark={isDark} />
+
+            <View className="mb-10 gap-3">
+              <SocialButton
+                provider="google"
+                label={googleLoading ? "A entrar..." : undefined}
+                onPress={handleGoogleLogin}
+                forceLight
+              />
+              <SocialButton
+                provider="apple"
+                onPress={handleAppleLogin}
+                forceLight
+              />
+            </View>
 
               <DividerWithText text="Ou" isDark={isDark} />
 
