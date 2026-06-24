@@ -50,6 +50,8 @@ export interface HealthConnectStatus {
   grantedPermissionsCount: number;
   providerPackageName: string;
   sdkStatus: number;
+  runtimeReady: boolean;
+  runtimeMessage?: string;
 }
 
 export interface StepRecord {
@@ -87,7 +89,7 @@ function getNativeModule(): NativeHealthConnectModule {
 
   if (!HealthConnectModule) {
     throw new HealthConnectError(
-      "HealthConnectModule is not available. Rebuild the Android development client.",
+      "Health Connect native module is not available. Use a development build, not Expo Go.",
       "MODULE_NOT_LINKED",
     );
   }
@@ -145,8 +147,23 @@ export async function getHealthConnectStatus(): Promise<HealthConnectStatus> {
       ...status,
       permissionsGranted: Boolean(status.permissionsGranted),
       grantedPermissionsCount: Number(status.grantedPermissionsCount ?? 0),
+      runtimeReady: true,
     };
   } catch (error) {
+    if (error instanceof HealthConnectError) {
+      return {
+        available: false,
+        installed: false,
+        needsUpdate: false,
+        permissionsGranted: false,
+        grantedPermissionsCount: 0,
+        providerPackageName: "",
+        sdkStatus: HEALTH_CONNECT_SDK_UNAVAILABLE,
+        runtimeReady: false,
+        runtimeMessage: error.message,
+      };
+    }
+
     throw toHealthConnectError(error, "HC_STATUS_ERROR");
   }
 }

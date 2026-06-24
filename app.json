@@ -13,7 +13,13 @@
       "icon": "./assets/icon/colorBackground.png",
       "infoPlist": {
         "CFBundleDevelopmentRegion": "pt",
-        "CFBundleLocalizations": ["pt-PT"]
+        "CFBundleLocalizations": [
+          "pt-PT",
+          "pt-PT"
+        ]
+      },
+      "runtimeVersion": {
+        "policy": "appVersion"
       }
     },
     "android": {
@@ -28,11 +34,19 @@
         "android.permission.FOREGROUND_SERVICE",
         "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
         "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.POST_NOTIFICATIONS",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_DATA_SYNC",
+        "android.permission.RECEIVE_BOOT_COMPLETED",
         "android.permission.POST_NOTIFICATIONS"
       ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.cbl2025.aide"
+      "package": "com.cbl2025.aide",
+      "googleServicesFile": "./google-services.json",
+      "runtimeVersion": "1.0.0"
     },
     "web": {
       "output": "static",
@@ -55,7 +69,9 @@
         }
       ],
       "@react-native-community/datetimepicker",
-      "react-native-health-connect"
+      "react-native-health-connect",
+      "expo-asset",
+      "expo-web-browser"
     ],
     "locales": {
       "pt-PT": "./locales/pt-PT.json"
@@ -67,8 +83,12 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "77f0c9a8-1dd1-40c0-955c-01fac692579b"
+        "projectId": "fb30b9b1-baa2-4aab-b751-0c5286ead3d6"
       }
+    },
+    "owner": "l.fiuza",
+    "updates": {
+      "url": "https://u.expo.dev/fb30b9b1-baa2-4aab-b751-0c5286ead3d6"
     }
   }
 }

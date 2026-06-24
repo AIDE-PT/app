@@ -13,13 +13,16 @@
  * de qualquer rendering ocorrer.
  */
 
-import { supabase } from "@/utils/supabase/client";
+import { getSupabaseClient } from "@/utils/supabase/client";
+import { sendLocalDataEntryNotification } from "@/src/services/localNotifications";
+import { sendHealthDataPushToAiders } from "@/src/services/pushNotifications";
 import {
   getGrantedPermissions,
   initialize,
   readRecords,
   type RecordResult,
 } from "react-native-health-connect";
+import { Platform, PermissionsAndroid } from "react-native";
 // import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
@@ -36,7 +39,6 @@ const MAX_RETRIES = 3;
 /** Espera entre tentativas em ms. */
 const RETRY_DELAY_MS = 2000;
 
-/** Janela de tempo do primeiro sync (dias atrás). */
 const INITIAL_SYNC_DAYS = 30;
 const BACKGROUND_READ_PERMISSION =
   "android.permission.health.READ_HEALTH_DATA_IN_BACKGROUND";
@@ -140,8 +142,13 @@ type SyncedEntryNotification = {
   measuredAt?: string | null;
 };
 
-type BackgroundFetchModule = typeof import("expo-background-fetch");
-type TaskManagerModule = typeof import("expo-task-manager");
+type MetricNotificationStatus = "normal" | "warning" | "alert";
+
+type ConcerningEntryNotification = SyncedEntryNotification & {
+  status: Exclude<MetricNotificationStatus, "normal">;
+  statusLabel: string;
+};
+
 type BackgroundModules = {
   BackgroundFetch: BackgroundFetchModule;
   TaskManager: TaskManagerModule;
@@ -188,7 +195,6 @@ const REQUIRED_PERMISSIONS: {
 
 let cachedBackgroundModulesPromise: Promise<BackgroundModules | null> | null =
   null;
-let taskDefined = false;
 
 async function loadBackgroundModules(): Promise<BackgroundModules | null> {
   if (Platform.OS !== "android") return null;
@@ -260,11 +266,9 @@ async function checkPermissions(): Promise<boolean> {
 }
 
 async function checkBackgroundReadPermission(): Promise<boolean> {
+  if (Platform.OS !== "android") return false;
   try {
-    const granted = await getGrantedPermissions();
-    return Array.from(granted as unknown as Iterable<string>).includes(
-      BACKGROUND_READ_PERMISSION,
-    );
+    return await PermissionsAndroid.check(BACKGROUND_READ_PERMISSION as never);
   } catch {
     return false;
   }
@@ -305,7 +309,7 @@ async function getBiometricDataTypeIdByName(name: string): Promise<string> {
   const cached = biometricTypeIdCache.get(name);
   if (cached) return cached;
 
-  const { data, error } = await supabase
+  const { data, error } = await getSupabaseClient()
     .from("biometric_data_types")
     .select("id")
     .eq("name", name)
@@ -322,6 +326,62 @@ async function getBiometricDataTypeIdByName(name: string): Promise<string> {
 
   biometricTypeIdCache.set(name, data.id);
   return data.id;
+}
+
+async function ensureUserRowExists(
+  userId: string,
+  email?: string | null,
+  name?: string | null,
+): Promise<void> {
+  const { error } = await getSupabaseClient()
+    .from("users")
+    .upsert(
+      {
+        id: userId,
+        email: email ?? null,
+        name: name ?? null,
+      },
+      { onConflict: "id" },
+    )
+    .select("id")
+    .maybeSingle();
+
+  if (error) {
+    // A linha do utilizador já é criada pelo trigger handle_new_user no signup,
+    // por isso este upsert é apenas best-effort. Se falhar (ex.: RLS sem política
+    // de INSERT neste ambiente), NÃO é fatal: a linha existe na mesma e o FK do
+    // biometric_data fica satisfeito. Não bloquear o sync por causa disto.
+    console.warn(
+      "[HealthSync] ensureUserRowExists ignorado (linha já existe via trigger):",
+      error.message,
+    );
+  }
+}
+
+// Só perfis "cuidado" geram/enviam os próprios dados biométricos. Um "aider"
+// monitoriza pacientes e não deve sincronizar Health Connect próprio.
+// Devolve true apenas quando o perfil é POSITIVAMENTE "aider"; se o tipo for
+// desconhecido (user_type_id nulo), devolve false para não bloquear cuidados.
+async function isAiderProfile(userId: string): Promise<boolean> {
+  const { data: userRow, error: userError } = await getSupabaseClient()
+    .from("users")
+    .select("user_type_id")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (userError || !userRow?.user_type_id) return false;
+
+  const { data: userType } = await getSupabaseClient()
+    .from("user_types")
+    .select("designation")
+    .eq("id", userRow.user_type_id)
+    .maybeSingle();
+
+  return (
+    String(userType?.designation ?? "")
+      .trim()
+      .toLowerCase() === "aider"
+  );
 }
 
 // ─── Leitura do Health Connect ─────────────────────────────────────────────────
@@ -412,7 +472,11 @@ async function readHealthRecords(
           .filter((v) => v != null);
         if (vals.length === 0) return null;
         const avg = vals.reduce((a, b) => a + b, 0) / vals.length;
-        return { average: Math.round(avg * 10) / 10, count: vals.length };
+        const percentage = avg <= 1 ? avg * 100 : avg;
+        return {
+          average: Math.round(percentage * 10) / 10,
+          count: vals.length,
+        };
       }
 
       case "TotalCaloriesBurned": {
@@ -464,7 +528,7 @@ async function collectHealthSnapshot(
   ]);
 
   return {
-    timestamp: new Date().toISOString(),
+    timestamp: endCopy.toISOString(),
     window: { start: startCopy.toISOString(), end: endCopy.toISOString() },
     heartRate: heartRate as HealthSnapshot["heartRate"],
     steps: steps as HealthSnapshot["steps"],
@@ -486,6 +550,44 @@ function buildExternalId(
   return `health_connect:${patientId}:${metricName}:${window.start}:${window.end}`;
 }
 
+function formatLocalDateKey(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function isLocalDayStart(date: Date): boolean {
+  return (
+    date.getHours() === 0 &&
+    date.getMinutes() === 0 &&
+    date.getSeconds() === 0 &&
+    date.getMilliseconds() === 0
+  );
+}
+
+function getNextLocalMidnight(date: Date): Date {
+  const next = new Date(date);
+  next.setHours(24, 0, 0, 0);
+  return next;
+}
+
+function splitWindowByLocalDay(start: Date, end: Date) {
+  const windows: { start: Date; end: Date }[] = [];
+  let cursor = new Date(start);
+
+  while (cursor < end) {
+    const nextMidnight = getNextLocalMidnight(cursor);
+    const windowEnd = nextMidnight < end ? nextMidnight : new Date(end);
+    if (windowEnd > cursor) {
+      windows.push({ start: new Date(cursor), end: new Date(windowEnd) });
+    }
+    cursor = new Date(windowEnd);
+  }
+
+  return windows;
+}
+
 function formatEntryValueForNotification(
   entry: SyncedEntryNotification,
 ): string {
@@ -497,18 +599,161 @@ function formatEntryValueForNotification(
   return unit ? `${entry.value} ${unit}` : String(entry.value);
 }
 
-async function notifySyncedEntries(
-  entries: SyncedEntryNotification[],
+function getMetricNotificationStatus(entry: SyncedEntryNotification): {
+  status: MetricNotificationStatus;
+  label: string;
+} {
+  const value = entry.value;
+  const secondary = entry.valueSecondary;
+
+  switch (entry.metric) {
+    case "HeartRate":
+      if (value >= 120) return { status: "alert", label: "elevada" };
+      if (value > 100) return { status: "warning", label: "acelerada" };
+      if (value < 50) return { status: "warning", label: "baixa" };
+      return { status: "normal", label: "normal" };
+
+    case "BloodPressure":
+      if (
+        value < 90 ||
+        value >= 140 ||
+        (secondary != null && secondary >= 90)
+      ) {
+        return { status: "alert", label: "critica" };
+      }
+      if (value >= 120 || (secondary != null && secondary >= 80)) {
+        return { status: "warning", label: "a subir" };
+      }
+      return { status: "normal", label: "normal" };
+
+    case "BodyTemperature":
+      if (value >= 38) return { status: "alert", label: "febre" };
+      if (value > 37.5) return { status: "warning", label: "a subir" };
+      if (value < 35.5) return { status: "warning", label: "baixa" };
+      return { status: "normal", label: "normal" };
+
+    case "OxygenSaturation":
+      if (value < 92) return { status: "alert", label: "critica" };
+      if (value < 95) return { status: "warning", label: "baixa" };
+      return { status: "normal", label: "normal" };
+
+    case "SleepSession":
+      if (value >= 7 && value <= 9) {
+        return { status: "normal", label: "bom" };
+      }
+      if ((value >= 6 && value < 7) || (value > 9 && value <= 10)) {
+        return { status: "warning", label: "irregular" };
+      }
+      return { status: "alert", label: "insuficiente" };
+
+    // Passos e calorias são cumulativos e dependem muito da hora do dia.
+    // Evitamos avisos automáticos para não gerar falsos positivos.
+    case "Steps":
+    case "TotalCaloriesBurned":
+      return { status: "normal", label: "normal" };
+
+    default:
+      return { status: "normal", label: "normal" };
+  }
+}
+
+function getConcerningEntry(
+  entry: SyncedEntryNotification,
+): ConcerningEntryNotification | null {
+  const status = getMetricNotificationStatus(entry);
+
+  if (status.status === "normal") return null;
+
+  return {
+    ...entry,
+    status: status.status,
+    statusLabel: status.label,
+  };
+}
+
+function buildConcerningNotificationCopy(entry: ConcerningEntryNotification) {
+  const metricLabel = METRIC_NOTIFICATION_META[entry.metric].label;
+  const valueText = formatEntryValueForNotification(entry);
+  const measuredAtLabel = formatMeasuredAtForNotification(entry.measuredAt);
+  const measuredAtSuffix = measuredAtLabel ? ` em ${measuredAtLabel}` : "";
+  const titlePrefix = entry.status === "alert" ? "Alerta" : "Atenção";
+
+  return {
+    title: `${titlePrefix}: ${metricLabel}`,
+    content: `${metricLabel} ${entry.statusLabel}. Valor: ${valueText}${measuredAtSuffix}.`,
+  };
+}
+
+function formatMeasuredAtForNotification(measuredAt?: string | null): string {
+  if (!measuredAt) return "";
+
+  const date = new Date(measuredAt);
+  if (Number.isNaN(date.getTime())) return "";
+
+  const dateLabel = date.toLocaleDateString("pt-PT", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  const timeLabel = date.toLocaleTimeString("pt-PT", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+
+  return `${dateLabel} as ${timeLabel}`;
+}
+
+async function persistSyncedEntryNotifications(
+  userId: string,
+  entries: ConcerningEntryNotification[],
 ): Promise<void> {
-  let requestPermissionIfNeeded = true;
+  if (entries.length === 0) return;
 
   for (const entry of entries) {
+    const copy = buildConcerningNotificationCopy(entry);
+
+    try {
+      await sendHealthDataPushToAiders({
+        patientId: userId,
+        type: entry.status,
+        title: copy.title,
+        body: copy.content,
+        eventAt: entry.measuredAt,
+      });
+    } catch (pushError) {
+      console.warn(
+        "[HealthSync] Falha ao guardar/enviar notificacao aos aiders:",
+        pushError,
+      );
+    }
+  }
+}
+
+async function notifySyncedEntries(
+  userId: string,
+  entries: SyncedEntryNotification[],
+): Promise<void> {
+  const concerningEntries = entries
+    .map(getConcerningEntry)
+    .filter((entry): entry is ConcerningEntryNotification => Boolean(entry));
+
+  if (concerningEntries.length === 0) return;
+
+  await persistSyncedEntryNotifications(userId, concerningEntries);
+
+  let requestPermissionIfNeeded = true;
+
+  for (const entry of concerningEntries) {
+    const copy = buildConcerningNotificationCopy(entry);
+
     try {
       await sendLocalDataEntryNotification({
         metricLabel: METRIC_NOTIFICATION_META[entry.metric].label,
         valueText: formatEntryValueForNotification(entry),
         measuredAt: entry.measuredAt,
         requestPermissionIfNeeded,
+        title: copy.title,
+        body: copy.content,
       });
       requestPermissionIfNeeded = false;
     } catch (error) {
@@ -526,7 +771,8 @@ async function notifySyncedEntries(
 }
 
 async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
-  const { data: userData, error: userError } = await supabase.auth.getUser();
+  const { data: userData, error: userError } =
+    await getSupabaseClient().auth.getUser();
   if (userError) throw userError;
 
   const patientId = userData.user?.id;
@@ -535,6 +781,14 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
     return;
   }
 
+  await ensureUserRowExists(
+    patientId,
+    userData.user.email,
+    typeof userData.user.user_metadata?.name === "string"
+      ? userData.user.user_metadata.name
+      : null,
+  );
+
   const nowIso = new Date().toISOString();
   const rows: BiometricDataInsert[] = [];
   const notificationEntries: SyncedEntryNotification[] = [];
@@ -542,6 +796,7 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   const pushRow = async (
     metric: HealthRecordType,
     row: Omit<BiometricDataInsert, "patient_id" | "biometric_data_type_id">,
+    externalId?: string,
   ) => {
     const metricName = BIOMETRIC_TYPE_NAMES[metric];
     const biometricDataTypeId = await getBiometricDataTypeIdByName(metricName);
@@ -549,7 +804,8 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
       patient_id: patientId,
       biometric_data_type_id: biometricDataTypeId,
       source_app: "health_connect",
-      external_id: buildExternalId(metricName, patientId, snapshot.window),
+      external_id:
+        externalId ?? buildExternalId(metricName, patientId, snapshot.window),
       last_modified: nowIso,
       ...row,
     });
@@ -572,12 +828,22 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   if (snapshot.steps) {
-    await pushRow("Steps", {
-      value: snapshot.steps.total,
-      measured_at: snapshot.timestamp,
-      start_time: snapshot.window.start,
-      end_time: snapshot.window.end,
-    });
+    // Use a day-keyed external_id so each calendar day has exactly one row.
+    // Consecutive syncs on the same day upsert the row instead of creating duplicates.
+    const windowStart = new Date(snapshot.window.start);
+    const dayKey = formatLocalDateKey(windowStart);
+    await pushRow(
+      "Steps",
+      {
+        value: snapshot.steps.total,
+        measured_at: snapshot.timestamp,
+        start_time: snapshot.window.start,
+        end_time: snapshot.window.end,
+      },
+      isLocalDayStart(windowStart)
+        ? `health_connect:${patientId}:steps:daily:${dayKey}`
+        : undefined,
+    );
   }
 
   if (
@@ -612,21 +878,35 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   if (snapshot.calories) {
-    await pushRow("TotalCaloriesBurned", {
-      value: snapshot.calories.total,
-      measured_at: snapshot.timestamp,
-      start_time: snapshot.window.start,
-      end_time: snapshot.window.end,
-    });
+    const windowStart = new Date(snapshot.window.start);
+    const dayKey = formatLocalDateKey(windowStart);
+    await pushRow(
+      "TotalCaloriesBurned",
+      {
+        value: snapshot.calories.total,
+        measured_at: snapshot.timestamp,
+        start_time: snapshot.window.start,
+        end_time: snapshot.window.end,
+      },
+      isLocalDayStart(windowStart)
+        ? `health_connect:${patientId}:calories:daily:${dayKey}`
+        : undefined,
+    );
   }
 
   if (snapshot.sleep) {
-    await pushRow("SleepSession", {
-      value: snapshot.sleep.duration, // horas dormidas
-      measured_at: snapshot.timestamp,
-      start_time: snapshot.window.start,
-      end_time: snapshot.window.end,
-    });
+    // Use the start day as the night key (a session beginning on day X belongs to night X).
+    const nightKey = formatLocalDateKey(new Date(snapshot.window.start));
+    await pushRow(
+      "SleepSession",
+      {
+        value: snapshot.sleep.duration,
+        measured_at: snapshot.timestamp,
+        start_time: snapshot.window.start,
+        end_time: snapshot.window.end,
+      },
+      `health_connect:${patientId}:sleep:daily:${nightKey}`,
+    );
   }
 
   if (snapshot.sleep) {
@@ -642,13 +922,13 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
   }
 
   // upsert — se o external_id já existir, atualiza em vez de duplicar
-  const { error } = await supabase
+  const { error } = await getSupabaseClient()
     .from("biometric_data")
     .upsert(rows, { onConflict: "external_id" });
 
   if (error) throw error;
 
-  await notifySyncedEntries(notificationEntries);
+  await notifySyncedEntries(patientId, notificationEntries);
 
   console.log(`[HealthSync] ✅ ${rows.length} registo(s) sincronizado(s).`);
 }
@@ -658,6 +938,17 @@ async function sendSnapshotToSupabase(snapshot: HealthSnapshot): Promise<void> {
 async function runSyncLogic(
   context: "foreground" | "background" = "foreground",
 ): Promise<boolean> {
+  // Só perfis "cuidado" enviam os próprios dados. Se for um "aider", nem vale a
+  // pena ler o Health Connect nem tentar escrever — sai já.
+  const { data: authData } = await getSupabaseClient().auth.getUser();
+  const authUserId = authData.user?.id;
+  if (authUserId && (await isAiderProfile(authUserId))) {
+    console.log(
+      "[HealthSync] Perfil 'aider' — sync ignorado (apenas perfis 'cuidado' enviam os próprios dados).",
+    );
+    return false;
+  }
+
   if (context === "background") {
     const hasBackgroundRead = await checkBackgroundReadPermission();
     if (!hasBackgroundRead) {
@@ -693,21 +984,28 @@ async function runSyncLogic(
     (() => {
       const fallback = new Date(end);
       fallback.setDate(fallback.getDate() - INITIAL_SYNC_DAYS);
+      fallback.setHours(0, 0, 0, 0);
       return fallback;
     })();
 
   console.log(
     `[HealthSync] 📅 Janela: ${start.toISOString()} → ${end.toISOString()}`,
   );
-  console.log("[HealthSync] 6. A recolher snapshot...");
+  const windows = splitWindowByLocalDay(start, end);
+  for (const [index, window] of windows.entries()) {
+    console.log(
+      `[HealthSync] 6. A recolher snapshot ${index + 1}/${windows.length}: ${window.start.toISOString()} -> ${window.end.toISOString()}`,
+    );
 
-  const snapshot = await collectHealthSnapshot(start, end);
-  console.log("[HealthSync] 7. Snapshot:", JSON.stringify(snapshot, null, 2));
+    const snapshot = await collectHealthSnapshot(window.start, window.end);
+    console.log("[HealthSync] 7. Snapshot:", JSON.stringify(snapshot, null, 2));
 
-  console.log("[HealthSync] 8. A enviar para Supabase...");
-  await withRetry(() => sendSnapshotToSupabase(snapshot));
+    console.log("[HealthSync] 8. A enviar para Supabase...");
+    await withRetry(() => sendSnapshotToSupabase(snapshot));
+  }
+
   console.log("[HealthSync] 9. Enviado!");
-  await setLastSyncEndTime(snapshot.window.end);
+  await setLastSyncEndTime(end.toISOString());
   return true;
 }
 
@@ -718,7 +1016,7 @@ async function runSyncLogic(
  * Chamar uma vez após o utilizador conceder permissões Health Connect.
  */
 export async function registerHealthBackgroundSync(): Promise<void> {
-  const modules = await ensureTaskIsDefined();
+  const modules = await loadBackgroundModules();
   if (!modules) {
     console.warn("[HealthSync] Background polling indisponivel neste runtime.");
     return;
@@ -727,7 +1025,7 @@ export async function registerHealthBackgroundSync(): Promise<void> {
   const { TaskManager, BackgroundFetch } = modules;
 
   try {
-    const { BackgroundFetch, TaskManager } = await ensureTaskDefined();
+    await ensureTaskDefined();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
     if (isRegistered) {
       console.log("[HealthSync] ✅ Task já registada.");
@@ -760,7 +1058,7 @@ export async function unregisterHealthBackgroundSync(): Promise<void> {
   const { TaskManager, BackgroundFetch } = modules;
 
   try {
-    const { BackgroundFetch, TaskManager } = await getExpoTaskModules();
+    await getExpoTaskModules();
     const isRegistered = await TaskManager.isTaskRegisteredAsync(TASK_NAME);
     if (isRegistered) {
       await BackgroundFetch.unregisterTaskAsync(TASK_NAME);
@@ -808,6 +1106,70 @@ export async function runSyncNow(): Promise<void> {
     console.error("[HealthSync] ❌ Erro no sync Automatico:", err);
     throw err;
   }
+}
+
+/**
+ * Força um sync completo dia a dia dos últimos INITIAL_SYNC_DAYS dias,
+ * ignorando o lastSyncTime guardado. Garante pelo menos 1 snapshot por dia
+ * (janela 00:00–23:59 de cada dia). Os dados existentes na BD são actualizados
+ * via upsert (external_id), sem duplicações.
+ * Útil para repopular dados após limpeza manual no Supabase.
+ */
+export async function forceSyncAll(): Promise<void> {
+  // Verificações de perfil e permissões (mesmas do runSyncLogic)
+  const { data: authData } = await getSupabaseClient().auth.getUser();
+  const authUserId = authData.user?.id;
+  if (authUserId && (await isAiderProfile(authUserId))) {
+    console.log("[HealthSync] forceSyncAll ignorado — perfil 'aider'.");
+    return;
+  }
+
+  const isInitialized = await initialize();
+  if (!isInitialized) {
+    throw new Error("Health Connect não disponível.");
+  }
+
+  const hasPermissions = await checkPermissions();
+  if (!hasPermissions) {
+    throw new Error("Permissões do Health Connect insuficientes.");
+  }
+
+  const now = new Date();
+  let successCount = 0;
+
+  for (let d = INITIAL_SYNC_DAYS; d >= 0; d--) {
+    const dayStart = new Date(now);
+    dayStart.setDate(dayStart.getDate() - d);
+    dayStart.setHours(0, 0, 0, 0);
+    dayStart.setMilliseconds(0);
+
+    const dayEnd = new Date(dayStart);
+    dayEnd.setHours(23, 59, 59, 999);
+
+    // Não ir além do momento actual
+    if (dayEnd > now) dayEnd.setTime(now.getTime());
+
+    try {
+      const snapshot = await collectHealthSnapshot(dayStart, dayEnd);
+      await withRetry(() => sendSnapshotToSupabase(snapshot));
+      successCount++;
+      console.log(
+        `[HealthSync] forceSyncAll ✅ dia ${INITIAL_SYNC_DAYS - d + 1}/${INITIAL_SYNC_DAYS + 1}: ${dayStart.toISOString().slice(0, 10)}`,
+      );
+    } catch (err) {
+      console.warn(
+        `[HealthSync] forceSyncAll ⚠️ falha no dia ${dayStart.toISOString().slice(0, 10)}:`,
+        err,
+      );
+    }
+  }
+
+  // Actualizar lastSyncTime para que o sync incremental continue a partir de agora
+  await setLastSyncEndTime(now.toISOString());
+
+  console.log(
+    `[HealthSync] forceSyncAll concluído — ${successCount}/${INITIAL_SYNC_DAYS + 1} dias sincronizados.`,
+  );
 }
 
 export { TASK_NAME };

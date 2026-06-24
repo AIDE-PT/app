@@ -1,3 +1,4 @@
+import { LOCAL_API_BASE as API_BASE } from "@/constants/api";
 import { Feather } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -6,31 +7,32 @@ import Constants from "expo-constants";
 import { useFocusEffect, useRouter } from "expo-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-    ActivityIndicator,
-    Animated,
-    GestureResponderEvent,
-    LayoutAnimation,
-    LayoutChangeEvent,
-    Platform,
-    Pressable,
-    RefreshControl,
-    ScrollView,
-    Text,
-    TouchableOpacity,
-    UIManager,
-    View,
+  ActivityIndicator,
+  Alert as RNAlert,
+  Animated,
+  GestureResponderEvent,
+  LayoutAnimation,
+  LayoutChangeEvent,
+  Platform,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  UIManager,
+  View,
 } from "react-native";
 import {
-    SafeAreaView,
-    useSafeAreaInsets,
+  SafeAreaView,
+  useSafeAreaInsets,
 } from "react-native-safe-area-context";
 
 import { LightBackground } from "@/components/DotBackground";
 import Navbar from "@/components/navBar/NavBar";
 import WidgetGrid from "@/components/widgets/WidgetGrid";
 import {
-    DASHBOARD_CONFIG,
-    WidgetVariant,
+  DASHBOARD_CONFIG,
+  WidgetVariant,
 } from "@/components/widgets/WidgetWrapper";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
@@ -53,11 +55,6 @@ if (
 }
 
 const STORAGE_KEY = "@dashboard_layout";
-
-const API_BASE = Platform.select({
-  android: "http://10.0.2.2:3000",
-  default: "http://localhost:3000",
-});
 
 interface Alert {
   id: string;
@@ -116,8 +113,11 @@ export default function EditableDashboard({
   const [cuidados, setCuidados] = useState<CuidadoOption[]>([]);
   const [selectedCuidado, setSelectedCuidado] = useState<CuidadoOption>();
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [topBarOverlayHeight, setTopBarOverlayHeight] = useState(0);
   const metricPatientId =
-    profileType === "aider" ? (selectedCuidado?.id ?? null) : (user?.id ?? null);
+    profileType === "aider"
+      ? (selectedCuidado?.id ?? null)
+      : (user?.id ?? null);
 
   const menuAnimation = useRef(new Animated.Value(0)).current;
   const gridContentRef = useRef<View | null>(null);
@@ -155,44 +155,31 @@ export default function EditableDashboard({
     }
 
     try {
-      const { data: relations, error: relationsError } = await supabase
-        .from("care_relations")
-        .select("user_id_pacient")
-        .eq("user_id_aider", user.id);
-
-      if (relationsError) {
-        console.log(
-          "Erro ao carregar associacoes do aider",
-          relationsError.message,
-        );
-        return;
-      }
-
-      const patientIds = (relations ?? [])
-        .map((relation) => relation.user_id_pacient)
-        .filter((id): id is string => Boolean(id));
-
-      if (patientIds.length === 0) {
-        setCuidados([]);
-        setSelectedCuidado(undefined);
-        return;
-      }
-
-      const { data: patients, error: patientsError } = await supabase
-        .from("users")
-        .select("id, name, email")
-        .in("id", patientIds);
+      const { data: patients, error: patientsError } = await supabase.rpc(
+        "get_patients_for_aider",
+        { p_aider_id: user.id },
+      );
 
       if (patientsError) {
         console.log(
-          "Erro ao carregar dados dos cuidados associados",
+          "Erro ao carregar cuidados associados",
           patientsError.message,
         );
         return;
       }
 
+      if (!patients || patients.length === 0) {
+        setCuidados([]);
+        setSelectedCuidado(undefined);
+        return;
+      }
+
       const mappedCuidados: CuidadoOption[] = (patients ?? []).map(
-        (patient) => ({
+        (patient: {
+          id: string;
+          name: string | null;
+          email: string | null;
+        }) => ({
           id: patient.id,
           name: patient.name?.trim() || patient.email || "Cuidado",
         }),
@@ -307,6 +294,13 @@ export default function EditableDashboard({
     if (authLoading) return;
     loadAssociatedCuidados();
   }, [authLoading, loadAssociatedCuidados]);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (authLoading) return;
+      void loadAssociatedCuidados();
+    }, [authLoading, loadAssociatedCuidados]),
+  );
 
   useEffect(() => {
     const timeoutId = setTimeout(() => {
@@ -552,7 +546,11 @@ export default function EditableDashboard({
       return;
     }
 
-    router.push(`/MasterDetail?type=${widgetId}`);
+    router.push(
+      `/MasterDetail?type=${widgetId}${
+        metricPatientId ? `&patientId=${metricPatientId}` : ""
+      }`,
+    );
   };
 
   const draggingWidget = draggingWidgetId
@@ -589,6 +587,7 @@ export default function EditableDashboard({
     userId: user?.id,
     healthConnectGranted: hasHealthConnectPermissions,
     hasAtLeastOneWidget: activeWidgets.length > 0,
+    isAider: profileType === "aider",
   });
   const isHardOnboardingActive = !isOnboardingLoading && isOnboardingActive;
   const isDashboardLocked =
@@ -597,7 +596,8 @@ export default function EditableDashboard({
     isDashboardLocked && onboardingStep === "health-connect";
   const highlightWidgetStep =
     isDashboardLocked && onboardingStep === "add-widget";
-  const shouldShowOnboardingHero = isOnboardingLoading || isHardOnboardingActive;
+  const shouldShowOnboardingHero =
+    isOnboardingLoading || isHardOnboardingActive;
   const isAndroid = Platform.OS === "android";
 
   const showPopup = useCallback((title: string, message: string) => {
@@ -631,10 +631,7 @@ export default function EditableDashboard({
       return;
     }
 
-    if (
-      !previousOnboardingCompletedRef.current &&
-      onboardingState.completed
-    ) {
+    if (!previousOnboardingCompletedRef.current && onboardingState.completed) {
       showPopup("Parabens!", "Fez o onboarding com sucesso.");
     }
 
@@ -660,9 +657,6 @@ export default function EditableDashboard({
   const TOP_BAR_HEIGHT = 30;
   const TOP_BAR_CONTENT_HEIGHT = 90;
   const heroTopExtension = notEditable ? 0 : insets.top + TOP_BAR_HEIGHT;
-  const onboardingTopPadding = notEditable
-    ? 12
-    : Math.max(topBarOverlayHeight, insets.top + TOP_BAR_CONTENT_HEIGHT) + 12;
 
   const { data: alerts = [] } = useQuery<Alert[]>({
     queryKey: ["alerts"],
@@ -831,7 +825,56 @@ export default function EditableDashboard({
               </View>
             )}
 
-            {!isLoadingHealthConnect &&
+            {profileType === "aider" && cuidados.length === 0 && (
+              <View className="px-4 mb-2">
+                <View
+                  className={`rounded-[28px] p-5 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                  style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+                >
+                  <View className="flex-row items-center">
+                    <View
+                      className="w-12 h-12 rounded-full items-center justify-center"
+                      style={{
+                        backgroundColor: isDark
+                          ? "rgba(80, 97, 255, 0.18)"
+                          : "rgba(80, 97, 255, 0.1)",
+                      }}
+                    >
+                      <Feather
+                        name="user-plus"
+                        size={20}
+                        color={isDark ? "#A9BDFF" : "#5061FF"}
+                      />
+                    </View>
+                    <View className="flex-1 ml-4">
+                      <Text
+                        className={`text-base font-bold ${isDark ? "text-white" : "text-black"}`}
+                      >
+                        Ainda não tem pacientes associados
+                      </Text>
+                      <Text
+                        className={`mt-1 text-xs ${isDark ? "text-white/60" : "text-slate-600"}`}
+                      >
+                        Adicione um paciente para começar a ver métricas e
+                        notas.
+                      </Text>
+                    </View>
+                  </View>
+
+                  <View className="mt-4">
+                    <Button
+                      variant="primary"
+                      forceLight={false}
+                      label="Adicionar paciente"
+                      onPress={() => router.push("/associar")}
+                    />
+                  </View>
+                </View>
+              </View>
+            )}
+
+            {profileType !== "aider" &&
+              !isLoadingHealthConnect &&
               healthConnectStatus &&
               !healthConnectStatus.permissionsGranted && (
                 <View className="px-4 mb-2">
@@ -899,196 +942,198 @@ export default function EditableDashboard({
               disabled={isDashboardLocked}
             />
             */}
-            <WidgetGrid
-              contentRef={gridContentRef}
-              onContentLayout={measureGrid}
-              scrollEnabled={false}
-            >
-              {activeWidgets.map((item) => {
-                const isBeingDragged = draggingWidgetId === item.id;
-                const isSizeMenuOpen = openSizeMenuId === item.id;
+            <View style={{ zIndex: 0 }}>
+              <WidgetGrid
+                contentRef={gridContentRef}
+                onContentLayout={measureGrid}
+                scrollEnabled={false}
+              >
+                {activeWidgets.map((item) => {
+                  const isBeingDragged = draggingWidgetId === item.id;
+                  const isSizeMenuOpen = openSizeMenuId === item.id;
 
-                return (
-                  <View
-                    key={item.id}
-                    className="relative"
-                    style={
-                      isSizeMenuOpen
-                        ? {
-                            zIndex: 2000,
-                            elevation: 2000,
-                          }
-                        : undefined
-                    }
-                    onLayout={(event) => registerCardLayout(item.id, event)}
-                  >
-                    <Pressable
-                      onPress={() => handleCardPress(item.id)}
-                      onPressIn={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : measureGrid
+                  return (
+                    <View
+                      key={item.id}
+                      className="relative"
+                      style={
+                        isSizeMenuOpen
+                          ? {
+                              zIndex: 2000,
+                              elevation: 2000,
+                            }
+                          : undefined
                       }
-                      onLongPress={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : (event) => beginDrag(item.id, event)
-                      }
-                      onTouchMove={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : (event) => handleDragMove(item.id, event)
-                      }
-                      onTouchEnd={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : () => finishDrag(item.id)
-                      }
-                      onTouchCancel={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : () => finishDrag(item.id)
-                      }
-                      onPressOut={
-                        notEditable || isDashboardLocked
-                          ? undefined
-                          : () => finishDrag(item.id)
-                      }
-                      delayLongPress={280}
-                      style={isBeingDragged ? { opacity: 0.1 } : undefined}
+                      onLayout={(event) => registerCardLayout(item.id, event)}
                     >
-                      <DashboardMetricWidget
-                        type={item.type}
-                        endpoint={item.endpoint}
-                        variant={item.variant as WidgetVariant}
-                        iconSize={24}
-                        patientId={metricPatientId}
-                        superSimplified={useSuperSimplifiedWidgets}
-                      />
-                    </Pressable>
-
-                    {!notEditable && !isDashboardLocked && (
-                      <TouchableOpacity
-                        onPress={() => toggleSizeMenuSafe(item.id)}
-                        className={`absolute top-2 right-2 h-7 w-7 rounded-full items-center justify-center z-40 ${isDark ? "bg-aide-dark-card border border-white/20" : "bg-white/90 border border-slate-200"}`}
-                        disabled={Boolean(draggingWidgetId)}
-                        accessibilityRole="button"
-                        accessibilityLabel={`Mais opções para ${item.type}`}
-                        accessibilityHint="Abre opções de tamanho e remoção do widget."
+                      <Pressable
+                        onPress={() => handleCardPress(item.id)}
+                        onPressIn={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : measureGrid
+                        }
+                        onLongPress={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : (event) => beginDrag(item.id, event)
+                        }
+                        onTouchMove={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : (event) => handleDragMove(item.id, event)
+                        }
+                        onTouchEnd={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : () => finishDrag(item.id)
+                        }
+                        onTouchCancel={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : () => finishDrag(item.id)
+                        }
+                        onPressOut={
+                          notEditable || isDashboardLocked
+                            ? undefined
+                            : () => finishDrag(item.id)
+                        }
+                        delayLongPress={280}
+                        style={isBeingDragged ? { opacity: 0.1 } : undefined}
                       >
-                        <Feather
-                          name="more-vertical"
-                          size={14}
-                          color={isDark ? "#ffffff" : "#1e293b"}
-                          accessible={false}
+                        <DashboardMetricWidget
+                          type={item.type}
+                          endpoint={item.endpoint}
+                          variant={item.variant as WidgetVariant}
+                          iconSize={24}
+                          patientId={metricPatientId}
+                          superSimplified={useSuperSimplifiedWidgets}
                         />
-                      </TouchableOpacity>
-                    )}
+                      </Pressable>
 
-                    {!notEditable && !isDashboardLocked && isSizeMenuOpen && (
-                      <Animated.View
-                        style={{
-                          position: "absolute",
-                          top: 36,
-                          right: 4,
-                          opacity: menuAnimation,
-                          transform: [
-                            { translateY: menuTranslateY },
-                            { scale: menuScale },
-                          ],
-                          zIndex: 999,
-                          elevation: 12,
-                          borderRadius: 20,
-                          overflow: "hidden",
-                          backgroundColor: isDark
-                            ? "rgba(0, 4, 18, 0.95)"
-                            : "#ffffff",
-                          borderWidth: 1,
-                          borderColor: isDark
-                            ? "rgba(80, 97, 255, 0.3)"
-                            : "rgba(80, 97, 255, 0.2)",
-                          minWidth: 140,
-                          boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
-                        }}
-                      >
-                        {SIZE_OPTIONS.map((option) => {
-                          const selected = option.variant === item.variant;
-                          return (
-                            <TouchableOpacity
-                              key={option.variant}
-                              className={`px-4 py-3 flex-row items-center justify-between ${selected ? (isDark ? "bg-blue-900/50" : "bg-blue-50") : isDark ? "bg-transparent" : "bg-white"}`}
-                              onPress={() => {
-                                setSizeSafe(item.id, option.variant);
-                                closeSizeMenu();
-                              }}
-                              accessibilityRole="button"
-                              accessibilityLabel={`Tamanho ${option.label}`}
-                              accessibilityState={{ selected }}
-                            >
-                              <Text
-                                className={`text-sm font-bold ${selected ? (isDark ? "text-blue-300" : "text-blue-700") : isDark ? "text-slate-300" : "text-slate-600"}`}
-                              >
-                                {option.label}
-                              </Text>
-                              {selected && (
-                                <Feather
-                                  name="check"
-                                  size={13}
-                                  color={isDark ? "#93c5fd" : "#1d4ed8"}
-                                  accessible={false}
-                                />
-                              )}
-                            </TouchableOpacity>
-                          );
-                        })}
-                        {/* Delete Option */}
+                      {!notEditable && !isDashboardLocked && (
                         <TouchableOpacity
-                          className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"} border-t ${isDark ? "border-white/10" : "border-slate-100"}`}
-                          onPress={() => {
-                            deleteWidgetSafe(item.id);
-                          }}
+                          onPress={() => toggleSizeMenuSafe(item.id)}
+                          className={`absolute top-2 right-2 h-7 w-7 rounded-full items-center justify-center z-40 ${isDark ? "bg-aide-dark-card border border-white/20" : "bg-white/90 border border-slate-200"}`}
+                          disabled={Boolean(draggingWidgetId)}
                           accessibilityRole="button"
-                          accessibilityLabel={`Eliminar widget ${item.type}`}
+                          accessibilityLabel={`Mais opções para ${item.type}`}
+                          accessibilityHint="Abre opções de tamanho e remoção do widget."
                         >
-                          <Text className="text-xs font-bold text-red-500">
-                            Eliminar
-                          </Text>
                           <Feather
-                            name="trash-2"
-                            size={13}
-                            color="#ef4444"
+                            name="more-vertical"
+                            size={14}
+                            color={isDark ? "#ffffff" : "#1e293b"}
                             accessible={false}
                           />
                         </TouchableOpacity>
-                      </Animated.View>
-                    )}
-                  </View>
-                );
-              })}
+                      )}
 
-              {draggingWidget && (
-                <View
-                  pointerEvents="none"
-                  style={{
-                    position: "absolute",
-                    left: dragPosition.x,
-                    top: dragPosition.y,
-                    zIndex: 120,
-                    opacity: 0.96,
-                    transform: [{ scale: 1.03 }],
-                  }}
-                >
-                  <DashboardMetricWidget
-                    type={draggingWidget.type}
-                    endpoint={draggingWidget.endpoint}
-                    variant={draggingWidget.variant as WidgetVariant}
-                    iconSize={24}
-                    patientId={metricPatientId}
-                    superSimplified={useSuperSimplifiedWidgets}
-                  />
-                </View>
-              )}
-            </WidgetGrid>
+                      {!notEditable && !isDashboardLocked && isSizeMenuOpen && (
+                        <Animated.View
+                          style={{
+                            position: "absolute",
+                            top: 36,
+                            right: 4,
+                            opacity: menuAnimation,
+                            transform: [
+                              { translateY: menuTranslateY },
+                              { scale: menuScale },
+                            ],
+                            zIndex: 999,
+                            elevation: 12,
+                            borderRadius: 20,
+                            overflow: "hidden",
+                            backgroundColor: isDark
+                              ? "rgba(0, 4, 18, 0.95)"
+                              : "#ffffff",
+                            borderWidth: 1,
+                            borderColor: isDark
+                              ? "rgba(80, 97, 255, 0.3)"
+                              : "rgba(80, 97, 255, 0.2)",
+                            minWidth: 140,
+                            boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)",
+                          }}
+                        >
+                          {SIZE_OPTIONS.map((option) => {
+                            const selected = option.variant === item.variant;
+                            return (
+                              <TouchableOpacity
+                                key={option.variant}
+                                className={`px-4 py-3 flex-row items-center justify-between ${selected ? (isDark ? "bg-blue-900/50" : "bg-blue-50") : isDark ? "bg-transparent" : "bg-white"}`}
+                                onPress={() => {
+                                  setSizeSafe(item.id, option.variant);
+                                  closeSizeMenu();
+                                }}
+                                accessibilityRole="button"
+                                accessibilityLabel={`Tamanho ${option.label}`}
+                                accessibilityState={{ selected }}
+                              >
+                                <Text
+                                  className={`text-sm font-bold ${selected ? (isDark ? "text-blue-300" : "text-blue-700") : isDark ? "text-slate-300" : "text-slate-600"}`}
+                                >
+                                  {option.label}
+                                </Text>
+                                {selected && (
+                                  <Feather
+                                    name="check"
+                                    size={13}
+                                    color={isDark ? "#93c5fd" : "#1d4ed8"}
+                                    accessible={false}
+                                  />
+                                )}
+                              </TouchableOpacity>
+                            );
+                          })}
+                          {/* Delete Option */}
+                          <TouchableOpacity
+                            className={`px-4 py-3 flex-row items-center justify-between ${isDark ? "bg-transparent" : "bg-white"} border-t ${isDark ? "border-white/10" : "border-slate-100"}`}
+                            onPress={() => {
+                              deleteWidgetSafe(item.id);
+                            }}
+                            accessibilityRole="button"
+                            accessibilityLabel={`Eliminar widget ${item.type}`}
+                          >
+                            <Text className="text-xs font-bold text-red-500">
+                              Eliminar
+                            </Text>
+                            <Feather
+                              name="trash-2"
+                              size={13}
+                              color="#ef4444"
+                              accessible={false}
+                            />
+                          </TouchableOpacity>
+                        </Animated.View>
+                      )}
+                    </View>
+                  );
+                })}
+
+                {draggingWidget && (
+                  <View
+                    pointerEvents="none"
+                    style={{
+                      position: "absolute",
+                      left: dragPosition.x,
+                      top: dragPosition.y,
+                      zIndex: 120,
+                      opacity: 0.96,
+                      transform: [{ scale: 1.03 }],
+                    }}
+                  >
+                    <DashboardMetricWidget
+                      type={draggingWidget.type}
+                      endpoint={draggingWidget.endpoint}
+                      variant={draggingWidget.variant as WidgetVariant}
+                      iconSize={24}
+                      patientId={metricPatientId}
+                      superSimplified={useSuperSimplifiedWidgets}
+                    />
+                  </View>
+                )}
+              </WidgetGrid>
+            </View>
           </ScrollView>
         </SafeAreaView>
         <Navbar

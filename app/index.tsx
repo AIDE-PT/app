@@ -1,7 +1,7 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
-import { Dimensions, Text, View } from "react-native";
+import { ActivityIndicator, Dimensions, Text, View } from "react-native";
 import "react-native-gesture-handler";
 import Animated, {
   Easing,
@@ -18,6 +18,7 @@ import { Button } from "../components/buttons/button";
 import "../global.css";
 
 import LightBackground from "@/components/DotBackground";
+import { getSurfaceShadowStyle } from "@/components/surface/surfaceStyles";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -207,7 +208,18 @@ export default function App() {
   }, [isLoading, router, session]);
 
   if (isLoading) {
-    return null;
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        <ActivityIndicator size="large" color="#5061FF" />
+      </View>
+    );
   }
 
   return (
@@ -232,7 +244,7 @@ export default function App() {
           {/* Inner circle with logo */}
           <View
             className={`w-[100px] h-[100px] rounded-full justify-center items-center ${isDark ? "bg-[#5061FF]/50" : "bg-[#9AADE8]"}`}
-            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+            style={getSurfaceShadowStyle("elevated", isDark)}
             accessibilityRole="image"
             accessibilityLabel="Logótipo AIDE"
           >

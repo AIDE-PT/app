@@ -1,4 +1,8 @@
 import { sendLocalSOSNotification } from "@/src/services/localNotifications";
+import {
+  sendSOSPushToAiders,
+  type SosPushResult,
+} from "@/src/services/pushNotifications";
 import React from "react";
 import { Alert, Platform, TouchableOpacity, View } from "react-native";
 import Svg, { Path } from "react-native-svg";
@@ -23,7 +27,23 @@ const SOSSvg = () => (
   </Svg>
 );
 
+const getErrorMessage = (error: unknown) => {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return "Erro desconhecido.";
+};
+
 const handleSOS = async () => {
+  let sosResult: SosPushResult | undefined;
+  let sosError: unknown = null;
+
+  try {
+    sosResult = await sendSOSPushToAiders();
+  } catch (error) {
+    sosError = error;
+    console.warn("[SOS] Failed to notify associated aiders", error);
+  }
+
   if (
     Platform.OS === "web" &&
     typeof window !== "undefined" &&
@@ -48,9 +68,42 @@ const handleSOS = async () => {
       );
     }
   }
+
+  if (sosError) {
+    Alert.alert(
+      "SOS nao registado na app",
+      `Nao foi possivel gravar/enviar o alerta aos aiders associados.\n\nDetalhe: ${getErrorMessage(sosError)}`,
+    );
+    return;
+  }
+
+  if (sosResult?.aiderCount === 0) {
+    Alert.alert(
+      "SOS ativado",
+      "Nao existem aiders associados a este cuidado para receber o alerta.",
+    );
+    return;
+  }
+
+  if (sosResult && sosResult.sentPushCount === 0) {
+    Alert.alert(
+      "SOS registado",
+      "O alerta ficou registado para os aiders associados, mas nenhum deles tem notificacoes push ativas neste dispositivo.",
+    );
+  }
 };
 
-export const SOSButton = () => {
+interface SOSButtonProps {
+  compact?: boolean;
+  fullWidth?: boolean;
+}
+
+export const SOSButton = ({
+  compact = false,
+  fullWidth = false,
+}: SOSButtonProps) => {
+  const buttonWidth = fullWidth ? "100%" : compact ? 208 : 256;
+
   return (
     <TouchableOpacity
       onPress={handleSOS}
@@ -58,14 +111,19 @@ export const SOSButton = () => {
       accessibilityRole="button"
       accessibilityLabel="Ativar SOS"
       accessibilityHint="Envia um pedido de socorro."
+      style={{ width: buttonWidth }}
     >
       <View
-        className="w-64 h-12 p-2 bg-red-600 rounded-[20px] flex-row justify-center items-center gap-4"
-        style={
+        className="h-12 p-2 bg-red-600 rounded-[20px] flex-row justify-center items-center"
+        style={[
+          {
+            width: "100%",
+            gap: 16,
+          },
           {
             boxShadow: "inset 0px 0px 50px -25px rgba(255, 127, 129, 1.00)",
-          } as any
-        }
+          } as any,
+        ]}
       >
         {/* Left antena — mirrored so arcs point outward left */}
         <View style={{ transform: [{ scaleX: -1 }] }}>

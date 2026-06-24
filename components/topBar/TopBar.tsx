@@ -1,9 +1,20 @@
 import { useUserProfile } from "@/contexts/UserProfileContext";
 import { useTheme } from "@/hooks/useTheme";
-import React from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import ChoseCuidado from "../buttons/choseCuidado";
+import React, { useState } from "react";
+import {
+  Platform,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import CuidadoModal from "../modals/CuidadoModal";
 import SOSButton from "../buttons/sosButton";
+import {
+  getSurfaceStyle,
+  surfaceRadius,
+  surfaceSpacing,
+} from "../surface/surfaceStyles";
 import NotificationBell from "../svg/NotificationBell";
 import SettingsIcon from "../svg/Settings";
 
@@ -33,95 +44,73 @@ const TopBar = ({
 }: TopBarProps) => {
   const { isDark } = useTheme();
   const { profileType } = useUserProfile();
+  const [showModal, setShowModal] = useState(false);
 
   const iconColor = isDark ? "white" : "#000000";
-  const ballBg = isDark ? "bg-[#131632]" : "bg-white";
-  const styleBall = `items-center w-[46px] h-[46px] rounded-[100px] justify-center ${ballBg}`;
+  const topBarLayoutStyle = [
+    styles.container,
+    profileType === "cuidado" ? styles.centered : styles.started,
+  ];
+  const actionSurface = getSurfaceStyle("elevated", isDark, {
+    borderRadius: surfaceRadius.lg,
+  });
 
-  const backgroundStyle = showBackground
-    ? {
-        borderBottomLeftRadius: 40,
-        borderBottomRightRadius: 40,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.12,
-        shadowRadius: 8,
+  const backgroundSurface = showBackground
+    ? getSurfaceStyle("elevated", isDark, {
+        borderTopLeftRadius: 0,
+        borderTopRightRadius: 0,
+        borderBottomLeftRadius: surfaceRadius.lg,
+        borderBottomRightRadius: surfaceRadius.lg,
         overflow: "visible" as const,
-      }
+      })
     : {};
 
   const topBarLayerStyle = {
     overflow: "visible" as const,
     zIndex: 60,
-    elevation: 60,
+    ...(Platform.OS === "android" && !showBackground ? { elevation: 60 } : {}),
   };
-
-  const overlayColor = isDark
-    ? "rgba(0, 4, 18, 0.55)"
-    : "rgba(219, 237, 248, 1)";
 
   return (
     <View
-      className={`flex-row z-50 px-4 py-5 ${profileType === "cuidado" ? "items-center justify-between" : "items-start justify-between"} ${className}`}
-      style={[backgroundStyle, topBarLayerStyle]}
+      className={`z-50 ${className}`}
+      style={[...topBarLayoutStyle, backgroundSurface, topBarLayerStyle]}
     >
-      {showBackground && (
-        <>
-          <View
-            style={[
-              StyleSheet.absoluteFillObject,
-              {
-                backgroundColor: overlayColor,
-                borderBottomLeftRadius: 40,
-                borderBottomRightRadius: 40,
-              },
-            ]}
-          />
-        </>
-      )}
       {profileType === "cuidado" ? (
-        <>
-          <SOSButton />
-
-          <TouchableOpacity
-            style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
-            className={styleBall}
-            onPress={onNotificationPress}
-            accessibilityRole="button"
-            accessibilityLabel="Abrir notificações"
-            accessibilityHint="Mostra os alertas e notificações."
-          >
-            <NotificationBell color={iconColor} size={21} />
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
-            className={styleBall}
-            onPress={onSettingsPress}
-            accessibilityRole="button"
-            accessibilityLabel="Abrir definições"
-            accessibilityHint="Abre as definições da aplicação."
-          >
-            <SettingsIcon color={iconColor} size={21} />
-          </TouchableOpacity>
-        </>
+        <SOSButton fullWidth />
       ) : (
         <>
-          <View
-            className="flex-1 mr-4"
-            style={{ overflow: "visible", zIndex: 2000, elevation: 2000 }}
+          <TouchableOpacity
+            onPress={() => setShowModal(true)}
+            activeOpacity={0.7}
+            className={`flex-1 mr-4 flex-row items-center justify-between rounded-2xl px-4 py-3 ${
+              isDark ? "bg-white/10" : "bg-white/70"
+            }`}
+            style={{ boxShadow: "0 1px 4px 0 rgba(0,0,0,0.08)" }}
           >
-            <ChoseCuidado
-              cuidados={cuidados}
-              selectedCuidado={selectedCuidado}
-              onSelect={onSelectCuidado}
-            />
-          </View>
+            <Text
+              className={`font-semibold flex-1 ${isDark ? "text-white" : "text-slate-900"}`}
+              numberOfLines={1}
+            >
+              {selectedCuidado?.name ?? "Selecionar paciente"}
+            </Text>
+            <Text className={isDark ? "text-white/50" : "text-slate-400"}>
+              ▾
+            </Text>
+          </TouchableOpacity>
+          <CuidadoModal
+            visible={showModal}
+            onClose={() => setShowModal(false)}
+            cuidados={cuidados}
+            onSelect={(c) => {
+              onSelectCuidado(c);
+              setShowModal(false);
+            }}
+          />
 
-          <View className="flex-row gap-3">
+          <View style={styles.actions}>
             <TouchableOpacity
-              style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
-              className={styleBall}
+              style={[styles.actionButton, actionSurface]}
               onPress={onNotificationPress}
               accessibilityRole="button"
               accessibilityLabel="Abrir notificações"
@@ -131,8 +120,7 @@ const TopBar = ({
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={{ boxShadow: "0 1px 4px 0 rgba(0, 0, 0, 0.08)" }}
-              className={styleBall}
+              style={[styles.actionButton, actionSurface]}
               onPress={onSettingsPress}
               accessibilityRole="button"
               accessibilityLabel="Abrir definições"
@@ -148,3 +136,34 @@ const TopBar = ({
 };
 
 export default TopBar;
+
+const styles = StyleSheet.create({
+  container: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: surfaceSpacing.md,
+    paddingVertical: surfaceSpacing.md,
+  },
+  centered: {
+    alignItems: "center",
+  },
+  started: {
+    alignItems: "flex-start",
+  },
+  actionButton: {
+    alignItems: "center",
+    height: 48,
+    justifyContent: "center",
+    width: 48,
+  },
+  actions: {
+    flexDirection: "row",
+    gap: surfaceSpacing.sm,
+  },
+  selectorLayer: {
+    marginRight: surfaceSpacing.md,
+    overflow: "visible",
+    zIndex: 2000,
+    elevation: 2000,
+  },
+});

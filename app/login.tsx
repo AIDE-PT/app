@@ -1,11 +1,12 @@
 import { LightBackground } from "@/components/DotBackground";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/utils/supabase/client";
+import { useGoogleAuth } from "@/hooks/useGoogleAuth";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useGlobalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Platform, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 import { Button } from "../components/buttons/button";
@@ -13,8 +14,16 @@ import { SocialButton } from "../components/buttons/socialButton";
 import { Input } from "../components/input/Input";
 import "../global.css";
 
+const emailOrPhoneSchema = z.string().refine((value) => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const phoneRegex = /^\+?\d{9,15}$/;
+  const cleanPhone = value.replace(/\s/g, "");
+
+  return emailRegex.test(value) || phoneRegex.test(cleanPhone);
+}, "Introduza um email ou telemovel valido");
+
 const loginSchema = z.object({
-  email: z.string().min(1, "Email obrigatório").email("Email inválido"),
+  email: emailOrPhoneSchema,
   password: z.string().min(1, "Password obrigatória"),
 });
 
@@ -48,6 +57,11 @@ export default function Login() {
   const router = useRouter();
   const params = useGlobalSearchParams<{ next?: string }>();
   const { session, isLoading: authLoading } = useAuth();
+  const {
+    signInWithGoogle,
+    loading: googleLoading,
+    error: googleError,
+  } = useGoogleAuth();
   const nextRoute =
     typeof params.next === "string" ? params.next : "/testDashboard";
   const isDark = false;
@@ -80,13 +94,10 @@ export default function Login() {
   const handleLogin = async (data: LoginFormData) => {
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { error } = await getSupabaseClient().auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
-
-      console.log("ERRO:", JSON.stringify(error));
-      console.log("DATA:", JSON.stringify(data));
 
       if (error) {
         const messages: Record<string, string> = {
@@ -106,9 +117,19 @@ export default function Login() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    console.log("Login with Google");
+  const handleGoogleLogin = async () => {
+    await signInWithGoogle();
   };
+
+  useEffect(() => {
+    if (!googleError) return;
+
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      window.alert(`Erro no Login com Google: ${googleError}`);
+    } else {
+      Alert.alert("Erro no Login com Google", googleError, [{ text: "OK" }]);
+    }
+  }, [googleError]);
 
   const handleAppleLogin = () => {
     console.log("Login with Apple");
@@ -146,7 +167,6 @@ export default function Login() {
                         ? errors.email?.message
                         : undefined
                     }
-                    validateAs="emailOrPhone"
                     value={value}
                     onBlur={onBlur}
                     onChangeText={onChange}
@@ -183,6 +203,7 @@ export default function Login() {
             <View className="mb-10 gap-3">
               <SocialButton
                 provider="google"
+                label={googleLoading ? "A entrar..." : undefined}
                 onPress={handleGoogleLogin}
                 forceLight
               />

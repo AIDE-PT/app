@@ -5,6 +5,10 @@
 # dependencies
 node_modules/
 
+# firebase credentials (never commit)
+*firebase-adminsdk*.json
+
+
 # Expo
 .expo/
 dist/
@@ -35,17 +39,23 @@ yarn-error.*
 # local env files
 .env*.local
 
+# Firebase credentials (never commit)
+*firebase-adminsdk*.json
+
 # typescript
 *.tsbuildinfo
 
 app-example
+expo-troubleshooting.md
 
 # generated native folders
 /ios
 /android/*
+!/android/build.gradle
 !/android/app/
 /android/app/*
 !/android/app/build.gradle
+!/android/app/google-services.json
 !/android/app/src/
 /android/app/src/*
 !/android/app/src/main/

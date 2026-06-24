@@ -1,0 +1,5 @@
+-- Este ficheiro está intencionalmente vazio.
+-- A lógica de negócio (triggers, funções) foi adicionada em migrações posteriores:
+--   20260618171610_auto_insert_user_on_signup.sql  -- trigger handle_new_user
+--   20260618172000_fix_users_rls_for_aider.sql     -- políticas RLS corrigidas
+--   20260618180000_get_patients_for_aider.sql      -- função RPC get_patients_for_aider

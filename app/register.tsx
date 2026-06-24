@@ -1,5 +1,6 @@
 import { LightBackground } from "@/components/DotBackground";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGoogleAuth } from "@/hooks/useGoogleAuth";
 import {
   registerFieldCopy,
   RegisterFormData,
@@ -10,7 +11,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Button } from "../components/buttons/button";
 import { SocialButton } from "../components/buttons/socialButton";
@@ -44,8 +52,23 @@ const DividerWithText = ({
 export default function Register() {
   const router = useRouter();
   const { session, isLoading: authLoading } = useAuth();
+  const {
+    signInWithGoogle,
+    loading: googleLoading,
+    error: googleError,
+  } = useGoogleAuth();
   const isDark = false;
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!googleError) return;
+
+    if (Platform.OS === "web" && typeof window !== "undefined") {
+      window.alert(`Erro no Registo com Google: ${googleError}`);
+    } else {
+      Alert.alert("Erro no Registo com Google", googleError, [{ text: "OK" }]);
+    }
+  }, [googleError]);
 
   useEffect(() => {
     if (!authLoading && session) {
@@ -77,6 +100,15 @@ export default function Register() {
   const handleRegister = async (data: RegisterFormData) => {
     setIsLoading(true);
     try {
+      if (!supabase) {
+        Alert.alert(
+          "Configuração em falta",
+          "O Supabase não está configurado. Define as variáveis EXPO_PUBLIC_SUPABASE_URL e EXPO_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY.",
+          [{ text: "OK" }],
+        );
+        return;
+      }
+
       const { error } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
@@ -102,8 +134,8 @@ export default function Register() {
       setIsLoading(false);
     }
   };
-  const handleGoogleRegister = () => {
-    console.log("Register with Google");
+  const handleGoogleRegister = async () => {
+    await signInWithGoogle();
   };
 
   const handleAppleRegister = () => {
@@ -232,6 +264,7 @@ export default function Register() {
               <View className="mb-6 gap-3">
                 <SocialButton
                   provider="google"
+                  label={googleLoading ? "A entrar..." : undefined}
                   onPress={handleGoogleRegister}
                   forceLight
                 />

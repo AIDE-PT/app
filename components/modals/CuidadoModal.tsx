@@ -1,12 +1,7 @@
+import { useTheme } from "@/hooks/useTheme";
 import React from "react";
-import {
-  Modal,
-  Pressable,
-  ScrollView,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Text, TouchableOpacity, View } from "react-native";
+import BottomModal from "./BottomModal";
 
 interface Cuidado {
   id: string;
@@ -26,43 +21,38 @@ export default function CuidadoModal({
   cuidados,
   onSelect,
 }: CuidadoModalProps) {
+  const { isDark } = useTheme();
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="none"
-      onRequestClose={onClose}
-    >
-      <Pressable className="flex-1" onPress={onClose}>
-        <View className="items-center">
-          <View
-            className="bg-white mt-20 px-8 pb-4 pt-14 rounded-b-[30px]"
-            style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
+    <BottomModal visible={visible} onClose={onClose}>
+      <Text
+        className={`text-base font-semibold mb-5 ${isDark ? "text-white" : "text-slate-900"}`}
+      >
+        Selecionar paciente
+      </Text>
+      {cuidados.map((cuidado, index) => (
+        <View key={cuidado.id}>
+          <TouchableOpacity
+            onPress={() => {
+              onSelect(cuidado);
+              onClose();
+            }}
+            activeOpacity={0.7}
+            className="py-4 items-center"
           >
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {cuidados.map((cuidado, index) => (
-                <View key={cuidado.id}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      onSelect(cuidado);
-                      onClose();
-                    }}
-                    activeOpacity={0.7}
-                    className="py-3 items-center"
-                  >
-                    <Text className="text-xl font-semibold text-[#111111]">
-                      {cuidado.name}
-                    </Text>
-                  </TouchableOpacity>
-                  {index < cuidados.length - 1 && (
-                    <View className="h-[1px] bg-[#E5E5E5]" />
-                  )}
-                </View>
-              ))}
-            </ScrollView>
-          </View>
+            <Text
+              className={`text-xl font-semibold ${isDark ? "text-white" : "text-[#111111]"}`}
+            >
+              {cuidado.name}
+            </Text>
+          </TouchableOpacity>
+          {index < cuidados.length - 1 && (
+            <View
+              className={`h-[1px] ${isDark ? "bg-white/10" : "bg-[#E5E5E5]"}`}
+            />
+          )}
         </View>
-      </Pressable>
-    </Modal>
+      ))}
+    </BottomModal>
   );
 }

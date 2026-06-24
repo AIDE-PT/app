@@ -1,17 +1,17 @@
 import { useTheme } from "@/hooks/useTheme";
 import { Feather } from "@expo/vector-icons";
 import React, { ReactNode } from "react";
-import { Dimensions, Text, View, ViewStyle } from "react-native";
+import { Dimensions, Text, TextStyle, View, ViewStyle } from "react-native";
 import Svg, {
-    Circle,
-    Defs,
-    G,
-    Line,
-    LinearGradient,
-    Path,
-    Rect,
-    Stop,
-    Text as SvgText,
+  Circle,
+  Defs,
+  G,
+  Line,
+  LinearGradient,
+  Path,
+  Rect,
+  Stop,
+  Text as SvgText,
 } from "react-native-svg";
 import { IconType } from "../svg/WidgetIcon";
 
@@ -21,6 +21,8 @@ const GRID_GAP = 12;
 const availableWidth = screenWidth - GRID_PADDING * 2;
 const COLUMN_WIDTH = (availableWidth - GRID_GAP * 2) / 3;
 const BRAND_BLUE = "#7C89FF";
+const WIDGET_TITLE_LIGHT = "#1A1A2E";
+const WIDGET_TITLE_DARK = "#FFFFFF";
 const DEFAULT_SEMANTIC = {
   success: "#4CD964",
   warning: "#FFCC00",
@@ -835,7 +837,7 @@ function getStatus(
         ? { text: "acelerado", status: "warning" }
         : v < 50
           ? { text: "baixo", status: "warning" }
-        : { text: "normal", status: "normal" };
+          : { text: "normal", status: "normal" };
     case "temp":
       if (v >= 38) return { text: "febre", status: "alert" };
       return v > 37.5
@@ -947,9 +949,7 @@ function getSuperSimpleCopy(
       return {
         ...base,
         headline:
-          status.status === "normal"
-            ? "Sono equilibrado"
-            : "Sono irregular",
+          status.status === "normal" ? "Sono equilibrado" : "Sono irregular",
         subtitle:
           status.status === "normal"
             ? "Boa recuperacao para o dia."
@@ -1016,10 +1016,18 @@ function getSuperSimpleCopy(
     default:
       return {
         ...base,
-        headline: status.status === "normal" ? "Estado estavel" : "Estado a vigiar",
+        headline:
+          status.status === "normal" ? "Estado estavel" : "Estado a vigiar",
         subtitle: "Resumo simplificado ativo para facilitar leitura.",
       };
   }
+}
+
+function getCompactStatusLabel(status: { text: string; status: MetricStatus }) {
+  if (status.text === "sem dados") return "Sem dados";
+  if (status.status === "normal") return "OK";
+  if (status.status === "warning") return "Atencao";
+  return "Alerta";
 }
 
 //  DASHBOARD_CONFIG / METRIC_STYLES
@@ -1224,6 +1232,11 @@ export function WidgetWrapper({
   const bgColor = bg || (isDark ? "bg-aide-dark-card" : "bg-white/90");
   const borderColor = isDark ? "border-white/10" : "border-gray-100";
   const textColor = isDark ? "#FFFFFF" : "#000746";
+  const widgetTitleColor = isDark ? WIDGET_TITLE_DARK : WIDGET_TITLE_LIGHT;
+  const widgetTitleStyle: TextStyle = {
+    color: widgetTitleColor,
+    fontWeight: isDark ? "600" : "700",
+  };
 
   const statusPalette = buildStatusPalette(colors.semantic, isDark);
   const status = metricType
@@ -1233,7 +1246,125 @@ export function WidgetWrapper({
 
   if (superSimplified && metricType) {
     const simpleCopy = getSuperSimpleCopy(metricType, status);
+    const compactStatusLabel = getCompactStatusLabel(status);
     const meterTrack = isDark ? "rgba(255,255,255,0.14)" : "#E2E8F0";
+    const resizeControlInset = 34;
+
+    if (is11) {
+      return (
+        <View
+          style={[
+            { width, height, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.12)" },
+            style,
+          ]}
+          className={`${bgColor} rounded-[20px] p-3 border ${borderColor} overflow-hidden`}
+        >
+          <View className="flex-row items-center gap-1.5">
+            {icon}
+            <Text
+              className="flex-1 text-sm font-open-sans-semibold"
+              style={widgetTitleStyle}
+              numberOfLines={1}
+            >
+              {title}
+            </Text>
+          </View>
+
+          <View className="flex-1 justify-center gap-1">
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: palette.border,
+              }}
+            />
+            <Text
+              className="font-bold"
+              style={{
+                color: palette.text,
+                fontSize: compactStatusLabel === "Sem dados" ? 16 : 18,
+                lineHeight: 22,
+              }}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.78}
+            >
+              {compactStatusLabel}
+            </Text>
+          </View>
+        </View>
+      );
+    }
+
+    if (is12) {
+      return (
+        <View
+          style={[
+            { width, height, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.12)" },
+            style,
+          ]}
+          className={`${bgColor} rounded-[20px] p-3 border ${borderColor} overflow-hidden`}
+        >
+          <View
+            className="flex-row items-center justify-between"
+            style={{ paddingRight: resizeControlInset }}
+          >
+            <View className="flex-row items-center gap-1.5 flex-1">
+              {icon}
+              <Text
+                className="text-sm font-open-sans-semibold"
+                style={widgetTitleStyle}
+                numberOfLines={1}
+              >
+                {title}
+              </Text>
+            </View>
+
+            <View
+              className="px-2 py-0.5 rounded-full"
+              style={{
+                backgroundColor: palette.bg,
+                borderWidth: 1,
+                borderColor: palette.border,
+              }}
+            >
+              <Text
+                className="text-[10px] font-open-sans-semibold"
+                style={{ color: palette.text }}
+                numberOfLines={1}
+              >
+                {compactStatusLabel}
+              </Text>
+            </View>
+          </View>
+
+          <View className="flex-1 justify-center">
+            <Text
+              className={`text-base font-open-sans-semibold ${isDark ? "text-white" : "text-slate-900"}`}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.82}
+            >
+              {simpleCopy.headline}
+            </Text>
+          </View>
+
+          <View
+            style={{ backgroundColor: meterTrack }}
+            className="h-[6px] rounded-full overflow-hidden"
+          >
+            <View
+              style={{
+                width: `${simpleCopy.meter}%`,
+                backgroundColor: palette.border,
+              }}
+              className="h-full rounded-full"
+            />
+          </View>
+        </View>
+      );
+    }
 
     return (
       <View
@@ -1243,11 +1374,15 @@ export function WidgetWrapper({
         ]}
         className={`${bgColor} rounded-[20px] p-3 border ${borderColor} overflow-hidden`}
       >
-        <View className="flex-row items-center justify-between">
+        <View
+          className="flex-row items-center justify-between"
+          style={{ paddingRight: resizeControlInset }}
+        >
           <View className="flex-row items-center gap-1.5">
             {icon}
             <Text
-              className={`text-sm font-open-sans-semibold ${isDark ? "text-white" : "text-slate-800"}`}
+              className="text-sm font-open-sans-semibold"
+              style={widgetTitleStyle}
               numberOfLines={1}
             >
               {title}
@@ -1393,81 +1528,10 @@ export function WidgetWrapper({
     }
   };
 
-  const chart = renderChart();
+  const chart = is11 ? null : renderChart();
 
   //  1-1 layout: stacked (value on top, chart bottom)
   if (is11) {
-    // Temp gets the same side-by-side treatment so the thermometer icon is visible
-    if (metricType === "temp") {
-      const tempVal = parseFloat(value) || 36.5;
-      const thermW = Math.round(width * 0.28);
-      const chartH = Math.max(height - 44, 20);
-      return (
-        <View
-          style={[
-            { width, height, boxShadow: "0 2px 8px 0 rgba(0,0,0,0.12)" },
-            style,
-          ]}
-          className={`${bgColor} rounded-[20px] p-2 border ${borderColor} overflow-hidden flex-row`}
-        >
-          {/* Left: header + value + thermometer */}
-          <View
-            style={{ width: thermW + 4, paddingRight: 2 }}
-            className="justify-between"
-          >
-            <View className="flex-row items-center gap-1">
-              {icon}
-              <Text
-                className="text-xs font-open-sans-semibold"
-                numberOfLines={1}
-              >
-                {title}
-              </Text>
-            </View>
-            <View className="flex-row items-end">
-              <Text
-                style={{ color: textColor }}
-                className="text-xl font-bold leading-none"
-              >
-                {value}
-              </Text>
-              <Text
-                className={`text-xs font-semibold ml-0.5 mb-0.5 ${isDark ? "text-white/50" : "text-black/90"}`}
-              >
-                {unit}
-              </Text>
-            </View>
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <TempMiniChart
-                value={tempVal}
-                w={thermW - 2}
-                h={chartH - 8}
-                isDark={isDark}
-                semantic={colors.semantic}
-              />
-            </View>
-          </View>
-          {/* Right: line chart */}
-          {chart && (
-            <View
-              style={{
-                flex: 1,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {chart}
-            </View>
-          )}
-        </View>
-      );
-    }
     return (
       <View
         style={[
@@ -1476,59 +1540,28 @@ export function WidgetWrapper({
         ]}
         className={`${bgColor} rounded-[20px] p-2 border ${borderColor} overflow-hidden`}
       >
-        {/* Header */}
         <View className="flex-row items-center gap-1 mb-1">
           {icon}
-          <Text className="text-aide-light-blue text-sm font-open-sans-semibold tracking-wide">
+          <Text
+            className="flex-1 text-sm font-open-sans-semibold tracking-wide"
+            style={widgetTitleStyle}
+            numberOfLines={1}
+          >
             {title}
           </Text>
         </View>
-        {/* Value - show custom steps indicator, otherwise show regular value */}
-        {(!metricType || metricType !== "stress") && (
-          <View className="flex-row items-end mb-1">
-            {metricType === "steps" ? (
-              <View className="-mt-2">
-                <Text
-                  style={{ color: textColor, lineHeight: 28 }}
-                  className="text-2xl font-bold"
-                >
-                  {value}
-                </Text>
-                <Text
-                  className={`text-xs font-semibold ${isDark ? "text-white/50" : "text-black/90"}`}
-                >
-                  /10000
-                </Text>
-              </View>
-            ) : (
-              <>
-                <Text
-                  style={{ color: textColor }}
-                  className="text-2xl font-bold leading-none"
-                >
-                  {value}
-                </Text>
-                <Text
-                  className={`text-xs font-semibold ml-1 mb-0.5 ${isDark ? "text-white/50" : "text-black/90"}`}
-                >
-                  {unit}
-                </Text>
-              </>
-            )}
-          </View>
-        )}
-        {/* Chart */}
-        {chart && (
-          <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              justifyContent: metricType === "stress" ? "center" : "flex-end",
-            }}
+
+        <View className="flex-1 justify-center">
+          <Text
+            style={{ color: textColor, lineHeight: 32 }}
+            className="text-2xl font-bold"
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.65}
           >
-            {chart}
-          </View>
-        )}
+            {value}
+          </Text>
+        </View>
       </View>
     );
   }
@@ -1561,7 +1594,8 @@ export function WidgetWrapper({
         <View className="flex-row items-center gap-1">
           {icon}
           <Text
-            className="text-aide-light-blue text-base font-open-sans-semibold tracking-wide"
+            className="text-base font-open-sans-semibold tracking-wide"
+            style={widgetTitleStyle}
             numberOfLines={1}
           >
             {title}

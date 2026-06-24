@@ -1,7 +1,9 @@
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { ConsentPrivacyProvider } from "@/contexts/ConsentPrivacyContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { UserProfileProvider } from "@/contexts/UserProfileContext";
 import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
+import { registerDevicePushToken } from "@/src/services/pushNotifications";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Constants from "expo-constants";
 import { useFonts } from "expo-font";
@@ -9,7 +11,7 @@ import * as Notifications from "expo-notifications";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useRef } from "react";
-import { Platform } from "react-native";
+import { ActivityIndicator, Platform, View } from "react-native";
 import "../global.css";
 
 const queryClient = new QueryClient();
@@ -26,6 +28,23 @@ Notifications.setNotificationHandler({
 SplashScreen.preventAutoHideAsync().catch(() => {
   // Ignore race-condition errors if splash is already hidden.
 });
+
+function PushNotificationRegistration() {
+  const { user, isLoading } = useAuth();
+
+  useEffect(() => {
+    if (isLoading || !user?.id) return;
+
+    registerDevicePushToken(user.id).catch((error) => {
+      console.warn(
+        "[PushNotifications] Failed to register device token",
+        error,
+      );
+    });
+  }, [isLoading, user?.id]);
+
+  return null;
+}
 
 export default function RootLayout() {
   const [fontsLoaded] = useFonts({
@@ -73,17 +92,33 @@ export default function RootLayout() {
     })();
   }, [isLoading, healthConnectStatus?.permissionsGranted]);
 
-  if (!fontsLoaded) return null;
+  if (!fontsLoaded) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          backgroundColor: "#ffffff",
+        }}
+      >
+        <ActivityIndicator size="large" color="#5061FF" />
+      </View>
+    );
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthProvider>
-          <UserProfileProvider>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="index" />
-            </Stack>
-          </UserProfileProvider>
+          <PushNotificationRegistration />
+          <ConsentPrivacyProvider>
+            <UserProfileProvider>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="index" />
+              </Stack>
+            </UserProfileProvider>
+          </ConsentPrivacyProvider>
         </AuthProvider>
       </ThemeProvider>
     </QueryClientProvider>

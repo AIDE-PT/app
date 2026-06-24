@@ -3,14 +3,20 @@ import { Button } from "@/components/buttons/button";
 import LightBackground from "@/components/DotBackground";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/contexts/UserProfileContext";
-import useHealthConnectStatus from "@/hooks/useHealthConnectStatus";
 import { useTheme } from "@/hooks/useTheme";
-import { supabase } from "@/utils/supabase/client";
+import { forceSyncAll } from "@/src/tasks/healthBackgroundSync";
+import { getSupabaseClient } from "@/utils/supabase/client";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
 import { Camera, Pencil } from "lucide-react-native";
 import React, { useEffect, useState } from "react";
-import { Alert, ScrollView, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GerirPerfilFormulario from "../components/gerir_perfil_formulario";
 
@@ -34,11 +40,10 @@ const GerirPerfil = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const { isDark } = useTheme();
   const { signOut, user } = useAuth();
   const { profileType } = useUserProfile();
-  const { status: healthConnectStatus, isLoading: isLoadingHealthConnect } =
-    useHealthConnectStatus();
 
   const accountTypeLabel =
     profileType === "aider"
@@ -57,7 +62,7 @@ const GerirPerfil = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        const { data, error } = await getSupabaseClient()
           .from("users")
           .select("name, email, phone_number, nif")
           .eq("id", user.id)
@@ -97,7 +102,7 @@ const GerirPerfil = () => {
     };
 
     loadProfile();
-  }, [user?.id]);
+  }, [user?.email, user?.id, user?.user_metadata?.name]);
 
   const handleSave = async () => {
     if (!user?.id) {
@@ -107,7 +112,7 @@ const GerirPerfil = () => {
 
     try {
       setIsSavingProfile(true);
-      const { error } = await supabase
+      const { error } = await getSupabaseClient()
         .from("users")
         .update({
           name: userData.nome.trim() || null,
@@ -261,65 +266,63 @@ const GerirPerfil = () => {
                 </TouchableOpacity>
               </View>
 
-              <View
-                className={`p-6 rounded-[32px] ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
-                style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
-              >
-                <View className="flex-row items-center justify-between">
-                  <Text
-                    className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}
-                  >
-                    Health Connect
-                  </Text>
-                  <Ionicons
-                    name="heart-circle-outline"
-                    size={26}
-                    color={isDark ? "#FF7A7A" : "#D64550"}
-                  />
-                </View>
-                <Text
-                  className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}
+              {Platform.OS === "android" && (
+                <View
+                  className={`p-6 rounded-[32px] mt-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
+                  style={{ boxShadow: "0 2px 8px 0 rgba(0, 0, 0, 0.12)" }}
                 >
-                  {isLoadingHealthConnect
-                    ? "A verificar a ligacao ao Health Connect."
-                    : healthConnectStatus?.permissionsGranted
-                      ? "O Health Connect ja esta ligado e pronto para ler passos, frequencia cardiaca e outros dados de saude."
-                      : "Ligue a sua conta ao Health Connect para gerir permissoes de passos, frequencia cardiaca e outros dados de saude."}
-                </Text>
-                {!isLoadingHealthConnect &&
-                  healthConnectStatus?.permissionsGranted && (
-                    <View
-                      className={`mt-4 self-start px-4 py-2 rounded-full flex-row items-center ${isDark ? "bg-emerald-500/15" : "bg-emerald-100"}`}
+                  <View className="flex-row items-center justify-between">
+                    <Text
+                      className={`text-xl font-bold ${isDark ? "text-white" : "text-black"}`}
                     >
-                      <Ionicons
-                        name="checkmark-circle"
-                        size={16}
-                        color={isDark ? "#86efac" : "#15803d"}
-                      />
+                      Sincronização
+                    </Text>
+                    <Ionicons
+                      name="sync-outline"
+                      size={24}
+                      color={isDark ? "#A0AEC0" : "#4A5568"}
+                    />
+                  </View>
+                  <Text
+                    className={`text-xs font-bold mt-1 ${isDark ? "text-white/60" : "text-gray-800"}`}
+                  >
+                    Força a sincronização completa dos últimos 30 dias a partir
+                    do Health Connect, ignorando a última sincronização
+                    guardada.
+                  </Text>
+                  <TouchableOpacity
+                    className="mt-4 py-3 rounded-xl items-center self-center"
+                    disabled={isSyncing}
+                    onPress={async () => {
+                      setIsSyncing(true);
+                      try {
+                        await forceSyncAll();
+                        Alert.alert(
+                          "Sincronização concluída",
+                          "Os dados dos últimos 30 dias foram sincronizados.",
+                        );
+                      } catch {
+                        Alert.alert(
+                          "Erro",
+                          "Não foi possível sincronizar os dados. Tente novamente.",
+                        );
+                      } finally {
+                        setIsSyncing(false);
+                      }
+                    }}
+                  >
+                    <View
+                      className={`py-3 px-8 rounded-xl ${isDark ? "bg-white/10" : "bg-slate-100"} ${isSyncing ? "opacity-60" : ""}`}
+                    >
                       <Text
-                        className={`ml-2 text-xs font-bold ${isDark ? "text-emerald-300" : "text-emerald-700"}`}
+                        className={`font-medium ${isDark ? "text-white" : "text-slate-700"}`}
                       >
-                        Ligacao ativa
+                        {isSyncing ? "A sincronizar..." : "sync force --all"}
                       </Text>
                     </View>
-                  )}
-                <TouchableOpacity
-                  className="mt-4 py-3 rounded-xl items-center self-center"
-                  onPress={() => router.push("/health-connect")}
-                >
-                  <View
-                    className={`py-3 px-8 rounded-xl ${isDark ? "bg-[#D64550]/20" : "bg-rose-100"}`}
-                  >
-                    <Text
-                      className={`font-medium ${isDark ? "text-rose-300" : "text-rose-600"}`}
-                    >
-                      {healthConnectStatus?.permissionsGranted
-                        ? "Gerir ligacao"
-                        : "Abrir Health Connect"}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              </View>
+                  </TouchableOpacity>
+                </View>
+              )}
 
               <View
                 className={`p-6 rounded-[32px] mt-4 ${isDark ? "bg-aide-dark-card" : "bg-white"}`}
