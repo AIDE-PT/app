@@ -1,0 +1,3 @@
+-- Intentionally kept as a no-op for migration history compatibility.
+-- The real push_tokens table creation now runs earlier in
+-- 20260621115900_create_push_tokens.sql, before the dispatch functions.

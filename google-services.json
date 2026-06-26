@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1086563645851",
+    "project_id": "aide-25a3b",
+    "storage_bucket": "aide-25a3b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086563645851:android:ae5aeecd5d35c58127493e",
+        "android_client_info": {
+          "package_name": "com.aide.aide"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmJ_Sw46mToIm_4uZwTyRCNEzACRMJGEQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1086563645851:android:0f5998d423a7a12e27493e",
+        "android_client_info": {
+          "package_name": "com.cbl2025.aide"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmJ_Sw46mToIm_4uZwTyRCNEzACRMJGEQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

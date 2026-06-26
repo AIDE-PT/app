@@ -1,7 +1,13 @@
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
+.env
+*.env
 # dependencies
 node_modules/
+
+# firebase credentials (never commit)
+*firebase-adminsdk*.json
+
 
 # Expo
 .expo/
@@ -33,11 +39,24 @@ yarn-error.*
 # local env files
 .env*.local
 
+# Firebase credentials (never commit)
+*firebase-adminsdk*.json
+
 # typescript
 *.tsbuildinfo
 
 app-example
+expo-troubleshooting.md
 
 # generated native folders
 /ios
-/android
+
+# Android native project: o projeto é commitado por inteiro (build "bare" no EAS,
+# preserva o módulo nativo Health Connect). Ignorar apenas artefactos de build
+# e ficheiros específicos da máquina.
+/android/.gradle/
+/android/.idea/
+/android/local.properties
+/android/**/build/
+/android/app/release/
+.cxx/

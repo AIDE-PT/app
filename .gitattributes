@@ -1,0 +1,11 @@
+# Garantir que o Gradle wrapper script mantém LF (executado no Linux pelo EAS Build)
+android/gradlew text eol=lf
+
+# Ficheiros binários — nunca aplicar conversão de fim de linha
+*.jar binary
+*.keystore binary
+*.webp binary
+*.png binary
+*.jpg binary
+*.ttf binary
+*.otf binary

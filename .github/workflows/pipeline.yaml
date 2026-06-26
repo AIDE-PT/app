@@ -1,0 +1,249 @@
+name: CI/CD Workflow
+run-name: ${{ github.workflow }} - ${{ github.event_name }} - ${{ github.ref.branch }} by ${{ github.actor }}
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependency-validation:
+    name: Package Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit
+        run: npm audit --audit-level=moderate
+
+  lint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: dependency-validation
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+  prettier:
+    name: Prettier
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: dependency-validation
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Prettier check
+        run: npm run prettier:check
+
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: dependency-validation
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run TypeScript type check
+        run: npm run typecheck
+
+  test:
+    name: Jest Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: dependency-validation
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run tests
+        run: npm run test:coverage
+
+      - name: Jest Coverage Comment
+        id: coverage
+        if: github.event_name == 'pull_request'
+        uses: MishaKav/jest-coverage-comment@main
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          coverage-summary-path: ./coverage/coverage-summary.json
+          title: Jest Coverage Comment
+          summary-title: Summary
+          badge-title: Coverage
+          text-instead-badge: false
+          hide-comment: false
+          create-new-comment: false
+          hide-summary: false
+          remove-links-to-files: false
+          remove-links-to-lines: false
+          report-only-changed-files: false
+
+      - name: Dynamic Badges
+        if: github.ref == 'refs/heads/dev' || github.ref == 'refs/heads/main'
+        uses: Schneegans/dynamic-badges-action@v1.7.0
+        with:
+          auth: ${{ secrets.GIST_TOKEN }}
+          gistID: 0d7da4825fe900c051580e2a6079d99d
+          filename: aide-coverage.json
+          label: Jest Coverage
+          message: ${{ steps.coverage.outputs.coverage }}%
+          color: ${{ steps.coverage.outputs.color }}
+
+  # sonarcloud:
+  #   name: SonarCloud Analysis
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 10
+  #   needs: dependency-validation
+
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0 # Shallow clones should be disabled for better analysis
+  #     - name: SonarQube Scan
+  #       uses: SonarSource/sonarqube-scan-action@v6
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  #       with:
+  #         args: >
+  #           -Dsonar.pullrequest.key=${{ github.event.pull_request.number }}
+  #           -Dsonar.pullrequest.branch=${{ github.head_ref }}
+  #           -Dsonar.pullrequest.base=${{ github.base_ref }}
+
+  # preview:
+  #   name: Expo Preview
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 30
+  #   needs: dependency-validation
+  #   if: github.event_name == 'pull_request'
+
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
+
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "22"
+  #         cache: "npm"
+
+  #     - name: Setup Expo and EAS
+  #       uses: expo/expo-github-action@v8
+  #       with:
+  #         eas-version: latest
+  #         token: ${{ secrets.EXPO_TOKEN }}
+
+  #     - name: Install dependencies
+  #       run: npm ci
+
+  #     - name: Create preview
+  #       uses: expo/expo-github-action/preview@v8
+  #       with:
+  #         command: eas update --auto --branch ${{ github.event.pull_request.head.ref }}
+
+  # build-dev:
+  #   name: Expo Dev Build
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 30
+  #   needs: [lint, prettier, typecheck, test]
+  #   if: github.ref == 'refs/heads/dev'
+
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/setup-node@v6
+  #       with:
+  #         node-version: 22
+  #         cache: npm
+  #     - name: Setup Expo and EAS
+  #       uses: expo/expo-github-action@v8
+  #       with:
+  #         eas-version: latest
+  #         token: ${{ secrets.EXPO_TOKEN }}
+
+  #     - name: Build Expo Dev
+  #       run: eas build --platform all --profile development --non-interactive
+
+  # build-prod:
+  #   name: Expo Production Build
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 30
+  #   needs: [lint, prettier, typecheck, test]
+  #   if: github.ref == 'refs/heads/main'
+
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: actions/setup-node@v6
+  #       with:
+  #         node-version: 22
+  #         cache: npm
+  #     - name: Setup Expo and EAS
+  #       uses: expo/expo-github-action@v8
+  #       with:
+  #         eas-version: latest
+  #         token: ${{ secrets.EXPO_TOKEN }}
+
+  #     - name: Build Expo Production
+  #       run: eas build --platform all --profile production --non-interactive
